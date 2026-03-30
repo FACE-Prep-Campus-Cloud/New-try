@@ -1,646 +1,704 @@
-<!-- Copying the code is easy, but when you create it, you have to become busy -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="https://leetcode.com/favicon.ico" type="image/x-icon">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetTrack — Student Rankings</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --border: #e2e4ed;
+    --accent: #e67e00;
+    --accent2: #16a34a;
+    --accent3: #dc2626;
+    --accent4: #2563eb;
+    --text: #1a1a2e;
+    --muted: #8890a8;
+    --easy: #16a34a;
+    --medium: #d97706;
+    --hard: #dc2626;
+    --rank: #7c3aed;
+  }
 
-        html, body {
-            height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow-x: hidden;
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            position: relative;
-            color: #ffffff;
-            line-height: 1.6;
-        }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        /* Animated background particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
+  /* Grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.3; }
-        }
+  /* Header */
+  header {
+    padding: 48px 0 32px;
+    text-align: center;
+  }
 
-        .main-container {
-            position: relative;
-            z-index: 2;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
+  .logo-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    border: 1px solid var(--accent);
+    padding: 4px 12px;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
 
-        .header-section {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeInDown 1s ease-out;
-        }
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    opacity: 0;
+    animation: fadeUp 0.5s 0.1s ease forwards;
+  }
 
+  h1 span { color: var(--accent); }
 
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
+  .subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-top: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    opacity: 0;
+    animation: fadeUp 0.5s 0.2s ease forwards;
+  }
 
-        @keyframes glow {
-            from { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
-            to { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); }
-        }
+  /* Input section */
+  .input-section {
+    margin: 40px 0 36px;
+    opacity: 0;
+    animation: fadeUp 0.5s 0.3s ease forwards;
+  }
 
-        .hero-subtitle {
-            font-size: 1.2rem;
-            font-weight: 300;
-            opacity: 0.9;
-            margin-bottom: 30px;
-        }
+  .input-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
 
-        .search-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 1s ease-out 0.3s both;
-            max-width: 600px;
-            width: 100%;
-        }
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    padding: 16px 18px;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+    line-height: 1.7;
+  }
 
-        .search-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
 
-        .leetcode-logo {
-            height: 32px;
-            width: auto;
-            filter: brightness(0) invert(1);
-        }
+  textarea::placeholder { color: var(--muted); }
 
-        .search-container {
-            display: flex;
-            gap: 0;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 
-        .username-input {
-            flex: 1;
-            padding: 16px 20px;
-            font-size: 16px;
-            border: none;
-            background: rgba(255, 255, 255, 0.95);
-            color: #333;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 12px 28px;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.18s ease;
+    text-transform: uppercase;
+  }
 
-        .username-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 1);
-            box-shadow: inset 0 0 0 2px #ffd700;
-        }
+  .btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+  }
 
-        .username-input::placeholder {
-            color: #666;
-            font-weight: 400;
-        }
+  .btn-primary:hover {
+    background: #ea6a00;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(249,115,22,0.25);
+  }
 
-        .search-button {
-            padding: 16px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #333;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  .btn-primary:active { transform: translateY(0); }
 
-        .search-button:hover {
-            background: linear-gradient(45deg, #ffed4e, #ffd700);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
-        }
+  .btn-clear {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
 
-        .search-button:active {
-            transform: translateY(0);
-        }
+  .btn-clear:hover { border-color: var(--muted); color: var(--text); }
 
-        .badge-container {
-            text-align: center;
-            margin-top: 30px;
-            animation: fadeIn 0.5s ease-out;
-        }
+  .hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
 
-        .badge-container img {
-            border-radius: 8px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-        }
+  /* Progress bar */
+  .progress-wrap {
+    display: none;
+    margin: 20px 0;
+  }
 
-        .badge-container img:hover {
-            transform: scale(1.05);
-        }
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
 
-        .links-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            max-width: 1000px;
-            width: 100%;
-            margin-bottom: 40px;
-            animation: fadeInUp 1s ease-out 0.6s both;
-        }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
 
-        .link-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: white;
-            display: block;
-        }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
 
-        .link-card:hover {
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
+  /* Stats summary bar */
+  .stats-bar {
+    display: none;
+    gap: 1px;
+    margin-bottom: 28px;
+  }
 
-        .link-card i {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            color: #ffd700;
-        }
+  .stat-pill {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    text-align: center;
+  }
 
-        .link-card h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+  .stat-pill:first-child { border-radius: 4px 0 0 4px; }
+  .stat-pill:last-child { border-radius: 0 4px 4px 0; }
 
-        .link-card p {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            font-weight: 300;
-        }
+  .stat-pill .num {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
 
-        .footer {
-            margin-top: auto;
-            padding: 20px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            width: 100%;
-            animation: fadeIn 1s ease-out 0.9s both;
-        }
+  .stat-pill .lbl {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
 
-        .footer-text {
-            font-size: 0.9rem;
-            font-weight: 300;
-            opacity: 0.8;
-        }
+  /* Table */
+  .table-wrap {
+    display: none;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 60px;
+  }
 
-        .target-cursor {
-            width: 20px;
-            height: 20px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, transparent 70%);
-            border: 2px solid rgba(255, 215, 0, 0.6);
-            border-radius: 50%;
-            position: fixed;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 9999;
-            transition: all 0.1s ease;
-            animation: pulse 1.5s infinite;
-        }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
 
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
+  thead tr {
+    background: #f0f1f8;
+    border-bottom: 1px solid var(--border);
+  }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 18px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  th:hover { color: var(--accent); }
+  th.sorted { color: var(--accent); }
+  th.sorted::after { content: ' ↑'; }
+  th.sorted.desc::after { content: ' ↓'; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+    animation: rowIn 0.3s ease forwards;
+    opacity: 0;
+  }
 
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #333;
-            animation: spin 1s ease-in-out infinite;
-        }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(249,115,22,0.05); }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+  td {
+    padding: 14px 18px;
+    vertical-align: middle;
+  }
 
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .search-section {
-                padding: 30px 20px;
-                margin: 0 10px 30px;
-            }
-            
-            .search-container {
-                flex-direction: column;
-                border-radius: 12px;
-            }
-            
-            .username-input {
-                border-radius: 12px 12px 0 0;
-            }
-            
-            .search-button {
-                border-radius: 0 0 12px 12px;
-                justify-content: center;
-            }
-            
-            .links-section {
-                grid-template-columns: 1fr;
-                margin: 0 10px 30px;
-            }
-        }
+  .rank-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 40px;
+  }
 
-        @media (max-width: 480px) {
-            .hero-title {
-                font-size: 1.5rem;
-            }
-            
-            .search-section {
-                padding: 20px 15px;
-            }
-        }
-    </style>
-    <title>LEETCODE LIVE RANKING FINDER</title>
+  .username-cell {
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .username-cell a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .username-cell a:hover { color: var(--accent); }
+
+  .global-rank {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--rank);
+    font-weight: 700;
+  }
+
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+
+  .easy-badge { color: var(--easy); background: rgba(22,163,74,0.1); }
+  .medium-badge { color: var(--medium); background: rgba(217,119,6,0.1); }
+  .hard-badge { color: var(--hard); background: rgba(220,38,38,0.1); }
+  .total-badge { color: var(--accent4); background: rgba(37,99,235,0.08); font-size: 13px; }
+
+  .bar-wrap {
+    display: flex;
+    gap: 2px;
+    width: 90px;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--border);
+  }
+
+  .bar-easy { background: var(--easy); }
+  .bar-medium { background: var(--medium); }
+  .bar-hard { background: var(--hard); }
+
+  .status-error {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--hard);
+    opacity: 0.8;
+  }
+
+  /* Empty / loading states */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+
+  .empty-state .icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(240,192,64,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  /* Sort controls */
+  .controls {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .result-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .result-count span { color: var(--accent); }
+
+  .export-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+
+  .export-btn:hover { color: var(--accent); border-color: var(--accent); }
+</style>
 </head>
 <body>
-    <div class="particles"></div>
-    <div class="target-cursor"></div>
-    
-    <div class="main-container">
-        <div class="header-section">
-            <h1 class="hero-title">LeetCode Live Ranking</h1>
-        </div>
+<div class="container">
+  <header>
+    <div class="logo-tag">⚡ LeetTrack</div>
+    <h1>Student <span>LeetCode</span><br>Dashboard</h1>
+    <p class="subtitle">// paste profile links → fetch ranks & scores instantly</p>
+  </header>
 
-        <div class="search-section">
-            <h2 class="search-title">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/LeetCode_Logo_black_with_text.svg/1280px-LeetCode_Logo_black_with_text.svg.png" alt="LeetCode" class="leetcode-logo">
-                Ranking Finder
-            </h2>
-            <div class="search-container">
-                <input type="text" class="username-input" id="username" placeholder="Enter LeetCode username only">
-                <button class="search-button" onclick="search()" id="searchBtn">
-                    <i class="fas fa-search"></i>
-                    Search
-                </button>
-            </div>
-            <div class="badge-container" id="badge-container"></div>
-        </div>
-		
-		<br><br><br>
-
-        <div class="links-section">
-            <a href="https://github.com/yashu1wwww" class="link-card" target="_blank">
-                <i class="fab fa-github"></i>
-                <h3>GitHub Profile</h3>
-                <p>Check out my repositories</p>
-            </a>
-
-            <a href="https://yashwanthwebproject.netlify.app" class="link-card" target="_blank">
-                <i class="fas fa-code"></i>
-                <h3>Web Projects</h3>
-                <p>Explore my development work</p>
-            </a>
-        </div>
-
-        <div class="footer">
-            <p class="footer-text">© 2025 Developed with ❤️ by Yashwanth R</p>
-        </div>
+  <div class="input-section">
+    <label class="input-label">Paste LeetCode Profile URLs</label>
+    <textarea id="linksInput" placeholder="https://leetcode.com/u/username1/&#10;https://leetcode.com/u/username2/&#10;https://leetcode.com/u/username3/&#10;&#10;One per line, or comma/space separated — any format works"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="fetchAll()">
+        <span id="btnText">Fetch Rankings</span>
+      </button>
+      <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+      <span class="hint" id="countHint"></span>
     </div>
+  </div>
 
-   <script>
-    const targetCursor = document.querySelector('.target-cursor');
-    let mouseX = 0, mouseY = 0;
-    let cursorX = 0, cursorY = 0;
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span id="progressText">Fetching...</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
 
-    // Smooth cursor movement
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
+  <div class="controls" id="controls">
+    <div class="result-count" id="resultCount"></div>
+    <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+  </div>
 
-    function animateCursor() {
-        cursorX += (mouseX - cursorX) * 0.1;
-        cursorY += (mouseY - cursorY) * 0.1;
-        targetCursor.style.left = cursorX + 'px';
-        targetCursor.style.top = cursorY + 'px';
-        requestAnimationFrame(animateCursor);
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill"><span class="num" id="statTotal" style="color:var(--accent4)">—</span><span class="lbl">Students</span></div>
+    <div class="stat-pill"><span class="num" id="statAvgRank" style="color:var(--rank)">—</span><span class="lbl">Avg Rank</span></div>
+    <div class="stat-pill"><span class="num" id="statEasy" style="color:var(--easy)">—</span><span class="lbl">Avg Easy</span></div>
+    <div class="stat-pill"><span class="num" id="statMedium" style="color:var(--medium)">—</span><span class="lbl">Avg Medium</span></div>
+    <div class="stat-pill"><span class="num" id="statHard" style="color:var(--hard)">—</span><span class="lbl">Avg Hard</span></div>
+    <div class="stat-pill"><span class="num" id="statSolved" style="color:var(--accent4)">—</span><span class="lbl">Avg Solved</span></div>
+  </div>
+
+  <div class="table-wrap" id="tableWrap">
+    <table id="rankTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th onclick="sortBy('username')" id="th-username">Username</th>
+          <th onclick="sortBy('rank')" id="th-rank" class="sorted">Global Rank</th>
+          <th onclick="sortBy('total')" id="th-total">Total</th>
+          <th onclick="sortBy('easy')" id="th-easy">Easy</th>
+          <th onclick="sortBy('medium')" id="th-medium">Medium</th>
+          <th onclick="sortBy('hard')" id="th-hard">Hard</th>
+          <th>Progress</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let allData = [];
+let sortKey = 'rank';
+let sortDesc = false;
+
+const PROXY = 'https://corsproxy.io/?';
+const GQL = 'https://leetcode.com/graphql';
+
+const QUERY = `query getUserProfile($username: String!) {
+  matchedUser(username: $username) {
+    username
+    profile { ranking }
+    submitStats {
+      acSubmissionNum { difficulty count }
     }
-    animateCursor();
+  }
+}`;
 
-    // Background particles
-    function createParticles() {
-        const particlesContainer = document.querySelector('.particles');
-        const particleCount = 50;
+function extractUsernames(raw) {
+  const urls = raw.match(/leetcode\.com\/(?:u\/)?([a-zA-Z0-9_\-\.]+)\/?/g) || [];
+  const names = urls.map(u => {
+    const m = u.match(/leetcode\.com\/(?:u\/)?([a-zA-Z0-9_\-\.]+)/);
+    return m ? m[1] : null;
+  }).filter(Boolean);
+  // dedupe
+  return [...new Set(names)].filter(n => n !== 'profile' && n !== 'problems' && n !== 'contest');
+}
 
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 6 + 's';
-            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-            particlesContainer.appendChild(particle);
-        }
+async function fetchUser(username) {
+  const url = PROXY + encodeURIComponent(GQL);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-requested-with': 'XMLHttpRequest' },
+    body: JSON.stringify({ query: QUERY, variables: { username } })
+  });
+  const json = await res.json();
+  const user = json?.data?.matchedUser;
+  if (!user) return null;
+  const stats = {};
+  for (const s of user.submitStats.acSubmissionNum) stats[s.difficulty] = s.count;
+  return {
+    username: user.username,
+    rank: user.profile.ranking || 9999999,
+    easy: stats['Easy'] || 0,
+    medium: stats['Medium'] || 0,
+    hard: stats['Hard'] || 0,
+    total: stats['All'] || 0
+  };
+}
+
+async function fetchAll() {
+  const raw = document.getElementById('linksInput').value.trim();
+  if (!raw) return;
+  const usernames = extractUsernames(raw);
+  if (!usernames.length) {
+    alert('No valid LeetCode profile URLs found. Make sure URLs contain /u/username or /username.');
+    return;
+  }
+
+  allData = [];
+  document.getElementById('tableWrap').style.display = 'none';
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('controls').style.display = 'none';
+  document.getElementById('tableBody').innerHTML = '';
+
+  document.getElementById('progressWrap').style.display = 'block';
+  const btn = document.getElementById('btnText');
+  btn.innerHTML = '<span class="spinner"></span>Fetching...';
+
+  for (let i = 0; i < usernames.length; i++) {
+    const uname = usernames[i];
+    const pct = Math.round(((i + 1) / usernames.length) * 100);
+    document.getElementById('progressText').textContent = `Fetching ${uname}...`;
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    try {
+      const data = await fetchUser(uname);
+      if (data) allData.push({ ...data, error: false });
+      else allData.push({ username: uname, rank: null, easy: 0, medium: 0, hard: 0, total: 0, error: true });
+    } catch {
+      allData.push({ username: uname, rank: null, easy: 0, medium: 0, hard: 0, total: 0, error: true });
     }
-    createParticles();
+    await sleep(200);
+  }
 
-    // Enter key triggers search
-    document.getElementById('username').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            search();
-        }
-    });
+  document.getElementById('progressWrap').style.display = 'none';
+  btn.textContent = 'Fetch Rankings';
+  renderTable();
+}
 
-    // Live validation border color
-    document.getElementById('username').addEventListener('input', function (e) {
-        const input = e.target;
-        const value = input.value.trim();
-        const extracted = extractUsername(value);
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        if (value && extracted && !isValidUsername(extracted)) {
-            input.style.borderColor = '#ff6b6b';
-        } else {
-            input.style.borderColor = '';
-        }
-    });
+function sortBy(key) {
+  if (sortKey === key) sortDesc = !sortDesc;
+  else { sortKey = key; sortDesc = false; }
+  document.querySelectorAll('th[id^="th-"]').forEach(th => {
+    th.classList.remove('sorted', 'desc');
+  });
+  const th = document.getElementById('th-' + key);
+  if (th) { th.classList.add('sorted'); if (sortDesc) th.classList.add('desc'); }
+  renderTable();
+}
 
-    // ✅ Fixed username extraction (rejects leetcard URLs)
-    function extractUsername(input) {
-        if (!input) return '';
+function renderTable() {
+  const sorted = [...allData].sort((a, b) => {
+    let av = a[sortKey] ?? (sortKey === 'rank' ? 99999999 : 0);
+    let bv = b[sortKey] ?? (sortKey === 'rank' ? 99999999 : 0);
+    if (sortKey === 'username') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (sortDesc) return av < bv ? 1 : -1;
+    return av > bv ? 1 : -1;
+  });
 
-        input = input.trim().replace(/\/+$/, '');
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  const maxTotal = Math.max(...allData.map(d => d.total || 0), 1);
 
-        // ❌ Disallow direct leetcard URLs
-        if (/leetcard\.jacoblin\.cool/i.test(input)) {
-            return '';
-        }
+  sorted.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    tr.style.animationDelay = `${i * 30}ms`;
+    const eW = Math.round((d.easy / maxTotal) * 100);
+    const mW = Math.round((d.medium / maxTotal) * 100);
+    const hW = Math.round((d.hard / maxTotal) * 100);
 
-        // ✅ Extract from leetcode.com URLs
-        const urlPatterns = [
-            /leetcode\.com\/u\/([a-zA-Z0-9_-]+)/,
-            /leetcode\.com\/([a-zA-Z0-9_-]+)\/?$/
-        ];
+    tr.innerHTML = d.error
+      ? `<td class="rank-num">${i + 1}</td>
+         <td class="username-cell"><a href="https://leetcode.com/u/${d.username}/" target="_blank">${d.username}</a></td>
+         <td colspan="6"><span class="status-error">✗ profile not found</span></td>`
+      : `<td class="rank-num">${i + 1}</td>
+         <td class="username-cell"><a href="https://leetcode.com/u/${d.username}/" target="_blank">${d.username}</a></td>
+         <td><span class="global-rank">#${(d.rank || 'N/A').toLocaleString()}</span></td>
+         <td><span class="score-badge total-badge">${d.total}</span></td>
+         <td><span class="score-badge easy-badge">${d.easy}</span></td>
+         <td><span class="score-badge medium-badge">${d.medium}</span></td>
+         <td><span class="score-badge hard-badge">${d.hard}</span></td>
+         <td>
+           <div class="bar-wrap">
+             <div class="bar-easy" style="width:${eW}%"></div>
+             <div class="bar-medium" style="width:${mW}%"></div>
+             <div class="bar-hard" style="width:${hW}%"></div>
+           </div>
+         </td>`;
+    tbody.appendChild(tr);
+  });
 
-        for (const pattern of urlPatterns) {
-            const match = input.match(pattern);
-            if (match && match[1]) {
-                return match[1];
-            }
-        }
+  const valid = allData.filter(d => !d.error);
+  const avgRank = valid.length ? Math.round(valid.reduce((s, d) => s + (d.rank || 0), 0) / valid.length) : 0;
+  const avgE = valid.length ? Math.round(valid.reduce((s, d) => s + d.easy, 0) / valid.length) : 0;
+  const avgM = valid.length ? Math.round(valid.reduce((s, d) => s + d.medium, 0) / valid.length) : 0;
+  const avgH = valid.length ? Math.round(valid.reduce((s, d) => s + d.hard, 0) / valid.length) : 0;
+  const avgT = valid.length ? Math.round(valid.reduce((s, d) => s + d.total, 0) / valid.length) : 0;
 
-        // Otherwise treat as plain username
-        return input;
-    }
+  document.getElementById('statTotal').textContent = allData.length;
+  document.getElementById('statAvgRank').textContent = '#' + avgRank.toLocaleString();
+  document.getElementById('statEasy').textContent = avgE;
+  document.getElementById('statMedium').textContent = avgM;
+  document.getElementById('statHard').textContent = avgH;
+  document.getElementById('statSolved').textContent = avgT;
 
-    function isValidUsername(username) {
-        return /^[a-zA-Z0-9_-]+$/.test(username);
-    }
+  const errors = allData.filter(d => d.error).length;
+  document.getElementById('resultCount').innerHTML =
+    `<span>${allData.length}</span> profiles loaded${errors ? ` · <span style="color:var(--hard)">${errors} not found</span>` : ''}`;
 
-    // Main search function
-    function search() {
-        const input = document.getElementById('username');
-        const searchBtn = document.getElementById('searchBtn');
-        const badgeContainer = document.getElementById('badge-container');
-        const rawInput = input.value.trim();
+  document.getElementById('tableWrap').style.display = 'block';
+  document.getElementById('statsBar').style.display = 'flex';
+  document.getElementById('controls').style.display = 'flex';
+}
 
-        badgeContainer.innerHTML = '';
+function clearAll() {
+  document.getElementById('linksInput').value = '';
+  document.getElementById('tableWrap').style.display = 'none';
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('controls').style.display = 'none';
+  document.getElementById('countHint').textContent = '';
+  allData = [];
+}
 
-        if (!rawInput) {
-            showNotification('Please enter a LeetCode username only', 'error');
-            input.focus();
-            return;
-        }
+function exportCSV() {
+  const rows = [['#', 'Username', 'Global Rank', 'Total', 'Easy', 'Medium', 'Hard', 'Profile URL']];
+  [...allData].sort((a, b) => (a.rank || 9e9) - (b.rank || 9e9)).forEach((d, i) => {
+    rows.push([i + 1, d.username, d.rank || 'N/A', d.total, d.easy, d.medium, d.hard, `https://leetcode.com/u/${d.username}/`]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'leetcode_rankings.csv';
+  a.click();
+}
 
-        const username = extractUsername(rawInput);
+// Live URL count
+document.getElementById('linksInput').addEventListener('input', function () {
+  const names = extractUsernames(this.value);
+  document.getElementById('countHint').textContent = names.length ? `${names.length} profile${names.length > 1 ? 's' : ''} detected` : '';
+});
 
-        if (!username || !isValidUsername(username)) {
-            showNotification('Please enter a valid username only', 'error');
-            input.focus();
-            return;
-        }
-
-        searchBtn.innerHTML = '<div class="loading"></div> Searching...';
-        searchBtn.disabled = true;
-
-        setTimeout(() => {
-            displayBadge(username);
-            searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
-            searchBtn.disabled = false;
-            document.getElementById('badge-container').scrollIntoView({ behavior: 'smooth' });
-        }, 1000);
-    }
-
-    // ✅ Dynamic LeetCode card display (based on username)
-    function displayBadge(username) {
-        const badgeContainer = document.getElementById('badge-container');
-        const badgeWrapper = document.createElement('div');
-        badgeWrapper.style.cssText = `
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: fadeIn 0.5s ease-out;
-        `;
-
-        const title = document.createElement('h3');
-        title.textContent = `LeetCode Profile: ${username}`;
-        title.style.cssText = `
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffd700;
-        `;
-
-        // 🟠 LeetCode Ranking Badge (from Shields.io)
-        const badge = document.createElement('img');
-        badge.src = `https://img.shields.io/badge/dynamic/json?style=for-the-badge&labelColor=black&color=%23ffa116&label=Ranking&query=ranking&url=https%3A%2F%2Fleetcode-badge.vercel.app%2Fapi%2Fusers%2F${username}&logo=leetcode&logoColor=yellow`;
-        badge.alt = 'LeetCode Ranking';
-        badge.style.cssText = `
-            border-radius: 8px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-            max-width: 100%;
-            height: auto;
-        `;
-
-     // 🟣 Full LeetCard (with unicorn theme) for that username
-const leetCard = document.createElement('img');
-leetCard.src = `https://leetcard.jacoblin.cool/${username}?theme=unicorn`;
-leetCard.alt = `${username}'s LeetCode Card`;
-leetCard.style.cssText = `
-    margin-top: 20px;
-    width: 100%;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    transition: transform 0.3s ease;
-`;
-
-
-        badge.onerror = () => {
-            showNotification('User not found or API error. Please check the username.', 'error');
-            badgeContainer.innerHTML = '';
-        };
-
-        badgeWrapper.appendChild(title);
-        badgeWrapper.appendChild(badge);
-        badgeWrapper.appendChild(leetCard);
-        badgeContainer.appendChild(badgeWrapper);
-    }
-
-    // Notification popup
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            animation: slideIn 0.3s ease-out;
-            max-width: 300px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            ${type === 'success'
-                ? 'background: linear-gradient(45deg, #4CAF50, #45a049);'
-                : 'background: linear-gradient(45deg, #f44336, #da190b);'}
-        `;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease-out forwards';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Add keyframe styles
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Smooth scrolling
-    document.documentElement.style.scrollBehavior = 'smooth';
-
-    // Hover effects
-    document.querySelectorAll('.link-card, .search-button').forEach(element => {
-        element.addEventListener('mouseenter', function () {
-            this.style.transform = this.classList.contains('link-card')
-                ? 'translateY(-8px) scale(1.02)'
-                : 'translateY(-2px) scale(1.02)';
-        });
-
-        element.addEventListener('mouseleave', function () {
-            this.style.transform = this.classList.contains('link-card')
-                ? 'translateY(0) scale(1)'
-                : 'translateY(0) scale(1)';
-        });
-    });
+// Ctrl+Enter shortcut
+document.getElementById('linksInput').addEventListener('keydown', function (e) {
+  if (e.ctrlKey && e.key === 'Enter') fetchAll();
+});
 </script>
 </body>
 </html>
