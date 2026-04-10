@@ -404,18 +404,18 @@ td { padding: 8px 10px; color: var(--ink); vertical-align: middle; line-height: 
     <div class="dept-dropdown-wrap">
       <div class="dept-btn" id="deptBtn" onclick="toggleDeptMenu()">
         <svg class="dept-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        <span id="deptBtnLabel">I B.Sc AI &amp; DS</span>
+        <span id="deptBtnLabel">I BCA-A</span>
         <svg class="dept-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="dept-menu" id="deptMenu">
         <div class="dept-option active" data-dept="0" onclick="selectDept(0)">
-          <div class="dept-dot" style="background:#0a5c44"></div>I B.Sc AI &amp; DS
+          <div class="dept-dot" style="background:#0a5c44"></div>I BCA-A
         </div>
         <div class="dept-option" data-dept="1" onclick="selectDept(1)">
-          <div class="dept-dot" style="background:#0f6b7a"></div>I B.Sc IT
+          <div class="dept-dot" style="background:#0f6b7a"></div>I BCA-B
         </div>
         <div class="dept-option" data-dept="2" onclick="selectDept(2)">
-          <div class="dept-dot" style="background:#5c2d6b"></div>I B.Sc CS
+          <div class="dept-dot" style="background:#5c2d6b"></div>II BCA
         </div>
       </div>
     </div>
@@ -561,36 +561,28 @@ td { padding: 8px 10px; color: var(--ink); vertical-align: middle; line-height: 
 
 <script>
 /* ══════════════════════════════════════════════════════
-   GOOGLE SHEETS CONFIGURATION FOR KAMARAJ COLLEGE
-   ══════════════════════════════════════════════════════ 
-   
-   IMPORTANT: Replace these with your actual Google Sheets IDs
-   Make sure each sheet is set to "Anyone with the link can view"
-   
-   To get your Sheet ID:
-   1. Open your Google Sheet
-   2. Click Share → Change to "Anyone with the link" → Viewer
-   3. Copy the ID from the URL (the long string between /d/ and /edit)
-*/
+   GOOGLE SHEETS CONFIGURATION FOR KAMARAJ COLLEGE - BCA
+   ══════════════════════════════════════════════════════ */
+
 const SHEET_CONFIG = {
   0: { 
-    id: 'YOUR_AI_DS_SHEET_ID_HERE',  // Replace with actual Sheet ID
-    name: 'I B.Sc AI & DS', 
-    short: 'AI & DS', 
+    id: '1da3Q9GUCBCoEkdLR50Tkm3SfTPInQECASdEsLEsmT4I',
+    name: 'I BCA-A', 
+    short: 'BCA-A', 
     color: '#0a5c44', 
     gid: '0' 
   },
   1: { 
-    id: 'YOUR_IT_SHEET_ID_HERE',     // Replace with actual Sheet ID
-    name: 'I B.Sc IT', 
-    short: 'IT', 
+    id: '1Q40Xa1-FMo2UkRNez3LV37evylW4x0q5rawIWc27l1M',
+    name: 'I BCA-B', 
+    short: 'BCA-B', 
     color: '#0f6b7a', 
     gid: '0' 
   },
   2: { 
-    id: 'YOUR_CS_SHEET_ID_HERE',     // Replace with actual Sheet ID
-    name: 'I B.Sc CS', 
-    short: 'CS', 
+    id: '1dwYAAfo_C4w-ywolyxoGAkNrbWaO5or349H0miAuuLM',
+    name: 'II BCA', 
+    short: 'BCA II', 
     color: '#5c2d6b', 
     gid: '0' 
   }
@@ -743,7 +735,7 @@ document.addEventListener('click', function(e) {
 function selectDept(idx) {
   document.querySelectorAll('.dept-option').forEach(function(el){ el.classList.remove('active'); });
   document.querySelector('.dept-option[data-dept="'+idx+'"]').classList.add('active');
-  const labels = ['I B.Sc AI &amp; DS', 'I B.Sc IT', 'I B.Sc CS'];
+  const labels = ['I BCA-A', 'I BCA-B', 'II BCA'];
   document.getElementById('deptBtnLabel').innerHTML = labels[idx];
   document.getElementById('deptBtn').classList.remove('open');
   document.getElementById('deptMenu').classList.remove('open');
@@ -1031,7 +1023,7 @@ function downloadPage(){
   var a    = document.createElement('a');
   a.href   = URL.createObjectURL(blob);
   var dept = document.getElementById('deptBtnLabel').textContent.trim().replace(/\s+/g,'_');
-  a.download = 'HackerRank_Dashboard_KAMARAJ_' + dept + '.html';
+  a.download = 'HackerRank_Dashboard_KAMARAJ_BCA_' + dept + '.html';
   a.click();
   URL.revokeObjectURL(a.href);
 }
