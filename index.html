@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HackerRank Dashboard — KAMARAJ College</title>
+<title>HackerRank Dashboard — Rathinam college of arts and science</title>
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 <style>
 html {
@@ -726,7 +726,7 @@ document.addEventListener('click', function(e) {
 function selectDept(idx) {
   document.querySelectorAll('.dept-option').forEach(function(el){ el.classList.remove('active'); });
   document.querySelector('.dept-option[data-dept="'+idx+'"]').classList.add('active');
-  const labels = ['I BCA-A', 'I BCA-B', 'II BCA'];
+  const labels = ['I BCA (AI)', 'I B.Sc CT (GenAI)'];
   document.getElementById('deptBtnLabel').innerHTML = labels[idx];
   document.getElementById('deptBtn').classList.remove('open');
   document.getElementById('deptMenu').classList.remove('open');
