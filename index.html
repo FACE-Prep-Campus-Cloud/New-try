@@ -3,699 +3,1136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HackerRank Bulk Comparison</title>
+<title>HackerRank Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-tertiary: #1a1a1a;
-  --bg-card: rgba(20,20,20,0.95);
-  --text-primary: #ffffff;
-  --text-secondary: #e0e6ed;
-  --text-muted: #b0b0b0;
-  --accent-primary: #667eea;
-  --accent-secondary: #764ba2;
-  --accent-success: #4CAF50;
-  --accent-warning: #ff9800;
-  --accent-danger: #f44336;
-  --border-primary: rgba(255,255,255,0.1);
-  --border-accent: rgba(102,126,234,0.3);
-  --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
-  --radius-md: 12px;
-  --radius-sm: 6px;
-}
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: #2a2a3a;
+    --border2: #3a3a50;
+    --text: #e8e8f0;
+    --text2: #9090b0;
+    --text3: #5a5a7a;
+    --accent: #00e5a0;
+    --accent2: #00b87a;
+    --accent-dim: rgba(0,229,160,0.1);
+    --accent-dim2: rgba(0,229,160,0.05);
+    --danger: #ff4466;
+    --danger-dim: rgba(255,68,102,0.12);
+    --warn: #ffaa00;
+    --warn-dim: rgba(255,170,0,0.1);
+    --solved: #00e5a0;
+    --solved-bg: rgba(0,229,160,0.1);
+    --attempted: #ffaa00;
+    --attempted-bg: rgba(255,170,0,0.1);
+    --na-bg: rgba(255,255,255,0.03);
+    --radius: 10px;
+    --radius2: 6px;
+  }
 
-*{margin:0;padding:0;box-sizing:border-box;}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #1a1a1a 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  color: var(--text-primary);
-  font-size: 14px;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
 
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-track{background:#111;}
-::-webkit-scrollbar-thumb{background:#333;border-radius:4px;}
-::-webkit-scrollbar-thumb:hover{background:#555;}
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
 
-/* ── LAYOUT ── */
-.app { display:flex; flex-direction:column; min-height:100vh; }
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-text { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .logo-sub { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
 
-header {
-  background: rgba(10,10,10,0.95);
-  border-bottom: 1px solid var(--border-primary);
-  padding: 14px 28px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  position: sticky; top:0; z-index:100;
-  backdrop-filter: blur(12px);
-}
-.logo {
-  width:38px; height:38px; border-radius:10px;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:13px; flex-shrink:0;
-}
-header h1 { font-size:18px; font-weight:700; }
-header p  { font-size:12px; color:var(--text-muted); }
+  .sidebar-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
 
-.main { display:flex; flex:1; overflow:hidden; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius2);
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+  }
+  .nav-btn:hover { background: var(--bg3); color: var(--text); }
+  .nav-btn.active { background: var(--accent-dim); color: var(--accent); }
+  .nav-icon { font-size: 15px; width: 20px; text-align: center; }
 
-/* ── SIDEBAR ── */
-.sidebar {
-  width:260px; flex-shrink:0;
-  background: rgba(15,15,15,0.95);
-  border-right: 1px solid var(--border-primary);
-  padding:20px 16px;
-  display:flex; flex-direction:column; gap:8px;
-  overflow-y:auto;
-}
-.sidebar h2 { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin:8px 0 4px; }
+  .sidebar-bottom {
+    padding: 16px 12px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .session-status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius2);
+    background: var(--bg3);
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--text3);
+  }
+  .session-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .session-dot.connected { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .session-dot.error { background: var(--danger); }
 
-.form-group { display:flex; flex-direction:column; gap:6px; }
-.form-label { font-size:12px; font-weight:600; color:var(--text-secondary); }
-.form-input, .form-textarea {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  padding: 8px 12px;
-  font-size:13px;
-  font-family: inherit;
-  transition: border-color .2s, box-shadow .2s;
-  width:100%;
-}
-.form-input:focus, .form-textarea:focus {
-  outline:none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
-}
-.form-textarea { resize:vertical; min-height:120px; }
+  .sync-btn {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius2);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .sync-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim2); }
 
-.hint { font-size:11px; color:var(--text-muted); }
+  /* ─── MAIN ─── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-/* ── AUTH SECTION ── */
-.auth-box {
-  background: rgba(102,126,234,0.08);
-  border: 1px solid var(--border-accent);
-  border-radius: var(--radius-sm);
-  padding:12px;
-  font-size:12px;
-  color: var(--text-muted);
-  line-height:1.6;
-}
-.auth-box a { color:var(--accent-primary); }
-.auth-status { margin-top:8px; font-size:12px; }
+  .topbar {
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .page-title { font-size: 18px; font-weight: 800; color: var(--text); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
 
-/* ── BUTTONS ── */
-.btn {
-  display:inline-flex; align-items:center; gap:6px;
-  padding:9px 16px; border-radius:var(--radius-sm);
-  font-size:13px; font-weight:600; cursor:pointer;
-  border:none; transition:.2s; white-space:nowrap;
-}
-.btn-primary   { background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); color:#fff; }
-.btn-primary:hover { opacity:.9; transform:translateY(-1px); }
-.btn-success   { background:var(--accent-success); color:#fff; }
-.btn-success:hover { opacity:.9; }
-.btn-danger    { background:var(--accent-danger); color:#fff; }
-.btn-danger:hover  { opacity:.9; }
-.btn-secondary { background:rgba(255,255,255,0.08); color:var(--text-secondary); border:1px solid var(--border-primary); }
-.btn-secondary:hover { background:rgba(255,255,255,0.12); }
-.btn-sm { padding:5px 10px; font-size:12px; }
-.btn:disabled { opacity:.4; cursor:not-allowed; transform:none !important; }
-.btn-full { width:100%; justify-content:center; }
+  /* ─── CONTENT ─── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-/* ── CONTENT AREA ── */
-.content {
-  flex:1; padding:24px; overflow-y:auto;
-  display:flex; flex-direction:column; gap:20px;
-}
+  /* ─── TAB PANELS ─── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
-/* ── CARD ── */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  overflow:hidden;
-}
-.card-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 18px;
-  border-bottom:1px solid var(--border-primary);
-  background: rgba(255,255,255,0.02);
-}
-.card-title { font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
-.card-body   { padding:18px; }
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .ct-icon { font-size: 15px; }
+  .card-body { padding: 18px; }
 
-/* ── PROGRESS ── */
-.progress-bar-track {
-  background:rgba(255,255,255,0.06);
-  border-radius:99px; height:8px; overflow:hidden; margin:10px 0 4px;
-}
-.progress-bar-fill {
-  height:100%; border-radius:99px;
-  background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));
-  transition:width .3s ease;
-}
-.progress-meta { display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); }
-#progress-section { display:none; }
+  /* ─── GRID ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width:900px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
 
-/* ── STATS ROW ── */
-.stats-row {
-  display:flex; gap:12px; flex-wrap:wrap;
-}
-.stat-pill {
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border-primary);
-  border-radius:99px; padding:4px 14px;
-  font-size:12px; color:var(--text-secondary);
-}
-.stat-pill strong { color:var(--text-primary); }
+  /* ─── FORM ─── */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block; margin-bottom: 6px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text3); font-family: 'Space Mono', monospace;
+  }
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent);
+  }
+  .form-textarea { resize: vertical; min-height: 110px; }
+  .form-select { cursor: pointer; }
 
-/* ── MATRIX TABLE ── */
-.matrix-wrap { overflow:auto; max-height:580px; }
-.matrix-table {
-  border-collapse:collapse; width:100%; font-size:12px;
-  min-width:600px;
-}
-.matrix-table th, .matrix-table td {
-  padding:7px 10px; text-align:center;
-  border-bottom:1px solid var(--border-primary);
-  border-right:1px solid rgba(255,255,255,0.04);
-  white-space:nowrap;
-}
-.matrix-table thead th {
-  background:rgba(255,255,255,0.05);
-  font-weight:700; font-size:11px;
-  position:sticky; top:0; z-index:2;
-  color:var(--text-secondary);
-}
-.matrix-table .user-col {
-  text-align:left; font-weight:600;
-  position:sticky; left:0; z-index:3;
-  background:#161616;
-  min-width:130px;
-}
-.matrix-table thead .user-col { z-index:4; background:#1a1a1a; }
-.matrix-table tbody tr:hover td { background:rgba(255,255,255,0.03); }
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px;
+    border-radius: var(--radius2);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent2); }
+  .btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--border2); color: var(--text); }
+  .btn-danger { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,68,102,0.25); }
+  .btn-danger:hover:not(:disabled) { background: rgba(255,68,102,0.2); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
 
-/* Status cells */
-td.solved       { background:rgba(76,175,80,0.18);  color:#81c784; font-weight:700; }
-td.attempted    { background:rgba(255,152,0,0.18);  color:#ffb74d; }
-td.not-attempted{ color:#555; }
+  /* ─── PROGRESS ─── */
+  .progress-track {
+    height: 6px; border-radius: 3px;
+    background: var(--bg3);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #00b8ff);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px; font-family: 'Space Mono', monospace; color: var(--text3);
+  }
 
-/* ── LEGEND ── */
-.legend {
-  display:flex; gap:16px; flex-wrap:wrap;
-  font-size:12px; color:var(--text-muted);
-  padding:12px 0 0;
-}
-.legend-dot {
-  display:inline-block; width:10px; height:10px;
-  border-radius:2px; margin-right:5px;
-}
-.l-solved   { background:rgba(76,175,80,0.6); }
-.l-attempted{ background:rgba(255,152,0,0.6); }
-.l-dna      { background:rgba(255,255,255,0.1); }
+  /* ─── STAT CHIPS ─── */
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-chip {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 10px 16px;
+    text-align: center;
+    min-width: 90px;
+  }
+  .stat-chip .sv { font-size: 20px; font-weight: 800; color: var(--accent); font-family: 'Space Mono', monospace; }
+  .stat-chip .sl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; font-family: 'Space Mono', monospace; }
 
-/* ── PAGINATION ── */
-.pagination {
-  display:flex; align-items:center; justify-content:space-between;
-  flex-wrap:wrap; gap:10px; padding:12px 0 0;
-}
-.pag-btns { display:flex; gap:6px; align-items:center; }
-.page-info { font-size:12px; color:var(--text-muted); }
-.per-page-wrap { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); }
-.per-page-wrap select {
-  background:rgba(255,255,255,0.06); border:1px solid var(--border-primary);
-  border-radius:4px; color:var(--text-primary); padding:3px 8px; font-size:12px;
-}
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead tr { border-bottom: 2px solid var(--border); }
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody td { padding: 10px 12px; color: var(--text2); font-family: 'Space Mono', monospace; }
+  tbody td:first-child { color: var(--text); font-weight: 700; }
 
-/* ── EMPTY & ERROR ── */
-.empty-state {
-  display:flex; flex-direction:column; align-items:center;
-  justify-content:center; gap:10px; padding:60px 20px;
-  color:var(--text-muted); text-align:center;
-}
-.empty-state .icon { font-size:36px; }
-.empty-state .title { font-size:15px; font-weight:600; color:var(--text-secondary); }
-.empty-state .sub   { font-size:13px; }
-.error-msg { color:var(--accent-danger); font-size:13px; padding:10px 0; }
+  /* rank badge */
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--bg3);
+    font-size: 11px; font-weight: 700; color: var(--text2);
+  }
+  .rank-badge.gold { background: rgba(255,215,0,0.15); color: #ffd700; }
+  .rank-badge.silver { background: rgba(192,192,192,0.15); color: #c0c0c0; }
+  .rank-badge.bronze { background: rgba(205,127,50,0.15); color: #cd7f32; }
 
-/* ── NOTICE ── */
-.notice {
-  background:rgba(255,152,0,0.1);
-  border:1px solid rgba(255,152,0,0.3);
-  border-radius:var(--radius-sm); padding:12px 16px;
-  font-size:13px; line-height:1.7; color:var(--text-secondary);
-}
-.notice code {
-  background:rgba(255,255,255,0.1); border-radius:3px;
-  padding:1px 5px; font-size:12px; font-family:monospace;
-}
+  /* ─── MATRIX TABLE ─── */
+  .matrix-wrap { overflow: auto; max-height: 520px; }
+  .matrix-table { font-size: 11px; }
+  .matrix-table thead th { position: sticky; top: 0; background: var(--bg2); z-index: 2; }
+  .matrix-table .user-col { position: sticky; left: 0; background: var(--bg2); z-index: 1; min-width: 130px; }
+  .matrix-table td { padding: 7px 10px; white-space: nowrap; }
+  .cell-solved { color: var(--solved); background: var(--solved-bg); font-weight: 700; }
+  .cell-attempted { color: var(--attempted); background: var(--attempted-bg); }
+  .cell-na { color: var(--text3); background: var(--na-bg); }
 
-/* ── CORS NOTE ── */
-.cors-info {
-  background:rgba(102,126,234,0.1);
-  border:1px solid var(--border-accent);
-  border-radius:var(--radius-sm); padding:12px 16px;
-  font-size:12px; line-height:1.7; color:var(--text-muted);
-}
+  /* ─── LEGEND ─── */
+  .legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
 
-/* responsive */
-@media(max-width:700px){
-  .main{flex-direction:column;}
-  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border-primary);}
-  .stats-row{flex-direction:column;}
-}
+  /* ─── PAGINATION ─── */
+  .pagination { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .page-info { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; flex: 1; }
+
+  /* ─── HISTORY ─── */
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    padding: 12px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .history-item:hover { border-color: var(--accent); }
+  .hi-head { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .hi-meta { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center; padding: 48px 24px;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-text { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .empty-sub { font-size: 12px; font-family: 'Space Mono', monospace; }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 18px;
+    border-radius: var(--radius); font-size: 13px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 9999;
+    max-width: 320px;
+    font-family: 'Space Mono', monospace;
+  }
+  #toast.show { opacity: 1; }
+  #toast.success { border-color: var(--accent); color: var(--accent); }
+  #toast.error { border-color: var(--danger); color: var(--danger); }
+
+  /* ─── NOTICE BOX ─── */
+  .notice {
+    padding: 12px 16px;
+    border-radius: var(--radius2);
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .notice.warn { background: var(--warn-dim); border: 1px solid rgba(255,170,0,0.2); color: var(--warn); }
+  .notice.info { background: var(--accent-dim2); border: 1px solid rgba(0,229,160,0.15); color: var(--accent); }
+
+  /* ─── COMPARISON DETAILS ─── */
+  .comparison-detail { }
+  .cd-header { margin-bottom: 14px; }
+  .cd-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+  .cd-meta { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .hacker-row {
+    display: flex; gap: 12px; align-items: stretch; margin-bottom: 18px;
+  }
+  .hacker-card-d {
+    flex: 1; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius2); padding: 14px;
+  }
+  .hacker-card-d .hname { font-size: 15px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+  .hacker-card-d .hrank { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--text3); }
+  .vs-sep {
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px; color: var(--text3);
+    padding: 0 4px;
+  }
+
+  /* ─── SCROLLBAR STYLE ─── */
+  * { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: 'Space Mono', monospace; font-weight: 700; }
+  .tag-green { background: var(--solved-bg); color: var(--solved); }
+  .tag-yellow { background: var(--attempted-bg); color: var(--attempted); }
+  .tag-gray { background: var(--na-bg); color: var(--text3); }
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- ── HEADER ── -->
-  <header>
-    <div class="logo">HR</div>
-    <div>
-      <h1>HackerRank Bulk Comparison</h1>
-      <p>Compare multiple hackers against a fixed user in a contest</p>
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">
+      <div class="logo-mark">HR</div>
+      <div>
+        <div class="logo-text">HackerRank</div>
+        <div class="logo-sub">Dashboard v1</div>
+      </div>
     </div>
-  </header>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-tab="leaderboard">
+      <span class="nav-icon">📊</span> Leaderboard
+    </button>
+    <button class="nav-btn" data-tab="comparison">
+      <span class="nav-icon">⚖️</span> Bulk Compare
+    </button>
+    <button class="nav-btn" data-tab="history">
+      <span class="nav-icon">📚</span> History
+    </button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="session-status">
+      <div class="session-dot" id="session-dot"></div>
+      <span id="session-label">No session</span>
+    </div>
+    <button class="sync-btn" id="sync-btn">🔄 Sync Session</button>
+  </div>
+</aside>
 
-  <div class="main">
+<!-- ════ MAIN ════ -->
+<main class="main">
+  <div class="topbar">
+    <span class="page-title" id="page-title">Contest Leaderboard</span>
+    <div class="topbar-right">
+      <span style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;">Open HackerRank → Log in → Sync Session</span>
+    </div>
+  </div>
 
-    <!-- ── SIDEBAR ── -->
-    <aside class="sidebar">
+  <div class="content">
 
-      <div class="notice">
-        ⚠️ <strong>Authentication required.</strong> This tool calls the HackerRank API directly from your browser. You must be <strong>logged in to hackerrank.com</strong> in the same browser for cookies to be sent automatically.<br><br>
-        If requests fail with 401/403, open <a href="https://www.hackerrank.com" target="_blank">hackerrank.com</a>, log in, then come back here and try again.
+    <!-- ─ LEADERBOARD ─ -->
+    <div class="tab-panel active" id="tab-leaderboard">
+
+      <div class="notice warn">
+        ⚠️ This app reuses your active HackerRank browser session. Make sure you are logged in at
+        <strong>hackerrank.com</strong> and click <strong>Sync Session</strong> in the sidebar first.
+        API calls are made from your browser directly (no server needed).
       </div>
 
-      <h2>Contest</h2>
-      <div class="form-group">
-        <label class="form-label" for="contestSlug">Contest Slug</label>
-        <input type="text" class="form-input" id="contestSlug" placeholder="e.g. dsa-trainers" value="dsa-trainers">
-        <span class="hint">From the contest URL: hackerrank.com/contests/<em>slug</em></span>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title"><span class="ct-icon">⚙️</span> Controls</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Contest Slug</label>
+              <input class="form-input" id="lb-slug" value="dsa-trainers" placeholder="e.g. my-contest-2024">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Results Limit</label>
+              <input class="form-input" id="lb-limit" type="number" value="100" min="1" max="1000">
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="lb-load-btn">▶ Load</button>
+              <button class="btn btn-secondary" id="lb-export-csv" disabled>⬇ CSV</button>
+              <button class="btn btn-secondary" id="lb-export-xl" disabled>⬇ Excel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="lb-progress-card" style="display:none">
+          <div class="card-head"><span class="card-title"><span class="ct-icon">⏳</span> Loading</span></div>
+          <div class="card-body">
+            <div class="progress-track"><div class="progress-fill" id="lb-progress-fill"></div></div>
+            <div class="progress-meta">
+              <span id="lb-status">Starting…</span>
+              <span id="lb-pct">0%</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <h2>Users</h2>
-      <div class="form-group">
-        <label class="form-label" for="hacker1">Fixed User (reference)</label>
-        <input type="text" class="form-input" id="hacker1" placeholder="e.g. hbinu">
+      <div class="stat-row" id="lb-stats" style="display:none">
+        <div class="stat-chip"><div class="sv" id="lb-stat-count">0</div><div class="sl">Loaded</div></div>
+        <div class="stat-chip"><div class="sv" id="lb-stat-pages">0</div><div class="sl">Pages</div></div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="hackerList">Users to compare (one per line)</label>
-        <textarea class="form-textarea" id="hackerList" placeholder="username1&#10;username2&#10;username3" rows="7"></textarea>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title"><span class="ct-icon">🏆</span> Results</span>
+          <span style="font-size:11px;font-family:'Space Mono',monospace;color:var(--text3)" id="lb-count-badge">0 entries</span>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table id="lb-table">
+              <thead><tr>
+                <th>Rank</th><th>Hacker</th><th>Score</th><th>Time</th><th>Country</th>
+              </tr></thead>
+              <tbody id="lb-tbody">
+                <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">No data loaded</div><div class="empty-sub">Enter a contest slug and click Load</div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ BULK COMPARE ─ -->
+    <div class="tab-panel" id="tab-comparison">
+
+      <div class="stat-row" id="bc-stat-row" style="display:none">
+        <div class="stat-chip"><div class="sv" id="bc-stat-total">0</div><div class="sl">Total</div></div>
+        <div class="stat-chip"><div class="sv" id="bc-stat-done">0</div><div class="sl">Done</div></div>
+        <div class="stat-chip"><div class="sv" id="bc-stat-rate">0%</div><div class="sl">Success</div></div>
+        <div class="stat-chip"><div class="sv" id="bc-stat-speed">—</div><div class="sl">Comps/s</div></div>
       </div>
 
-      <h2>CSRF Token (optional)</h2>
-      <div class="form-group">
-        <label class="form-label" for="csrfToken">csrf_token cookie value</label>
-        <input type="text" class="form-input" id="csrfToken" placeholder="Paste token if requests fail">
-        <span class="hint">Open DevTools → Application → Cookies → hackerrank.com → <code>csrf_token</code></span>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title"><span class="ct-icon">⚙️</span> Setup</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Contest Slug</label>
+              <input class="form-input" id="bc-slug" value="dsa-trainers">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fixed User (hacker1)</label>
+              <input class="form-input" id="bc-h1" placeholder="e.g. hbinu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Users to Compare (one per line)</label>
+              <textarea class="form-textarea" id="bc-list" placeholder="username1&#10;username2&#10;username3"></textarea>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="bc-start-btn">▶ Start</button>
+              <button class="btn btn-danger" id="bc-stop-btn" style="display:none">⏹ Stop</button>
+              <button class="btn btn-secondary" id="bc-export-btn" style="display:none">⬇ Export CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="bc-progress-card" style="display:none">
+          <div class="card-head">
+            <span class="card-title"><span class="ct-icon">⚡</span> Progress</span>
+            <span class="tag tag-green" id="bc-pct-badge">0%</span>
+          </div>
+          <div class="card-body">
+            <div class="progress-track"><div class="progress-fill" id="bc-progress-fill"></div></div>
+            <div class="progress-meta">
+              <span id="bc-status">Starting…</span>
+              <span id="bc-speed-label">—</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-        <button class="btn btn-primary btn-full" id="startBtn" onclick="startBulkComparison()">▶ Start Comparison</button>
-        <button class="btn btn-danger btn-full" id="stopBtn" style="display:none" onclick="stopComparison()">⏹ Stop</button>
+      <!-- Matrix results -->
+      <div class="card" id="bc-results-card">
+        <div class="card-head">
+          <span class="card-title"><span class="ct-icon">📋</span> Comparison Matrix</span>
+        </div>
+        <div class="card-body" id="bc-results-body">
+          <div class="empty-state">
+            <div class="empty-icon">⚖️</div>
+            <div class="empty-text">No comparisons yet</div>
+            <div class="empty-sub">Fill in the form and click Start</div>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div id="sideStatus" class="auth-status"></div>
-
-      <div class="cors-info" style="margin-top:8px;">
-        ℹ️ Requests are sent directly from your browser to HackerRank using <code>credentials: 'include'</code>, the same way the extension does — no proxy needed.
-      </div>
-    </aside>
-
-    <!-- ── MAIN CONTENT ── -->
-    <main class="content">
-
-      <!-- Progress -->
-      <div class="card" id="progress-section">
-        <div class="card-header">
-          <span class="card-title">⚡ Processing</span>
-          <span id="pct-badge" style="font-size:13px;font-weight:700;color:var(--accent-primary)">0%</span>
+    <!-- ─ HISTORY ─ -->
+    <div class="tab-panel" id="tab-history">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title"><span class="ct-icon">⚙️</span> Controls</span>
         </div>
         <div class="card-body">
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
-          </div>
-          <div class="progress-meta">
-            <span id="progressStatus">Starting…</span>
-            <span id="progressSpeed">0 cmp/s</span>
-          </div>
-          <div class="stats-row" style="margin-top:12px;" id="statsRow">
-            <div class="stat-pill">Total: <strong id="statTotal">0</strong></div>
-            <div class="stat-pill">Done: <strong id="statDone">0</strong></div>
-            <div class="stat-pill">Success: <strong id="statOk">0</strong></div>
-            <div class="stat-pill">Failed: <strong id="statFail">0</strong></div>
-            <div class="stat-pill">Rate: <strong id="statRate">0%</strong></div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="hist-refresh-btn">↻ Refresh</button>
+            <button class="btn btn-danger" id="hist-clear-btn">🗑 Clear All</button>
           </div>
         </div>
       </div>
-
-      <!-- Results -->
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">📊 Comparison Matrix</span>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span id="matrixInfo" style="font-size:12px;color:var(--text-muted)"></span>
-            <button class="btn btn-secondary btn-sm" id="exportBtn" style="display:none" onclick="exportCSV()">⬇ Export CSV</button>
-          </div>
-        </div>
-        <div class="card-body" id="resultsArea">
-          <div class="empty-state">
-            <div class="icon">⚖️</div>
-            <div class="title">Ready to compare</div>
-            <div class="sub">Fill in the fields on the left and click Start Comparison</div>
+        <div class="card-head"><span class="card-title"><span class="ct-icon">📚</span> Recent Queries</span></div>
+        <div class="card-body">
+          <div class="history-list" id="history-list">
+            <div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No history yet</div><div class="empty-sub">Load a leaderboard to start building history</div></div>
           </div>
         </div>
       </div>
+    </div>
 
-    </main>
-  </div>
-</div>
+  </div><!-- /content -->
+</main>
+
+<div id="toast"></div>
 
 <script>
-// ── STATE ──
+// ════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════
+const BASE_URL = 'https://www.hackerrank.com';
+const STORAGE_KEY = 'hr_dash_session';
+const HISTORY_KEY = 'hr_dash_history';
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let session = { csrfToken: '', cookies: '' };
+let leaderboardData = [];
 let bulkResults = [];
-let isRunning   = false;
-let startTime   = null;
-let currentPage = 1;
-let perPage     = 20;
-const BASE_URL  = 'https://www.hackerrank.com';
-const BATCH_SIZE = 10; // smaller batches for direct browser fetch
+let bulkActive = false;
+let bulkStartTime = null;
 
-// ── UTILS ──
-function $(id){ return document.getElementById(id); }
+// Pagination
+let matrixPage = 1;
+const MATRIX_PAGE_SIZE = 25;
 
-function getChallengeStatus(score, attempted) {
-  if (score > 0)    return { text: String(score), cls: 'solved' };
-  if (attempted)    return { text: '0',           cls: 'attempted' };
-  return               { text: '–',            cls: 'not-attempted' };
+// ════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 3000);
 }
 
-function truncate(s, n){ return s.length > n ? s.slice(0,n-1)+'…' : s; }
-
-function setStatus(msg, color=''){
-  $('sideStatus').textContent = msg;
-  $('sideStatus').style.color = color;
+// ════════════════════════════════════════════
+//  SESSION
+// ════════════════════════════════════════════
+function saveSession(s) {
+  session = s;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, savedAt: Date.now() })); } catch(e){}
+  updateSessionUI(true);
 }
 
-// ── API ──
-async function compareHackers(contestSlug, hacker1, hacker2, csrfToken){
-  const ts  = Date.now();
-  const url = `${BASE_URL}/rest/compare?contest_slug=${encodeURIComponent(contestSlug)}`
-            + `&hacker_slug_1=${encodeURIComponent(hacker1)}`
-            + `&hacker_slug_2=${encodeURIComponent(hacker2)}`
-            + `&_=${ts}`;
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (Date.now() - s.savedAt > 12 * 3600_000) return false;
+    session = { csrfToken: s.csrfToken || '', cookies: s.cookies || '' };
+    if (session.cookies) { updateSessionUI(true); return true; }
+  } catch(e){}
+  return false;
+}
+
+function updateSessionUI(connected) {
+  const dot = document.getElementById('session-dot');
+  const lbl = document.getElementById('session-label');
+  dot.className = 'session-dot ' + (connected ? 'connected' : 'error');
+  lbl.textContent = connected ? 'Connected' : 'Not connected';
+}
+
+// ════════════════════════════════════════════
+//  FETCH HELPERS
+// ════════════════════════════════════════════
+async function apiFetch(url, opts = {}) {
   const headers = {
     'accept': 'application/json, text/javascript, */*; q=0.01',
     'x-requested-with': 'XMLHttpRequest',
+    'x-csrf-token': session.csrfToken || '',
+    ...(opts.headers || {})
   };
-  if (csrfToken) headers['x-csrf-token'] = csrfToken;
-  const resp = await fetch(url, { credentials: 'include', headers });
-  if (!resp.ok) {
-    const txt = await resp.text();
-    throw new Error(`HTTP ${resp.status}: ${txt.slice(0,200)}`);
+  const res = await fetch(url, {
+    credentials: 'include',
+    ...opts,
+    headers
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${txt.slice(0, 120)}`);
   }
-  return resp.json();
+  return res.json();
 }
 
-// ── BULK COMPARISON ──
-async function startBulkComparison(){
-  const contestSlug = $('contestSlug').value.trim();
-  const hacker1     = $('hacker1').value.trim();
-  const listRaw     = $('hackerList').value.trim();
-  const csrfToken   = $('csrfToken').value.trim();
+async function syncSession() {
+  const btn = document.getElementById('sync-btn');
+  btn.textContent = '⏳ Syncing…';
+  btn.disabled = true;
+  try {
+    // Try to get csrf from the page
+    let csrfToken = '';
+    try {
+      const res = await fetch(`${BASE_URL}/dashboard`, { credentials: 'include' });
+      const html = await res.text();
+      const m = html.match(/name=["']csrf-token["']\s+content=["']([^"']+)["']/i)
+                 || html.match(/csrfToken["']?\s*:\s*["']([^"']+)["']/i);
+      if (m) csrfToken = m[1];
+    } catch(e) {}
 
-  if (!contestSlug || !hacker1 || !listRaw){
-    setStatus('❌ Please fill all required fields.', 'var(--accent-danger)');
-    return;
+    // Check if we actually have cookies by trying a lightweight API call
+    const testUrl = `${BASE_URL}/rest/contests/dsa-trainers/leaderboard?offset=0&limit=1`;
+    await apiFetch(testUrl, { headers: { 'x-csrf-token': csrfToken } });
+    saveSession({ csrfToken, cookies: 'browser-session' });
+    toast('Session synced! ✅', 'success');
+  } catch(e) {
+    updateSessionUI(false);
+    toast('Sync failed — make sure you are logged in at hackerrank.com', 'error');
+    console.error(e);
+  } finally {
+    btn.textContent = '🔄 Sync Session';
+    btn.disabled = false;
   }
+}
 
-  const hackerList = listRaw.split('\n').map(h=>h.trim()).filter(Boolean);
-  if (hackerList.length === 0){
-    setStatus('❌ Enter at least one username to compare.', 'var(--accent-danger)');
-    return;
+// ════════════════════════════════════════════
+//  LEADERBOARD
+// ════════════════════════════════════════════
+async function loadLeaderboard() {
+  const slug = document.getElementById('lb-slug').value.trim();
+  const limit = parseInt(document.getElementById('lb-limit').value) || 100;
+  if (!slug) { toast('Enter a contest slug', 'error'); return; }
+  if (!session.cookies) { toast('Sync your session first', 'error'); return; }
+
+  const loadBtn = document.getElementById('lb-load-btn');
+  const progCard = document.getElementById('lb-progress-card');
+  const fill = document.getElementById('lb-progress-fill');
+  const status = document.getElementById('lb-status');
+  const pct = document.getElementById('lb-pct');
+  const tbody = document.getElementById('lb-tbody');
+  const csvBtn = document.getElementById('lb-export-csv');
+  const xlBtn = document.getElementById('lb-export-xl');
+
+  loadBtn.disabled = true; loadBtn.textContent = '⏳ Loading…';
+  progCard.style.display = '';
+  tbody.innerHTML = '';
+  leaderboardData = [];
+
+  document.getElementById('lb-stats').style.display = 'none';
+  document.getElementById('lb-count-badge').textContent = '0 entries';
+  csvBtn.disabled = true; xlBtn.disabled = true;
+
+  const pageSize = 100;
+  const pages = Math.ceil(limit / pageSize);
+
+  try {
+    for (let p = 0; p < pages; p++) {
+      const offset = p * pageSize;
+      const curLimit = Math.min(pageSize, limit - offset);
+      const progress = Math.round((p / pages) * 100);
+      fill.style.width = progress + '%';
+      pct.textContent = progress + '%';
+      status.textContent = `Page ${p+1} / ${pages}…`;
+
+      const data = await apiFetch(
+        `${BASE_URL}/rest/contests/${slug}/leaderboard?offset=${offset}&limit=${curLimit}`
+      );
+      const models = data.models || [];
+      leaderboardData = leaderboardData.concat(models);
+
+      models.forEach(m => {
+        const tr = document.createElement('tr');
+        const r = parseInt(m.rank);
+        const rankClass = r === 1 ? 'gold' : r === 2 ? 'silver' : r === 3 ? 'bronze' : '';
+        tr.innerHTML = `
+          <td><span class="rank-badge ${rankClass}">${m.rank || '—'}</span></td>
+          <td style="color:var(--text);font-weight:600">${m.hacker || '—'}</td>
+          <td style="color:var(--accent)">${m.score ?? '—'}</td>
+          <td>${m.time_taken ?? '—'}</td>
+          <td>${m.country || '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      if (models.length < curLimit) break;
+    }
+
+    fill.style.width = '100%'; pct.textContent = '100%';
+    status.textContent = `Done — ${leaderboardData.length} entries`;
+    document.getElementById('lb-count-badge').textContent = `${leaderboardData.length} entries`;
+    document.getElementById('lb-stat-count').textContent = leaderboardData.length;
+    document.getElementById('lb-stat-pages').textContent = pages;
+    document.getElementById('lb-stats').style.display = 'flex';
+    csvBtn.disabled = false; xlBtn.disabled = false;
+
+    await saveToHistory(slug, leaderboardData);
+    toast(`Loaded ${leaderboardData.length} entries`, 'success');
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+    toast(e.message, 'error');
+    console.error(e);
+  } finally {
+    loadBtn.disabled = false; loadBtn.textContent = '▶ Load';
+    setTimeout(() => progCard.style.display = 'none', 2500);
   }
+}
 
-  // Reset
-  bulkResults  = [];
-  isRunning    = true;
-  startTime    = Date.now();
-  currentPage  = 1;
+function exportCSV(data, filename) {
+  const headers = ['Rank','Hacker','Score','Time','Country'];
+  const rows = data.map(m => [m.rank,m.hacker,m.score,m.time_taken,m.country]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c ?? ''}"`).join(',')).join('\n');
+  triggerDownload(filename, 'text/csv', csv);
+}
 
-  $('startBtn').style.display = 'none';
-  $('stopBtn').style.display  = '';
-  $('progress-section').style.display = '';
-  $('exportBtn').style.display = 'none';
+function exportExcel(data, filename) {
+  const headers = ['Rank','Hacker','Score','Time','Country'];
+  const rows = data.map(m => [m.rank,m.hacker,m.score,m.time_taken,m.country]);
+  const tsv = [headers, ...rows].map(r => r.join('\t')).join('\n');
+  triggerDownload(filename, 'application/vnd.ms-excel', tsv);
+}
 
-  updateProgress(0, hackerList.length);
-  setStatus('⏳ Running comparison…', 'var(--accent-primary)');
+function triggerDownload(filename, mime, content) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
 
-  // Show placeholder in results
-  $('resultsArea').innerHTML = `
+// ════════════════════════════════════════════
+//  BULK COMPARISON
+// ════════════════════════════════════════════
+async function startBulkComparison() {
+  const slug = document.getElementById('bc-slug').value.trim();
+  const h1 = document.getElementById('bc-h1').value.trim();
+  const listRaw = document.getElementById('bc-list').value.trim();
+  if (!slug || !h1 || !listRaw) { toast('Fill in all fields', 'error'); return; }
+  if (!session.cookies) { toast('Sync your session first', 'error'); return; }
+
+  const hackerList = listRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  if (hackerList.length === 0) { toast('Enter at least one username', 'error'); return; }
+
+  bulkActive = true;
+  bulkResults = [];
+  bulkStartTime = Date.now();
+  matrixPage = 1;
+
+  // UI setup
+  document.getElementById('bc-start-btn').style.display = 'none';
+  document.getElementById('bc-stop-btn').style.display = '';
+  document.getElementById('bc-progress-card').style.display = '';
+  document.getElementById('bc-export-btn').style.display = 'none';
+  document.getElementById('bc-stat-row').style.display = 'flex';
+  document.getElementById('bc-stat-total').textContent = hackerList.length;
+
+  document.getElementById('bc-results-body').innerHTML = `
     <div class="empty-state">
-      <div class="icon">⏳</div>
-      <div class="title">Processing…</div>
-      <div class="sub">Table will appear when complete</div>
+      <div class="empty-icon">⏳</div>
+      <div class="empty-text">Processing…</div>
+      <div class="empty-sub">Results will appear after completion</div>
     </div>`;
 
+  const BATCH = 50;
   const total = hackerList.length;
 
-  for (let i = 0; i < total && isRunning; i += BATCH_SIZE){
-    const batch = hackerList.slice(i, i + BATCH_SIZE);
-    const promises = batch.map(async hacker2 => {
+  for (let i = 0; i < hackerList.length && bulkActive; i += BATCH) {
+    const batch = hackerList.slice(i, i + BATCH);
+    const batchPromises = batch.map(async h2 => {
       try {
-        const data = await compareHackers(contestSlug, hacker1, hacker2, csrfToken);
-        return { hacker1, hacker2, success: true, data };
+        const ts = Date.now();
+        const url = `${BASE_URL}/rest/compare?contest_slug=${encodeURIComponent(slug)}&hacker_slug_1=${encodeURIComponent(h1)}&hacker_slug_2=${encodeURIComponent(h2)}&_=${ts}`;
+        const data = await apiFetch(url);
+        return { hacker1: h1, hacker2: h2, success: true, data };
       } catch(e) {
-        return { hacker1, hacker2, success: false, error: e.message };
+        return { hacker1: h1, hacker2: h2, success: false, error: e.message, data: null };
       }
     });
-    const batchRes = await Promise.all(promises);
-    batchRes.forEach(r => bulkResults.push(r));
-    updateProgress(bulkResults.length, total);
 
-    // Small delay between batches to avoid rate limiting
-    if (i + BATCH_SIZE < total && isRunning){
-      await new Promise(r => setTimeout(r, 100));
+    const batchRes = await Promise.all(batchPromises);
+    bulkResults.push(...batchRes);
+
+    const done = Math.min(i + BATCH, total);
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('bc-progress-fill').style.width = pct + '%';
+    document.getElementById('bc-pct-badge').textContent = pct + '%';
+    document.getElementById('bc-status').textContent = `${done}/${total} comparisons`;
+    document.getElementById('bc-stat-done').textContent = done;
+
+    const succ = bulkResults.filter(r => r.success).length;
+    document.getElementById('bc-stat-rate').textContent = Math.round(succ / done * 100) + '%';
+
+    const elapsed = (Date.now() - bulkStartTime) / 1000;
+    const speed = (done / elapsed).toFixed(1);
+    document.getElementById('bc-stat-speed').textContent = speed;
+    document.getElementById('bc-speed-label').textContent = speed + '/s';
+
+    if (i + BATCH < hackerList.length && bulkActive) {
+      await new Promise(r => setTimeout(r, 50));
     }
   }
 
   // Done
-  isRunning = false;
-  $('startBtn').style.display = '';
-  $('stopBtn').style.display  = 'none';
+  document.getElementById('bc-start-btn').style.display = '';
+  document.getElementById('bc-stop-btn').style.display = 'none';
+  document.getElementById('bc-status').textContent = bulkActive
+    ? `Complete — ${bulkResults.length} comparisons`
+    : `Stopped at ${bulkResults.length} comparisons`;
+  bulkActive = false;
 
-  const ok = bulkResults.filter(r=>r.success).length;
-  setStatus(`✅ Done: ${ok}/${total} succeeded.`, 'var(--accent-success)');
-  updateProgress(bulkResults.length, total);
+  renderMatrix();
+  document.getElementById('bc-export-btn').style.display = '';
+  toast(`Comparison complete — ${bulkResults.filter(r=>r.success).length}/${bulkResults.length} succeeded`, 'success');
+}
+
+function stopBulkComparison() {
+  bulkActive = false;
+  document.getElementById('bc-start-btn').style.display = '';
+  document.getElementById('bc-stop-btn').style.display = 'none';
   renderMatrix();
 }
 
-function stopComparison(){
-  isRunning = false;
-  $('startBtn').style.display = '';
-  $('stopBtn').style.display  = 'none';
-  setStatus('⏹ Stopped by user.', 'var(--accent-warning)');
-  renderMatrix();
+function getCellStatus(score, attempted) {
+  if (score > 0) return 'solved';
+  if (attempted) return 'attempted';
+  return 'na';
 }
 
-// ── PROGRESS ──
-function updateProgress(done, total){
-  const pct = total > 0 ? Math.round((done/total)*100) : 0;
-  $('progressFill').style.width = pct + '%';
-  $('pct-badge').textContent    = pct + '%';
-  $('progressStatus').textContent = `Completed ${done} / ${total}`;
-
-  const ok   = bulkResults.filter(r=>r.success).length;
-  const fail = bulkResults.filter(r=>!r.success).length;
-  $('statTotal').textContent = total;
-  $('statDone').textContent  = done;
-  $('statOk').textContent    = ok;
-  $('statFail').textContent  = fail;
-  $('statRate').textContent  = done > 0 ? Math.round((ok/done)*100)+'%' : '0%';
-
-  if (startTime){
-    const elapsed = (Date.now()-startTime)/1000;
-    const speed   = done/elapsed;
-    $('progressSpeed').textContent = speed.toFixed(1)+' cmp/s';
-  }
-}
-
-// ── MATRIX ──
-function createMatrix(){
-  const questions    = [];
-  const questionSet  = new Set();
-  const userSet      = new Map(); // username → questionStatus map
-  let fixedUser      = null;
+function buildMatrix() {
+  const questions = [];
+  const qSet = new Set();
+  const userMap = new Map();
+  let fixedUser = null;
 
   bulkResults.forEach(r => {
     if (!r.success || !r.data?.model) return;
-    const { challenges, hacker1, hacker2 } = r.data.model;
-    if (!fixedUser) fixedUser = hacker1?.username ?? r.hacker1;
+    if (!fixedUser) fixedUser = r.hacker1;
 
-    // Collect questions in order
-    if (questions.length === 0){
-      (challenges||[]).forEach(c=>{
-        if (!questionSet.has(c.name)){
-          questions.push(c.name);
-          questionSet.add(c.name);
-        }
-      });
+    const challenges = r.data.model.challenges || [];
+
+    if (questions.length === 0) {
+      challenges.forEach(c => { if (!qSet.has(c.name)) { questions.push(c.name); qSet.add(c.name); } });
     }
 
-    const h1name = hacker1?.username ?? r.hacker1;
-    const h2name = hacker2?.username ?? r.hacker2;
-    [h1name, h2name].forEach(n=>{ if(!userSet.has(n)) userSet.set(n,{}); });
-
-    (challenges||[]).forEach(c=>{
-      const parseScore = v => {
-        if (typeof v === 'number') return v;
-        const p = parseFloat(v); return isNaN(p)?0:p;
-      };
-      const s1 = parseScore(c.score1);
-      const s2 = parseScore(c.score2);
-      userSet.get(h1name)[c.name] = { score:s1, points:c.point||0, attempted:c.attempted1||false, ...getChallengeStatus(s1,c.attempted1) };
-      userSet.get(h2name)[c.name] = { score:s2, points:c.point||0, attempted:c.attempted2||false, ...getChallengeStatus(s2,c.attempted2) };
+    [r.hacker1, r.hacker2].forEach((hacker, idx) => {
+      if (!userMap.has(hacker)) userMap.set(hacker, {});
+      const scoreKey = idx === 0 ? 'score1' : 'score2';
+      const attemptKey = idx === 0 ? 'attempted1' : 'attempted2';
+      challenges.forEach(c => {
+        const sc = parseFloat(c[scoreKey]) || 0;
+        userMap.get(hacker)[c.name] = {
+          status: getCellStatus(sc, c[attemptKey]),
+          score: sc,
+          points: c.point || 0,
+          attempted: c[attemptKey] || false
+        };
+      });
     });
   });
 
-  const users = Array.from(userSet.entries()).map(([username, qs])=>{
-    const questionStatus = {};
-    questions.forEach(q=>{
-      questionStatus[q] = qs[q] || { score:0, points:0, attempted:false, text:'–', cls:'not-attempted' };
-    });
-    return { username, questionStatus };
-  });
-
+  const users = Array.from(userMap.keys()).map(u => ({ username: u, qmap: userMap.get(u) }));
   return { users, questions, fixedUser };
 }
 
-function renderMatrix(){
-  const matrix = createMatrix();
-  const area   = $('resultsArea');
-
-  if (matrix.users.length === 0){
-    area.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">⚠️</div>
-        <div class="title">No valid data</div>
-        <div class="sub">All comparisons failed or returned no data. Check your session/CSRF token.</div>
-      </div>`;
+function renderMatrix() {
+  const container = document.getElementById('bc-results-body');
+  if (bulkResults.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">No valid data</div><div class="empty-sub">All comparisons may have failed</div></div>`;
     return;
   }
 
-  const totalUsers  = matrix.users.length;
-  const totalPages  = Math.max(1, Math.ceil(totalUsers/perPage));
-  currentPage       = Math.min(currentPage, totalPages);
-  const start       = (currentPage-1)*perPage;
-  const end         = Math.min(start+perPage, totalUsers);
-  const pageUsers   = matrix.users.slice(start, end);
+  const { users, questions, fixedUser } = buildMatrix();
+  if (users.length === 0 || questions.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">No challenge data</div></div>`;
+    return;
+  }
 
-  $('matrixInfo').textContent = `${matrix.users.length} users · ${matrix.questions.length} questions`;
-  $('exportBtn').style.display = '';
+  const totalPages = Math.ceil(users.length / MATRIX_PAGE_SIZE);
+  matrixPage = Math.min(matrixPage, totalPages);
+  const start = (matrixPage - 1) * MATRIX_PAGE_SIZE;
+  const pageUsers = users.slice(start, start + MATRIX_PAGE_SIZE);
 
-  // Pagination HTML
-  const pagHTML = `
-    <div class="pagination">
-      <div class="pag-btns">
-        <button class="btn btn-secondary btn-sm" onclick="goPage(1)" ${currentPage===1?'disabled':''}>⏮</button>
-        <button class="btn btn-secondary btn-sm" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>◀ Prev</button>
-        <span class="page-info">Page ${currentPage} / ${totalPages}</span>
-        <button class="btn btn-secondary btn-sm" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Next ▶</button>
-        <button class="btn btn-secondary btn-sm" onclick="goPage(${totalPages})" ${currentPage===totalPages?'disabled':''}>⏭</button>
-      </div>
-      <div class="per-page-wrap">
-        <span>Rows per page:</span>
-        <select onchange="setPerPage(this.value)">
-          ${[10,20,50,100].map(v=>`<option value="${v}" ${perPage===v?'selected':''}>${v}</option>`).join('')}
-        </select>
-      </div>
-      <span class="page-info">Showing ${start+1}–${end} of ${totalUsers}</span>
-    </div>`;
+  // Header
+  let thCells = '<th class="user-col">👤 User</th>';
+  questions.forEach(q => { thCells += `<th title="${q}">${q.length > 20 ? q.slice(0,18)+'…' : q}</th>`; });
 
-  // Table header
-  let thead = '<tr><th class="user-col">👤 Username</th>';
-  matrix.questions.forEach(q=>{
-    thead += `<th title="${q}">${truncate(q,22)}</th>`;
-  });
-  thead += '</tr>';
-
-  // Table rows
-  let tbody = '';
-  pageUsers.forEach(user=>{
-    tbody += `<tr><td class="user-col"><strong>${user.username}</strong></td>`;
-    matrix.questions.forEach(q=>{
-      const d = user.questionStatus[q];
-      let display = d.attempted ? `${d.score}/${d.points}` : '–';
-      tbody += `<td class="${d.cls}" title="${q}: ${display}">${display}</td>`;
+  // Body
+  let rows = '';
+  pageUsers.forEach(u => {
+    let cells = `<td class="user-col" style="font-weight:700;color:${u.username === fixedUser ? 'var(--accent)' : 'var(--text)'}">${u.username}</td>`;
+    questions.forEach(q => {
+      const d = u.qmap[q];
+      if (!d || d.status === 'na') {
+        cells += `<td class="cell-na">—</td>`;
+      } else if (d.status === 'solved') {
+        cells += `<td class="cell-solved">${d.score}/${d.points}</td>`;
+      } else {
+        cells += `<td class="cell-attempted">${d.score}/${d.points}</td>`;
+      }
     });
-    tbody += '</tr>';
+    rows += `<tr>${cells}</tr>`;
   });
 
-  // Legend
-  const legend = `
-    <div class="legend">
-      <span><span class="legend-dot l-solved"></span>Solved (score/points)</span>
-      <span><span class="legend-dot l-attempted"></span>Attempted (0/points)</span>
-      <span><span class="legend-dot l-dna"></span>Did Not Attempt</span>
-    </div>`;
+  // Pagination controls
+  const pagCtrl = totalPages > 1 ? `
+    <div class="pagination" style="margin-top:14px">
+      <span class="page-info">Page ${matrixPage} / ${totalPages} (${users.length} users)</span>
+      <button class="btn btn-secondary" onclick="gotoMatrixPage(1)" ${matrixPage===1?'disabled':''}>⏮</button>
+      <button class="btn btn-secondary" onclick="gotoMatrixPage(${matrixPage-1})" ${matrixPage===1?'disabled':''}>◀</button>
+      <button class="btn btn-secondary" onclick="gotoMatrixPage(${matrixPage+1})" ${matrixPage===totalPages?'disabled':''}>▶</button>
+      <button class="btn btn-secondary" onclick="gotoMatrixPage(${totalPages})" ${matrixPage===totalPages?'disabled':''}>⏭</button>
+    </div>` : '';
 
-  area.innerHTML = `
-    ${pagHTML}
-    <div class="matrix-wrap" style="margin-top:14px;">
+  container.innerHTML = `
+    <div style="margin-bottom:12px;font-size:12px;color:var(--text3);font-family:'Space Mono',monospace">
+      Fixed: <strong style="color:var(--accent)">${fixedUser}</strong> &nbsp;·&nbsp;
+      ${questions.length} questions &nbsp;·&nbsp; ${users.length} users
+    </div>
+    <div class="matrix-wrap">
       <table class="matrix-table">
-        <thead>${thead}</thead>
-        <tbody>${tbody}</tbody>
+        <thead><tr>${thCells}</tr></thead>
+        <tbody>${rows}</tbody>
       </table>
     </div>
-    ${legend}`;
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--solved-bg);border:1px solid var(--solved)"></div> Solved</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--attempted-bg);border:1px solid var(--attempted)"></div> Attempted</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--na-bg);border:1px solid var(--border)"></div> Not Attempted</div>
+    </div>
+    ${pagCtrl}`;
 }
 
-function goPage(p){
-  const matrix = createMatrix();
-  const total  = Math.max(1, Math.ceil(matrix.users.length/perPage));
-  currentPage  = Math.max(1, Math.min(p, total));
+function gotoMatrixPage(p) {
+  const { users } = buildMatrix();
+  const total = Math.ceil(users.length / MATRIX_PAGE_SIZE);
+  matrixPage = Math.max(1, Math.min(p, total));
   renderMatrix();
 }
 
-function setPerPage(v){
-  perPage     = parseInt(v);
-  currentPage = 1;
-  renderMatrix();
-}
-
-// ── EXPORT CSV ──
-function exportCSV(){
-  const matrix = createMatrix();
-  if (!matrix.users.length){ alert('No data to export.'); return; }
-
-  let csv = 'Username,' + matrix.questions.map(q=>`"${q}"`).join(',') + '\n';
-  matrix.users.forEach(user=>{
-    const row = [user.username];
-    matrix.questions.forEach(q=>{
-      const d = user.questionStatus[q];
-      row.push(d.attempted ? `${d.score}/${d.points}` : 'Did Not Attempt');
+function exportBulkCSV() {
+  const { users, questions } = buildMatrix();
+  if (!users.length) { toast('No data to export', 'error'); return; }
+  const header = ['Username', ...questions];
+  const rows = users.map(u => {
+    const cells = [u.username];
+    questions.forEach(q => {
+      const d = u.qmap[q];
+      cells.push(d && d.attempted ? d.score : 'Did Not Attempt');
     });
-    csv += row.map(c=>`"${c}"`).join(',') + '\n';
+    return cells;
   });
-
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = `bulk_comparison_${$('contestSlug').value||'contest'}.csv`;
-  a.click();
+  const csv = [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  triggerDownload('bulk_comparison.csv', 'text/csv', csv);
+  toast('Exported!', 'success');
 }
+
+// ════════════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════════════
+async function saveToHistory(slug, data) {
+  try {
+    let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    hist.unshift({ slug, count: data.length, timestamp: new Date().toISOString(), preview: data.slice(0,5) });
+    hist = hist.slice(0, 50);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  } catch(e) {}
+}
+
+function loadHistory() {
+  const list = document.getElementById('history-list');
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (!hist.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No history yet</div></div>`;
+      return;
+    }
+    list.innerHTML = hist.map((h, i) => `
+      <div class="history-item" onclick="showHistoryDetail(${i})">
+        <div class="hi-head">🏆 ${h.slug} — ${h.count} entries</div>
+        <div class="hi-meta">${new Date(h.timestamp).toLocaleString()}</div>
+      </div>`).join('');
+  } catch(e) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-text">Error loading history</div></div>`;
+  }
+}
+
+function showHistoryDetail(idx) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const h = hist[idx];
+    const preview = h.preview.map((m, i) => `${i+1}. ${m.hacker} — Score: ${m.score}`).join('\n');
+    alert(`Contest: ${h.slug}\nDate: ${new Date(h.timestamp).toLocaleString()}\nTotal: ${h.count}\n\nTop 5:\n${preview}`);
+  } catch(e) {}
+}
+
+function clearHistory() {
+  if (!confirm('Clear all history?')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  loadHistory();
+  toast('History cleared', 'success');
+}
+
+// ════════════════════════════════════════════
+//  TAB NAVIGATION
+// ════════════════════════════════════════════
+const TAB_TITLES = {
+  leaderboard: '📊 Contest Leaderboard',
+  comparison: '⚖️ Bulk Comparison',
+  history: '📚 History'
+};
+
+document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById('page-title').textContent = TAB_TITLES[tab];
+    if (tab === 'history') loadHistory();
+  });
+});
+
+// ════════════════════════════════════════════
+//  EVENT WIRING
+// ════════════════════════════════════════════
+document.getElementById('sync-btn').addEventListener('click', syncSession);
+document.getElementById('lb-load-btn').addEventListener('click', loadLeaderboard);
+document.getElementById('lb-export-csv').addEventListener('click', () => exportCSV(leaderboardData, 'leaderboard.csv'));
+document.getElementById('lb-export-xl').addEventListener('click', () => exportExcel(leaderboardData, 'leaderboard.xls'));
+document.getElementById('bc-start-btn').addEventListener('click', startBulkComparison);
+document.getElementById('bc-stop-btn').addEventListener('click', stopBulkComparison);
+document.getElementById('bc-export-btn').addEventListener('click', exportBulkCSV);
+document.getElementById('hist-refresh-btn').addEventListener('click', loadHistory);
+document.getElementById('hist-clear-btn').addEventListener('click', clearHistory);
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+loadSession();
 </script>
 </body>
 </html>
