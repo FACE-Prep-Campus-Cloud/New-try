@@ -776,8 +776,8 @@
         <div class="select-wrapper">
           <select id="collegeName" name="collegeName" required>
             <option value="" disabled selected>Select your college</option>
-            <option value="Rathinam College of Arts &amp; Science">Rathinam College of Arts &amp; Science</option>
             <option value="Kamaraj College">Kamaraj College</option>
+            <option value="Rathinam College of Arts &amp; Science">Rathinam College of Arts &amp; Science</option>
             <option value="Kamaraj Women's College">Kamaraj Women's College</option>
             <option value="Sree Saraswathi Thyagaraja College">Sree Saraswathi Thyagaraja College</option>
             <option value="Nagarathinam Angalammal Arts &amp; Science College">Nagarathinam Angalammal Arts &amp; Science College</option>
@@ -798,6 +798,14 @@
             <option value="Asian School of Business">Asian School of Business</option>
             <option value="Alliance University">Alliance University</option>
             <option value="Kristu Jayathi University">Kristu Jayathi University</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="department">Department <span class="req">*</span></label>
+        <div class="select-wrapper">
+          <select id="department" name="department" required disabled>
+            <option value="" disabled selected>First select your college</option>
           </select>
         </div>
       </div>
@@ -877,7 +885,7 @@
       </div>
     </div>
 
-    <!-- MENTORS -->
+    <!-- MENTORS (dynamically populated) -->
     <div id="mentorSections"></div>
 
     <!-- INFRASTRUCTURE NPS -->
@@ -1017,49 +1025,151 @@
   // ─────────────────────────────────────────────
 
   const MENTOR_RUBRICS = ["Concept clarity", "Engagement level", "Practical/industry relevance", "Doubt resolution", "Preparedness"];
-  const MENTOR_COUNT = 5;
 
-  // Build mentor sections dynamically
-  const mentorContainer = document.getElementById("mentorSections");
-  for (let m = 1; m <= MENTOR_COUNT; m++) {
-    const sec = document.createElement("div");
-    sec.className = "section";
-    sec.style.animationDelay = `${0.2 + m * 0.05}s`;
+  // College-Department-Mentor Data Structure
+  const COLLEGE_DATA = {
+    "Kamaraj College": {
+      "I BCA - A": [
+        { subject: "Tamil - II", mentor: "Gowrishankar" },
+        { subject: "English - II", mentor: "Vedha" },
+        { subject: "Effective Communication", mentor: "Vedha" },
+        { subject: "Object Oriented Programming Java", mentor: "Arun Raj" },
+        { subject: "Aptitude", mentor: "Infanta Jasmine Rushmitha" },
+        { subject: "Python for Data Science Analytics", mentor: "Saral" },
+        { subject: "Front End Web Development", mentor: "Aparna" }
+      ],
+      "I BCA - B": [
+        { subject: "Tamil - II", mentor: "Gowrishankar" },
+        { subject: "English - II", mentor: "Vedha" },
+        { subject: "Effective Communication", mentor: "Vedha" },
+        { subject: "Object Oriented Programming Java", mentor: "Arun Raj" },
+        { subject: "Aptitude", mentor: "Infanta Jasmine Rushmitha" },
+        { subject: "Python for Data Science Analytics", mentor: "Saral" },
+        { subject: "Front End Web Development", mentor: "Aparna" }
+      ],
+      "II BCA": [
+        { subject: "Tamil - II", mentor: "Gowrishankar" },
+        { subject: "English - II", mentor: "Venkatesh" },
+        { subject: "Effective Communication", mentor: "Vedha" },
+        { subject: "Java Programming", mentor: "Arun Raj" },
+        { subject: "Full Stack Development (React JS) Skill", mentor: "Aparna" },
+        { subject: "Cloud Computing", mentor: "Saral" },
+        { subject: "Advanced Excel", mentor: "Arun Raj" },
+        { subject: "Multimedia System", mentor: "Saral" },
+        { subject: "EVS", mentor: "Infanta Jasmine Rushmitha" },
+        { subject: "Aptitude", mentor: "Infanta Jasmine Rushmitha" }
+      ],
+      "B.Com Honors": [
+        { subject: "Tamil - II", mentor: "Gowrishankar" },
+        { subject: "English - II", mentor: "Venkatesh" },
+        { subject: "Effective Communication", mentor: "Venkatesh" },
+        { subject: "Financial Accounting - II", mentor: "Bavani Sri" },
+        { subject: "Business Law", mentor: "Jane Rhinu" },
+        { subject: "Business Mathematics and Statistics", mentor: "Bavani Sri" },
+        { subject: "Problem Solving through Aptitude - II", mentor: "Infanta Jasmine Rushmitha" },
+        { subject: "Financial Analysis using Excel", mentor: "Bavani Sri" }
+      ],
+      "BBA Digital Marketing": [
+        { subject: "Tamil - II", mentor: "Gowrishankar" },
+        { subject: "English - II", mentor: "Venkatesh" },
+        { subject: "Effective Communication", mentor: "Venkatesh" },
+        { subject: "Organizational Behaviour", mentor: "Jane Rhinu" },
+        { subject: "Cost & Management Accounting", mentor: "Bavani Sri" },
+        { subject: "Introduction to Digital Marketing", mentor: "Jane Rhinu" },
+        { subject: "Social Media Marketing", mentor: "Jane Rhinu" },
+        { subject: "Monetary Marketing", mentor: "Jane Rhinu" },
+        { subject: "Aptitude", mentor: "Infanta Jasmine Rushmitha" }
+      ]
+    }
+    // Add more colleges here following the same structure
+  };
 
-    let html = `
-      <div class="section-title">
-        <div class="icon icon-purple">🧑‍🏫</div>
-        Mentor ${m} — Subject Handling
-      </div>
-      <div class="mentor-name-input field">
-        <label>Mentor ${m} Name <span class="req">*</span></label>
-        <input type="text" name="mentor${m}Name" placeholder="Enter mentor's name" required>
-      </div>
-      <p class="section-subtitle">Rate on a scale of 1 (Poor) to 5 (Excellent)</p>
-      <div class="mentor-grid">
-        <table class="mentor-table">
-          <thead>
-            <tr>
-              <th>Criteria</th>
-              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
-            </tr>
-          </thead>
-          <tbody>`;
+  // Populate departments when college is selected
+  document.getElementById('collegeName').addEventListener('change', function() {
+    const college = this.value;
+    const deptSelect = document.getElementById('department');
+    const mentorContainer = document.getElementById('mentorSections');
+    
+    // Clear existing departments and mentors
+    deptSelect.innerHTML = '<option value="" disabled selected>Select your department</option>';
+    mentorContainer.innerHTML = '';
+    
+    if (COLLEGE_DATA[college]) {
+      // Enable department dropdown
+      deptSelect.disabled = false;
+      
+      // Populate departments
+      const departments = Object.keys(COLLEGE_DATA[college]);
+      departments.forEach(dept => {
+        const option = document.createElement('option');
+        option.value = dept;
+        option.textContent = dept;
+        deptSelect.appendChild(option);
+      });
+    } else {
+      deptSelect.disabled = true;
+      deptSelect.innerHTML = '<option value="" disabled selected>No departments available for this college</option>';
+    }
+    
+    updateProgress();
+  });
 
-    MENTOR_RUBRICS.forEach((rub, ri) => {
-      const safeRub = rub.replace(/\s+/g, '').replace(/[^a-zA-Z]/g,'');
-      html += `<tr><td>${rub}</td>`;
-      for (let v = 1; v <= 5; v++) {
-        const id = `m${m}r${ri}v${v}`;
-        html += `<td><input type="radio" id="${id}" name="mentor${m}_${safeRub}" value="${v}" required><label for="${id}" class="r-label">${v}</label></td>`;
-      }
-      html += `</tr>`;
-    });
+  // Populate mentors when department is selected
+  document.getElementById('department').addEventListener('change', function() {
+    const college = document.getElementById('collegeName').value;
+    const department = this.value;
+    const mentorContainer = document.getElementById('mentorSections');
+    
+    // Clear existing mentors
+    mentorContainer.innerHTML = '';
+    
+    if (COLLEGE_DATA[college] && COLLEGE_DATA[college][department]) {
+      const mentors = COLLEGE_DATA[college][department];
+      
+      mentors.forEach((mentorData, index) => {
+        const sec = document.createElement("div");
+        sec.className = "section";
+        sec.style.animationDelay = `${0.2 + index * 0.05}s`;
 
-    html += `</tbody></table></div>`;
-    sec.innerHTML = html;
-    mentorContainer.appendChild(sec);
-  }
+        let html = `
+          <div class="section-title">
+            <div class="icon icon-purple">🧑‍🏫</div>
+            Subject ${index + 1} — ${mentorData.subject}
+          </div>
+          <div class="mentor-name-input field">
+            <label>Mentor Name</label>
+            <input type="text" name="mentor${index + 1}Name" value="${mentorData.mentor}" readonly style="background: var(--surface2); cursor: not-allowed;">
+          </div>
+          <input type="hidden" name="subject${index + 1}Name" value="${mentorData.subject}">
+          <p class="section-subtitle">Rate on a scale of 1 (Poor) to 5 (Excellent)</p>
+          <div class="mentor-grid">
+            <table class="mentor-table">
+              <thead>
+                <tr>
+                  <th>Criteria</th>
+                  <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+        MENTOR_RUBRICS.forEach((rub, ri) => {
+          const safeRub = rub.replace(/\s+/g, '').replace(/[^a-zA-Z]/g,'');
+          html += `<tr><td>${rub}</td>`;
+          for (let v = 1; v <= 5; v++) {
+            const id = `m${index + 1}r${ri}v${v}`;
+            html += `<td><input type="radio" id="${id}" name="mentor${index + 1}_${safeRub}" value="${v}" required><label for="${id}" class="r-label">${v}</label></td>`;
+          }
+          html += `</tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+        sec.innerHTML = html;
+        mentorContainer.appendChild(sec);
+      });
+    }
+    
+    updateProgress();
+  });
 
   // Show/hide missing materials field
   document.querySelectorAll('[name="studyMaterials"]').forEach(r => {
@@ -1119,6 +1229,7 @@
       registerNumber: fd.get('regNumber'),
       studentEmail: fd.get('studentEmail'),
       collegeName: fd.get('collegeName'),
+      department: fd.get('department'),
       regularAssessments: fd.get('assessments'),
       studyMaterialsReceived: fd.get('studyMaterials'),
       missingStudyMaterials: fd.get('missingMaterials') || '',
@@ -1132,12 +1243,20 @@
       suggestions: fd.get('suggestions'),
     };
 
-    // Mentor data
-    for (let m = 1; m <= MENTOR_COUNT; m++) {
-      data[`mentor${m}Name`] = fd.get(`mentor${m}Name`) || '';
-      MENTOR_RUBRICS.forEach(rub => {
-        const key = rub.replace(/\s+/g, '').replace(/[^a-zA-Z]/g,'');
-        data[`mentor${m}_${key}`] = fd.get(`mentor${m}_${key}`) || '';
+    // Collect mentor and subject data dynamically
+    const college = fd.get('collegeName');
+    const department = fd.get('department');
+    if (COLLEGE_DATA[college] && COLLEGE_DATA[college][department]) {
+      const mentors = COLLEGE_DATA[college][department];
+      mentors.forEach((mentorData, index) => {
+        const mentorNum = index + 1;
+        data[`subject${mentorNum}`] = mentorData.subject;
+        data[`mentor${mentorNum}Name`] = mentorData.mentor;
+        
+        MENTOR_RUBRICS.forEach(rub => {
+          const key = rub.replace(/\s+/g, '').replace(/[^a-zA-Z]/g,'');
+          data[`mentor${mentorNum}_${key}`] = fd.get(`mentor${mentorNum}_${key}`) || '';
+        });
       });
     }
 
@@ -1159,6 +1278,9 @@
       });
       showToast('Feedback submitted successfully! Thank you 🎉');
       this.reset();
+      document.getElementById('department').disabled = true;
+      document.getElementById('department').innerHTML = '<option value="" disabled selected>First select your college</option>';
+      document.getElementById('mentorSections').innerHTML = '';
       updateProgress();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -1172,3 +1294,4 @@
 </script>
 </body>
 </html>
+              
