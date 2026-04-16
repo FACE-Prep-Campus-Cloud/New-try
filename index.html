@@ -34,7 +34,6 @@
     min-height: 100vh;
   }
 
-  /* BG texture */
   body::before {
     content: '';
     position: fixed;
@@ -55,12 +54,9 @@
   }
 
   @media (max-width: 640px) {
-    .wrap {
-      padding: 40px 16px 80px;
-    }
+    .wrap { padding: 40px 16px 80px; }
   }
 
-  /* HEADER */
   .header {
     text-align: center;
     margin-bottom: 56px;
@@ -68,9 +64,7 @@
   }
 
   @media (max-width: 640px) {
-    .header {
-      margin-bottom: 40px;
-    }
+    .header { margin-bottom: 40px; }
   }
 
   .logo-badge {
@@ -90,10 +84,7 @@
   }
 
   @media (max-width: 640px) {
-    .logo-badge {
-      font-size: 12px;
-      padding: 6px 16px 6px 10px;
-    }
+    .logo-badge { font-size: 12px; padding: 6px 16px 6px 10px; }
   }
 
   .logo-badge .dot {
@@ -131,12 +122,9 @@
   }
 
   @media (max-width: 640px) {
-    .subtitle {
-      font-size: 14px;
-    }
+    .subtitle { font-size: 14px; }
   }
 
-  /* PROGRESS */
   .progress-bar-outer {
     background: var(--surface2);
     border-radius: 100px;
@@ -148,9 +136,7 @@
   }
 
   @media (max-width: 640px) {
-    .progress-bar-outer {
-      margin-bottom: 32px;
-    }
+    .progress-bar-outer { margin-bottom: 32px; }
   }
 
   .progress-bar-inner {
@@ -170,7 +156,6 @@
     animation: fadeUp .7s .1s ease both;
   }
 
-  /* SECTIONS */
   .section {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -183,10 +168,7 @@
   }
 
   @media (max-width: 640px) {
-    .section {
-      padding: 24px 20px;
-      margin-bottom: 16px;
-    }
+    .section { padding: 24px 20px; margin-bottom: 16px; }
   }
 
   .section:nth-child(1) { animation-delay: .1s; }
@@ -216,10 +198,7 @@
   }
 
   @media (max-width: 640px) {
-    .section-title {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
+    .section-title { font-size: 16px; margin-bottom: 20px; }
   }
 
   .section-title .icon {
@@ -235,7 +214,6 @@
   .icon-gold { background: rgba(245,158,11,.1); color: var(--gold); }
   .icon-green { background: rgba(16,185,129,.1); color: var(--success); }
 
-  /* FIELDS */
   .field { margin-bottom: 20px; }
   .field:last-child { margin-bottom: 0; }
 
@@ -265,6 +243,8 @@
     padding: 12px 16px;
     outline: none;
     transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+    -webkit-appearance: none;
   }
 
   @media (max-width: 640px) {
@@ -272,14 +252,15 @@
     input[type="email"],
     textarea,
     select {
-      font-size: 16px; /* Prevents zoom on iOS */
+      font-size: 16px;
       padding: 10px 14px;
     }
   }
 
   input[type="text"]:focus,
   input[type="email"]:focus,
-  textarea:focus {
+  textarea:focus,
+  select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(59,130,246,.1);
   }
@@ -288,10 +269,37 @@
 
   textarea { min-height: 100px; resize: vertical; }
 
+  /* Custom select wrapper for dropdown arrow */
+  .select-wrapper {
+    position: relative;
+  }
+
+  .select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--muted);
+    pointer-events: none;
+  }
+
+  .select-wrapper select {
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .select-wrapper select option[value=""] {
+    color: #94a3b8;
+  }
+
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media(max-width: 560px) { .field-row { grid-template-columns: 1fr; gap: 12px; } }
 
-  /* RADIO GROUPS */
   .radio-group {
     display: flex;
     gap: 12px;
@@ -316,10 +324,7 @@
   }
 
   @media (max-width: 640px) {
-    .radio-group label {
-      padding: 9px 18px;
-      font-size: 13px;
-    }
+    .radio-group label { padding: 9px 18px; font-size: 13px; }
   }
 
   .radio-group input[type="radio"]:checked + label {
@@ -335,7 +340,6 @@
     background: rgba(59,130,246,.05);
   }
 
-  /* STAR SCALE */
   .scale-wrap {
     display: flex;
     flex-direction: column;
@@ -358,9 +362,7 @@
   }
 
   @media (max-width: 640px) {
-    .scale-row {
-      gap: 6px;
-    }
+    .scale-row { gap: 6px; }
   }
 
   .scale-row input[type="radio"] { display: none; }
@@ -383,11 +385,7 @@
   }
 
   @media (max-width: 640px) {
-    .scale-row label {
-      width: 40px;
-      height: 40px;
-      font-size: 14px;
-    }
+    .scale-row label { width: 40px; height: 40px; font-size: 14px; }
   }
 
   .scale-row input[type="radio"]:checked + label {
@@ -402,7 +400,6 @@
     color: var(--text);
   }
 
-  /* NPS SCALE */
   .nps-row {
     display: flex;
     gap: 6px;
@@ -410,9 +407,7 @@
   }
 
   @media (max-width: 640px) {
-    .nps-row {
-      gap: 5px;
-    }
+    .nps-row { gap: 5px; }
   }
 
   .nps-row input[type="radio"] { display: none; }
@@ -434,11 +429,7 @@
   }
 
   @media (max-width: 640px) {
-    .nps-row label {
-      width: 46px;
-      height: 46px;
-      font-size: 15px;
-    }
+    .nps-row label { width: 46px; height: 46px; font-size: 15px; }
   }
 
   .nps-row input[type="radio"]:checked + label {
@@ -453,7 +444,6 @@
     color: var(--text);
   }
 
-  /* MENTOR TABLE */
   .mentor-grid {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -478,9 +468,7 @@
 
   .mentor-table thead th:first-child { text-align: left; }
 
-  .mentor-table tbody tr {
-    background: var(--surface2);
-  }
+  .mentor-table tbody tr { background: var(--surface2); }
 
   .mentor-table tbody td {
     padding: 10px 8px;
@@ -489,10 +477,7 @@
   }
 
   @media (max-width: 640px) {
-    .mentor-table tbody td {
-      padding: 8px 6px;
-      font-size: 13px;
-    }
+    .mentor-table tbody td { padding: 8px 6px; font-size: 13px; }
   }
 
   .mentor-table tbody td:first-child {
@@ -504,10 +489,7 @@
   }
 
   @media (max-width: 640px) {
-    .mentor-table tbody td:first-child {
-      padding-left: 10px;
-      font-size: 12px;
-    }
+    .mentor-table tbody td:first-child { padding-left: 10px; font-size: 12px; }
   }
 
   .mentor-table tbody td:last-child {
@@ -531,11 +513,7 @@
   }
 
   @media (max-width: 640px) {
-    .mentor-table .r-label {
-      width: 32px;
-      height: 32px;
-      font-size: 12px;
-    }
+    .mentor-table .r-label { width: 32px; height: 32px; font-size: 12px; }
   }
 
   .mentor-table input[type="radio"]:checked + .r-label {
@@ -549,11 +527,8 @@
     color: var(--text);
   }
 
-  .mentor-name-input {
-    margin-bottom: 14px;
-  }
+  .mentor-name-input { margin-bottom: 14px; }
 
-  /* CHALLENGES */
   .checkbox-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -579,10 +554,7 @@
   }
 
   @media (max-width: 640px) {
-    .checkbox-grid label {
-      padding: 10px 14px;
-      font-size: 13px;
-    }
+    .checkbox-grid label { padding: 10px 14px; font-size: 13px; }
   }
 
   .checkbox-grid input[type="checkbox"]:checked + label {
@@ -608,7 +580,6 @@
     background-size: contain;
   }
 
-  /* SUBMIT */
   .submit-area {
     text-align: center;
     margin-top: 40px;
@@ -667,7 +638,6 @@
     flex-wrap: wrap;
   }
 
-  /* TOAST */
   #toast {
     position: fixed;
     bottom: 32px; left: 50%;
@@ -707,7 +677,6 @@
   #toast.success { border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.05); }
   #toast.error { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.05); }
 
-  /* DIVIDER */
   .divider {
     height: 1px;
     background: var(--border);
@@ -715,9 +684,7 @@
   }
 
   @media (max-width: 640px) {
-    .divider {
-      margin: 20px 0;
-    }
+    .divider { margin: 20px 0; }
   }
 
   .section-subtitle {
@@ -742,10 +709,7 @@
   }
 
   @media (max-width: 640px) {
-    .setup-notice {
-      padding: 12px 14px;
-      font-size: 12px;
-    }
+    .setup-notice { padding: 12px 14px; font-size: 12px; }
   }
 
   .setup-notice code {
@@ -755,7 +719,6 @@
     font-size: 12px;
     font-family: monospace;
   }
-
 </style>
 </head>
 <body>
@@ -807,6 +770,36 @@
       <div class="field">
         <label for="studentEmail">Student Email ID <span class="req">*</span></label>
         <input type="email" id="studentEmail" name="studentEmail" placeholder="yourname@college.edu" required>
+      </div>
+      <div class="field">
+        <label for="collegeName">College Name <span class="req">*</span></label>
+        <div class="select-wrapper">
+          <select id="collegeName" name="collegeName" required>
+            <option value="" disabled selected>Select your college</option>
+            <option value="Rathinam College of Arts &amp; Science">Rathinam College of Arts &amp; Science</option>
+            <option value="Kamaraj College">Kamaraj College</option>
+            <option value="Kamaraj Women's College">Kamaraj Women's College</option>
+            <option value="Sree Saraswathi Thyagaraja College">Sree Saraswathi Thyagaraja College</option>
+            <option value="Nagarathinam Angalammal Arts &amp; Science College">Nagarathinam Angalammal Arts &amp; Science College</option>
+            <option value="Sri Amaraavathi College of Arts &amp; Science">Sri Amaraavathi College of Arts &amp; Science</option>
+            <option value="Bharathidasan College of Arts &amp; Science">Bharathidasan College of Arts &amp; Science</option>
+            <option value="SDNB Vaishnav College for Women">SDNB Vaishnav College for Women</option>
+            <option value="TERF's College of Arts and Science">TERF's College of Arts and Science</option>
+            <option value="TJS College of Arts and Science">TJS College of Arts and Science</option>
+            <option value="Vinayaga Mission's Research Foundation School of Arts &amp; Science">Vinayaga Mission's Research Foundation School of Arts &amp; Science</option>
+            <option value="Patrician College of Arts &amp; Science">Patrician College of Arts &amp; Science</option>
+            <option value="Takshashila University">Takshashila University</option>
+            <option value="AMET University">AMET University</option>
+            <option value="Joy University">Joy University</option>
+            <option value="Noorul Islam Centre for Higher Education (NICHE)">Noorul Islam Centre for Higher Education (NICHE)</option>
+            <option value="Study World Group of Institution">Study World Group of Institution</option>
+            <option value="Sasurie College of Arts and Science">Sasurie College of Arts and Science</option>
+            <option value="S-VYASA University">S-VYASA University</option>
+            <option value="Asian School of Business">Asian School of Business</option>
+            <option value="Alliance University">Alliance University</option>
+            <option value="Kristu Jayathi University">Kristu Jayathi University</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -1078,29 +1071,16 @@
 
   // Progress tracking
   function updateProgress() {
-    const required = document.querySelectorAll('[required]');
-    let filled = 0;
-    const seen = new Set();
-    required.forEach(el => {
-      if (el.type === 'radio' || el.type === 'checkbox') {
-        const name = el.name;
-        if (seen.has(name)) return;
-        seen.add(name);
-        if (document.querySelector(`[name="${name}"]:checked`)) filled++;
-      } else {
-        if (el.value.trim()) filled++;
-      }
-    });
-    const total = seen.size + document.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"])').length
-      + document.querySelectorAll('textarea[required], input[type="text"][required], input[type="email"][required]').length;
-
-    // simpler count
     let reqCount = 0, doneCount = 0;
     const groups = new Set();
     document.querySelectorAll('[required]').forEach(el => {
       if (el.type === 'radio') { groups.add(el.name); return; }
       reqCount++;
-      if (el.value.trim()) doneCount++;
+      if (el.tagName === 'SELECT') {
+        if (el.value && el.value !== '') doneCount++;
+      } else {
+        if (el.value.trim()) doneCount++;
+      }
     });
     groups.forEach(name => {
       reqCount++;
@@ -1138,6 +1118,7 @@
       studentName: fd.get('studentName'),
       registerNumber: fd.get('regNumber'),
       studentEmail: fd.get('studentEmail'),
+      collegeName: fd.get('collegeName'),
       regularAssessments: fd.get('assessments'),
       studyMaterialsReceived: fd.get('studyMaterials'),
       missingStudyMaterials: fd.get('missingMaterials') || '',
