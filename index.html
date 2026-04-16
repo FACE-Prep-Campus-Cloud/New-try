@@ -3,1136 +3,1191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HackerRank Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>FACE Prep Campus — Monthly Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --bg2: #111118;
-    --bg3: #1a1a24;
-    --border: #2a2a3a;
-    --border2: #3a3a50;
-    --text: #e8e8f0;
-    --text2: #9090b0;
-    --text3: #5a5a7a;
-    --accent: #00e5a0;
-    --accent2: #00b87a;
-    --accent-dim: rgba(0,229,160,0.1);
-    --accent-dim2: rgba(0,229,160,0.05);
-    --danger: #ff4466;
-    --danger-dim: rgba(255,68,102,0.12);
-    --warn: #ffaa00;
-    --warn-dim: rgba(255,170,0,0.1);
-    --solved: #00e5a0;
-    --solved-bg: rgba(0,229,160,0.1);
-    --attempted: #ffaa00;
-    --attempted-bg: rgba(255,170,0,0.1);
-    --na-bg: rgba(255,255,255,0.03);
-    --radius: 10px;
-    --radius2: 6px;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #e2e8f0;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --gold: #f59e0b;
+    --text: #1e293b;
+    --muted: #64748b;
+    --error: #ef4444;
+    --success: #10b981;
+    --radius: 14px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { scroll-behavior: smooth; }
+
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Syne', sans-serif;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
     min-height: 100vh;
-    display: flex;
-    overflow: hidden;
   }
 
-  /* ─── SIDEBAR ─── */
-  .sidebar {
-    width: 220px;
-    min-width: 220px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  /* BG texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(59,130,246,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(139,92,246,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
   }
 
-  .sidebar-logo {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid var(--border);
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 20px 100px;
   }
+
+  @media (max-width: 640px) {
+    .wrap {
+      padding: 40px 16px 80px;
+    }
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeUp .7s ease both;
+  }
+
+  @media (max-width: 640px) {
+    .header {
+      margin-bottom: 40px;
+    }
+  }
+
   .logo-badge {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-  }
-  .logo-mark {
-    width: 36px; height: 36px;
-    background: var(--accent);
-    color: #000;
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 20px 8px 12px;
     font-size: 13px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 28px;
+    letter-spacing: .03em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
-  .logo-text { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
-  .logo-sub { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
 
-  .sidebar-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  @media (max-width: 640px) {
+    .logo-badge {
+      font-size: 12px;
+      padding: 6px 16px 6px 10px;
+    }
+  }
 
-  .nav-btn {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius2);
-    border: none;
-    background: transparent;
-    color: var(--text2);
+  .logo-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  h1 {
     font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: left;
-    width: 100%;
-  }
-  .nav-btn:hover { background: var(--bg3); color: var(--text); }
-  .nav-btn.active { background: var(--accent-dim); color: var(--accent); }
-  .nav-icon { font-size: 15px; width: 20px; text-align: center; }
-
-  .sidebar-bottom {
-    padding: 16px 12px;
-    border-top: 1px solid var(--border);
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .session-status {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px;
-    border-radius: var(--radius2);
-    background: var(--bg3);
-    font-size: 11px;
-    font-family: 'Space Mono', monospace;
-    color: var(--text3);
-  }
-  .session-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--text3);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .session-dot.connected { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  .session-dot.error { background: var(--danger); }
-
-  .sync-btn {
-    width: 100%;
-    padding: 9px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--text2);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: var(--radius2);
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .sync-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim2); }
-
-  /* ─── MAIN ─── */
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .topbar {
-    padding: 0 28px;
-    height: 60px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-    flex-shrink: 0;
-  }
-  .page-title { font-size: 18px; font-weight: 800; color: var(--text); }
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
-
-  /* ─── CONTENT ─── */
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px 28px;
-  }
-  .content::-webkit-scrollbar { width: 6px; }
-  .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  /* ─── TAB PANELS ─── */
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ─── CARDS ─── */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-  .card-head {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .card-title {
-    font-size: 13px; font-weight: 700; color: var(--text);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .card-title .ct-icon { font-size: 15px; }
-  .card-body { padding: 18px; }
-
-  /* ─── GRID ─── */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  @media(max-width:900px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
-
-  /* ─── FORM ─── */
-  .form-group { margin-bottom: 14px; }
-  .form-label {
-    display: block; margin-bottom: 6px;
-    font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--text3); font-family: 'Space Mono', monospace;
-  }
-  .form-input, .form-textarea, .form-select {
-    width: 100%;
-    padding: 9px 12px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius2);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .form-input:focus, .form-textarea:focus, .form-select:focus {
-    border-color: var(--accent);
-  }
-  .form-textarea { resize: vertical; min-height: 110px; }
-  .form-select { cursor: pointer; }
-
-  /* ─── BUTTONS ─── */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 16px;
-    border-radius: var(--radius2);
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-size: 12px; font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-primary:hover:not(:disabled) { background: var(--accent2); }
-  .btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
-  .btn-secondary:hover:not(:disabled) { border-color: var(--border2); color: var(--text); }
-  .btn-danger { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,68,102,0.25); }
-  .btn-danger:hover:not(:disabled) { background: rgba(255,68,102,0.2); }
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-
-  /* ─── PROGRESS ─── */
-  .progress-track {
-    height: 6px; border-radius: 3px;
-    background: var(--bg3);
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), #00b8ff);
-    border-radius: 3px;
-    width: 0%;
-    transition: width 0.3s;
-  }
-  .progress-meta {
-    display: flex; justify-content: space-between;
-    font-size: 11px; font-family: 'Space Mono', monospace; color: var(--text3);
-  }
-
-  /* ─── STAT CHIPS ─── */
-  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-  .stat-chip {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius2);
-    padding: 10px 16px;
-    text-align: center;
-    min-width: 90px;
-  }
-  .stat-chip .sv { font-size: 20px; font-weight: 800; color: var(--accent); font-family: 'Space Mono', monospace; }
-  .stat-chip .sl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; font-family: 'Space Mono', monospace; }
-
-  /* ─── TABLE ─── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  thead tr { border-bottom: 2px solid var(--border); }
-  thead th {
-    padding: 10px 12px;
-    text-align: left;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text3);
-    font-family: 'Space Mono', monospace;
-    white-space: nowrap;
-  }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  tbody tr:hover { background: var(--bg3); }
-  tbody td { padding: 10px 12px; color: var(--text2); font-family: 'Space Mono', monospace; }
-  tbody td:first-child { color: var(--text); font-weight: 700; }
-
-  /* rank badge */
-  .rank-badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px; border-radius: 6px;
-    background: var(--bg3);
-    font-size: 11px; font-weight: 700; color: var(--text2);
-  }
-  .rank-badge.gold { background: rgba(255,215,0,0.15); color: #ffd700; }
-  .rank-badge.silver { background: rgba(192,192,192,0.15); color: #c0c0c0; }
-  .rank-badge.bronze { background: rgba(205,127,50,0.15); color: #cd7f32; }
-
-  /* ─── MATRIX TABLE ─── */
-  .matrix-wrap { overflow: auto; max-height: 520px; }
-  .matrix-table { font-size: 11px; }
-  .matrix-table thead th { position: sticky; top: 0; background: var(--bg2); z-index: 2; }
-  .matrix-table .user-col { position: sticky; left: 0; background: var(--bg2); z-index: 1; min-width: 130px; }
-  .matrix-table td { padding: 7px 10px; white-space: nowrap; }
-  .cell-solved { color: var(--solved); background: var(--solved-bg); font-weight: 700; }
-  .cell-attempted { color: var(--attempted); background: var(--attempted-bg); }
-  .cell-na { color: var(--text3); background: var(--na-bg); }
-
-  /* ─── LEGEND ─── */
-  .legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
-
-  /* ─── PAGINATION ─── */
-  .pagination { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .page-info { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; flex: 1; }
-
-  /* ─── HISTORY ─── */
-  .history-list { display: flex; flex-direction: column; gap: 8px; }
-  .history-item {
-    padding: 12px 14px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius2);
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-  .history-item:hover { border-color: var(--accent); }
-  .hi-head { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .hi-meta { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
-
-  /* ─── EMPTY STATE ─── */
-  .empty-state {
-    text-align: center; padding: 48px 24px;
-    color: var(--text3);
-  }
-  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
-  .empty-text { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-  .empty-sub { font-size: 12px; font-family: 'Space Mono', monospace; }
-
-  /* ─── TOAST ─── */
-  #toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--bg2); border: 1px solid var(--border);
-    color: var(--text); padding: 12px 18px;
-    border-radius: var(--radius); font-size: 13px;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 9999;
-    max-width: 320px;
-    font-family: 'Space Mono', monospace;
-  }
-  #toast.show { opacity: 1; }
-  #toast.success { border-color: var(--accent); color: var(--accent); }
-  #toast.error { border-color: var(--danger); color: var(--danger); }
-
-  /* ─── NOTICE BOX ─── */
-  .notice {
-    padding: 12px 16px;
-    border-radius: var(--radius2);
-    font-size: 12px;
-    font-family: 'Space Mono', monospace;
-    line-height: 1.6;
+    font-size: clamp(1.75rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #1e293b 30%, #3b82f6 70%, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 14px;
   }
-  .notice.warn { background: var(--warn-dim); border: 1px solid rgba(255,170,0,0.2); color: var(--warn); }
-  .notice.info { background: var(--accent-dim2); border: 1px solid rgba(0,229,160,0.15); color: var(--accent); }
 
-  /* ─── COMPARISON DETAILS ─── */
-  .comparison-detail { }
-  .cd-header { margin-bottom: 14px; }
-  .cd-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
-  .cd-meta { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
-  .hacker-row {
-    display: flex; gap: 12px; align-items: stretch; margin-bottom: 18px;
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 520px;
+    margin: 0 auto;
+    font-weight: 300;
+    line-height: 1.7;
   }
-  .hacker-card-d {
-    flex: 1; background: var(--bg3); border: 1px solid var(--border);
-    border-radius: var(--radius2); padding: 14px;
+
+  @media (max-width: 640px) {
+    .subtitle {
+      font-size: 14px;
+    }
   }
-  .hacker-card-d .hname { font-size: 15px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
-  .hacker-card-d .hrank { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--text3); }
-  .vs-sep {
+
+  /* PROGRESS */
+  .progress-bar-outer {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 4px;
+    margin-bottom: 48px;
+    overflow: hidden;
+    animation: fadeUp .7s .1s ease both;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  @media (max-width: 640px) {
+    .progress-bar-outer {
+      margin-bottom: 32px;
+    }
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width .4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    animation: fadeUp .7s .1s ease both;
+  }
+
+  /* SECTIONS */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp .5s ease both;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  @media (max-width: 640px) {
+    .section {
+      padding: 24px 20px;
+      margin-bottom: 16px;
+    }
+  }
+
+  .section:nth-child(1) { animation-delay: .1s; }
+  .section:nth-child(2) { animation-delay: .15s; }
+  .section:nth-child(3) { animation-delay: .2s; }
+  .section:nth-child(4) { animation-delay: .25s; }
+  .section:nth-child(5) { animation-delay: .3s; }
+  .section:nth-child(6) { animation-delay: .35s; }
+  .section:nth-child(7) { animation-delay: .4s; }
+  .section:nth-child(8) { animation-delay: .45s; }
+  .section:nth-child(9) { animation-delay: .5s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .section-title {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+  }
+
+  .section-title .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 13px; color: var(--text3);
-    padding: 0 4px;
+    font-size: 15px;
+    flex-shrink: 0;
   }
 
-  /* ─── SCROLLBAR STYLE ─── */
-  * { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+  .icon-blue { background: rgba(59,130,246,.1); color: var(--accent); }
+  .icon-purple { background: rgba(139,92,246,.1); color: var(--accent2); }
+  .icon-gold { background: rgba(245,158,11,.1); color: var(--gold); }
+  .icon-green { background: rgba(16,185,129,.1); color: var(--success); }
 
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: 'Space Mono', monospace; font-weight: 700; }
-  .tag-green { background: var(--solved-bg); color: var(--solved); }
-  .tag-yellow { background: var(--attempted-bg); color: var(--attempted); }
-  .tag-gray { background: var(--na-bg); color: var(--text3); }
+  /* FIELDS */
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  label .req { color: var(--accent); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="email"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  @media (max-width: 640px) {
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+      font-size: 16px; /* Prevents zoom on iOS */
+      padding: 10px 14px;
+    }
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+  }
+
+  input::placeholder, textarea::placeholder { color: #94a3b8; }
+
+  textarea { min-height: 100px; resize: vertical; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 560px) { .field-row { grid-template-columns: 1fr; gap: 12px; } }
+
+  /* RADIO GROUPS */
+  .radio-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .radio-group input[type="radio"] { display: none; }
+
+  .radio-group label {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all .2s;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .radio-group label {
+      padding: 9px 18px;
+      font-size: 13px;
+    }
+  }
+
+  .radio-group input[type="radio"]:checked + label {
+    background: rgba(59,130,246,.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.05);
+  }
+
+  .radio-group label:hover {
+    border-color: var(--accent);
+    background: rgba(59,130,246,.05);
+  }
+
+  /* STAR SCALE */
+  .scale-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .scale-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    .scale-row {
+      gap: 6px;
+    }
+  }
+
+  .scale-row input[type="radio"] { display: none; }
+
+  .scale-row label {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .scale-row label {
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+    }
+  }
+
+  .scale-row input[type="radio"]:checked + label {
+    background: rgba(59,130,246,.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.08);
+  }
+
+  .scale-row label:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* NPS SCALE */
+  .nps-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .nps-row {
+      gap: 5px;
+    }
+  }
+
+  .nps-row input[type="radio"] { display: none; }
+
+  .nps-row label {
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    text-transform: none; letter-spacing: 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .nps-row label {
+      width: 46px;
+      height: 46px;
+      font-size: 15px;
+    }
+  }
+
+  .nps-row input[type="radio"]:checked + label {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(59,130,246,.25);
+  }
+
+  .nps-row label:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* MENTOR TABLE */
+  .mentor-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mentor-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    min-width: 420px;
+  }
+
+  .mentor-table thead th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 0 8px 8px;
+    text-align: center;
+  }
+
+  .mentor-table thead th:first-child { text-align: left; }
+
+  .mentor-table tbody tr {
+    background: var(--surface2);
+  }
+
+  .mentor-table tbody td {
+    padding: 10px 8px;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  @media (max-width: 640px) {
+    .mentor-table tbody td {
+      padding: 8px 6px;
+      font-size: 13px;
+    }
+  }
+
+  .mentor-table tbody td:first-child {
+    padding-left: 14px;
+    border-radius: 8px 0 0 8px;
+    font-weight: 400;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .mentor-table tbody td:first-child {
+      padding-left: 10px;
+      font-size: 12px;
+    }
+  }
+
+  .mentor-table tbody td:last-child {
+    border-radius: 0 8px 8px 0;
+    padding-right: 14px;
+  }
+
+  .mentor-table input[type="radio"] { display: none; }
+
+  .mentor-table .r-label {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 13px; font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    margin: 0 auto;
+    transition: all .15s;
+  }
+
+  @media (max-width: 640px) {
+    .mentor-table .r-label {
+      width: 32px;
+      height: 32px;
+      font-size: 12px;
+    }
+  }
+
+  .mentor-table input[type="radio"]:checked + .r-label {
+    background: rgba(59,130,246,.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .mentor-table .r-label:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .mentor-name-input {
+    margin-bottom: 14px;
+  }
+
+  /* CHALLENGES */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media(max-width: 500px) { .checkbox-grid { grid-template-columns: 1fr; } }
+
+  .checkbox-grid input[type="checkbox"] { display: none; }
+
+  .checkbox-grid label {
+    display: flex; align-items: center; gap: 10px;
+    text-transform: none; letter-spacing: 0;
+    font-size: 14px; font-weight: 400;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all .2s;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .checkbox-grid label {
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+  }
+
+  .checkbox-grid input[type="checkbox"]:checked + label {
+    background: rgba(59,130,246,.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .checkbox-grid label::before {
+    content: '';
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: all .2s;
+    background: var(--surface2);
+  }
+
+  .checkbox-grid input[type="checkbox"]:checked + label::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M6.5 11.5L3 8l1-1 2.5 2.5 5.5-5.5 1 1z'/%3E%3C/svg%3E");
+    background-size: contain;
+  }
+
+  /* SUBMIT */
+  .submit-area {
+    text-align: center;
+    margin-top: 40px;
+    animation: fadeUp .5s .6s ease both;
+    opacity: 0;
+  }
+
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 44px;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 4px 14px rgba(59,130,246,.25);
+  }
+
+  @media (max-width: 640px) {
+    .btn-submit {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 32px;
+      font-size: 15px;
+    }
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59,130,246,.3);
+  }
+
+  .btn-submit:active { transform: translateY(0); }
+
+  .btn-submit:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .note {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 14px;
+    color: var(--text);
+    box-shadow: 0 10px 40px rgba(0,0,0,.15);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    max-width: calc(100vw - 32px);
+  }
+
+  @media (max-width: 640px) {
+    #toast {
+      bottom: 20px;
+      padding: 12px 20px;
+      font-size: 13px;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  #toast.success { border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.05); }
+  #toast.error { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.05); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  @media (max-width: 640px) {
+    .divider {
+      margin: 20px 0;
+    }
+  }
+
+  .section-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    margin-top: -14px;
+  }
+
+  .setup-notice {
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #b45309;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .setup-notice {
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+  }
+
+  .setup-notice code {
+    background: rgba(245,158,11,.15);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+  }
+
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- ════ SIDEBAR ════ -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
+  <div class="header">
     <div class="logo-badge">
-      <div class="logo-mark">HR</div>
-      <div>
-        <div class="logo-text">HackerRank</div>
-        <div class="logo-sub">Dashboard v1</div>
-      </div>
+      <div class="dot"></div>
+      Monthly Feedback — FACE Prep Campus
     </div>
+    <h1>Share Your Campus Experience</h1>
+    <p class="subtitle">Your responses are confidential and will be used solely to enhance training quality, support, and campus experience.</p>
   </div>
-  <nav class="sidebar-nav">
-    <button class="nav-btn active" data-tab="leaderboard">
-      <span class="nav-icon">📊</span> Leaderboard
-    </button>
-    <button class="nav-btn" data-tab="comparison">
-      <span class="nav-icon">⚖️</span> Bulk Compare
-    </button>
-    <button class="nav-btn" data-tab="history">
-      <span class="nav-icon">📚</span> History
-    </button>
-  </nav>
-  <div class="sidebar-bottom">
-    <div class="session-status">
-      <div class="session-dot" id="session-dot"></div>
-      <span id="session-label">No session</span>
-    </div>
-    <button class="sync-btn" id="sync-btn">🔄 Sync Session</button>
-  </div>
-</aside>
 
-<!-- ════ MAIN ════ -->
-<main class="main">
-  <div class="topbar">
-    <span class="page-title" id="page-title">Contest Leaderboard</span>
-    <div class="topbar-right">
-      <span style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;">Open HackerRank → Log in → Sync Session</span>
+  <div class="setup-notice">
+    <span>⚙️</span>
+    <div>
+      <strong>Google Sheets Setup Required:</strong> Replace the value of <code>SHEET_SCRIPT_URL</code> at the top of the &lt;script&gt; with your Google Apps Script Web App URL to enable live data sync.
+      <a href="#setup-guide" style="color:#b45309; margin-left:6px; text-decoration:underline; text-underline-offset:3px;">See guide below ↓</a>
     </div>
   </div>
 
-  <div class="content">
+  <div class="progress-label">
+    <span>Progress</span>
+    <span id="pct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBar"></div>
+  </div>
 
-    <!-- ─ LEADERBOARD ─ -->
-    <div class="tab-panel active" id="tab-leaderboard">
+  <form id="feedbackForm" novalidate>
 
-      <div class="notice warn">
-        ⚠️ This app reuses your active HackerRank browser session. Make sure you are logged in at
-        <strong>hackerrank.com</strong> and click <strong>Sync Session</strong> in the sidebar first.
-        API calls are made from your browser directly (no server needed).
+    <!-- PERSONAL INFO -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-blue">👤</div>
+        Personal Information
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="studentName">Student Name <span class="req">*</span></label>
+          <input type="text" id="studentName" name="studentName" placeholder="Enter your full name" required>
+        </div>
+        <div class="field">
+          <label for="regNumber">Register Number <span class="req">*</span></label>
+          <input type="text" id="regNumber" name="regNumber" placeholder="e.g. 22CS001" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="studentEmail">Student Email ID <span class="req">*</span></label>
+        <input type="email" id="studentEmail" name="studentEmail" placeholder="yourname@college.edu" required>
+      </div>
+    </div>
+
+    <!-- ACADEMICS -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-purple">📚</div>
+        Academic Experience
       </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-head"><span class="card-title"><span class="ct-icon">⚙️</span> Controls</span></div>
-          <div class="card-body">
-            <div class="form-group">
-              <label class="form-label">Contest Slug</label>
-              <input class="form-input" id="lb-slug" value="dsa-trainers" placeholder="e.g. my-contest-2024">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Results Limit</label>
-              <input class="form-input" id="lb-limit" type="number" value="100" min="1" max="1000">
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-primary" id="lb-load-btn">▶ Load</button>
-              <button class="btn btn-secondary" id="lb-export-csv" disabled>⬇ CSV</button>
-              <button class="btn btn-secondary" id="lb-export-xl" disabled>⬇ Excel</button>
-            </div>
+      <div class="field">
+        <label>Did you have regular assessments and assignments? <span class="req">*</span></label>
+        <div class="radio-group">
+          <input type="radio" id="assessYes" name="assessments" value="Yes" required>
+          <label for="assessYes">✅ Yes</label>
+          <input type="radio" id="assessNo" name="assessments" value="No">
+          <label for="assessNo">❌ No</label>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>Did you receive study materials for all course papers? <span class="req">*</span></label>
+        <div class="radio-group">
+          <input type="radio" id="matsYes" name="studyMaterials" value="Yes" required>
+          <label for="matsYes">✅ Yes</label>
+          <input type="radio" id="matsNo" name="studyMaterials" value="No">
+          <label for="matsNo">❌ No</label>
+        </div>
+      </div>
+
+      <div class="field" id="noMatsField" style="display:none">
+        <label for="missingMats">Which course papers had no study material?</label>
+        <textarea id="missingMats" name="missingMaterials" placeholder="List the course papers here..."></textarea>
+      </div>
+    </div>
+
+    <!-- PROGRAM RATINGS -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-gold">⭐</div>
+        Program Effectiveness
+      </div>
+      <p class="section-subtitle">Rate on a scale of 1 (Poor) to 5 (Excellent)</p>
+
+      <div class="field">
+        <label>Hands-on learning & curriculum relevance <span class="req">*</span></label>
+        <div class="scale-wrap">
+          <div class="scale-labels"><span>1 – Poor</span><span>5 – Excellent</span></div>
+          <div class="scale-row">
+            <input type="radio" id="curr1" name="curriculumRating" value="1" required><label for="curr1">1</label>
+            <input type="radio" id="curr2" name="curriculumRating" value="2"><label for="curr2">2</label>
+            <input type="radio" id="curr3" name="curriculumRating" value="3"><label for="curr3">3</label>
+            <input type="radio" id="curr4" name="curriculumRating" value="4"><label for="curr4">4</label>
+            <input type="radio" id="curr5" name="curriculumRating" value="5"><label for="curr5">5</label>
           </div>
         </div>
-
-        <div class="card" id="lb-progress-card" style="display:none">
-          <div class="card-head"><span class="card-title"><span class="ct-icon">⏳</span> Loading</span></div>
-          <div class="card-body">
-            <div class="progress-track"><div class="progress-fill" id="lb-progress-fill"></div></div>
-            <div class="progress-meta">
-              <span id="lb-status">Starting…</span>
-              <span id="lb-pct">0%</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <div class="stat-row" id="lb-stats" style="display:none">
-        <div class="stat-chip"><div class="sv" id="lb-stat-count">0</div><div class="sl">Loaded</div></div>
-        <div class="stat-chip"><div class="sv" id="lb-stat-pages">0</div><div class="sl">Pages</div></div>
-      </div>
+      <div class="divider"></div>
 
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title"><span class="ct-icon">🏆</span> Results</span>
-          <span style="font-size:11px;font-family:'Space Mono',monospace;color:var(--text3)" id="lb-count-badge">0 entries</span>
-        </div>
-        <div class="card-body" style="padding:0">
-          <div class="table-wrap">
-            <table id="lb-table">
-              <thead><tr>
-                <th>Rank</th><th>Hacker</th><th>Score</th><th>Time</th><th>Country</th>
-              </tr></thead>
-              <tbody id="lb-tbody">
-                <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">No data loaded</div><div class="empty-sub">Enter a contest slug and click Load</div></div></td></tr>
-              </tbody>
-            </table>
+      <div class="field">
+        <label>Confidence & industry preparedness <span class="req">*</span></label>
+        <div class="scale-wrap">
+          <div class="scale-labels"><span>1 – Poor</span><span>5 – Excellent</span></div>
+          <div class="scale-row">
+            <input type="radio" id="conf1" name="confidenceRating" value="1" required><label for="conf1">1</label>
+            <input type="radio" id="conf2" name="confidenceRating" value="2"><label for="conf2">2</label>
+            <input type="radio" id="conf3" name="confidenceRating" value="3"><label for="conf3">3</label>
+            <input type="radio" id="conf4" name="confidenceRating" value="4"><label for="conf4">4</label>
+            <input type="radio" id="conf5" name="confidenceRating" value="5"><label for="conf5">5</label>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ─ BULK COMPARE ─ -->
-    <div class="tab-panel" id="tab-comparison">
+    <!-- MENTORS -->
+    <div id="mentorSections"></div>
 
-      <div class="stat-row" id="bc-stat-row" style="display:none">
-        <div class="stat-chip"><div class="sv" id="bc-stat-total">0</div><div class="sl">Total</div></div>
-        <div class="stat-chip"><div class="sv" id="bc-stat-done">0</div><div class="sl">Done</div></div>
-        <div class="stat-chip"><div class="sv" id="bc-stat-rate">0%</div><div class="sl">Success</div></div>
-        <div class="stat-chip"><div class="sv" id="bc-stat-speed">—</div><div class="sl">Comps/s</div></div>
+    <!-- INFRASTRUCTURE NPS -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-green">🏛️</div>
+        Campus Infrastructure
       </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-head"><span class="card-title"><span class="ct-icon">⚙️</span> Setup</span></div>
-          <div class="card-body">
-            <div class="form-group">
-              <label class="form-label">Contest Slug</label>
-              <input class="form-input" id="bc-slug" value="dsa-trainers">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Fixed User (hacker1)</label>
-              <input class="form-input" id="bc-h1" placeholder="e.g. hbinu">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Users to Compare (one per line)</label>
-              <textarea class="form-textarea" id="bc-list" placeholder="username1&#10;username2&#10;username3"></textarea>
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-primary" id="bc-start-btn">▶ Start</button>
-              <button class="btn btn-danger" id="bc-stop-btn" style="display:none">⏹ Stop</button>
-              <button class="btn btn-secondary" id="bc-export-btn" style="display:none">⬇ Export CSV</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" id="bc-progress-card" style="display:none">
-          <div class="card-head">
-            <span class="card-title"><span class="ct-icon">⚡</span> Progress</span>
-            <span class="tag tag-green" id="bc-pct-badge">0%</span>
-          </div>
-          <div class="card-body">
-            <div class="progress-track"><div class="progress-fill" id="bc-progress-fill"></div></div>
-            <div class="progress-meta">
-              <span id="bc-status">Starting…</span>
-              <span id="bc-speed-label">—</span>
-            </div>
-          </div>
+      <div class="field">
+        <label>How likely are you to recommend the campus infrastructure? <span class="req">*</span></label>
+        <p class="section-subtitle">Wi-Fi, classrooms, facilities — 1 (Lowest) to 10 (Highest)</p>
+        <div class="nps-row">
+          <input type="radio" id="infra1" name="infraNPS" value="1" required><label for="infra1">1</label>
+          <input type="radio" id="infra2" name="infraNPS" value="2"><label for="infra2">2</label>
+          <input type="radio" id="infra3" name="infraNPS" value="3"><label for="infra3">3</label>
+          <input type="radio" id="infra4" name="infraNPS" value="4"><label for="infra4">4</label>
+          <input type="radio" id="infra5" name="infraNPS" value="5"><label for="infra5">5</label>
+          <input type="radio" id="infra6" name="infraNPS" value="6"><label for="infra6">6</label>
+          <input type="radio" id="infra7" name="infraNPS" value="7"><label for="infra7">7</label>
+          <input type="radio" id="infra8" name="infraNPS" value="8"><label for="infra8">8</label>
+          <input type="radio" id="infra9" name="infraNPS" value="9"><label for="infra9">9</label>
+          <input type="radio" id="infra10" name="infraNPS" value="10"><label for="infra10">10</label>
         </div>
       </div>
+      <div class="field">
+        <label for="infraChallenges">Describe infrastructure challenges in detail <span class="req">*</span></label>
+        <textarea id="infraChallenges" name="infraChallenges" placeholder="Share specific issues with Wi-Fi, classrooms, labs, etc..." required></textarea>
+      </div>
+    </div>
 
-      <!-- Matrix results -->
-      <div class="card" id="bc-results-card">
-        <div class="card-head">
-          <span class="card-title"><span class="ct-icon">📋</span> Comparison Matrix</span>
-        </div>
-        <div class="card-body" id="bc-results-body">
-          <div class="empty-state">
-            <div class="empty-icon">⚖️</div>
-            <div class="empty-text">No comparisons yet</div>
-            <div class="empty-sub">Fill in the form and click Start</div>
-          </div>
+    <!-- TRAINING NPS -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-blue">🎓</div>
+        Training Recommendation
+      </div>
+      <div class="field">
+        <label>How likely are you to recommend FACE Prep training to juniors/friends? <span class="req">*</span></label>
+        <p class="section-subtitle">1 (Lowest) to 10 (Highest)</p>
+        <div class="nps-row">
+          <input type="radio" id="train1" name="trainingNPS" value="1" required><label for="train1">1</label>
+          <input type="radio" id="train2" name="trainingNPS" value="2"><label for="train2">2</label>
+          <input type="radio" id="train3" name="trainingNPS" value="3"><label for="train3">3</label>
+          <input type="radio" id="train4" name="trainingNPS" value="4"><label for="train4">4</label>
+          <input type="radio" id="train5" name="trainingNPS" value="5"><label for="train5">5</label>
+          <input type="radio" id="train6" name="trainingNPS" value="6"><label for="train6">6</label>
+          <input type="radio" id="train7" name="trainingNPS" value="7"><label for="train7">7</label>
+          <input type="radio" id="train8" name="trainingNPS" value="8"><label for="train8">8</label>
+          <input type="radio" id="train9" name="trainingNPS" value="9"><label for="train9">9</label>
+          <input type="radio" id="train10" name="trainingNPS" value="10"><label for="train10">10</label>
         </div>
       </div>
     </div>
 
-    <!-- ─ HISTORY ─ -->
-    <div class="tab-panel" id="tab-history">
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title"><span class="ct-icon">⚙️</span> Controls</span>
-        </div>
-        <div class="card-body">
-          <div class="btn-row">
-            <button class="btn btn-secondary" id="hist-refresh-btn">↻ Refresh</button>
-            <button class="btn btn-danger" id="hist-clear-btn">🗑 Clear All</button>
-          </div>
+    <!-- CHALLENGES -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-purple">🔍</div>
+        Current Challenges
+      </div>
+      <div class="field">
+        <label>What challenges are you facing? <span class="req">*</span> (Select all that apply)</label>
+        <div class="checkbox-grid">
+          <input type="checkbox" id="ch1" name="challenges" value="Teaching Quality & Delivery">
+          <label for="ch1">Teaching Quality & Delivery</label>
+          <input type="checkbox" id="ch2" name="challenges" value="Communication & Language Issues">
+          <label for="ch2">Communication & Language Issues</label>
+          <input type="checkbox" id="ch3" name="challenges" value="Curriculum & Academic Concerns">
+          <label for="ch3">Curriculum & Academic Concerns</label>
+          <input type="checkbox" id="ch4" name="challenges" value="Study Materials & Resources">
+          <label for="ch4">Study Materials & Resources</label>
+          <input type="checkbox" id="ch5" name="challenges" value="No Challenges">
+          <label for="ch5">No Challenges</label>
+          <input type="checkbox" id="ch6" name="challenges" value="Other">
+          <label for="ch6">Other</label>
         </div>
       </div>
-      <div class="card">
-        <div class="card-head"><span class="card-title"><span class="ct-icon">📚</span> Recent Queries</span></div>
-        <div class="card-body">
-          <div class="history-list" id="history-list">
-            <div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No history yet</div><div class="empty-sub">Load a leaderboard to start building history</div></div>
-          </div>
-        </div>
+      <div class="field">
+        <label for="challengeDetail">Describe your challenges in detail <span class="req">*</span></label>
+        <textarea id="challengeDetail" name="challengeDetail" placeholder="Share as much detail as possible so we can help..." required></textarea>
+      </div>
+      <div class="field">
+        <label for="suggestions">Your suggestions for improvement <span class="req">*</span></label>
+        <textarea id="suggestions" name="suggestions" placeholder="What would make your FACE Prep experience better?" required></textarea>
       </div>
     </div>
 
-  </div><!-- /content -->
-</main>
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span>Submit Feedback</span>
+        <span>→</span>
+      </button>
+      <p class="note">🔒 Your response is confidential and handled only by the feedback team.</p>
+    </div>
+
+  </form>
+
+  <!-- SETUP GUIDE -->
+  <div id="setup-guide" class="section" style="margin-top:48px; animation-delay:.7s;">
+    <div class="section-title">
+      <div class="icon icon-gold">📊</div>
+      Google Sheets Integration — Setup Guide
+    </div>
+    <div style="color:var(--muted); font-size:14px; line-height:1.9;">
+      <p><strong style="color:var(--text);">Step 1.</strong> Open <a href="https://sheets.google.com" target="_blank" style="color:var(--accent);">Google Sheets</a> and create a new spreadsheet.</p>
+      <p><strong style="color:var(--text);">Step 2.</strong> Go to <strong style="color:var(--text);">Extensions → Apps Script</strong>.</p>
+      <p><strong style="color:var(--text);">Step 3.</strong> Paste the following code into the editor and click <strong style="color:var(--text);">Save</strong>:</p>
+      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px;font-family:monospace;font-size:12px;color:#475569;overflow-x:auto;margin:12px 0;line-height:1.7;">function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+
+  // Add header row on first submission
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(Object.keys(data));
+  }
+  sheet.appendRow(Object.values(data));
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ result: "success" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+      <p><strong style="color:var(--text);">Step 4.</strong> Click <strong style="color:var(--text);">Deploy → New deployment → Web App</strong>.</p>
+      <p><strong style="color:var(--text);">Step 5.</strong> Set <em>Execute as</em>: <strong style="color:var(--text);">Me</strong> and <em>Who has access</em>: <strong style="color:var(--text);">Anyone</strong>. Click Deploy.</p>
+      <p><strong style="color:var(--text);">Step 6.</strong> Copy the Web App URL and paste it as the value of <code style="background:var(--surface2);padding:2px 7px;border-radius:4px;color:#b45309;">SHEET_SCRIPT_URL</code> inside the &lt;script&gt; tag at the bottom of this HTML file.</p>
+    </div>
+  </div>
+
+</div>
 
 <div id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════
-//  CONFIG
-// ════════════════════════════════════════════
-const BASE_URL = 'https://www.hackerrank.com';
-const STORAGE_KEY = 'hr_dash_session';
-const HISTORY_KEY = 'hr_dash_history';
+  // ─────────────────────────────────────────────
+  //  🔧 REPLACE THIS with your Apps Script URL
+  // ─────────────────────────────────────────────
+  const SHEET_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+  // ─────────────────────────────────────────────
 
-// ════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════
-let session = { csrfToken: '', cookies: '' };
-let leaderboardData = [];
-let bulkResults = [];
-let bulkActive = false;
-let bulkStartTime = null;
+  const MENTOR_RUBRICS = ["Concept clarity", "Engagement level", "Practical/industry relevance", "Doubt resolution", "Preparedness"];
+  const MENTOR_COUNT = 5;
 
-// Pagination
-let matrixPage = 1;
-const MATRIX_PAGE_SIZE = 25;
+  // Build mentor sections dynamically
+  const mentorContainer = document.getElementById("mentorSections");
+  for (let m = 1; m <= MENTOR_COUNT; m++) {
+    const sec = document.createElement("div");
+    sec.className = "section";
+    sec.style.animationDelay = `${0.2 + m * 0.05}s`;
 
-// ════════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════════
-function toast(msg, type = 'info') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show ' + type;
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.className = '', 3000);
-}
+    let html = `
+      <div class="section-title">
+        <div class="icon icon-purple">🧑‍🏫</div>
+        Mentor ${m} — Subject Handling
+      </div>
+      <div class="mentor-name-input field">
+        <label>Mentor ${m} Name <span class="req">*</span></label>
+        <input type="text" name="mentor${m}Name" placeholder="Enter mentor's name" required>
+      </div>
+      <p class="section-subtitle">Rate on a scale of 1 (Poor) to 5 (Excellent)</p>
+      <div class="mentor-grid">
+        <table class="mentor-table">
+          <thead>
+            <tr>
+              <th>Criteria</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+            </tr>
+          </thead>
+          <tbody>`;
 
-// ════════════════════════════════════════════
-//  SESSION
-// ════════════════════════════════════════════
-function saveSession(s) {
-  session = s;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, savedAt: Date.now() })); } catch(e){}
-  updateSessionUI(true);
-}
-
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-    const s = JSON.parse(raw);
-    if (Date.now() - s.savedAt > 12 * 3600_000) return false;
-    session = { csrfToken: s.csrfToken || '', cookies: s.cookies || '' };
-    if (session.cookies) { updateSessionUI(true); return true; }
-  } catch(e){}
-  return false;
-}
-
-function updateSessionUI(connected) {
-  const dot = document.getElementById('session-dot');
-  const lbl = document.getElementById('session-label');
-  dot.className = 'session-dot ' + (connected ? 'connected' : 'error');
-  lbl.textContent = connected ? 'Connected' : 'Not connected';
-}
-
-// ════════════════════════════════════════════
-//  FETCH HELPERS
-// ════════════════════════════════════════════
-async function apiFetch(url, opts = {}) {
-  const headers = {
-    'accept': 'application/json, text/javascript, */*; q=0.01',
-    'x-requested-with': 'XMLHttpRequest',
-    'x-csrf-token': session.csrfToken || '',
-    ...(opts.headers || {})
-  };
-  const res = await fetch(url, {
-    credentials: 'include',
-    ...opts,
-    headers
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status}: ${txt.slice(0, 120)}`);
-  }
-  return res.json();
-}
-
-async function syncSession() {
-  const btn = document.getElementById('sync-btn');
-  btn.textContent = '⏳ Syncing…';
-  btn.disabled = true;
-  try {
-    // Try to get csrf from the page
-    let csrfToken = '';
-    try {
-      const res = await fetch(`${BASE_URL}/dashboard`, { credentials: 'include' });
-      const html = await res.text();
-      const m = html.match(/name=["']csrf-token["']\s+content=["']([^"']+)["']/i)
-                 || html.match(/csrfToken["']?\s*:\s*["']([^"']+)["']/i);
-      if (m) csrfToken = m[1];
-    } catch(e) {}
-
-    // Check if we actually have cookies by trying a lightweight API call
-    const testUrl = `${BASE_URL}/rest/contests/dsa-trainers/leaderboard?offset=0&limit=1`;
-    await apiFetch(testUrl, { headers: { 'x-csrf-token': csrfToken } });
-    saveSession({ csrfToken, cookies: 'browser-session' });
-    toast('Session synced! ✅', 'success');
-  } catch(e) {
-    updateSessionUI(false);
-    toast('Sync failed — make sure you are logged in at hackerrank.com', 'error');
-    console.error(e);
-  } finally {
-    btn.textContent = '🔄 Sync Session';
-    btn.disabled = false;
-  }
-}
-
-// ════════════════════════════════════════════
-//  LEADERBOARD
-// ════════════════════════════════════════════
-async function loadLeaderboard() {
-  const slug = document.getElementById('lb-slug').value.trim();
-  const limit = parseInt(document.getElementById('lb-limit').value) || 100;
-  if (!slug) { toast('Enter a contest slug', 'error'); return; }
-  if (!session.cookies) { toast('Sync your session first', 'error'); return; }
-
-  const loadBtn = document.getElementById('lb-load-btn');
-  const progCard = document.getElementById('lb-progress-card');
-  const fill = document.getElementById('lb-progress-fill');
-  const status = document.getElementById('lb-status');
-  const pct = document.getElementById('lb-pct');
-  const tbody = document.getElementById('lb-tbody');
-  const csvBtn = document.getElementById('lb-export-csv');
-  const xlBtn = document.getElementById('lb-export-xl');
-
-  loadBtn.disabled = true; loadBtn.textContent = '⏳ Loading…';
-  progCard.style.display = '';
-  tbody.innerHTML = '';
-  leaderboardData = [];
-
-  document.getElementById('lb-stats').style.display = 'none';
-  document.getElementById('lb-count-badge').textContent = '0 entries';
-  csvBtn.disabled = true; xlBtn.disabled = true;
-
-  const pageSize = 100;
-  const pages = Math.ceil(limit / pageSize);
-
-  try {
-    for (let p = 0; p < pages; p++) {
-      const offset = p * pageSize;
-      const curLimit = Math.min(pageSize, limit - offset);
-      const progress = Math.round((p / pages) * 100);
-      fill.style.width = progress + '%';
-      pct.textContent = progress + '%';
-      status.textContent = `Page ${p+1} / ${pages}…`;
-
-      const data = await apiFetch(
-        `${BASE_URL}/rest/contests/${slug}/leaderboard?offset=${offset}&limit=${curLimit}`
-      );
-      const models = data.models || [];
-      leaderboardData = leaderboardData.concat(models);
-
-      models.forEach(m => {
-        const tr = document.createElement('tr');
-        const r = parseInt(m.rank);
-        const rankClass = r === 1 ? 'gold' : r === 2 ? 'silver' : r === 3 ? 'bronze' : '';
-        tr.innerHTML = `
-          <td><span class="rank-badge ${rankClass}">${m.rank || '—'}</span></td>
-          <td style="color:var(--text);font-weight:600">${m.hacker || '—'}</td>
-          <td style="color:var(--accent)">${m.score ?? '—'}</td>
-          <td>${m.time_taken ?? '—'}</td>
-          <td>${m.country || '—'}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      if (models.length < curLimit) break;
-    }
-
-    fill.style.width = '100%'; pct.textContent = '100%';
-    status.textContent = `Done — ${leaderboardData.length} entries`;
-    document.getElementById('lb-count-badge').textContent = `${leaderboardData.length} entries`;
-    document.getElementById('lb-stat-count').textContent = leaderboardData.length;
-    document.getElementById('lb-stat-pages').textContent = pages;
-    document.getElementById('lb-stats').style.display = 'flex';
-    csvBtn.disabled = false; xlBtn.disabled = false;
-
-    await saveToHistory(slug, leaderboardData);
-    toast(`Loaded ${leaderboardData.length} entries`, 'success');
-  } catch(e) {
-    status.textContent = 'Error: ' + e.message;
-    toast(e.message, 'error');
-    console.error(e);
-  } finally {
-    loadBtn.disabled = false; loadBtn.textContent = '▶ Load';
-    setTimeout(() => progCard.style.display = 'none', 2500);
-  }
-}
-
-function exportCSV(data, filename) {
-  const headers = ['Rank','Hacker','Score','Time','Country'];
-  const rows = data.map(m => [m.rank,m.hacker,m.score,m.time_taken,m.country]);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c ?? ''}"`).join(',')).join('\n');
-  triggerDownload(filename, 'text/csv', csv);
-}
-
-function exportExcel(data, filename) {
-  const headers = ['Rank','Hacker','Score','Time','Country'];
-  const rows = data.map(m => [m.rank,m.hacker,m.score,m.time_taken,m.country]);
-  const tsv = [headers, ...rows].map(r => r.join('\t')).join('\n');
-  triggerDownload(filename, 'application/vnd.ms-excel', tsv);
-}
-
-function triggerDownload(filename, mime, content) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
-  a.download = filename;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
-// ════════════════════════════════════════════
-//  BULK COMPARISON
-// ════════════════════════════════════════════
-async function startBulkComparison() {
-  const slug = document.getElementById('bc-slug').value.trim();
-  const h1 = document.getElementById('bc-h1').value.trim();
-  const listRaw = document.getElementById('bc-list').value.trim();
-  if (!slug || !h1 || !listRaw) { toast('Fill in all fields', 'error'); return; }
-  if (!session.cookies) { toast('Sync your session first', 'error'); return; }
-
-  const hackerList = listRaw.split('\n').map(s => s.trim()).filter(Boolean);
-  if (hackerList.length === 0) { toast('Enter at least one username', 'error'); return; }
-
-  bulkActive = true;
-  bulkResults = [];
-  bulkStartTime = Date.now();
-  matrixPage = 1;
-
-  // UI setup
-  document.getElementById('bc-start-btn').style.display = 'none';
-  document.getElementById('bc-stop-btn').style.display = '';
-  document.getElementById('bc-progress-card').style.display = '';
-  document.getElementById('bc-export-btn').style.display = 'none';
-  document.getElementById('bc-stat-row').style.display = 'flex';
-  document.getElementById('bc-stat-total').textContent = hackerList.length;
-
-  document.getElementById('bc-results-body').innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">⏳</div>
-      <div class="empty-text">Processing…</div>
-      <div class="empty-sub">Results will appear after completion</div>
-    </div>`;
-
-  const BATCH = 50;
-  const total = hackerList.length;
-
-  for (let i = 0; i < hackerList.length && bulkActive; i += BATCH) {
-    const batch = hackerList.slice(i, i + BATCH);
-    const batchPromises = batch.map(async h2 => {
-      try {
-        const ts = Date.now();
-        const url = `${BASE_URL}/rest/compare?contest_slug=${encodeURIComponent(slug)}&hacker_slug_1=${encodeURIComponent(h1)}&hacker_slug_2=${encodeURIComponent(h2)}&_=${ts}`;
-        const data = await apiFetch(url);
-        return { hacker1: h1, hacker2: h2, success: true, data };
-      } catch(e) {
-        return { hacker1: h1, hacker2: h2, success: false, error: e.message, data: null };
+    MENTOR_RUBRICS.forEach((rub, ri) => {
+      const safeRub = rub.replace(/\s+/g, '').replace(/[^a-zA-Z]/g,'');
+      html += `<tr><td>${rub}</td>`;
+      for (let v = 1; v <= 5; v++) {
+        const id = `m${m}r${ri}v${v}`;
+        html += `<td><input type="radio" id="${id}" name="mentor${m}_${safeRub}" value="${v}" required><label for="${id}" class="r-label">${v}</label></td>`;
       }
+      html += `</tr>`;
     });
 
-    const batchRes = await Promise.all(batchPromises);
-    bulkResults.push(...batchRes);
-
-    const done = Math.min(i + BATCH, total);
-    const pct = Math.round((done / total) * 100);
-    document.getElementById('bc-progress-fill').style.width = pct + '%';
-    document.getElementById('bc-pct-badge').textContent = pct + '%';
-    document.getElementById('bc-status').textContent = `${done}/${total} comparisons`;
-    document.getElementById('bc-stat-done').textContent = done;
-
-    const succ = bulkResults.filter(r => r.success).length;
-    document.getElementById('bc-stat-rate').textContent = Math.round(succ / done * 100) + '%';
-
-    const elapsed = (Date.now() - bulkStartTime) / 1000;
-    const speed = (done / elapsed).toFixed(1);
-    document.getElementById('bc-stat-speed').textContent = speed;
-    document.getElementById('bc-speed-label').textContent = speed + '/s';
-
-    if (i + BATCH < hackerList.length && bulkActive) {
-      await new Promise(r => setTimeout(r, 50));
-    }
+    html += `</tbody></table></div>`;
+    sec.innerHTML = html;
+    mentorContainer.appendChild(sec);
   }
 
-  // Done
-  document.getElementById('bc-start-btn').style.display = '';
-  document.getElementById('bc-stop-btn').style.display = 'none';
-  document.getElementById('bc-status').textContent = bulkActive
-    ? `Complete — ${bulkResults.length} comparisons`
-    : `Stopped at ${bulkResults.length} comparisons`;
-  bulkActive = false;
-
-  renderMatrix();
-  document.getElementById('bc-export-btn').style.display = '';
-  toast(`Comparison complete — ${bulkResults.filter(r=>r.success).length}/${bulkResults.length} succeeded`, 'success');
-}
-
-function stopBulkComparison() {
-  bulkActive = false;
-  document.getElementById('bc-start-btn').style.display = '';
-  document.getElementById('bc-stop-btn').style.display = 'none';
-  renderMatrix();
-}
-
-function getCellStatus(score, attempted) {
-  if (score > 0) return 'solved';
-  if (attempted) return 'attempted';
-  return 'na';
-}
-
-function buildMatrix() {
-  const questions = [];
-  const qSet = new Set();
-  const userMap = new Map();
-  let fixedUser = null;
-
-  bulkResults.forEach(r => {
-    if (!r.success || !r.data?.model) return;
-    if (!fixedUser) fixedUser = r.hacker1;
-
-    const challenges = r.data.model.challenges || [];
-
-    if (questions.length === 0) {
-      challenges.forEach(c => { if (!qSet.has(c.name)) { questions.push(c.name); qSet.add(c.name); } });
-    }
-
-    [r.hacker1, r.hacker2].forEach((hacker, idx) => {
-      if (!userMap.has(hacker)) userMap.set(hacker, {});
-      const scoreKey = idx === 0 ? 'score1' : 'score2';
-      const attemptKey = idx === 0 ? 'attempted1' : 'attempted2';
-      challenges.forEach(c => {
-        const sc = parseFloat(c[scoreKey]) || 0;
-        userMap.get(hacker)[c.name] = {
-          status: getCellStatus(sc, c[attemptKey]),
-          score: sc,
-          points: c.point || 0,
-          attempted: c[attemptKey] || false
-        };
-      });
+  // Show/hide missing materials field
+  document.querySelectorAll('[name="studyMaterials"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const noField = document.getElementById('noMatsField');
+      noField.style.display = r.value === 'No' && r.checked ? 'block' : 'none';
     });
   });
 
-  const users = Array.from(userMap.keys()).map(u => ({ username: u, qmap: userMap.get(u) }));
-  return { users, questions, fixedUser };
-}
-
-function renderMatrix() {
-  const container = document.getElementById('bc-results-body');
-  if (bulkResults.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">No valid data</div><div class="empty-sub">All comparisons may have failed</div></div>`;
-    return;
-  }
-
-  const { users, questions, fixedUser } = buildMatrix();
-  if (users.length === 0 || questions.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">No challenge data</div></div>`;
-    return;
-  }
-
-  const totalPages = Math.ceil(users.length / MATRIX_PAGE_SIZE);
-  matrixPage = Math.min(matrixPage, totalPages);
-  const start = (matrixPage - 1) * MATRIX_PAGE_SIZE;
-  const pageUsers = users.slice(start, start + MATRIX_PAGE_SIZE);
-
-  // Header
-  let thCells = '<th class="user-col">👤 User</th>';
-  questions.forEach(q => { thCells += `<th title="${q}">${q.length > 20 ? q.slice(0,18)+'…' : q}</th>`; });
-
-  // Body
-  let rows = '';
-  pageUsers.forEach(u => {
-    let cells = `<td class="user-col" style="font-weight:700;color:${u.username === fixedUser ? 'var(--accent)' : 'var(--text)'}">${u.username}</td>`;
-    questions.forEach(q => {
-      const d = u.qmap[q];
-      if (!d || d.status === 'na') {
-        cells += `<td class="cell-na">—</td>`;
-      } else if (d.status === 'solved') {
-        cells += `<td class="cell-solved">${d.score}/${d.points}</td>`;
+  // Progress tracking
+  function updateProgress() {
+    const required = document.querySelectorAll('[required]');
+    let filled = 0;
+    const seen = new Set();
+    required.forEach(el => {
+      if (el.type === 'radio' || el.type === 'checkbox') {
+        const name = el.name;
+        if (seen.has(name)) return;
+        seen.add(name);
+        if (document.querySelector(`[name="${name}"]:checked`)) filled++;
       } else {
-        cells += `<td class="cell-attempted">${d.score}/${d.points}</td>`;
+        if (el.value.trim()) filled++;
       }
     });
-    rows += `<tr>${cells}</tr>`;
-  });
+    const total = seen.size + document.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"])').length
+      + document.querySelectorAll('textarea[required], input[type="text"][required], input[type="email"][required]').length;
 
-  // Pagination controls
-  const pagCtrl = totalPages > 1 ? `
-    <div class="pagination" style="margin-top:14px">
-      <span class="page-info">Page ${matrixPage} / ${totalPages} (${users.length} users)</span>
-      <button class="btn btn-secondary" onclick="gotoMatrixPage(1)" ${matrixPage===1?'disabled':''}>⏮</button>
-      <button class="btn btn-secondary" onclick="gotoMatrixPage(${matrixPage-1})" ${matrixPage===1?'disabled':''}>◀</button>
-      <button class="btn btn-secondary" onclick="gotoMatrixPage(${matrixPage+1})" ${matrixPage===totalPages?'disabled':''}>▶</button>
-      <button class="btn btn-secondary" onclick="gotoMatrixPage(${totalPages})" ${matrixPage===totalPages?'disabled':''}>⏭</button>
-    </div>` : '';
-
-  container.innerHTML = `
-    <div style="margin-bottom:12px;font-size:12px;color:var(--text3);font-family:'Space Mono',monospace">
-      Fixed: <strong style="color:var(--accent)">${fixedUser}</strong> &nbsp;·&nbsp;
-      ${questions.length} questions &nbsp;·&nbsp; ${users.length} users
-    </div>
-    <div class="matrix-wrap">
-      <table class="matrix-table">
-        <thead><tr>${thCells}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--solved-bg);border:1px solid var(--solved)"></div> Solved</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--attempted-bg);border:1px solid var(--attempted)"></div> Attempted</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--na-bg);border:1px solid var(--border)"></div> Not Attempted</div>
-    </div>
-    ${pagCtrl}`;
-}
-
-function gotoMatrixPage(p) {
-  const { users } = buildMatrix();
-  const total = Math.ceil(users.length / MATRIX_PAGE_SIZE);
-  matrixPage = Math.max(1, Math.min(p, total));
-  renderMatrix();
-}
-
-function exportBulkCSV() {
-  const { users, questions } = buildMatrix();
-  if (!users.length) { toast('No data to export', 'error'); return; }
-  const header = ['Username', ...questions];
-  const rows = users.map(u => {
-    const cells = [u.username];
-    questions.forEach(q => {
-      const d = u.qmap[q];
-      cells.push(d && d.attempted ? d.score : 'Did Not Attempt');
+    // simpler count
+    let reqCount = 0, doneCount = 0;
+    const groups = new Set();
+    document.querySelectorAll('[required]').forEach(el => {
+      if (el.type === 'radio') { groups.add(el.name); return; }
+      reqCount++;
+      if (el.value.trim()) doneCount++;
     });
-    return cells;
-  });
-  const csv = [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  triggerDownload('bulk_comparison.csv', 'text/csv', csv);
-  toast('Exported!', 'success');
-}
+    groups.forEach(name => {
+      reqCount++;
+      if (document.querySelector(`[name="${name}"]:checked`)) doneCount++;
+    });
 
-// ════════════════════════════════════════════
-//  HISTORY
-// ════════════════════════════════════════════
-async function saveToHistory(slug, data) {
-  try {
-    let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    hist.unshift({ slug, count: data.length, timestamp: new Date().toISOString(), preview: data.slice(0,5) });
-    hist = hist.slice(0, 50);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
-  } catch(e) {}
-}
+    const pct = Math.min(100, Math.round((doneCount / reqCount) * 100));
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+  }
 
-function loadHistory() {
-  const list = document.getElementById('history-list');
-  try {
-    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    if (!hist.length) {
-      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No history yet</div></div>`;
+  document.getElementById('feedbackForm').addEventListener('input', updateProgress);
+  document.getElementById('feedbackForm').addEventListener('change', updateProgress);
+
+  // Toast
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+    t.className = 'show ' + type;
+    setTimeout(() => { t.className = ''; }, 4000);
+  }
+
+  // SUBMIT
+  document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>Submitting…</span><span>⏳</span>';
+
+    // Collect data
+    const fd = new FormData(this);
+    const data = {
+      timestamp: new Date().toISOString(),
+      studentName: fd.get('studentName'),
+      registerNumber: fd.get('regNumber'),
+      studentEmail: fd.get('studentEmail'),
+      regularAssessments: fd.get('assessments'),
+      studyMaterialsReceived: fd.get('studyMaterials'),
+      missingStudyMaterials: fd.get('missingMaterials') || '',
+      curriculumRating: fd.get('curriculumRating'),
+      confidenceRating: fd.get('confidenceRating'),
+      infraNPS: fd.get('infraNPS'),
+      infraChallenges: fd.get('infraChallenges'),
+      trainingNPS: fd.get('trainingNPS'),
+      challenges: fd.getAll('challenges').join('; '),
+      challengeDetail: fd.get('challengeDetail'),
+      suggestions: fd.get('suggestions'),
+    };
+
+    // Mentor data
+    for (let m = 1; m <= MENTOR_COUNT; m++) {
+      data[`mentor${m}Name`] = fd.get(`mentor${m}Name`) || '';
+      MENTOR_RUBRICS.forEach(rub => {
+        const key = rub.replace(/\s+/g, '').replace(/[^a-zA-Z]/g,'');
+        data[`mentor${m}_${key}`] = fd.get(`mentor${m}_${key}`) || '';
+      });
+    }
+
+    if (SHEET_SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+      // Demo mode
+      console.log("Form Data (demo):", data);
+      showToast("Demo mode: data logged to console. Add your Apps Script URL to enable Sheets sync.");
+      btn.disabled = false;
+      btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
       return;
     }
-    list.innerHTML = hist.map((h, i) => `
-      <div class="history-item" onclick="showHistoryDetail(${i})">
-        <div class="hi-head">🏆 ${h.slug} — ${h.count} entries</div>
-        <div class="hi-meta">${new Date(h.timestamp).toLocaleString()}</div>
-      </div>`).join('');
-  } catch(e) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-text">Error loading history</div></div>`;
-  }
-}
 
-function showHistoryDetail(idx) {
-  try {
-    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    const h = hist[idx];
-    const preview = h.preview.map((m, i) => `${i+1}. ${m.hacker} — Score: ${m.score}`).join('\n');
-    alert(`Contest: ${h.slug}\nDate: ${new Date(h.timestamp).toLocaleString()}\nTotal: ${h.count}\n\nTop 5:\n${preview}`);
-  } catch(e) {}
-}
-
-function clearHistory() {
-  if (!confirm('Clear all history?')) return;
-  localStorage.removeItem(HISTORY_KEY);
-  loadHistory();
-  toast('History cleared', 'success');
-}
-
-// ════════════════════════════════════════════
-//  TAB NAVIGATION
-// ════════════════════════════════════════════
-const TAB_TITLES = {
-  leaderboard: '📊 Contest Leaderboard',
-  comparison: '⚖️ Bulk Comparison',
-  history: '📚 History'
-};
-
-document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tab = btn.dataset.tab;
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(`tab-${tab}`).classList.add('active');
-    document.getElementById('page-title').textContent = TAB_TITLES[tab];
-    if (tab === 'history') loadHistory();
+    try {
+      await fetch(SHEET_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      showToast('Feedback submitted successfully! Thank you 🎉');
+      this.reset();
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      console.error(err);
+      showToast('Submission failed. Please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
+    }
   });
-});
-
-// ════════════════════════════════════════════
-//  EVENT WIRING
-// ════════════════════════════════════════════
-document.getElementById('sync-btn').addEventListener('click', syncSession);
-document.getElementById('lb-load-btn').addEventListener('click', loadLeaderboard);
-document.getElementById('lb-export-csv').addEventListener('click', () => exportCSV(leaderboardData, 'leaderboard.csv'));
-document.getElementById('lb-export-xl').addEventListener('click', () => exportExcel(leaderboardData, 'leaderboard.xls'));
-document.getElementById('bc-start-btn').addEventListener('click', startBulkComparison);
-document.getElementById('bc-stop-btn').addEventListener('click', stopBulkComparison);
-document.getElementById('bc-export-btn').addEventListener('click', exportBulkCSV);
-document.getElementById('hist-refresh-btn').addEventListener('click', loadHistory);
-document.getElementById('hist-clear-btn').addEventListener('click', clearHistory);
-
-// ════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════
-loadSession();
 </script>
 </body>
 </html>
