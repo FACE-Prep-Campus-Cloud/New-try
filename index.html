@@ -6,6 +6,7 @@
 <title>MentorLens — Performance Dashboard | Asian School of Business</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 :root {
   --bg:        #f7f4ef;
@@ -73,6 +74,8 @@ body::after {
   display: flex; align-items: center; justify-content: center;
   z-index: 10000;
   transition: opacity 0.4s, visibility 0.4s;
+  flex-direction: column;
+  gap: 20px;
 }
 .loading-overlay.hidden { opacity: 0; visibility: hidden; }
 .spinner {
@@ -84,11 +87,22 @@ body::after {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text {
-  position: absolute;
-  margin-top: 80px;
   font-size: 13px; color: var(--ink3);
   font-weight: 500;
 }
+.error-message {
+  max-width: 500px;
+  padding: 20px;
+  background: var(--rose-lt);
+  border: 1px solid var(--rose);
+  border-radius: var(--radius);
+  color: var(--rose);
+  font-size: 13px;
+  line-height: 1.6;
+  display: none;
+}
+.error-message.show { display: block; }
+.error-message strong { display: block; margin-bottom: 10px; font-size: 14px; }
 
 /* ─── LAYOUT ─────────────────────────────────────────────── */
 .shell {
@@ -472,9 +486,18 @@ tbody tr { transition: background 0.12s; }
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div>
-    <div class="spinner"></div>
-    <div class="loading-text">Loading live data from Google Sheets...</div>
+  <div class="spinner"></div>
+  <div class="loading-text">Loading live data from Google Sheets...</div>
+  <div class="error-message" id="errorMessage">
+    <strong>⚠ Unable to load data</strong>
+    Please make sure your Google Sheet is set to "Anyone with the link can view" in sharing settings.
+    <br><br>
+    <strong>Steps to fix:</strong><br>
+    1. Open your Google Sheet<br>
+    2. Click "Share" button (top right)<br>
+    3. Change access to "Anyone with the link"<br>
+    4. Set permission to "Viewer"<br>
+    5. Refresh this page
   </div>
 </div>
 
@@ -531,8 +554,6 @@ tbody tr { transition: background 0.12s; }
     </div>
     <div class="filter-row" id="deptFilterRow" style="visibility:hidden">
       <button class="filter-chip active" onclick="setDeptFilter('all',this)">All</button>
-      <button class="filter-chip" onclick="setDeptFilter('I BCA - A',this)">BCA-A</button>
-      <button class="filter-chip" onclick="setDeptFilter('I BCA - B',this)">BCA-B</button>
     </div>
   </div>
 
@@ -617,8 +638,7 @@ tbody tr { transition: background 0.12s; }
 <script>
 // ── GOOGLE SHEETS CONFIG ─────────────────────────────────────────────
 const SHEET_ID = '19HsWARl8RFNZ6nc-bUCBKKEN39JkQVxCBfbNCUSe2_4';
-const SHEET_NAME = 'Sheet1';
-const API_KEY = 'AIzaSyDChLS3kN_1-6H3lgVgxE8Q1G0a_dOPqEc'; // Public API key for read-only access
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
 
 // ── GLOBAL STATE ─────────────────────────────────────────────────────
 let MENTORS = [];
@@ -633,52 +653,63 @@ let chartInstances = {};
 async function loadSheetData() {
   try {
     document.getElementById('loadingOverlay').classList.remove('hidden');
+    document.getElementById('errorMessage').classList.remove('show');
     
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    const response = await fetch(CSV_URL);
     
-    if (!data.values || data.values.length < 2) {
-      throw new Error('No data found in sheet');
+    if (!response.ok) {
+      throw new Error('Failed to fetch data. Please check sheet sharing settings.');
     }
     
-    processSheetData(data.values);
-    renderAllData();
+    const csvText = await response.text();
     
-    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
-    
-    setTimeout(() => {
-      document.getElementById('loadingOverlay').classList.add('hidden');
-    }, 600);
+    Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        processSheetData(results.data);
+        renderAllData();
+        
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        
+        setTimeout(() => {
+          document.getElementById('loadingOverlay').classList.add('hidden');
+        }, 600);
+      },
+      error: function(error) {
+        throw new Error('Failed to parse CSV data');
+      }
+    });
     
   } catch (error) {
     console.error('Error loading sheet data:', error);
-    alert('Failed to load data from Google Sheets. Please check your connection and try again.');
-    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('errorMessage').classList.add('show');
+    setTimeout(() => {
+      document.getElementById('loadingOverlay').style.background = 'rgba(247, 244, 239, 0.98)';
+    }, 100);
   }
 }
 
 // ── PROCESS SHEET DATA ───────────────────────────────────────────────
 function processSheetData(rows) {
-  const headers = rows[0];
-  const dataRows = rows.slice(1);
-  
   TABLE_DATA = [];
   const mentorStats = {};
   const deptSet = new Set();
   const subjectSet = new Set();
   
-  dataRows.forEach(row => {
-    const dept = row[5] || 'Unknown';
-    deptSet.add(dept);
+  rows.forEach(row => {
+    const dept = row.department || 'Unknown';
+    if (dept && dept !== 'Unknown') {
+      deptSet.add(dept);
+    }
     
-    // Process up to 7 subjects (columns R-AL)
+    // Process up to 7 subjects
     for (let i = 1; i <= 7; i++) {
-      const subjectName = row[17 + (i-1)*3];
-      const mentorName = row[18 + (i-1)*3];
-      const rating = parseFloat(row[19 + (i-1)*3]);
+      const subjectName = row[`subject${i}_Name`];
+      const mentorName = row[`subject${i}_Mentor`];
+      const rating = parseFloat(row[`subject${i}_Rating`]);
       
-      if (subjectName && mentorName && !isNaN(rating)) {
+      if (subjectName && mentorName && !isNaN(rating) && rating > 0) {
         subjectSet.add(subjectName);
         
         TABLE_DATA.push({
@@ -723,21 +754,38 @@ function processSheetData(rows) {
     };
   }).sort((a, b) => b.rating - a.rating);
   
-  DEPT_LIST = Array.from(deptSet);
+  DEPT_LIST = Array.from(deptSet).sort();
+  
+  // Update department filters
+  updateDeptFilters();
   
   // Update summary metrics
   const totalRatings = TABLE_DATA.length;
-  const avgRating = TABLE_DATA.reduce((sum, r) => sum + r.rating, 0) / totalRatings;
+  const avgRating = totalRatings > 0 ? TABLE_DATA.reduce((sum, r) => sum + r.rating, 0) / totalRatings : 0;
   
-  document.getElementById('avgRating').textContent = avgRating.toFixed(1);
-  document.getElementById('ratingStatus').textContent = avgRating >= 4.0 ? 'Excellent' : avgRating >= 3.5 ? 'Good' : 'Needs improvement';
-  document.getElementById('totalResponses').textContent = dataRows.length;
+  document.getElementById('avgRating').textContent = avgRating > 0 ? avgRating.toFixed(1) : '—';
+  document.getElementById('ratingStatus').textContent = avgRating >= 4.0 ? 'Excellent' : avgRating >= 3.5 ? 'Good' : avgRating > 0 ? 'Needs improvement' : 'No data';
+  document.getElementById('totalResponses').textContent = rows.length;
   document.getElementById('responseSub').textContent = `${totalRatings} subject ratings`;
   document.getElementById('mentorCount').textContent = MENTORS.length;
   document.getElementById('mentorSub').textContent = `Across ${DEPT_LIST.length} departments`;
   document.getElementById('subjectCount').textContent = subjectSet.size;
-  document.getElementById('subjectSub').textContent = `${DEPT_LIST.join(' · ')}`;
+  document.getElementById('subjectSub').textContent = DEPT_LIST.length > 0 ? DEPT_LIST.join(' · ') : 'No data';
   document.getElementById('pageSub').textContent = `${DEPT_LIST.length} departments · ${MENTORS.length} mentors · ${subjectSet.size} subjects`;
+}
+
+// ── UPDATE DEPT FILTERS ──────────────────────────────────────────────
+function updateDeptFilters() {
+  const filterRow = document.getElementById('deptFilterRow');
+  filterRow.innerHTML = '<button class="filter-chip active" onclick="setDeptFilter(\'all\',this)">All</button>';
+  
+  DEPT_LIST.forEach(dept => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip';
+    btn.textContent = dept;
+    btn.onclick = function() { setDeptFilter(dept, this); };
+    filterRow.appendChild(btn);
+  });
 }
 
 // ── RENDER ALL DATA ──────────────────────────────────────────────────
@@ -811,7 +859,7 @@ function renderMentorCards() {
     ? MENTORS 
     : MENTORS.filter(m => m.depts.some(d => d === currentDeptFilter));
     
-  document.getElementById('mentorGrid').innerHTML = list.map(m => {
+  document.getElementById('mentorGrid').innerHTML = list.length > 0 ? list.map(m => {
     const pct = (m.rating / 5 * 100).toFixed(0);
     const deptTags = m.depts.map(d => {
       const s = deptStyle(d);
@@ -848,7 +896,7 @@ function renderMentorCards() {
         <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${m.color}"></div></div>
       </div>
     </div>`;
-  }).join('');
+  }).join('') : '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--ink3)">No mentors found for this filter</div>';
 }
 
 // ── TABLE ────────────────────────────────────────────────────────────
@@ -857,7 +905,7 @@ function renderTable() {
     ? TABLE_DATA 
     : TABLE_DATA.filter(r => r.dept === currentDeptFilter);
     
-  document.getElementById('feedbackBody').innerHTML = data.map(r => {
+  document.getElementById('feedbackBody').innerHTML = data.length > 0 ? data.map(r => {
     const s = deptStyle(r.dept);
     return `<tr>
       <td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${r.dept}</span></td>
@@ -867,7 +915,7 @@ function renderTable() {
       <td>${stars(r.rating)}</td>
       <td>${statusBadge(r.rating)}</td>
     </tr>`;
-  }).join('');
+  }).join('') : '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ink3)">No feedback data found</td></tr>';
 }
 
 // ── CHARTS ───────────────────────────────────────────────────────────
@@ -878,35 +926,40 @@ function gridColor() { return 'rgba(160,140,110,0.1)'; }
 
 function initSummaryCharts() {
   // Top mentors chart
-  const topMentors = MENTORS.slice(0, 8);
-  chartInstances.topMentors = new Chart(document.getElementById('topMentorsChart'), {
-    type: 'bar',
-    data: {
-      labels: topMentors.map(m => m.name),
-      datasets: [{
-        data: topMentors.map(m => m.rating),
-        backgroundColor: topMentors.map((m, i) => i === 0 ? '#1a6b4a' : i === topMentors.length-1 ? '#8b2252' : '#e8d4a0'),
-        borderRadius: 5,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { min: 0, max: 5, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: gridColor() }, border: { display: false } },
-        y: { ticks: { font: { size: 11 } }, grid: { display: false }, border: { display: false } }
+  const topMentors = MENTORS.slice(0, Math.min(8, MENTORS.length));
+  
+  if (topMentors.length > 0) {
+    chartInstances.topMentors = new Chart(document.getElementById('topMentorsChart'), {
+      type: 'bar',
+      data: {
+        labels: topMentors.map(m => m.name),
+        datasets: [{
+          data: topMentors.map(m => m.rating),
+          backgroundColor: topMentors.map((m, i) => i === 0 ? '#1a6b4a' : i === topMentors.length-1 ? '#8b2252' : '#e8d4a0'),
+          borderRadius: 5,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { min: 0, max: 5, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: gridColor() }, border: { display: false } },
+          y: { ticks: { font: { size: 11 } }, grid: { display: false }, border: { display: false } }
+        }
       }
-    }
-  });
+    });
+  }
   
   // Rating distribution
   const ratingBuckets = [0, 0, 0, 0, 0];
   TABLE_DATA.forEach(r => {
     const bucket = Math.min(Math.floor(r.rating), 4);
-    ratingBuckets[bucket]++;
+    if (bucket >= 0 && bucket < 5) {
+      ratingBuckets[bucket]++;
+    }
   });
   
   chartInstances.distribution = new Chart(document.getElementById('distributionChart'), {
@@ -932,22 +985,25 @@ function initSummaryCharts() {
     }
   });
   
-  document.getElementById('topMentorsBadge').textContent = `Top ${topMentors.length}`;
+  document.getElementById('topMentorsBadge').textContent = topMentors.length > 0 ? `Top ${topMentors.length}` : 'No data';
 }
 
 function updateSummaryCharts() {
   if (chartInstances.topMentors) {
-    const topMentors = MENTORS.slice(0, 8);
+    const topMentors = MENTORS.slice(0, Math.min(8, MENTORS.length));
     chartInstances.topMentors.data.labels = topMentors.map(m => m.name);
     chartInstances.topMentors.data.datasets[0].data = topMentors.map(m => m.rating);
     chartInstances.topMentors.update();
+    document.getElementById('topMentorsBadge').textContent = topMentors.length > 0 ? `Top ${topMentors.length}` : 'No data';
   }
   
   if (chartInstances.distribution) {
     const ratingBuckets = [0, 0, 0, 0, 0];
     TABLE_DATA.forEach(r => {
       const bucket = Math.min(Math.floor(r.rating), 4);
-      ratingBuckets[bucket]++;
+      if (bucket >= 0 && bucket < 5) {
+        ratingBuckets[bucket]++;
+      }
     });
     chartInstances.distribution.data.datasets[0].data = ratingBuckets;
     chartInstances.distribution.update();
@@ -956,12 +1012,17 @@ function updateSummaryCharts() {
 
 // ── EXPORT ───────────────────────────────────────────────────────────
 function exportCSV() {
+  if (TABLE_DATA.length === 0) {
+    alert('No data to export. Please load data first.');
+    return;
+  }
+  
   const rows = [['Department', 'Mentor', 'Subject', 'Rating']];
   TABLE_DATA.forEach(r => rows.push([r.dept, r.mentor, r.subject, r.rating]));
   const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'asb-mentor-feedback.csv';
+  a.download = 'asb-mentor-feedback-' + new Date().toISOString().split('T')[0] + '.csv';
   a.click();
 }
 
