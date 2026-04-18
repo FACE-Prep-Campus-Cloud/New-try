@@ -4,43 +4,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MentorLens — Performance Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 :root {
-  --bg:        #f7f4ef;
-  --bg2:       #f0ece4;
+  --bg:        #fdf8ed;
+  --bg2:       #f5e9c8;
   --surface:   #ffffff;
-  --surface2:  #faf8f5;
-  --border:    rgba(160,140,110,0.15);
-  --border2:   rgba(160,140,110,0.28);
+  --surface2:  #fdf4e0;
+  --border:    rgba(120,80,10,0.10);
+  --border2:   rgba(120,80,10,0.22);
 
-  --ink:       #1a1612;
-  --ink2:      #4a3f35;
-  --ink3:      #8a7a6a;
-  --ink4:      #b8a898;
+  --ink:       #2a1800;
+  --ink2:      #4a2e00;
+  --ink3:      #8a6020;
+  --ink4:      #c09840;
 
-  --gold:      #b8860b;
-  --gold-lt:   #f5edda;
-  --gold-md:   #e8d4a0;
-  --emerald:   #1a6b4a;
-  --emerald-lt:#e0f0e8;
-  --sapphire:  #1e3a6e;
-  --sapphire-lt:#dde7f7;
-  --rose:      #8b2252;
-  --rose-lt:   #f5e0ec;
-  --amber:     #c4600a;
-  --amber-lt:  #fdecd8;
-  --slate:     #3d4f5c;
-  --slate-lt:  #e2e8ed;
+  --accent:      #7a4f00;
+  --accent-lt:   #fde9a0;
+  --accent-md:   #e6b84a;
 
-  --shadow-sm: 0 1px 3px rgba(30,20,10,0.06), 0 1px 2px rgba(30,20,10,0.04);
-  --shadow-md: 0 4px 16px rgba(30,20,10,0.08), 0 1px 4px rgba(30,20,10,0.05);
-  --shadow-lg: 0 12px 40px rgba(30,20,10,0.1), 0 4px 12px rgba(30,20,10,0.06);
+  --rose:      #7f1d1d;
+  --rose-lt:   #fee2e2;
+  --amber:     #78350f;
+  --amber-lt:  #fef3c7;
 
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body:    'Outfit', sans-serif;
+  --gold-dark:   #5c3600;
+  --gold-mid:    #c48a00;
+  --gold-light:  #fde9a0;
+  --gold-bright: #f5c842;
+
+  --shadow-sm: 0 1px 3px rgba(120,80,10,0.08), 0 1px 2px rgba(120,80,10,0.04);
+  --shadow-md: 0 4px 16px rgba(120,80,10,0.12), 0 1px 4px rgba(120,80,10,0.07);
+  --shadow-lg: 0 12px 40px rgba(120,80,10,0.16), 0 4px 12px rgba(120,80,10,0.08);
+
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
   --radius:       14px;
   --radius-sm:    8px;
 }
@@ -58,28 +58,19 @@ body {
   overflow-x: hidden;
 }
 
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.025'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9999;
-}
-
-/* Loading overlay */
 .loading-overlay {
   position: fixed; inset: 0;
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   z-index: 10000;
   transition: opacity 0.4s, visibility 0.4s;
-  flex-direction: column;
-  gap: 20px;
+  flex-direction: column; gap: 20px;
 }
 .loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .spinner {
   width: 48px; height: 48px;
-  border: 3px solid var(--border2);
-  border-top-color: var(--gold);
+  border: 3px solid var(--gold-light);
+  border-top-color: var(--gold-mid);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -94,7 +85,6 @@ body::after {
 .error-message.show { display: block; }
 .error-message strong { display: block; margin-bottom: 10px; font-size: 14px; }
 
-/* ─── LAYOUT ─── */
 .shell {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -102,69 +92,42 @@ body::after {
   min-height: 100vh;
 }
 
-/* ─── TOPBAR ─── */
+/* TOPBAR */
 .topbar {
   grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   padding: 0 32px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border2);
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(135deg, #4a2800 0%, #7a4f00 60%, #a06e00 100%);
+  border-bottom: 1px solid rgba(245,200,66,0.20);
+  box-shadow: 0 2px 16px rgba(90,50,0,0.30);
   position: sticky; top: 0; z-index: 100;
 }
 
-/* Logo = Institution name */
-.logo {
-  display: flex; align-items: center; gap: 14px;
-  font-family: var(--font-display);
-  color: var(--ink);
-}
-.logo-mark {
-  width: 34px; height: 34px;
-  background: linear-gradient(135deg, var(--gold), #d4a820);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; color: #fff;
-  box-shadow: 0 2px 8px rgba(184,134,11,0.35);
-  flex-shrink: 0;
-}
-.logo-institution {
-  display: flex; flex-direction: column; gap: 0;
-}
+.logo { display: flex; align-items: center; }
 .logo-name {
-  font-size: 22px; font-weight: 700;
-  color: var(--ink); line-height: 1.2;
-  white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; max-width: 400px;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 400;
+  color: #fde9a0;
+  line-height: 1.2; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  max-width: 420px; letter-spacing: -0.01em;
 }
 
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 
-/* College Dropdown */
-.college-dropdown-wrap {
-  position: relative;
-}
+.college-dropdown-wrap { position: relative; }
 .college-select-btn {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 14px;
-  background: var(--gold-lt);
-  border: 1px solid var(--gold-md);
+  background: rgba(253,233,160,0.12);
+  border: 1px solid rgba(253,233,160,0.32);
   border-radius: var(--radius-sm);
   font-family: var(--font-body); font-size: 12px; font-weight: 500;
-  color: var(--gold); cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  max-width: 220px;
-  overflow: hidden;
+  color: #fde9a0; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap; max-width: 220px; overflow: hidden;
 }
-.college-select-btn:hover { background: var(--gold-md); }
-.college-select-btn .btn-label {
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  flex: 1;
-}
+.college-select-btn:hover { background: rgba(253,233,160,0.22); }
+.college-select-btn .btn-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 .college-select-btn .caret { flex-shrink: 0; font-size: 9px; transition: transform 0.2s; }
 .college-select-btn.open .caret { transform: rotate(180deg); }
 
@@ -176,8 +139,7 @@ body::after {
   box-shadow: var(--shadow-lg);
   min-width: 280px; max-width: 340px;
   max-height: 380px; overflow-y: auto;
-  z-index: 200;
-  display: none;
+  z-index: 200; display: none;
 }
 .college-dropdown.open { display: block; animation: dropDown 0.18s cubic-bezier(.22,1,.36,1); }
 @keyframes dropDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
@@ -187,89 +149,83 @@ body::after {
   font-size: 12.5px; color: var(--ink2);
   cursor: pointer; border-bottom: 1px solid var(--border);
   transition: background 0.12s;
-  display: flex; align-items: center; gap: 8px;
-  line-height: 1.4;
+  display: flex; align-items: center; gap: 8px; line-height: 1.4;
 }
 .college-dropdown-item:last-child { border-bottom: none; }
-.college-dropdown-item:hover { background: var(--gold-lt); color: var(--gold); }
-.college-dropdown-item.active {
-  background: var(--gold-lt); color: var(--gold); font-weight: 500;
-}
+.college-dropdown-item:hover { background: var(--gold-light); color: var(--gold-dark); }
+.college-dropdown-item.active { background: var(--gold-light); color: var(--gold-dark); font-weight: 500; }
 .college-dropdown-item .item-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--border2); flex-shrink: 0; margin-top: 2px;
 }
-.college-dropdown-item.active .item-dot { background: var(--gold); }
+.college-dropdown-item.active .item-dot { background: var(--gold-mid); }
 
 .export-btn {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 16px;
-  background: var(--ink); color: #fff;
+  background: var(--gold-bright); color: var(--gold-dark);
   border: none; border-radius: var(--radius-sm);
-  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  font-family: var(--font-body); font-size: 12px; font-weight: 600;
   cursor: pointer; letter-spacing: 0.01em;
   transition: background 0.2s, transform 0.15s;
-  box-shadow: 0 2px 8px rgba(30,20,10,0.18);
+  box-shadow: 0 2px 8px rgba(160,110,0,0.35);
   white-space: nowrap;
 }
-.export-btn:hover { background: var(--ink2); transform: translateY(-1px); }
+.export-btn:hover { background: #f0be30; transform: translateY(-1px); }
 
 .faceprep-logo {
-  height: 38px; width: auto;
-  object-fit: contain; display: block;
+  height: 38px; width: auto; object-fit: contain; display: block;
+  filter: brightness(0) invert(1) opacity(0.85);
 }
 
-/* ─── SIDEBAR ─── */
+/* SIDEBAR */
 .sidebar {
-  background: var(--surface);
-  border-right: 1px solid var(--border2);
+  background: linear-gradient(180deg, #4a2800 0%, #5c3600 100%);
+  border-right: 1px solid rgba(245,200,66,0.15);
   padding: 24px 0;
   display: flex; flex-direction: column; gap: 2px;
-  box-shadow: 2px 0 12px rgba(30,20,10,0.03);
+  box-shadow: 2px 0 16px rgba(90,50,0,0.22);
 }
 
 .nav-group-label {
   font-size: 10px; font-weight: 600;
   letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink4);
+  color: rgba(253,233,160,0.40);
   padding: 12px 22px 5px;
 }
 
 .nav-item {
   display: flex; align-items: center; gap: 11px;
   padding: 10px 22px;
-  color: var(--ink3);
+  color: rgba(253,233,160,0.65);
   font-size: 13.5px; font-weight: 400;
   cursor: pointer;
   border-left: 2.5px solid transparent;
   transition: all 0.15s;
 }
-.nav-item:hover { color: var(--ink); background: var(--bg2); }
+.nav-item:hover { color: #fde9a0; background: rgba(253,233,160,0.07); }
 .nav-item.active {
-  color: var(--gold);
-  background: var(--gold-lt);
-  border-left-color: var(--gold);
+  color: #fde9a0;
+  background: rgba(253,233,160,0.13);
+  border-left-color: var(--gold-bright);
   font-weight: 500;
 }
 .nav-icon {
-  width: 28px; height: 28px;
-  border-radius: var(--radius-sm);
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  background: transparent;
-  transition: background 0.15s;
+  font-size: 14px; background: transparent; transition: background 0.15s;
 }
-.nav-item.active .nav-icon { background: var(--gold-md); color: var(--gold); }
+.nav-item.active .nav-icon { background: rgba(253,233,160,0.13); }
 
 .sidebar-footer {
   margin-top: auto;
   padding: 16px 22px 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(253,233,160,0.12);
 }
-.sidebar-footer-label { font-size: 11px; color: var(--ink4); }
-.sidebar-footer-val { font-size: 13px; font-weight: 500; color: var(--ink2); margin-top: 1px; }
+.sidebar-footer-label { font-size: 11px; color: rgba(253,233,160,0.35); }
+.sidebar-footer-val { font-size: 13px; font-weight: 500; color: rgba(253,233,160,0.70); margin-top: 1px; }
 
-/* ─── MAIN ─── */
+/* MAIN */
 .main {
   overflow-y: auto;
   padding: 32px 36px;
@@ -282,37 +238,33 @@ body::after {
   flex-wrap: wrap; gap: 12px;
 }
 .page-eyebrow {
-  font-size: 11px; font-weight: 500;
+  font-size: 11px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.12em;
-  color: var(--gold); margin-bottom: 4px;
+  color: var(--gold-mid); margin-bottom: 4px;
 }
 .page-title {
   font-family: var(--font-display);
-  font-size: 28px; font-weight: 700;
-  color: var(--ink); letter-spacing: -0.02em; line-height: 1.1;
+  font-size: 28px; font-weight: 400;
+  color: var(--ink); letter-spacing: -0.01em; line-height: 1.1;
 }
 .page-sub { font-size: 13px; color: var(--ink3); margin-top: 5px; }
 
 .filter-row { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
 .filter-chip {
-  padding: 7px 16px;
-  border-radius: 20px;
+  padding: 7px 16px; border-radius: 20px;
   border: 1px solid var(--border2);
-  background: var(--surface);
-  color: var(--ink3);
+  background: var(--surface); color: var(--ink3);
   font-size: 12px; font-weight: 500;
   cursor: pointer; font-family: var(--font-body);
-  transition: all 0.15s;
-  box-shadow: var(--shadow-sm);
+  transition: all 0.15s; box-shadow: var(--shadow-sm);
 }
-.filter-chip:hover { color: var(--ink); border-color: var(--gold-md); }
+.filter-chip:hover { color: var(--gold-dark); border-color: var(--gold-mid); }
 .filter-chip.active {
-  background: var(--gold); color: #fff;
-  border-color: var(--gold);
-  box-shadow: 0 2px 8px rgba(184,134,11,0.25);
+  background: var(--gold-dark); color: #fde9a0;
+  border-color: var(--gold-dark);
+  box-shadow: 0 2px 8px rgba(120,80,0,0.25);
 }
 
-/* ─── PANELS ─── */
 .panel { display: none; flex-direction: column; gap: 22px; }
 .panel.active { display: flex; }
 
@@ -326,12 +278,13 @@ body::after {
 .panel.active > *:nth-child(3) { animation-delay: 0.13s; }
 .panel.active > *:nth-child(4) { animation-delay: 0.18s; }
 
-/* ─── METRIC CARDS ─── */
+/* METRIC CARDS */
 .metrics-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
 
 .metric-card {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--gold-mid);
   border-radius: var(--radius);
   padding: 22px 24px;
   position: relative; overflow: hidden;
@@ -342,28 +295,25 @@ body::after {
 .metric-card::after {
   content: ''; position: absolute;
   bottom: -18px; right: -18px;
-  width: 72px; height: 72px;
-  border-radius: 50%; opacity: 0.08;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--gold-light); opacity: 0.55;
 }
-.metric-card:nth-child(1)::after { background: var(--gold); }
-.metric-card:nth-child(2)::after { background: var(--emerald); }
-.metric-card:nth-child(3)::after { background: var(--sapphire); }
-.metric-card:nth-child(4)::after { background: var(--rose); }
 
 .metric-icon-wrap {
   width: 36px; height: 36px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; margin-bottom: 14px;
+  background: var(--gold-light); color: var(--gold-dark);
 }
 .metric-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); }
 .metric-value {
   font-family: var(--font-display);
-  font-size: 34px; font-weight: 700;
-  line-height: 1.05; letter-spacing: -0.03em; margin-top: 3px;
+  font-size: 34px; font-weight: 400;
+  line-height: 1.05; letter-spacing: -0.02em; margin-top: 3px;
+  color: var(--gold-dark);
 }
 .metric-sub { font-size: 12px; color: var(--ink3); margin-top: 5px; display: flex; align-items: center; gap: 6px; }
 
-/* ─── CARDS ─── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -377,8 +327,7 @@ body::after {
 }
 .card-title {
   font-family: var(--font-display);
-  font-size: 15px; font-weight: 600;
-  color: var(--ink); letter-spacing: -0.01em;
+  font-size: 16px; font-weight: 400; color: var(--ink);
 }
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
@@ -387,78 +336,74 @@ body::after {
   font-size: 11px; font-weight: 500;
   padding: 3px 10px; border-radius: 20px;
 }
-.badge-gold    { background: var(--gold-lt);     color: var(--gold);     border: 1px solid var(--gold-md); }
-.badge-green   { background: var(--emerald-lt);  color: var(--emerald);  border: 1px solid #b5ddc8; }
-.badge-blue    { background: var(--sapphire-lt); color: var(--sapphire); border: 1px solid #b8ccec; }
-.badge-amber   { background: var(--amber-lt);    color: var(--amber);    border: 1px solid #f0c898; }
-.badge-rose    { background: var(--rose-lt);     color: var(--rose);     border: 1px solid #e0b4cc; }
-.badge-slate   { background: var(--slate-lt);    color: var(--slate);    border: 1px solid #c0ccd5; }
+.badge-primary { background: var(--gold-light); color: var(--gold-dark); border: 1px solid var(--accent-md); }
+.badge-gold    { background: var(--gold-light); color: var(--gold-dark); border: 1px solid var(--accent-md); }
+.badge-green   { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.badge-blue    { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.badge-amber   { background: #fef3c7; color: #78350f; border: 1px solid #fcd34d; }
+.badge-rose    { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
 
-/* ─── MENTOR GRID ─── */
+/* MENTOR GRID */
 .mentor-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
 
 .mentor-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px;
+  border-radius: var(--radius); padding: 22px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
 }
-.mentor-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--gold-md); }
+.mentor-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--accent-md); }
 
 .mentor-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .avatar {
   width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 15px; font-weight: 700;
+  font-family: var(--font-display); font-size: 15px; font-weight: 400;
   flex-shrink: 0; box-shadow: var(--shadow-sm);
+  background: var(--gold-light); color: var(--gold-dark);
 }
-.mentor-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink); }
+.mentor-name { font-family: var(--font-display); font-size: 15px; font-weight: 400; color: var(--ink); }
 .dept-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
 .dept-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; border: 1px solid; }
 
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 14px; }
 .stat-box {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 9px 12px;
 }
 .stat-lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink3); }
-.stat-val { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.2; margin-top: 2px; }
+.stat-val { font-family: var(--font-display); font-size: 20px; font-weight: 400; line-height: 1.2; margin-top: 2px; color: var(--gold-dark); }
 
-.bar-wrap { }
 .bar-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink3); margin-bottom: 5px; }
-.bar-bg { background: var(--bg2); border-radius: 99px; height: 6px; overflow: hidden; border: 1px solid var(--border); }
-.bar-fill { height: 100%; border-radius: 99px; transition: width 0.9s cubic-bezier(.4,0,.2,1); }
+.bar-bg { background: var(--gold-light); border-radius: 99px; height: 7px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold-mid) 100%); transition: width 0.9s cubic-bezier(.4,0,.2,1); }
 
-/* ─── TABLE ─── */
+/* TABLE */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead th {
   text-align: left; padding: 12px 16px;
-  font-size: 10.5px; font-weight: 600; color: var(--ink3);
+  font-size: 10.5px; font-weight: 600; color: #fde9a0;
   text-transform: uppercase; letter-spacing: 0.09em;
-  border-bottom: 1.5px solid var(--border2);
-  background: var(--surface2); white-space: nowrap;
+  border-bottom: 1.5px solid rgba(253,233,160,0.15);
+  background: linear-gradient(135deg, #4a2800 0%, #7a4f00 100%);
+  white-space: nowrap;
 }
 thead th:first-child { border-radius: var(--radius-sm) 0 0 0; }
 thead th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
 tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: var(--gold-lt); }
+tbody tr:hover td { background: var(--surface2); }
 tbody tr { transition: background 0.12s; }
-.stars { font-size: 12px; letter-spacing: 1.5px; }
+.stars { font-size: 12px; letter-spacing: 1.5px; color: var(--gold-mid); }
 
-/* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: var(--gold-md); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--gold-mid); border-radius: 99px; }
 .college-dropdown::-webkit-scrollbar { width: 4px; }
-.college-dropdown::-webkit-scrollbar-thumb { background: var(--gold-md); }
+.college-dropdown::-webkit-scrollbar-thumb { background: var(--gold-mid); }
 
-/* ─── RESPONSIVE ─── */
 @media (max-width: 960px) {
   .shell { grid-template-columns: 1fr; }
   .sidebar { display: none; }
@@ -466,7 +411,7 @@ tbody tr { transition: background 0.12s; }
   .metrics-row { grid-template-columns: 1fr 1fr; }
   .charts-grid { grid-template-columns: 1fr; }
   .mentor-cards { grid-template-columns: 1fr; }
-  .logo-name { max-width: 180px; font-size: 13px; }
+  .logo-name { max-width: 180px; font-size: 15px; }
 }
 </style>
 </head>
@@ -488,15 +433,11 @@ tbody tr { transition: background 0.12s; }
 
 <div class="shell">
 
-<!-- ── TOPBAR ── -->
 <header class="topbar">
   <div class="logo">
-    <div class="logo-institution">
-      <div class="logo-name" id="logoInstitutionName">Select a College</div>
-    </div>
+    <div class="logo-name" id="logoInstitutionName">Select a College</div>
   </div>
   <div class="topbar-right">
-    <!-- College Dropdown -->
     <div class="college-dropdown-wrap" id="collegeDropdownWrap">
       <button class="college-select-btn" id="collegeSelectBtn" onclick="toggleDropdown()">
         <span class="btn-label" id="collegeBtnLabel">Select College</span>
@@ -509,7 +450,6 @@ tbody tr { transition: background 0.12s; }
   </div>
 </header>
 
-<!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="nav-group-label">Analytics</div>
   <div class="nav-item active" onclick="showPanel('summary',this)">
@@ -521,7 +461,6 @@ tbody tr { transition: background 0.12s; }
   <div class="nav-item" onclick="showPanel('feedback',this)">
     <span class="nav-icon">≡</span> Feedback Table
   </div>
-
   <div class="sidebar-footer">
     <div class="sidebar-footer-label">Data Source</div>
     <div class="sidebar-footer-val">Google Sheets (Live)</div>
@@ -530,9 +469,7 @@ tbody tr { transition: background 0.12s; }
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
 <main class="main">
-
   <div class="page-header">
     <div>
       <div class="page-eyebrow" id="pageEyebrow">Performance Analytics</div>
@@ -544,32 +481,31 @@ tbody tr { transition: background 0.12s; }
     </div>
   </div>
 
-  <!-- SUMMARY PANEL -->
   <div class="panel active" id="panel-summary">
     <div class="metrics-row">
       <div class="metric-card">
-        <div class="metric-icon-wrap" style="background:var(--gold-lt);color:var(--gold)">◎</div>
+        <div class="metric-icon-wrap">◎</div>
         <div class="metric-label">Avg Overall Rating</div>
-        <div class="metric-value" style="color:var(--gold)" id="avgRating">—</div>
+        <div class="metric-value" id="avgRating">—</div>
         <div class="metric-sub"><span class="badge badge-gold" id="ratingStatus">—</span></div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon-wrap" style="background:var(--emerald-lt);color:var(--emerald)">◈</div>
+        <div class="metric-icon-wrap">◈</div>
         <div class="metric-label">Total Responses</div>
-        <div class="metric-value" style="color:var(--emerald)" id="totalResponses">—</div>
-        <div class="metric-sub" style="color:var(--ink3)" id="responseSub">—</div>
+        <div class="metric-value" id="totalResponses">—</div>
+        <div class="metric-sub" id="responseSub">—</div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon-wrap" style="background:var(--sapphire-lt);color:var(--sapphire)">◉</div>
+        <div class="metric-icon-wrap">◉</div>
         <div class="metric-label">Mentors Tracked</div>
-        <div class="metric-value" style="color:var(--sapphire)" id="mentorCount">—</div>
-        <div class="metric-sub" style="color:var(--ink3)" id="mentorSub">—</div>
+        <div class="metric-value" id="mentorCount">—</div>
+        <div class="metric-sub" id="mentorSub">—</div>
       </div>
       <div class="metric-card">
-        <div class="metric-icon-wrap" style="background:var(--rose-lt);color:var(--rose)">▦</div>
+        <div class="metric-icon-wrap">▦</div>
         <div class="metric-label">Subjects Covered</div>
-        <div class="metric-value" style="color:var(--rose)" id="subjectCount">—</div>
-        <div class="metric-sub" style="color:var(--ink3)" id="subjectSub">—</div>
+        <div class="metric-value" id="subjectCount">—</div>
+        <div class="metric-sub" id="subjectSub">—</div>
       </div>
     </div>
     <div class="charts-grid">
@@ -583,33 +519,27 @@ tbody tr { transition: background 0.12s; }
       <div class="card">
         <div class="card-header">
           <div class="card-title">Rating distribution</div>
-          <span class="badge badge-blue">All subjects</span>
+          <span class="badge badge-primary">All subjects</span>
         </div>
         <div style="position:relative;height:220px"><canvas id="distributionChart"></canvas></div>
       </div>
     </div>
   </div>
 
-  <!-- MENTOR PANEL -->
   <div class="panel" id="panel-mentors">
     <div class="mentor-cards" id="mentorGrid">
       <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor performance</div>
     </div>
   </div>
 
-  <!-- FEEDBACK TABLE PANEL -->
   <div class="panel" id="panel-feedback">
     <div class="card" style="padding:0;overflow:hidden">
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Department</th>
-              <th>Mentor</th>
-              <th>Subject</th>
-              <th>Rating</th>
-              <th>Stars</th>
-              <th>Status</th>
+              <th>Department</th><th>Mentor</th><th>Subject</th>
+              <th>Rating</th><th>Stars</th><th>Status</th>
             </tr>
           </thead>
           <tbody id="feedbackBody">
@@ -618,14 +548,12 @@ tbody tr { transition: background 0.12s; }
         </table>
       </div>
     </div>
-    <div style="font-size:11px;color:var(--ink4);padding:0 4px">* Live data from Google Sheets. Click "Refresh" to update.</div>
+    <div style="font-size:11px;color:var(--ink4);padding:0 4px">* Live data from Google Sheets.</div>
   </div>
-
 </main>
 </div>
 
 <script>
-// ── COLLEGES CONFIG ──────────────────────────────────────────────────
 const COLLEGES = [
   { name: "Kamaraj College", gid: "0" },
   { name: "Kamaraj Women's College", gid: "1140723423" },
@@ -652,41 +580,26 @@ const COLLEGES = [
 ];
 
 const SHEET_ID = '19HsWARl8RFNZ6nc-bUCBKKEN39JkQVxCBfbNCUSe2_4';
-
-let currentCollege = null;
-let MENTORS = [];
-let TABLE_DATA = [];
-let DEPT_LIST = [];
-let currentPanel = 'summary';
-let currentDeptFilter = 'all';
+let currentCollege = null, MENTORS = [], TABLE_DATA = [], DEPT_LIST = [];
+let currentPanel = 'summary', currentDeptFilter = 'all';
 const chartsInit = { summary: false };
 let chartInstances = {};
 
-// ── BUILD DROPDOWN ────────────────────────────────────────────────────
 function buildDropdown() {
-  const dd = document.getElementById('collegeDropdown');
-  dd.innerHTML = COLLEGES.map((c, i) => `
-    <div class="college-dropdown-item" id="dditem-${i}" onclick="selectCollege(${i})">
-      <span class="item-dot"></span>
-      ${c.name}
-    </div>
-  `).join('');
+  document.getElementById('collegeDropdown').innerHTML = COLLEGES.map((c,i) =>
+    `<div class="college-dropdown-item" id="dditem-${i}" onclick="selectCollege(${i})"><span class="item-dot"></span>${c.name}</div>`
+  ).join('');
 }
 
 function toggleDropdown() {
-  const dd = document.getElementById('collegeDropdown');
-  const btn = document.getElementById('collegeSelectBtn');
+  const dd = document.getElementById('collegeDropdown'), btn = document.getElementById('collegeSelectBtn');
   const isOpen = dd.classList.contains('open');
-  dd.classList.toggle('open', !isOpen);
-  btn.classList.toggle('open', !isOpen);
-  if (!isOpen) {
-    document.addEventListener('click', closeDropdownOutside, { once: true, capture: true });
-  }
+  dd.classList.toggle('open', !isOpen); btn.classList.toggle('open', !isOpen);
+  if (!isOpen) document.addEventListener('click', closeDropdownOutside, { once: true, capture: true });
 }
 
 function closeDropdownOutside(e) {
-  const wrap = document.getElementById('collegeDropdownWrap');
-  if (!wrap.contains(e.target)) {
+  if (!document.getElementById('collegeDropdownWrap').contains(e.target)) {
     document.getElementById('collegeDropdown').classList.remove('open');
     document.getElementById('collegeSelectBtn').classList.remove('open');
   }
@@ -694,119 +607,71 @@ function closeDropdownOutside(e) {
 
 function selectCollege(idx) {
   currentCollege = COLLEGES[idx];
-
-  // Update active state in dropdown
-  document.querySelectorAll('.college-dropdown-item').forEach((el, i) => {
-    el.classList.toggle('active', i === idx);
-  });
-
-  // Update button label & logo
+  document.querySelectorAll('.college-dropdown-item').forEach((el,i) => el.classList.toggle('active', i===idx));
   document.getElementById('collegeBtnLabel').textContent = currentCollege.name;
   document.getElementById('logoInstitutionName').textContent = currentCollege.name;
-
-  // Close dropdown
   document.getElementById('collegeDropdown').classList.remove('open');
   document.getElementById('collegeSelectBtn').classList.remove('open');
-
-  // Load data
   loadSheetData();
 }
 
-// ── LOAD DATA ─────────────────────────────────────────────────────────
 async function loadSheetData() {
-  if (!currentCollege) {
-    alert('Please select a college first.');
-    return;
-  }
-
-  const overlay = document.getElementById('loadingOverlay');
-  const errEl = document.getElementById('errorMessage');
+  if (!currentCollege) { alert('Please select a college first.'); return; }
+  const overlay = document.getElementById('loadingOverlay'), errEl = document.getElementById('errorMessage');
   document.getElementById('loadingText').textContent = `Loading data for ${currentCollege.name}...`;
-  overlay.classList.remove('hidden');
-  errEl.classList.remove('show');
-
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${currentCollege.gid}`;
-
+  overlay.classList.remove('hidden'); errEl.classList.remove('show');
   try {
-    const response = await fetch(csvUrl);
-    if (!response.ok) throw new Error('Fetch failed');
-
-    const csvText = await response.text();
-
-    Papa.parse(csvText, {
-      header: true,
-      skipEmptyLines: true,
-      complete(results) {
-        processSheetData(results.data);
-        renderAllData();
+    const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${currentCollege.gid}`);
+    if (!r.ok) throw new Error('Fetch failed');
+    Papa.parse(await r.text(), {
+      header: true, skipEmptyLines: true,
+      complete(res) {
+        processSheetData(res.data); renderAllData();
         document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
         setTimeout(() => overlay.classList.add('hidden'), 500);
       },
       error() { throw new Error('Parse failed'); }
     });
-  } catch (err) {
-    console.error(err);
-    errEl.classList.add('show');
-  }
+  } catch(err) { console.error(err); errEl.classList.add('show'); }
 }
 
-// ── PROCESS DATA ──────────────────────────────────────────────────────
 function processSheetData(rows) {
   TABLE_DATA = [];
-  const mentorStats = {};
-  const deptSet = new Set();
-  const subjectSet = new Set();
-
+  const mentorStats = {}, deptSet = new Set(), subjectSet = new Set();
   rows.forEach(row => {
     const dept = row.department || 'Unknown';
-    if (dept && dept !== 'Unknown') deptSet.add(dept);
-
+    if (dept !== 'Unknown') deptSet.add(dept);
     for (let i = 1; i <= 7; i++) {
-      const subjectName = row[`subject${i}_Name`];
-      const mentorName  = row[`subject${i}_Mentor`];
-      const rating      = parseFloat(row[`subject${i}_Rating`]);
-
-      if (subjectName && mentorName && !isNaN(rating) && rating > 0) {
-        subjectSet.add(subjectName);
-        TABLE_DATA.push({ dept, mentor: mentorName, subject: subjectName, rating });
-
-        if (!mentorStats[mentorName]) {
-          mentorStats[mentorName] = { name: mentorName, depts: new Set([dept]), ratings: [], subjects: new Set() };
-        }
-        mentorStats[mentorName].depts.add(dept);
-        mentorStats[mentorName].ratings.push(rating);
-        mentorStats[mentorName].subjects.add(subjectName);
+      const sn = row[`subject${i}_Name`], mn = row[`subject${i}_Mentor`], rt = parseFloat(row[`subject${i}_Rating`]);
+      if (sn && mn && !isNaN(rt) && rt > 0) {
+        subjectSet.add(sn); TABLE_DATA.push({ dept, mentor: mn, subject: sn, rating: rt });
+        if (!mentorStats[mn]) mentorStats[mn] = { name: mn, depts: new Set([dept]), ratings: [], subjects: new Set() };
+        mentorStats[mn].depts.add(dept); mentorStats[mn].ratings.push(rt); mentorStats[mn].subjects.add(sn);
       }
     }
   });
 
-  const colors   = ['#1e3a6e','#1a6b4a','#b8860b','#8b2252','#c4600a','#3d4f5c','#5e3a8a','#2a6b6b','#6e3a1e'];
-  const bgColors = ['#dde7f7','#e0f0e8','#f5edda','#f5e0ec','#fdecd8','#e2e8ed','#e8d4f7','#d4e8e8','#f7e8dd'];
-
-  MENTORS = Object.values(mentorStats).map((m, idx) => {
+  MENTORS = Object.values(mentorStats).map(m => {
     const avg = m.ratings.reduce((a,b) => a+b, 0) / m.ratings.length;
-    const initials = m.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
     return {
-      name: m.name, initials,
+      name: m.name,
+      initials: m.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase(),
       depts: Array.from(m.depts),
-      color: colors[idx % colors.length],
-      bg: bgColors[idx % bgColors.length],
       rating: parseFloat(avg.toFixed(1)),
       subjects: m.subjects.size,
       ratingCount: m.ratings.length
     };
-  }).sort((a, b) => b.rating - a.rating);
+  }).sort((a,b) => b.rating - a.rating);
 
   DEPT_LIST = Array.from(deptSet).sort();
   updateDeptFilters();
 
-  const totalRatings = TABLE_DATA.length;
-  const avgRating = totalRatings > 0 ? TABLE_DATA.reduce((s,r) => s + r.rating, 0) / totalRatings : 0;
-
-  document.getElementById('avgRating').textContent = avgRating > 0 ? avgRating.toFixed(1) : '—';
-  document.getElementById('ratingStatus').textContent = avgRating >= 4.0 ? 'Excellent' : avgRating >= 3.5 ? 'Good' : avgRating > 0 ? 'Needs improvement' : 'No data';
+  const tot = TABLE_DATA.length;
+  const avg = tot > 0 ? TABLE_DATA.reduce((s,r) => s+r.rating, 0) / tot : 0;
+  document.getElementById('avgRating').textContent = avg > 0 ? avg.toFixed(1) : '—';
+  document.getElementById('ratingStatus').textContent = avg >= 4.0 ? 'Excellent' : avg >= 3.5 ? 'Good' : avg > 0 ? 'Needs improvement' : 'No data';
   document.getElementById('totalResponses').textContent = rows.length;
-  document.getElementById('responseSub').textContent = `${totalRatings} subject ratings`;
+  document.getElementById('responseSub').textContent = `${tot} subject ratings`;
   document.getElementById('mentorCount').textContent = MENTORS.length;
   document.getElementById('mentorSub').textContent = `Across ${DEPT_LIST.length} departments`;
   document.getElementById('subjectCount').textContent = subjectSet.size;
@@ -819,28 +684,20 @@ function updateDeptFilters() {
   fr.innerHTML = '<button class="filter-chip active" onclick="setDeptFilter(\'all\',this)">All</button>';
   DEPT_LIST.forEach(dept => {
     const btn = document.createElement('button');
-    btn.className = 'filter-chip';
-    btn.textContent = dept;
+    btn.className = 'filter-chip'; btn.textContent = dept;
     btn.onclick = function() { setDeptFilter(dept, this); };
     fr.appendChild(btn);
   });
 }
 
 function renderAllData() {
-  renderMentorCards();
-  renderTable();
-  if (!chartsInit.summary) {
-    initSummaryCharts();
-    chartsInit.summary = true;
-  } else {
-    updateSummaryCharts();
-  }
+  renderMentorCards(); renderTable();
+  if (!chartsInit.summary) { initSummaryCharts(); chartsInit.summary = true; } else { updateSummaryCharts(); }
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────
 function stars(r) {
   const f = Math.floor(r), h = r - f >= 0.5;
-  return `<span class="stars" style="color:#b8860b">${'★'.repeat(f)}${h?'½':''}${'☆'.repeat(5-f-(h?1:0))}</span>`;
+  return `<span class="stars">${'★'.repeat(f)}${h?'½':''}${'☆'.repeat(5-f-(h?1:0))}</span>`;
 }
 function statusBadge(r) {
   if (r >= 4.3) return '<span class="badge badge-gold">Excellent</span>';
@@ -849,112 +706,88 @@ function statusBadge(r) {
   return '<span class="badge badge-rose">Needs work</span>';
 }
 function deptStyle(d) {
-  if (d.includes('BCA')) return { color:'#1e3a6e', bg:'#dde7f7', border:'#b8ccec' };
-  if (d.includes('BBA')) return { color:'#1a6b4a', bg:'#e0f0e8', border:'#b5ddc8' };
-  return { color:'#b8860b', bg:'#f5edda', border:'#e8d4a0' };
+  if (d.includes('BCA')) return { color:'#5c3600', bg:'#fde9a0', border:'#e6b84a' };
+  if (d.includes('BBA')) return { color:'#3d2200', bg:'#f5c842', border:'#c48a00' };
+  return { color:'#4a2e00', bg:'#fff3cc', border:'#e6b84a' };
 }
 
-// ── NAV ───────────────────────────────────────────────────────────────
 function showPanel(id, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
   currentPanel = id;
-
-  const meta = {
-    summary:  ['Performance Analytics', 'Overview'],
-    mentors:  ['Mentor Analytics', 'Performance'],
-    feedback: ['Student Feedback', 'Feedback Table'],
-  };
+  const meta = { summary:['Performance Analytics','Overview'], mentors:['Mentor Analytics','Performance'], feedback:['Student Feedback','Feedback Table'] };
   document.getElementById('pageEyebrow').textContent = meta[id][0];
   document.getElementById('pageTitle').textContent = meta[id][1];
-
-  const showFilter = id === 'mentors' || id === 'feedback';
-  document.getElementById('deptFilterRow').style.visibility = showFilter ? 'visible' : 'hidden';
-
-  if (id === 'mentors') renderMentorCards();
-  if (id === 'feedback') renderTable();
+  document.getElementById('deptFilterRow').style.visibility = (id==='mentors'||id==='feedback') ? 'visible' : 'hidden';
+  if (id==='mentors') renderMentorCards();
+  if (id==='feedback') renderTable();
 }
 
 function setDeptFilter(val, btn) {
   currentDeptFilter = val;
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  if (currentPanel === 'mentors') renderMentorCards();
-  if (currentPanel === 'feedback') renderTable();
+  if (currentPanel==='mentors') renderMentorCards();
+  if (currentPanel==='feedback') renderTable();
 }
 
-// ── RENDER MENTORS ────────────────────────────────────────────────────
 function renderMentorCards() {
-  const list = currentDeptFilter === 'all'
-    ? MENTORS
-    : MENTORS.filter(m => m.depts.some(d => d === currentDeptFilter));
-
+  const list = currentDeptFilter==='all' ? MENTORS : MENTORS.filter(m => m.depts.some(d => d===currentDeptFilter));
   document.getElementById('mentorGrid').innerHTML = list.length > 0 ? list.map(m => {
-    const pct = (m.rating / 5 * 100).toFixed(0);
-    const deptTags = m.depts.map(d => {
-      const s = deptStyle(d);
-      return `<span class="dept-tag" style="color:${s.color};background:${s.bg};border-color:${s.border}">${d}</span>`;
-    }).join('');
+    const pct = (m.rating/5*100).toFixed(0);
+    const tags = m.depts.map(d => { const s=deptStyle(d); return `<span class="dept-tag" style="color:${s.color};background:${s.bg};border-color:${s.border}">${d}</span>`; }).join('');
     return `<div class="mentor-card">
       <div class="mentor-head">
-        <div class="avatar" style="background:${m.bg};color:${m.color}">${m.initials}</div>
-        <div>
-          <div class="mentor-name">${m.name}</div>
-          <div class="dept-tags">${deptTags}</div>
-        </div>
+        <div class="avatar">${m.initials}</div>
+        <div><div class="mentor-name">${m.name}</div><div class="dept-tags">${tags}</div></div>
       </div>
       <div class="stat-grid">
-        <div class="stat-box"><div class="stat-lbl">Avg Rating</div><div class="stat-val" style="color:${m.color}">${m.rating.toFixed(1)}</div></div>
+        <div class="stat-box"><div class="stat-lbl">Avg Rating</div><div class="stat-val">${m.rating.toFixed(1)}</div></div>
         <div class="stat-box"><div class="stat-lbl">Subjects</div><div class="stat-val" style="color:var(--ink)">${m.subjects}</div></div>
-        <div class="stat-box"><div class="stat-lbl">Ratings</div><div class="stat-val" style="color:var(--emerald)">${m.ratingCount}</div></div>
+        <div class="stat-box"><div class="stat-lbl">Ratings</div><div class="stat-val">${m.ratingCount}</div></div>
         <div class="stat-box" style="display:flex;align-items:center;justify-content:center">${statusBadge(m.rating)}</div>
       </div>
-      <div class="bar-wrap">
-        <div class="bar-top"><span>Performance score</span><span>${pct}%</span></div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${m.color}"></div></div>
-      </div>
+      <div class="bar-top"><span>Performance score</span><span>${pct}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
     </div>`;
-  }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3)">No mentors found for this filter</div>';
+  }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3)">No mentors found</div>';
 }
 
-// ── RENDER TABLE ──────────────────────────────────────────────────────
 function renderTable() {
-  const data = currentDeptFilter === 'all'
-    ? TABLE_DATA
-    : TABLE_DATA.filter(r => r.dept === currentDeptFilter);
-
+  const data = currentDeptFilter==='all' ? TABLE_DATA : TABLE_DATA.filter(r => r.dept===currentDeptFilter);
   document.getElementById('feedbackBody').innerHTML = data.length > 0 ? data.map(r => {
     const s = deptStyle(r.dept);
     return `<tr>
       <td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${r.dept}</span></td>
       <td style="font-weight:600;font-size:13.5px">${r.mentor}</td>
       <td style="color:var(--ink3);font-size:12px;max-width:250px">${r.subject}</td>
-      <td><span style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--ink)">${r.rating.toFixed(1)}</span><span style="color:var(--ink4);font-size:11px">/5</span></td>
+      <td><span style="font-family:var(--font-display);font-size:16px;font-weight:400;color:var(--gold-dark)">${r.rating.toFixed(1)}</span><span style="color:var(--ink4);font-size:11px">/5</span></td>
       <td>${stars(r.rating)}</td>
       <td>${statusBadge(r.rating)}</td>
     </tr>`;
   }).join('') : '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink3)">No feedback data found</td></tr>';
 }
 
-// ── CHARTS ────────────────────────────────────────────────────────────
-Chart.defaults.font.family = 'Outfit';
-Chart.defaults.color = '#8a7a6a';
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.color = '#8a6020';
 
 function initSummaryCharts() {
-  const topMentors = MENTORS.slice(0, Math.min(8, MENTORS.length));
+  const top = MENTORS.slice(0, Math.min(8, MENTORS.length));
   chartInstances.topMentors = new Chart(document.getElementById('topMentorsChart'), {
     type: 'bar',
     data: {
-      labels: topMentors.map(m => m.name),
-      datasets: [{ data: topMentors.map(m => m.rating), backgroundColor: topMentors.map((m,i) => i===0?'#1a6b4a':i===topMentors.length-1?'#8b2252':'#e8d4a0'), borderRadius: 5, borderSkipped: false }]
+      labels: top.map(m => m.name),
+      datasets: [{ data: top.map(m => m.rating),
+        backgroundColor: top.map((m,i) => i===0 ? '#5c3600' : i===top.length-1 ? '#f5c842' : '#c48a00'),
+        borderRadius: 5, borderSkipped: false }]
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { min:0, max:5, ticks:{ stepSize:1, font:{size:10} }, grid:{color:'rgba(160,140,110,0.1)'}, border:{display:false} },
+        x: { min:0, max:5, ticks:{stepSize:1,font:{size:10}}, grid:{color:'rgba(120,80,10,0.07)'}, border:{display:false} },
         y: { ticks:{font:{size:11}}, grid:{display:false}, border:{display:false} }
       }
     }
@@ -964,16 +797,18 @@ function initSummaryCharts() {
   chartInstances.distribution = new Chart(document.getElementById('distributionChart'), {
     type: 'doughnut',
     data: {
-      labels: ['1-2','2-3','3-4','4-5','5'],
-      datasets: [{ data: buckets, backgroundColor:['#8b2252','#c4600a','#e8d4a0','#1a6b4a','#b8860b'], borderWidth:0 }]
+      labels: ['1–2','2–3','3–4','4–5','5'],
+      datasets: [{ data: buckets,
+        backgroundColor: ['#7f1d1d','#d97706','#f5c842','#c48a00','#5c3600'],
+        borderWidth: 2, borderColor: '#ffffff' }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display:true, position:'right', labels:{font:{size:11},boxWidth:12,padding:12,color:'#8a7a6a'} } }
+      plugins: { legend: { display:true, position:'right', labels:{font:{size:11},boxWidth:12,padding:12,color:'#8a6020'} } }
     }
   });
 
-  document.getElementById('topMentorsBadge').textContent = topMentors.length > 0 ? `Top ${topMentors.length}` : 'No data';
+  document.getElementById('topMentorsBadge').textContent = top.length > 0 ? `Top ${top.length}` : 'No data';
 }
 
 function updateSummaryCharts() {
@@ -981,27 +816,23 @@ function updateSummaryCharts() {
     const top = MENTORS.slice(0, Math.min(8, MENTORS.length));
     chartInstances.topMentors.data.labels = top.map(m => m.name);
     chartInstances.topMentors.data.datasets[0].data = top.map(m => m.rating);
-    chartInstances.topMentors.data.datasets[0].backgroundColor = top.map((m,i) => i===0?'#1a6b4a':i===top.length-1?'#8b2252':'#e8d4a0');
+    chartInstances.topMentors.data.datasets[0].backgroundColor = top.map((m,i) => i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00');
     chartInstances.topMentors.update();
     document.getElementById('topMentorsBadge').textContent = top.length > 0 ? `Top ${top.length}` : 'No data';
   }
-  if (chartInstances.distribution) {
-    chartInstances.distribution.data.datasets[0].data = getRatingBuckets();
-    chartInstances.distribution.update();
-  }
+  if (chartInstances.distribution) { chartInstances.distribution.data.datasets[0].data = getRatingBuckets(); chartInstances.distribution.update(); }
 }
 
 function getRatingBuckets() {
   const b = [0,0,0,0,0];
-  TABLE_DATA.forEach(r => { const i = Math.min(Math.floor(r.rating), 4); if (i>=0) b[i]++; });
+  TABLE_DATA.forEach(r => { const i = Math.min(Math.floor(r.rating),4); if(i>=0) b[i]++; });
   return b;
 }
 
-// ── EXPORT ────────────────────────────────────────────────────────────
 function exportCSV() {
-  if (TABLE_DATA.length === 0) { alert('No data to export.'); return; }
+  if (!TABLE_DATA.length) { alert('No data to export.'); return; }
   const rows = [['Department','Mentor','Subject','Rating']];
-  TABLE_DATA.forEach(r => rows.push([r.dept, r.mentor, r.subject, r.rating]));
+  TABLE_DATA.forEach(r => rows.push([r.dept,r.mentor,r.subject,r.rating]));
   const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
@@ -1009,10 +840,8 @@ function exportCSV() {
   a.click();
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   buildDropdown();
-  // Hide loading overlay on init since no college is selected yet
   document.getElementById('loadingOverlay').classList.add('hidden');
 });
 </script>
