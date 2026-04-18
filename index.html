@@ -117,11 +117,9 @@ body::after {
 
 /* Logo = Institution name */
 .logo {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 14px;
   font-family: var(--font-display);
-  font-size: 18px; font-weight: 700;
   color: var(--ink);
-  letter-spacing: -0.01em;
 }
 .logo-mark {
   width: 34px; height: 34px;
@@ -135,17 +133,12 @@ body::after {
 .logo-institution {
   display: flex; flex-direction: column; gap: 0;
 }
-.logo-eyebrow {
-  font-family: var(--font-body);
-  font-size: 9px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--gold); line-height: 1;
-}
 .logo-name {
-  font-size: 16px; font-weight: 700;
+  font-size: 22px; font-weight: 700;
   color: var(--ink); line-height: 1.2;
   white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; max-width: 320px;
+  text-overflow: ellipsis; max-width: 400px;
+  letter-spacing: -0.02em;
 }
 
 .topbar-right { display: flex; align-items: center; gap: 10px; }
@@ -208,7 +201,7 @@ body::after {
 }
 .college-dropdown-item.active .item-dot { background: var(--gold); }
 
-.export-btn, .refresh-btn {
+.export-btn {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 16px;
   background: var(--ink); color: #fff;
@@ -219,9 +212,12 @@ body::after {
   box-shadow: 0 2px 8px rgba(30,20,10,0.18);
   white-space: nowrap;
 }
-.export-btn:hover, .refresh-btn:hover { background: var(--ink2); transform: translateY(-1px); }
-.refresh-btn { background: var(--emerald); }
-.refresh-btn:hover { background: #25805e; }
+.export-btn:hover { background: var(--ink2); transform: translateY(-1px); }
+
+.faceprep-logo {
+  height: 38px; width: auto;
+  object-fit: contain; display: block;
+}
 
 /* ─── SIDEBAR ─── */
 .sidebar {
@@ -497,7 +493,6 @@ tbody tr { transition: background 0.12s; }
   <div class="logo">
     <div class="logo-mark">◈</div>
     <div class="logo-institution">
-      <div class="logo-eyebrow">MentorLens · Institution</div>
       <div class="logo-name" id="logoInstitutionName">Select a College</div>
     </div>
   </div>
@@ -510,7 +505,7 @@ tbody tr { transition: background 0.12s; }
       </button>
       <div class="college-dropdown" id="collegeDropdown"></div>
     </div>
-    <button class="refresh-btn" onclick="loadSheetData()">↻ Refresh</button>
+    <img src="face prep campus.webp" alt="FacePrep Campus" class="faceprep-logo">
     <button class="export-btn" onclick="exportCSV()">↓ Export</button>
   </div>
 </header>
