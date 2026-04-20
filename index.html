@@ -845,7 +845,7 @@ function initSummaryCharts() {
   chartInstances.topMentors = new Chart(document.getElementById('topMentorsChart'), {
     type: 'bar',
     data: {
-      labels: top.map(m => `${m.name} (${m.subjects} subjects)`),
+      labels: top.map(m => m.name),
       datasets: [{
         data: top.map(m => m.rating),
         backgroundColor: top.map((m,i) => i===0 ? '#5c3600' : i===top.length-1 ? '#f5c842' : '#c48a00'),
@@ -936,7 +936,7 @@ function updateSummaryCharts() {
     // Resize the wrapper
     document.getElementById('topMentorsWrap').style.height = chartH + 'px';
 
-    chartInstances.topMentors.data.labels = top.map(m => `${m.name} (${m.subjects} subjects)`);
+    chartInstances.topMentors.data.labels = top.map(m => m.name);
     chartInstances.topMentors.data.datasets[0].data = top.map(m => m.rating);
     chartInstances.topMentors.data.datasets[0].backgroundColor = top.map((m,i) => i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00');
     chartInstances.topMentors.update();
