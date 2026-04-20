@@ -340,7 +340,6 @@ body {
   font-size: 16px; font-weight: 400; color: var(--ink);
 }
 
-/* CHART GRID — top mentors gets more height when many mentors */
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
 .chart-mentors-wrap { position: relative; }
 
@@ -550,17 +549,16 @@ tbody tr { transition: background 0.12s; }
           <div class="card-title">Mentor Ratings</div>
           <span class="badge badge-gold" id="topMentorsBadge">—</span>
         </div>
-        <!-- height is set dynamically by JS based on mentor count -->
         <div class="chart-mentors-wrap" id="topMentorsWrap">
           <canvas id="topMentorsChart"></canvas>
         </div>
       </div>
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Rating distribution</div>
-          <span class="badge badge-primary">All subjects</span>
+          <div class="card-title">Rating Distribution</div>
+          <span class="badge badge-primary" id="distBadge">All mentors</span>
         </div>
-        <div style="position:relative;height:220px"><canvas id="distributionChart"></canvas></div>
+        <div style="position:relative;height:260px"><canvas id="distributionChart"></canvas></div>
       </div>
     </div>
   </div>
@@ -626,7 +624,34 @@ let currentPanel = 'summary', currentDeptFilter = 'all';
 const chartsInit = { summary: false };
 let chartInstances = {};
 
-// Each bar row gets 38px height; minimum 200px, no cap — all mentors visible
+// ─── Rating distribution: based on MENTOR average ratings (same as bar chart) ───
+// Buckets aligned to the bar chart color scheme:
+//   Excellent ≥ 4.3  → darkest  #5c3600
+//   Good      4.0–4.29 → mid    #c48a00
+//   Average   3.5–3.99 → amber  #d97706
+//   Low       < 3.5    → yellow #f5c842
+const DIST_BUCKETS = [
+  { label: 'Excellent (≥4.3)', min: 4.3,  max: Infinity, color: '#5c3600' },
+  { label: 'Good (4.0–4.3)',   min: 4.0,  max: 4.3,      color: '#c48a00' },
+  { label: 'Average (3.5–4)', min: 3.5,  max: 4.0,      color: '#d97706' },
+  { label: 'Low (<3.5)',       min: -Infinity, max: 3.5, color: '#f5c842' },
+];
+
+function getMentorRatingBuckets() {
+  // Use MENTOR average ratings so distribution matches the bar chart
+  const counts = DIST_BUCKETS.map(() => 0);
+  MENTORS.forEach(m => {
+    const r = m.rating;
+    for (let i = 0; i < DIST_BUCKETS.length; i++) {
+      if (r >= DIST_BUCKETS[i].min && r < DIST_BUCKETS[i].max) {
+        counts[i]++;
+        break;
+      }
+    }
+  });
+  return counts;
+}
+
 function topMentorsChartHeight(count) {
   return Math.max(200, count * 38);
 }
@@ -836,8 +861,6 @@ Chart.defaults.color = '#8a6020';
 function initSummaryCharts() {
   const top = MENTORS.slice(0, Math.min(15, MENTORS.length));
   const chartH = topMentorsChartHeight(top.length);
-
-  // Set the wrapper height dynamically
   const wrap = document.getElementById('topMentorsWrap');
   wrap.style.position = 'relative';
   wrap.style.height = chartH + 'px';
@@ -860,13 +883,13 @@ function initSummaryCharts() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { 
-          callbacks: { 
+        tooltip: {
+          callbacks: {
             label: ctx => {
               const mentor = top[ctx.dataIndex];
               return `${ctx.parsed.x.toFixed(1)} / 5.0 (${mentor.subjects} subjects)`;
             }
-          } 
+          }
         },
         datalabels: {
           anchor: 'end', align: 'end',
@@ -890,52 +913,79 @@ function initSummaryCharts() {
     plugins: [ChartDataLabels]
   });
 
-  const buckets = getRatingBuckets();
+  // ── Distribution chart: mentor avg ratings, same colour scheme as bar chart ──
+  const bucketCounts = getMentorRatingBuckets();
+  const bucketLabels = DIST_BUCKETS.map(b => b.label);
+  const bucketColors = DIST_BUCKETS.map(b => b.color);
+
   chartInstances.distribution = new Chart(document.getElementById('distributionChart'), {
     type: 'doughnut',
     data: {
-      labels: ['1–2','2–3','3–4','4–5','5'],
+      labels: bucketLabels,
       datasets: [{
-        data: buckets,
-        backgroundColor: ['#7f1d1d','#d97706','#f5c842','#c48a00','#5c3600'],
-        borderWidth: 2, borderColor: '#ffffff'
+        data: bucketCounts,
+        backgroundColor: bucketColors,
+        borderWidth: 3,
+        borderColor: '#ffffff',
+        hoverOffset: 8
       }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '58%',
       plugins: {
         legend: {
-          display: true, position: 'right',
+          display: true,
+          position: 'bottom',
           labels: {
-            font:{size:11}, boxWidth:12, padding:12, color:'#8a6020',
+            font: { size: 11 },
+            boxWidth: 12,
+            padding: 14,
+            color: '#8a6020',
             generateLabels(chart) {
               return chart.data.labels.map((label, i) => {
                 const value = chart.data.datasets[0].data[i];
-                const total = chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-                const pct = total > 0 ? ((value/total)*100).toFixed(0) : 0;
-                return { text: label+': '+value+' ('+pct+'%)', fillStyle: chart.data.datasets[0].backgroundColor[i], hidden:false, index:i };
+                const total = chart.data.datasets[0].data.reduce((a,b) => a+b, 0);
+                const pct = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                return {
+                  text: `${label}: ${value} mentor${value !== 1 ? 's' : ''} (${pct}%)`,
+                  fillStyle: chart.data.datasets[0].backgroundColor[i],
+                  hidden: false,
+                  index: i
+                };
               });
             }
           }
         },
-        tooltip: { callbacks: { label(ctx) { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ctx.label+': '+ctx.parsed+' ('+((ctx.parsed/t)*100).toFixed(1)+'%)'; } } },
-        datalabels: { color:'#fff', font:{weight:'bold',size:13}, formatter:(v)=>v>0?v:'' }
+        tooltip: {
+          callbacks: {
+            label(ctx) {
+              const t = ctx.dataset.data.reduce((a,b) => a+b, 0);
+              const pct = t > 0 ? ((ctx.parsed / t) * 100).toFixed(1) : 0;
+              return `${ctx.label}: ${ctx.parsed} mentor${ctx.parsed !== 1 ? 's' : ''} (${pct}%)`;
+            }
+          }
+        },
+        datalabels: {
+          color: '#fff',
+          font: { weight: 'bold', size: 13 },
+          formatter: v => v > 0 ? v : ''
+        }
       }
     },
     plugins: [ChartDataLabels]
   });
 
   document.getElementById('topMentorsBadge').textContent = top.length > 0 ? `Top ${top.length}` : 'No data';
+  document.getElementById('distBadge').textContent = `${MENTORS.length} mentors`;
 }
 
 function updateSummaryCharts() {
   if (chartInstances.topMentors) {
     const top = MENTORS.slice(0, Math.min(15, MENTORS.length));
     const chartH = topMentorsChartHeight(top.length);
-
-    // Resize the wrapper
     document.getElementById('topMentorsWrap').style.height = chartH + 'px';
-
     chartInstances.topMentors.data.labels = top.map(m => m.name);
     chartInstances.topMentors.data.datasets[0].data = top.map(m => m.rating);
     chartInstances.topMentors.data.datasets[0].backgroundColor = top.map((m,i) => i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00');
@@ -943,15 +993,10 @@ function updateSummaryCharts() {
     document.getElementById('topMentorsBadge').textContent = top.length > 0 ? `Top ${top.length}` : 'No data';
   }
   if (chartInstances.distribution) {
-    chartInstances.distribution.data.datasets[0].data = getRatingBuckets();
+    chartInstances.distribution.data.datasets[0].data = getMentorRatingBuckets();
     chartInstances.distribution.update();
+    document.getElementById('distBadge').textContent = `${MENTORS.length} mentors`;
   }
-}
-
-function getRatingBuckets() {
-  const b = [0,0,0,0,0];
-  TABLE_DATA.forEach(r => { const i = Math.min(Math.floor(r.rating),4); if(i>=0) b[i]++; });
-  return b;
 }
 
 function downloadAllPages() {
@@ -1002,6 +1047,9 @@ function downloadAllPages() {
   const sectionStyle = 'margin-bottom:40px';
   const sectionTitleStyle = 'font-family:Georgia,serif;font-size:20px;font-weight:400;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px';
 
+  const bucketCounts = getMentorRatingBuckets();
+  const maxC = Math.max(...bucketCounts, 1);
+
   const html = `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title>
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;font-size:13px;line-height:1.6;}
@@ -1016,9 +1064,10 @@ table{width:100%;border-collapse:collapse;font-size:13px;}
 <div class="report-body">
 <div style="${sectionStyle}"><div style="${sectionTitleStyle}">Summary Overview</div>${metricsHTML}
 <div style="background:#fff;border:1px solid rgba(120,80,10,0.10);border-radius:14px;padding:18px 20px">
-<div style="font-size:12px;color:#8a6020;margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em">Rating Distribution</div>
+<div style="font-size:12px;color:#8a6020;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em">Rating Distribution (by Mentor Avg)</div>
+<div style="font-size:11px;color:#c09840;margin-bottom:12px">Same scale as Mentor Ratings chart</div>
 <div style="display:flex;gap:10px;align-items:flex-end;height:80px">
-${getRatingBuckets().map((count,i)=>{const labels=['1–2','2–3','3–4','4–5','5'],colors=['#7f1d1d','#d97706','#f5c842','#c48a00','#5c3600'],maxC=Math.max(...getRatingBuckets(),1),pct=(count/maxC*100).toFixed(0);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:11px;font-weight:600;color:${colors[i]}">${count}</div><div style="width:100%;background:${colors[i]};height:${pct}%;min-height:4px;border-radius:4px 4px 0 0"></div><div style="font-size:10px;color:#8a6020">${labels[i]}</div></div>`;}).join('')}
+${bucketCounts.map((count,i)=>{const pct=(count/maxC*100).toFixed(0);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:11px;font-weight:600;color:${DIST_BUCKETS[i].color}">${count}</div><div style="width:100%;background:${DIST_BUCKETS[i].color};height:${pct}%;min-height:4px;border-radius:4px 4px 0 0"></div><div style="font-size:9px;color:#8a6020;text-align:center;line-height:1.2">${DIST_BUCKETS[i].label}</div></div>`;}).join('')}
 </div></div></div>
 <div style="${sectionStyle}" class="page-break"><div style="${sectionTitleStyle}">Mentor Performance</div>
 <table>${tableHead(['Mentor Name','Department(s)','Avg Rating','Subjects','Status'])}<tbody>${mentorRowsHTML}</tbody></table></div>
