@@ -339,7 +339,10 @@ body {
   font-family: var(--font-display);
   font-size: 16px; font-weight: 400; color: var(--ink);
 }
-.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* CHART GRID — top mentors gets more height when many mentors */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.chart-mentors-wrap { position: relative; }
 
 .badge {
   display: inline-flex; align-items: center;
@@ -353,7 +356,7 @@ body {
 .badge-amber   { background: #fef3c7; color: #78350f; border: 1px solid #fcd34d; }
 .badge-rose    { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
 
-/* MENTOR GRID — simplified */
+/* MENTOR GRID */
 .mentor-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
 
 .mentor-card {
@@ -375,9 +378,7 @@ body {
 .mentor-dept-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 16px; }
 .dept-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; border: 1px solid; }
 
-.mentor-stats-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-}
+.mentor-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mentor-stat {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -421,7 +422,6 @@ tbody tr { transition: background 0.12s; }
 .college-dropdown::-webkit-scrollbar { width: 4px; }
 .college-dropdown::-webkit-scrollbar-thumb { background: var(--gold-mid); }
 
-/* PRINT / DOWNLOAD STYLES */
 @media print {
   .topbar, .sidebar, .filter-row, .sidebar-footer { display: none !important; }
   .shell { display: block !important; }
@@ -429,11 +429,6 @@ tbody tr { transition: background 0.12s; }
   .panel { display: flex !important; page-break-after: always; }
   .panel:last-child { page-break-after: avoid; }
   body { background: white !important; }
-  .print-section-title {
-    font-family: Georgia, serif; font-size: 22px;
-    color: #5c3600; margin-bottom: 20px;
-    padding-bottom: 10px; border-bottom: 2px solid #e6b84a;
-  }
 }
 
 @media (max-width: 960px) {
@@ -555,14 +550,17 @@ tbody tr { transition: background 0.12s; }
           <div class="card-title">Top rated mentors</div>
           <span class="badge badge-gold" id="topMentorsBadge">—</span>
         </div>
-        <div style="position:relative;height:250px"><canvas id="topMentorsChart"></canvas></div>
+        <!-- height is set dynamically by JS based on mentor count -->
+        <div class="chart-mentors-wrap" id="topMentorsWrap">
+          <canvas id="topMentorsChart"></canvas>
+        </div>
       </div>
       <div class="card">
         <div class="card-header">
           <div class="card-title">Rating distribution</div>
           <span class="badge badge-primary">All subjects</span>
         </div>
-        <div style="position:relative;height:250px"><canvas id="distributionChart"></canvas></div>
+        <div style="position:relative;height:220px"><canvas id="distributionChart"></canvas></div>
       </div>
     </div>
   </div>
@@ -628,6 +626,11 @@ let currentPanel = 'summary', currentDeptFilter = 'all';
 const chartsInit = { summary: false };
 let chartInstances = {};
 
+// Each bar row gets 38px height; minimum 200px, no cap — all mentors visible
+function topMentorsChartHeight(count) {
+  return Math.max(200, count * 38);
+}
+
 function buildDropdown() {
   document.getElementById('collegeDropdown').innerHTML = COLLEGES.map((c,i) =>
     `<div class="college-dropdown-item" id="dditem-${i}" onclick="selectCollege(${i})"><span class="item-dot"></span>${c.name}</div>`
@@ -664,10 +667,7 @@ function refreshData() {
   btn.classList.add('spinning');
   btn.disabled = true;
   loadSheetData().finally(() => {
-    setTimeout(() => {
-      btn.classList.remove('spinning');
-      btn.disabled = false;
-    }, 600);
+    setTimeout(() => { btn.classList.remove('spinning'); btn.disabled = false; }, 600);
   });
 }
 
@@ -713,13 +713,7 @@ function processSheetData(rows) {
 
   MENTORS = Object.values(mentorStats).map(m => {
     const avg = m.ratings.reduce((a,b) => a+b, 0) / m.ratings.length;
-    return {
-      name: m.name,
-      depts: Array.from(m.depts),
-      rating: parseFloat(avg.toFixed(1)),
-      subjects: m.subjects.size,
-      ratingCount: m.ratings.length
-    };
+    return { name: m.name, depts: Array.from(m.depts), rating: parseFloat(avg.toFixed(1)), subjects: m.subjects.size, ratingCount: m.ratings.length };
   }).sort((a,b) => b.rating - a.rating);
 
   DEPT_LIST = Array.from(deptSet).sort();
@@ -800,14 +794,10 @@ function setDeptFilter(val, btn) {
   if (currentPanel==='feedback') renderTable();
 }
 
-/* SIMPLIFIED MENTOR CARDS — only Rating + Subject Count */
 function renderMentorCards() {
   const list = currentDeptFilter==='all' ? MENTORS : MENTORS.filter(m => m.depts.some(d => d===currentDeptFilter));
   document.getElementById('mentorGrid').innerHTML = list.length > 0 ? list.map((m, idx) => {
-    const tags = m.depts.map(d => {
-      const s = deptStyle(d);
-      return `<span class="dept-tag" style="color:${s.color};background:${s.bg};border-color:${s.border}">${d}</span>`;
-    }).join('');
+    const tags = m.depts.map(d => { const s=deptStyle(d); return `<span class="dept-tag" style="color:${s.color};background:${s.bg};border-color:${s.border}">${d}</span>`; }).join('');
     const rankBadge = idx === 0 ? ' style="border-top-color:#f5c842"' : '';
     return `<div class="mentor-card"${rankBadge}>
       <div class="mentor-name">${m.name}</div>
@@ -844,7 +834,14 @@ Chart.defaults.font.family = 'Inter';
 Chart.defaults.color = '#8a6020';
 
 function initSummaryCharts() {
-  const top = MENTORS.slice(0, Math.min(8, MENTORS.length));
+  const top = MENTORS.slice(0, Math.min(15, MENTORS.length));
+  const chartH = topMentorsChartHeight(top.length);
+
+  // Set the wrapper height dynamically
+  const wrap = document.getElementById('topMentorsWrap');
+  wrap.style.position = 'relative';
+  wrap.style.height = chartH + 'px';
+
   chartInstances.topMentors = new Chart(document.getElementById('topMentorsChart'), {
     type: 'bar',
     data: {
@@ -853,7 +850,8 @@ function initSummaryCharts() {
         data: top.map(m => m.rating),
         backgroundColor: top.map((m,i) => i===0 ? '#5c3600' : i===top.length-1 ? '#f5c842' : '#c48a00'),
         borderRadius: 5,
-        borderSkipped: false
+        borderSkipped: false,
+        barThickness: 22
       }]
     },
     options: {
@@ -870,9 +868,17 @@ function initSummaryCharts() {
         }
       },
       scales: {
-        x: { min:0, max:5, ticks:{ stepSize:1, font:{size:10}, callback: v => v.toFixed(1) }, grid:{color:'rgba(120,80,10,0.07)'}, border:{display:false} },
-        y: { ticks:{font:{size:11}}, grid:{display:false}, border:{display:false} }
-      }
+        x: {
+          min: 0, max: 5,
+          ticks: { stepSize: 1, font:{size:10}, callback: v => v.toFixed(1) },
+          grid: { color:'rgba(120,80,10,0.07)' }, border: { display:false }
+        },
+        y: {
+          ticks: { font:{size:11}, autoSkip: false },
+          grid: { display:false }, border: { display:false }
+        }
+      },
+      layout: { padding: { right: 40 } }
     },
     plugins: [ChartDataLabels]
   });
@@ -906,10 +912,7 @@ function initSummaryCharts() {
           }
         },
         tooltip: { callbacks: { label(ctx) { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ctx.label+': '+ctx.parsed+' ('+((ctx.parsed/t)*100).toFixed(1)+'%)'; } } },
-        datalabels: {
-          color: '#fff', font: { weight: 'bold', size: 13 },
-          formatter: (v, ctx) => v > 0 ? v : ''
-        }
+        datalabels: { color:'#fff', font:{weight:'bold',size:13}, formatter:(v)=>v>0?v:'' }
       }
     },
     plugins: [ChartDataLabels]
@@ -920,7 +923,12 @@ function initSummaryCharts() {
 
 function updateSummaryCharts() {
   if (chartInstances.topMentors) {
-    const top = MENTORS.slice(0, Math.min(8, MENTORS.length));
+    const top = MENTORS.slice(0, Math.min(15, MENTORS.length));
+    const chartH = topMentorsChartHeight(top.length);
+
+    // Resize the wrapper
+    document.getElementById('topMentorsWrap').style.height = chartH + 'px';
+
     chartInstances.topMentors.data.labels = top.map(m => m.name);
     chartInstances.topMentors.data.datasets[0].data = top.map(m => m.rating);
     chartInstances.topMentors.data.datasets[0].backgroundColor = top.map((m,i) => i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00');
@@ -939,7 +947,6 @@ function getRatingBuckets() {
   return b;
 }
 
-/* ── DOWNLOAD ALL PAGES as self-contained HTML report ── */
 function downloadAllPages() {
   if (!TABLE_DATA.length) { alert('No data to download. Please select a college first.'); return; }
 
@@ -951,7 +958,6 @@ function downloadAllPages() {
   const topName = document.getElementById('subjectCount').textContent;
   const topSub = document.getElementById('subjectSub').textContent;
 
-  /* Build summary metrics HTML */
   const metricsHTML = `
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
       ${[
@@ -967,7 +973,6 @@ function downloadAllPages() {
         </div>`).join('')}
     </div>`;
 
-  /* Build mentor table HTML */
   const mentorRowsHTML = MENTORS.map((m, idx) => `
     <tr style="background:${idx%2===0?'#fff':'#fdf8ed'}">
       <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;color:#2a1800">${m.name}</td>
@@ -977,7 +982,6 @@ function downloadAllPages() {
       <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${statusBadgeInline(m.rating)}</td>
     </tr>`).join('');
 
-  /* Build feedback table HTML */
   const feedbackRowsHTML = TABLE_DATA.map((r, idx) => `
     <tr style="background:${idx%2===0?'#fff':'#fdf8ed'}">
       <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${r.dept}</td>
@@ -988,99 +992,38 @@ function downloadAllPages() {
     </tr>`).join('');
 
   const tableHead = (cols) => `<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;
-
   const sectionStyle = 'margin-bottom:40px';
   const sectionTitleStyle = 'font-family:Georgia,serif;font-size:20px;font-weight:400;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px';
 
   const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Performance Report — ${collegeName}</title>
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family: 'Inter', Arial, sans-serif; background:#fdf8ed; color:#2a1800; font-size:13px; line-height:1.6; }
-  .report-header {
-    background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);
-    color:#fde9a0; padding:28px 40px;
-    display:flex; align-items:center; justify-content:space-between;
-  }
-  .report-header h1 { font-family:Georgia,serif; font-size:26px; font-weight:400; }
-  .report-header p { font-size:12px; opacity:0.75; margin-top:4px; }
-  .report-meta { text-align:right; font-size:11px; opacity:0.75; }
-  .report-body { padding:36px 40px; max-width:1100px; margin:0 auto; }
-  table { width:100%; border-collapse:collapse; font-size:13px; border-radius:8px; overflow:hidden; }
-  @media print {
-    .report-header { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    thead tr { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .page-break { page-break-before:always; }
-  }
-</style>
-</head>
-<body>
-
-<div class="report-header">
-  <div>
-    <h1>Performance Report</h1>
-    <p>${collegeName}</p>
-  </div>
-  <div class="report-meta">
-    <div>Generated: ${now}</div>
-    <div>${MENTORS.length} mentors · ${DEPT_LIST.length} departments</div>
-  </div>
-</div>
-
+<html lang="en"><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;font-size:13px;line-height:1.6;}
+.report-header{background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}
+.report-header h1{font-family:Georgia,serif;font-size:26px;font-weight:400;}.report-header p{font-size:12px;opacity:0.75;margin-top:4px;}
+.report-meta{text-align:right;font-size:11px;opacity:0.75;}.report-body{padding:36px 40px;max-width:1100px;margin:0 auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+@media print{.report-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.page-break{page-break-before:always;}}
+</style></head><body>
+<div class="report-header"><div><h1>Performance Report</h1><p>${collegeName}</p></div>
+<div class="report-meta"><div>Generated: ${now}</div><div>${MENTORS.length} mentors · ${DEPT_LIST.length} departments</div></div></div>
 <div class="report-body">
-
-  <!-- PAGE 1: SUMMARY -->
-  <div style="${sectionStyle}">
-    <div style="${sectionTitleStyle}">Summary Overview</div>
-    ${metricsHTML}
-    <div style="background:#fff;border:1px solid rgba(120,80,10,0.10);border-radius:14px;padding:18px 20px">
-      <div style="font-size:12px;color:#8a6020;margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em">Rating Distribution</div>
-      <div style="display:flex;gap:10px;align-items:flex-end;height:80px">
-        ${getRatingBuckets().map((count, i) => {
-          const labels = ['1–2','2–3','3–4','4–5','5'];
-          const colors = ['#7f1d1d','#d97706','#f5c842','#c48a00','#5c3600'];
-          const maxCount = Math.max(...getRatingBuckets(), 1);
-          const pct = (count / maxCount * 100).toFixed(0);
-          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <div style="font-size:11px;font-weight:600;color:${colors[i]}">${count}</div>
-            <div style="width:100%;background:${colors[i]};height:${pct}%;min-height:4px;border-radius:4px 4px 0 0"></div>
-            <div style="font-size:10px;color:#8a6020">${labels[i]}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE 2: MENTOR PERFORMANCE -->
-  <div style="${sectionStyle}" class="page-break">
-    <div style="${sectionTitleStyle}">Mentor Performance</div>
-    <table>
-      ${tableHead(['Mentor Name','Department(s)','Avg Rating','Subjects','Status'])}
-      <tbody>${mentorRowsHTML}</tbody>
-    </table>
-  </div>
-
-  <!-- PAGE 3: FEEDBACK TABLE -->
-  <div style="${sectionStyle}" class="page-break">
-    <div style="${sectionTitleStyle}">Feedback Table</div>
-    <table>
-      ${tableHead(['Department','Mentor','Subject','Rating','Status'])}
-      <tbody>${feedbackRowsHTML}</tbody>
-    </table>
-    <div style="font-size:11px;color:#c09840;margin-top:10px">* Data sourced live from Google Sheets ·  Dashboard</div>
-  </div>
-
-</div>
-</body>
-</html>`;
+<div style="${sectionStyle}"><div style="${sectionTitleStyle}">Summary Overview</div>${metricsHTML}
+<div style="background:#fff;border:1px solid rgba(120,80,10,0.10);border-radius:14px;padding:18px 20px">
+<div style="font-size:12px;color:#8a6020;margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em">Rating Distribution</div>
+<div style="display:flex;gap:10px;align-items:flex-end;height:80px">
+${getRatingBuckets().map((count,i)=>{const labels=['1–2','2–3','3–4','4–5','5'],colors=['#7f1d1d','#d97706','#f5c842','#c48a00','#5c3600'],maxC=Math.max(...getRatingBuckets(),1),pct=(count/maxC*100).toFixed(0);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:11px;font-weight:600;color:${colors[i]}">${count}</div><div style="width:100%;background:${colors[i]};height:${pct}%;min-height:4px;border-radius:4px 4px 0 0"></div><div style="font-size:10px;color:#8a6020">${labels[i]}</div></div>`;}).join('')}
+</div></div></div>
+<div style="${sectionStyle}" class="page-break"><div style="${sectionTitleStyle}">Mentor Performance</div>
+<table>${tableHead(['Mentor Name','Department(s)','Avg Rating','Subjects','Status'])}<tbody>${mentorRowsHTML}</tbody></table></div>
+<div style="${sectionStyle}" class="page-break"><div style="${sectionTitleStyle}">Feedback Table</div>
+<table>${tableHead(['Department','Mentor','Subject','Rating','Status'])}<tbody>${feedbackRowsHTML}</tbody></table>
+<div style="font-size:11px;color:#c09840;margin-top:10px">* Data sourced live from Google Sheets</div></div>
+</div></body></html>`;
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `-Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.html`;
+  a.download = `Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.html`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
