@@ -547,7 +547,7 @@ tbody tr { transition: background 0.12s; }
     <div class="charts-grid">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Top rated mentors</div>
+          <div class="card-title">Ratings</div>
           <span class="badge badge-gold" id="topMentorsBadge">—</span>
         </div>
         <!-- height is set dynamically by JS based on mentor count -->
@@ -845,7 +845,7 @@ function initSummaryCharts() {
   chartInstances.topMentors = new Chart(document.getElementById('topMentorsChart'), {
     type: 'bar',
     data: {
-      labels: top.map(m => m.name),
+      labels: top.map(m => `${m.name} (${m.subjects} subjects)`),
       datasets: [{
         data: top.map(m => m.rating),
         backgroundColor: top.map((m,i) => i===0 ? '#5c3600' : i===top.length-1 ? '#f5c842' : '#c48a00'),
@@ -860,7 +860,14 @@ function initSummaryCharts() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ctx.parsed.x.toFixed(1) + ' / 5.0' } },
+        tooltip: { 
+          callbacks: { 
+            label: ctx => {
+              const mentor = top[ctx.dataIndex];
+              return `${ctx.parsed.x.toFixed(1)} / 5.0 (${mentor.subjects} subjects)`;
+            }
+          } 
+        },
         datalabels: {
           anchor: 'end', align: 'end',
           color: '#2a1800', font: { weight: 'bold', size: 11 },
@@ -929,7 +936,7 @@ function updateSummaryCharts() {
     // Resize the wrapper
     document.getElementById('topMentorsWrap').style.height = chartH + 'px';
 
-    chartInstances.topMentors.data.labels = top.map(m => m.name);
+    chartInstances.topMentors.data.labels = top.map(m => `${m.name} (${m.subjects} subjects)`);
     chartInstances.topMentors.data.datasets[0].data = top.map(m => m.rating);
     chartInstances.topMentors.data.datasets[0].backgroundColor = top.map((m,i) => i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00');
     chartInstances.topMentors.update();
