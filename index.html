@@ -1,1034 +1,943 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>English Training Dashboard — Live</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Build to Learn – Summer Internship 2026 Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #e2e8f0;
+    --accent: #f97316;
+    --accent2: #0ea5e9;
+    --gold: #f59e0b;
+    --text: #1e293b;
+    --muted: #64748b;
+    --error: #ef4444;
+    --success: #10b981;
+    --radius: 14px;
+  }
 
-    :root {
-      --green-dark:  #0d5c2a;
-      --green-mid:   #1a6b3a;
-      --green-bright:#2ecc71;
-      --green-light: #e6f7ed;
-      --green-pale:  #f0faf4;
-      --green-border:#b8e0c8;
-      --green-muted: #4a8a60;
-      --gold:        #f5c842;
-      --gold-dark:   #c8860a;
-      --gold-light:  #fef9e7;
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(249,115,22,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(14,165,233,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 780px; margin: 0 auto;
+    padding: 60px 20px 100px;
+    width: 100%;
+  }
+  @media (max-width: 640px) { 
+    .wrap { 
+      padding: 24px 16px 80px;
+      max-width: 100%;
+    } 
+  }
+
+  .header { text-align: center; margin-bottom: 56px; animation: fadeUp .7s ease both; }
+  @media (max-width: 640px) { .header { margin-bottom: 32px; } }
+  .logo-area { display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+  .logo-img { 
+    max-width: 240px; 
+    width: 100%; 
+    height: auto; 
+    display: block; 
+    margin: 0 auto;
+  }
+  @media (max-width: 640px) { 
+    .logo-area {
+      width: 100%;
+      padding: 0 12px;
     }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: linear-gradient(160deg, var(--green-pale) 0%, #e6f7ed 50%, #f5fdf8 100%);
-      min-height: 100vh;
-      color: #0d3320;
-    }
-
-    /* ── Shimmer Bar ── */
-    .accent-bar {
-      height: 5px;
-      background: linear-gradient(90deg, var(--green-mid), var(--gold), var(--green-bright), var(--gold), var(--green-mid));
-      background-size: 300% 100%;
-      animation: shimmer 4s linear infinite;
-    }
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-    .dash { max-width: 1200px; margin: 0 auto; padding: 28px 20px 48px; }
-
-    /* ── Loading Overlay ── */
-    #loadingOverlay {
-      position: fixed; inset: 0;
-      background: rgba(240,250,244,0.96);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      z-index: 999;
-      gap: 18px;
-    }
-
-    .spinner {
-      width: 52px; height: 52px;
-      border: 4px solid var(--green-border);
-      border-top-color: var(--green-mid);
-      border-right-color: var(--gold);
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      color: var(--green-dark);
-    }
-
-    .loading-sub { font-size: 13px; color: var(--green-muted); }
-
-    /* ── Error Banner ── */
-    #errorBanner {
-      display: none;
-      background: #fff8e8;
-      border: 1.5px solid #f0c840;
+    .logo-img { 
+      width: 100%;
+      max-width: 100%;
       border-radius: 14px;
-      padding: 18px 22px;
-      margin-bottom: 24px;
-      color: #7a5000;
-      font-size: 13px;
-      line-height: 1.6;
-    }
+    } 
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-weight: 800; 
+    line-height: 1.2;
+    background: linear-gradient(135deg, #1e293b 30%, #f97316 65%, #0ea5e9);
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    background-clip: text; 
+    margin-bottom: 16px;
+    padding: 0 8px;
+  }
+  .subtitle { 
+    color: var(--muted); 
+    font-size: 15px; 
+    max-width: 580px; 
+    margin: 0 auto; 
+    font-weight: 300; 
+    line-height: 1.7;
+    padding: 0 8px;
+  }
+  @media (max-width: 640px) { 
+    .subtitle { 
+      font-size: 14px; 
+      line-height: 1.65;
+    } 
+  }
 
-    /* ── Header ── */
-    .header {
-      display: flex; align-items: center; gap: 16px;
-      margin-bottom: 24px;
-      background: linear-gradient(135deg, #fff, #f0fdf6);
-      border: 1.5px solid var(--green-border);
-      border-radius: 20px;
-      padding: 20px 24px;
-      box-shadow: 0 4px 24px rgba(26,107,58,0.1);
-      flex-wrap: wrap;
-    }
+  /* ── PRIZE BADGE ── */
+  .prize-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .prize-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #78350f 0%, #92400e 40%, #b45309 100%);
+    border-radius: 100px;
+    padding: 11px 24px;
+    position: relative;
+    overflow: hidden;
+    animation: pulse-glow 2.2s ease-in-out infinite;
+    cursor: default;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.0), 0 4px 18px rgba(245,158,11,0.35); }
+    50%       { box-shadow: 0 0 0 7px rgba(251,191,36,0.16), 0 6px 28px rgba(245,158,11,0.55); }
+  }
+  .prize-badge::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2.4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%   { left: -60%; }
+    100% { left: 130%; }
+  }
+  .prize-icon {
+    font-size: 22px;
+    line-height: 1;
+    animation: spin-trophy 4s ease-in-out infinite;
+  }
+  @keyframes spin-trophy {
+    0%, 82%, 100% { transform: rotate(0deg) scale(1); }
+    88%  { transform: rotate(-14deg) scale(1.18); }
+    94%  { transform: rotate(10deg) scale(1.12); }
+  }
+  .prize-amount {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    background: linear-gradient(90deg, #fde68a, #fbbf24, #f59e0b, #fde68a);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gold-flow 2s linear infinite;
+    letter-spacing: 0.02em;
+  }
+  @keyframes gold-flow {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  .prize-sep {
+    width: 1px;
+    height: 18px;
+    background: rgba(251,191,36,0.35);
+    flex-shrink: 0;
+  }
+  .prize-gift-icon {
+    font-size: 20px;
+    line-height: 1;
+    animation: bounce-gift 1.8s ease-in-out infinite;
+  }
+  @keyframes bounce-gift {
+    0%, 100% { transform: translateY(0); }
+    45%       { transform: translateY(-5px); }
+    65%       { transform: translateY(-2px); }
+  }
+  .prize-gift-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    background: linear-gradient(90deg, #fde68a, #f59e0b, #fde68a);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gold-flow 2s linear infinite 0.4s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .prize-stars {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .prize-stars span {
+    font-size: 15px;
+    animation: star-twinkle 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(251,191,36,0.75));
+    color: #fbbf24;
+  }
+  .prize-stars span:nth-child(1) { animation-delay: 0s; }
+  .prize-stars span:nth-child(2) { animation-delay: 0.25s; }
+  .prize-stars span:nth-child(3) { animation-delay: 0.5s; }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.45; transform: scale(0.8); }
+    50%       { opacity: 1;    transform: scale(1.25); }
+  }
+  @media (max-width: 640px) {
+    .prize-badge { padding: 10px 18px; gap: 8px; }
+    .prize-amount { font-size: 16px; }
+    .prize-gift-text { font-size: 12px; }
+    .prize-icon { font-size: 19px; }
+    .prize-gift-icon { font-size: 18px; }
+  }
 
-    .header-icon {
-      width: 52px; height: 52px;
-      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px; flex-shrink: 0;
-      box-shadow: 0 4px 14px rgba(26,107,58,0.3);
-    }
+  /* ── PROGRESS ── */
+  .progress-label { 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 12px; 
+    color: var(--muted); 
+    margin-bottom: 8px; 
+    animation: fadeUp .7s .1s ease both;
+    padding: 0 4px;
+  }
+  .progress-bar-outer { 
+    background: var(--surface2); 
+    border-radius: 100px; 
+    height: 4px; 
+    margin-bottom: 48px; 
+    overflow: hidden; 
+    animation: fadeUp .7s .1s ease both; 
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+  @media (max-width: 640px) { .progress-bar-outer { margin-bottom: 28px; } }
+  .progress-bar-inner { 
+    height: 100%; 
+    background: linear-gradient(90deg, var(--accent), var(--accent2)); 
+    border-radius: 100px; 
+    transition: width .4s ease; 
+    width: 0%;
+  }
 
-    .header-text h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 23px; font-weight: 700;
-      background: linear-gradient(135deg, #0d5c2a, #1a8a48, var(--gold));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+  /* ── SECTIONS ── */
+  .section { 
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius); 
+    padding: 32px; 
+    margin-bottom: 20px; 
+    opacity: 0; 
+    animation: fadeUp .5s ease both; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    width: 100%;
+  }
+  @media (max-width: 640px) { 
+    .section { 
+      padding: 20px 16px; 
+      margin-bottom: 16px;
+      border-radius: 12px;
+    } 
+  }
+  .section:nth-child(1){animation-delay:.10s;}
+  .section:nth-child(2){animation-delay:.15s;}
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
 
-    .header-text p { font-size: 13px; color: var(--green-muted); margin-top: 3px; }
+  .section-title { 
+    font-family: 'Syne', sans-serif; 
+    font-size: 17px; 
+    font-weight: 700; 
+    color: var(--text); 
+    margin-bottom: 24px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+  }
+  @media (max-width: 640px) { 
+    .section-title { font-size: 16px; margin-bottom: 20px; } 
+  }
+  .section-title .icon { 
+    width: 32px; height: 32px; border-radius: 8px; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 16px; flex-shrink: 0;
+  }
+  @media (max-width: 640px) { 
+    .section-title .icon { width: 30px; height: 30px; font-size: 15px; } 
+  }
+  .icon-orange { background: rgba(249,115,22,.12); color: var(--accent); }
+  .icon-blue   { background: rgba(14,165,233,.12);  color: var(--accent2); }
 
-    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  /* ── FIELDS ── */
+  .field { margin-bottom: 20px; width: 100%; }
+  @media (max-width: 640px) { .field { margin-bottom: 16px; } }
+  .field:last-child { margin-bottom: 0; }
+  label { 
+    display: block; font-size: 13px; font-weight: 500; 
+    color: var(--muted); margin-bottom: 8px; 
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  @media (max-width: 640px) { label { font-size: 12px; margin-bottom: 7px; } }
+  label .req { color: var(--accent); margin-left: 2px; }
 
-    .badge {
-      background: var(--gold-light);
-      border: 1.5px solid var(--gold);
-      padding: 7px 16px; border-radius: 24px;
-      font-size: 12px; color: #5a7000; font-weight: 500;
-    }
+  input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    padding: 12px 16px; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none; -webkit-appearance: none;
+    box-sizing: border-box; max-width: 100%;
+  }
+  @media (max-width: 640px) { 
+    input[type="text"], input[type="email"], input[type="tel"], textarea, select { 
+      font-size: 16px; padding: 12px 14px;
+    } 
+  }
+  input:focus, textarea:focus, select:focus { 
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249,115,22,.1);
+  }
+  input::placeholder, textarea::placeholder { color: #94a3b8; }
+  textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
+  @media (max-width: 640px) { textarea { min-height: 100px; } }
 
-    .refresh-btn {
-      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
-      border: none; border-radius: 24px;
-      padding: 8px 18px; font-size: 12px;
-      color: #fff; font-weight: 500;
-      cursor: pointer; font-family: 'DM Sans', sans-serif;
-      display: flex; align-items: center; gap: 6px;
-      box-shadow: 0 2px 10px rgba(26,107,58,0.25);
-      transition: opacity 0.2s;
-    }
-    .refresh-btn:hover { opacity: 0.88; }
-    .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .field.error input, .field.error textarea, .field.error select { 
+    border-color: var(--error); box-shadow: 0 0 0 3px rgba(239,68,68,.1);
+  }
+  .field.error > label { color: var(--error); }
+  .error-message { 
+    display: none; font-size: 12px; color: var(--error); margin-top: 6px; font-weight: 500;
+  }
+  @media (max-width: 640px) { .error-message { font-size: 11px; } }
+  .field.error .error-message { display: block; }
 
-    .last-updated { font-size: 11px; color: var(--green-muted); }
+  .select-wrapper { position: relative; width: 100%; }
+  .select-wrapper::after { 
+    content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); 
+    width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; 
+    border-top: 6px solid var(--muted); pointer-events: none;
+  }
+  @media (max-width: 640px) { .select-wrapper::after { right: 14px; } }
+  .select-wrapper select { padding-right: 40px; cursor: pointer; }
+  .select-wrapper select option[value=""] { color: #94a3b8; }
 
-    /* ── KPI Cards ── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px; margin-bottom: 24px;
-    }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
+  @media(max-width: 640px) { .field-row { grid-template-columns: 1fr; gap: 16px; } }
 
-    .kpi {
-      background: #fff;
-      border: 1.5px solid var(--green-border);
-      border-radius: 18px; padding: 20px 18px;
-      position: relative; overflow: hidden;
-      transition: transform 0.22s, box-shadow 0.22s;
-      box-shadow: 0 2px 12px rgba(26,107,58,0.07);
-    }
-    .kpi:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(26,107,58,0.15); }
-    .kpi::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--green-mid), var(--gold), var(--green-mid));
-    }
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  @media (max-width: 640px) { .divider { margin: 20px 0; } }
+  .section-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
+  @media (max-width: 640px) { .section-subtitle { font-size: 11px; } }
 
-    .kpi-label { font-size: 11px; color: var(--green-muted); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 8px; font-weight: 500; }
-    .kpi-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--green-dark); line-height: 1; }
-    .kpi-value span { font-size: 16px; color: #1a8a48; }
-    .kpi-sub { font-size: 12px; color: #7ab890; margin-top: 5px; }
-    .kpi-icon { position: absolute; top: 16px; right: 16px; font-size: 20px; opacity: 0.2; }
+  /* ── CHECKBOX / RADIO GRID ── */
+  .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media(max-width: 640px) { .checkbox-grid { grid-template-columns: 1fr; gap: 10px; } }
+  .checkbox-grid input[type="checkbox"],
+  .checkbox-grid input[type="radio"] { display: none; }
+  .checkbox-grid label {
+    display: flex; align-items: center; gap: 10px;
+    text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 400;
+    color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; cursor: pointer; transition: all .2s; margin: 0;
+    width: 100%; box-sizing: border-box;
+  }
+  @media (max-width: 640px) { .checkbox-grid label { padding: 12px 14px; font-size: 14px; gap: 10px; } }
+  .checkbox-grid input[type="checkbox"]:checked + label,
+  .checkbox-grid input[type="radio"]:checked + label { 
+    background: rgba(249,115,22,.1); border-color: var(--accent); color: var(--accent);
+  }
+  .checkbox-grid label::before { 
+    content: ''; width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border); 
+    flex-shrink: 0; transition: all .2s; background: var(--surface2);
+  }
+  .checkbox-grid input[type="radio"] + label::before { border-radius: 50%; }
+  .checkbox-grid input[type="checkbox"]:checked + label::before,
+  .checkbox-grid input[type="radio"]:checked + label::before {
+    background: var(--accent); border-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M6.5 11.5L3 8l1-1 2.5 2.5 5.5-5.5 1 1z'/%3E%3C/svg%3E");
+    background-size: contain;
+  }
 
-    /* ── Section Title ── */
-    .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 17px; color: var(--green-dark);
-      margin-bottom: 14px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-title::before { content: ''; width: 4px; height: 20px; background: linear-gradient(180deg, var(--gold), var(--green-mid)); border-radius: 2px; }
-    .section-title::after  { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(26,107,58,0.25), transparent); }
+  .other-input-wrap { margin-top: 10px; display: none; }
+  .other-input-wrap.visible { display: block; animation: fadeUp .3s ease both; }
 
-    /* ── Topic Grid ── */
-    .topic-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px; margin-bottom: 26px;
-    }
+  /* ── SUBMIT ── */
+  .submit-area { 
+    text-align: center; margin-top: 40px; 
+    animation: fadeUp .5s .5s ease both; opacity: 0; padding: 0 8px;
+  }
+  @media (max-width: 640px) { .submit-area { margin-top: 32px; padding: 0; } }
+  .btn-submit {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff; font-family: 'Syne', sans-serif; font-size: 16px;
+    font-weight: 700; letter-spacing: .04em; border: none;
+    border-radius: 12px; padding: 16px 44px; cursor: pointer;
+    transition: all .2s; box-shadow: 0 4px 14px rgba(249,115,22,.3);
+    width: auto; max-width: 100%;
+  }
+  @media (max-width: 640px) { 
+    .btn-submit { width: 100%; padding: 15px 32px; font-size: 15px; } 
+  }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(249,115,22,.35); }
+  .btn-submit:active:not(:disabled) { transform: translateY(0); }
+  .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .note { 
+    color: var(--muted); font-size: 12px; margin-top: 14px; 
+    display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+    padding: 0 16px;
+  }
+  @media (max-width: 640px) { .note { font-size: 11px; margin-top: 12px; line-height: 1.5; } }
 
-    .topic-card {
-      background: #fff;
-      border: 1.5px solid var(--green-border);
-      border-radius: 14px; padding: 16px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px rgba(26,107,58,0.05);
-    }
-    .topic-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,107,58,0.12); }
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 24px; font-size: 14px; color: var(--text);
+    box-shadow: 0 10px 40px rgba(0,0,0,.15); opacity: 0; transition: all .3s;
+    z-index: 9999; display: flex; align-items: center; justify-content: center;
+    gap: 10px; white-space: nowrap; max-width: calc(100vw - 32px);
+  }
+  @media (max-width: 640px) { 
+    #toast { 
+      bottom: 20px; padding: 12px 20px; font-size: 13px; 
+      white-space: normal; text-align: center; max-width: calc(100vw - 24px);
+    } 
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.05); }
+  #toast.error   { border-color: rgba(239,68,68,.3);  background: rgba(239,68,68,.05); }
 
-    .topic-num  { font-size: 10px; color: var(--green-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; font-weight: 500; }
-    .topic-name { font-size: 12px; color: #0d3320; margin-bottom: 10px; line-height: 1.4; min-height: 34px; font-weight: 500; }
-    .topic-bar  { height: 5px; background: var(--green-light); border-radius: 3px; overflow: hidden; border: 1px solid var(--green-border); }
-    .topic-fill { height: 100%; background: linear-gradient(90deg, var(--green-mid), var(--gold)); border-radius: 3px; width: 0%; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
-    .topic-pct  { font-size: 11px; color: #1a8a48; margin-top: 4px; text-align: right; font-weight: 500; }
+  @keyframes shake { 
+    0%,100%{transform:translateX(0);} 
+    10%,30%,50%,70%,90%{transform:translateX(-4px);} 
+    20%,40%,60%,80%{transform:translateX(4px);} 
+  }
+  .shake { animation: shake 0.5s; }
+  .char-hint { font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
+  @media (max-width: 640px) { .char-hint { font-size: 10px; } }
 
-    /* ── Two Col ── */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 26px; }
+  /* ── GUIDELINES BUTTON ── */
+  .guidelines-btn {
+    display: inline-flex; align-items: center; gap: 14px;
+    margin-top: 22px; background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 14px 20px; text-decoration: none; color: var(--text);
+    transition: all .25s; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    max-width: 520px; width: 100%; text-align: left;
+  }
+  .guidelines-btn:hover { 
+    border-color: var(--accent); box-shadow: 0 4px 18px rgba(249,115,22,.15); transform: translateY(-2px);
+  }
+  .guidelines-icon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+  .guidelines-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .guidelines-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); }
+  .guidelines-sub { font-size: 12px; color: var(--muted); font-weight: 300; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
+  .guidelines-arrow { font-size: 18px; color: var(--accent); flex-shrink: 0; font-weight: 700; transition: transform .2s; }
+  .guidelines-btn:hover .guidelines-arrow { transform: translate(2px, -2px); }
+  @media (max-width: 640px) {
+    .guidelines-btn { padding: 12px 16px; gap: 12px; margin-top: 18px; max-width: 100%; }
+    .guidelines-icon { font-size: 24px; }
+    .guidelines-label { font-size: 13px; }
+    .guidelines-sub { font-size: 11px; white-space: normal; }
+    .guidelines-arrow { font-size: 16px; }
+  }
 
-    .card {
-      background: #fff;
-      border: 1.5px solid var(--green-border);
-      border-radius: 18px; padding: 22px;
-      box-shadow: 0 2px 12px rgba(26,107,58,0.06);
-    }
-    .card-title { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--green-dark); margin-bottom: 8px; font-weight: 600; }
-    .chart-wrap { position: relative; height: 230px; }
-
-    .legend { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--green-muted); }
-    .legend-box  { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-
-    /* ── Candidate Filter ── */
-    .table-controls {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 10px;
-      padding: 16px 22px;
-      border-bottom: 1.5px solid #d0eedd;
-      background: linear-gradient(135deg, #f6fef9, #edfaf3);
-    }
-
-    .table-header-title { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--green-dark); font-weight: 600; }
-
-    .filter-bar { display: flex; gap: 7px; flex-wrap: wrap; }
-
-    .filter-btn {
-      background: #f0fdf6;
-      border: 1.5px solid #a8dbb8;
-      border-radius: 20px;
-      padding: 5px 14px; font-size: 12px;
-      color: var(--green-mid); cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-weight: 500;
-      transition: all 0.2s;
-    }
-    .filter-btn:hover { background: #d8f5e4; border-color: var(--green-bright); }
-    .filter-btn.active {
-      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
-      color: #fff; border-color: transparent;
-      box-shadow: 0 2px 8px rgba(26,107,58,0.28);
-    }
-
-    /* ── Search ── */
-    .search-box {
-      background: #fff; border: 1.5px solid var(--green-border);
-      border-radius: 20px; padding: 6px 14px;
-      font-size: 12px; font-family: 'DM Sans', sans-serif;
-      color: #0d3320; outline: none; width: 180px;
-    }
-    .search-box:focus { border-color: var(--green-bright); }
-
-    /* ── Table Card ── */
-    .table-card {
-      background: #fff;
-      border: 1.5px solid var(--green-border);
-      border-radius: 18px; overflow: hidden;
-      margin-bottom: 26px;
-      box-shadow: 0 2px 12px rgba(26,107,58,0.06);
-    }
-
-    .table-scroll { overflow-x: auto; }
-
-    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-
-    .tbl th {
-      padding: 11px 16px; text-align: left;
-      font-size: 10px; color: var(--green-muted);
-      text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
-      border-bottom: 1.5px solid #d0eedd;
-      background: #f6fef9; white-space: nowrap;
-    }
-
-    .tbl td {
-      padding: 13px 16px; color: #0d3320;
-      border-bottom: 1px solid #e8f8ee;
-      vertical-align: middle;
-    }
-    .tbl tbody tr:last-child td { border-bottom: none; }
-    .tbl tbody tr:hover td { background: #f0fdf6; }
-
-    .status-pill { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .pill-live    { background: #eafaf0; color: #0d6b30; border: 1.5px solid #80d8a0; }
-    .pill-pending { background: #fefce8; color: #856000; border: 1.5px solid #f0d040; }
-
-    .att-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
-    .dot-present { background: #1a8a48; box-shadow: 0 0 0 2px rgba(26,138,72,0.2); }
-    .dot-absent  { background: #ddd090; border: 1.5px solid #b0b060; }
-
-    .progress-bar { height: 6px; background: var(--green-light); border-radius: 3px; overflow: hidden; width: 90px; border: 1px solid var(--green-border); }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green-mid), var(--gold)); border-radius: 3px; }
-
-    .name-cell { display: flex; align-items: center; gap: 9px; }
-    .name-init {
-      display: inline-flex; width: 30px; height: 30px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
-      align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(26,107,58,0.22);
-    }
-
-    .score-val { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--green-dark); font-weight: 700; }
-    .assign-yes { color: #0d6b30; font-weight: 500; }
-    .assign-no  { color: #a07000; font-weight: 500; }
-
-    /* ── Summary Strip ── */
-    .summary-strip {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      background: linear-gradient(135deg, #f0fdf6, var(--green-light));
-      border: 1.5px solid var(--green-border);
-      border-radius: 16px; overflow: hidden;
-      margin-bottom: 26px;
-      box-shadow: 0 2px 10px rgba(26,107,58,0.07);
-    }
-    .strip-item { padding: 16px 20px; border-right: 1px solid #c8e8d4; text-align: center; }
-    .strip-item:last-child { border-right: none; }
-    .strip-label { font-size: 10px; color: var(--green-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 5px; }
-    .strip-val   { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--green-dark); font-weight: 700; }
-
-    /* ── Divider ── */
-    .divider { height: 1px; background: linear-gradient(90deg, transparent, #a8dbb8, transparent); margin: 4px 0 24px; }
-
-    /* ── Pagination ── */
-    .pagination { display: flex; align-items: center; gap: 6px; padding: 12px 16px; justify-content: flex-end; border-top: 1px solid #e8f8ee; }
-    .page-btn {
-      background: #f0fdf6; border: 1.5px solid var(--green-border); border-radius: 8px;
-      padding: 5px 12px; font-size: 12px; color: var(--green-mid); cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.2s;
-    }
-    .page-btn:hover  { background: #d8f5e4; }
-    .page-btn.active { background: var(--green-mid); color: #fff; border-color: transparent; }
-    .page-info { font-size: 12px; color: var(--green-muted); margin-right: 8px; }
-
-    /* ── Footer ── */
-    .footer { text-align: center; padding: 20px 0 4px; font-size: 12px; color: #7ab890; border-top: 1px solid #c8e8d4; }
-
-    /* ── Responsive ── */
-    @media (max-width: 750px) {
-      .topic-grid { grid-template-columns: repeat(2, 1fr); }
-      .two-col    { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 460px) {
-      .topic-grid { grid-template-columns: 1fr; }
-      .header-right { width: 100%; }
-    }
-  </style>
+  @media (max-width: 640px) {
+    * { max-width: 100%; }
+    input, select, textarea { -webkit-text-size-adjust: 100%; }
+  }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- Loading -->
-<div id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="loading-text">Fetching Live Data...</div>
-  <div class="loading-sub">Connecting to Google Sheets</div>
-</div>
-
-<div class="accent-bar"></div>
-
-<div class="dash">
-
-  <!-- Error Banner -->
-  <div id="errorBanner">
-    ⚠️ <strong>Could not load live data.</strong> Make sure your Google Sheet is set to <em>"Anyone with the link can view"</em>. 
-    Using sample data instead. <a href="https://docs.google.com/spreadsheets/d/1_3cZ2i1Y4YtivZWguP42AMd9ToBxPmLEmTyqohnFpq4/edit" target="_blank" style="color:#1a6b3a">Open Sheet ↗</a>
-  </div>
-
-  <!-- Header -->
   <div class="header">
-    <div class="header-icon">📖</div>
-    <div class="header-text">
-      <h1>English Training Dashboard</h1>
-      <p id="headerSub">Loading session data...</p>
+    <div class="logo-area">
+      <img src="Face prep logo3.png" alt="FACE Prep Campus" class="logo-img">
     </div>
-    <div class="header-right">
-      <span class="last-updated" id="lastUpdated"></span>
-      <a href="https://docs.google.com/spreadsheets/d/1_3cZ2i1Y4YtivZWguP42AMd9ToBxPmLEmTyqohnFpq4/edit" target="_blank" style="text-decoration:none">
-        <button class="filter-btn" style="border-color:#1a6b3a;color:#1a6b3a">📊 Open Sheet ↗</button>
-      </a>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">🔄 Refresh</button>
-      <span class="badge">⭐ Live</span>
-    </div>
-  </div>
+    <h1>Introducing the Build-to-Learn Summer Internship Program 2026</h1>
+    <p class="subtitle">Turn your summer into a proof-building experience. The Build-to-Learn Internship helps you work on real-world problems and create meaningful projects that stand out. Build something that you can actually showcase and win</p>
 
-  <!-- KPI Cards -->
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-label">Total Candidates</div><div class="kpi-value" id="kpiCandidates">—</div><div class="kpi-sub">English domain</div></div>
-    <div class="kpi"><div class="kpi-icon">📅</div><div class="kpi-label">Sessions Held</div><div class="kpi-value" id="kpiSessions">—</div><div class="kpi-sub" id="kpiSessionsSub">Topics</div></div>
-    <div class="kpi"><div class="kpi-icon">✓</div><div class="kpi-label">Avg Attendance</div><div class="kpi-value" id="kpiAttendance">—</div><div class="kpi-sub" id="kpiAttSub"></div></div>
-    <div class="kpi"><div class="kpi-icon">📋</div><div class="kpi-label">Submission Rate</div><div class="kpi-value" id="kpiSubmission">—</div><div class="kpi-sub" id="kpiSubSub"></div></div>
-    <div class="kpi"><div class="kpi-icon">★</div><div class="kpi-label">Avg Score</div><div class="kpi-value" id="kpiScore">—</div><div class="kpi-sub">out of 10</div></div>
-  </div>
-
-  <!-- Summary Strip -->
-  <div class="summary-strip">
-    <div class="strip-item"><div class="strip-label">Highest Score</div><div class="strip-val" id="sumHigh">—</div></div>
-    <div class="strip-item"><div class="strip-label">Lowest Score</div><div class="strip-val" id="sumLow">—</div></div>
-    <div class="strip-item"><div class="strip-label">Best Session</div><div class="strip-val" id="sumBest">—</div></div>
-    <div class="strip-item"><div class="strip-label">Total Sessions</div><div class="strip-val" id="sumSessions">—</div></div>
-    <div class="strip-item"><div class="strip-label">Batch Status</div><div class="strip-val" style="color:#0d6b30">Live</div></div>
-  </div>
-
-  <!-- Topic Coverage -->
-  <div class="section-title">Session Topics Coverage</div>
-  <div class="topic-grid" id="topicGrid"><div style="padding:20px;color:#4a8a60;font-size:13px">Loading topics...</div></div>
-
-  <div class="divider"></div>
-
-  <!-- Charts -->
-  <div class="two-col">
-    <div class="card">
-      <div class="card-title">Attendance Per Session</div>
-      <div class="legend">
-        <span class="legend-item"><span class="legend-box" style="background:linear-gradient(135deg,#1a6b3a,#2ecc71)"></span>Present</span>
-        <span class="legend-item"><span class="legend-box" style="background:#ddd090;border:1px solid #b0b060"></span>Absent</span>
+    <!-- ── ANIMATED GOLD PRIZE BADGE ── -->
+    <div class="prize-wrap">
+      <div class="prize-badge">
+        <span class="prize-icon">🏆</span>
+        <span class="prize-amount">₹10,000</span>
+        <div class="prize-sep"></div>
+        <span class="prize-gift-icon">🎁</span>
+        <span class="prize-gift-text">Special Gifts</span>
       </div>
-      <div class="chart-wrap"><canvas id="attChart" role="img" aria-label="Attendance per session bar chart">Attendance data per session.</canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Score Trend (First Candidate with Data)</div>
-      <div class="legend">
-        <span class="legend-item"><span class="legend-box" style="background:linear-gradient(135deg,#1a6b3a,#f5c842)"></span>Assignment Score</span>
+      <div class="prize-stars">
+        <span>★</span><span>★</span><span>★</span>
       </div>
-      <div class="chart-wrap"><canvas id="scoreChart" role="img" aria-label="Score trend line chart">Score trend across sessions.</canvas></div>
     </div>
+
+    <a href="https://drive.google.com/file/d/1U7dR1noOvpUWAqpBAU3yXLMJzpyICHXx/view?usp=sharing" target="_blank" class="guidelines-btn">
+      <span class="guidelines-icon">📌</span>
+      <span class="guidelines-text">
+        <span class="guidelines-label">Project Guidelines</span>
+        <span class="guidelines-sub">Build-to-Learn Summer Internship 2026 — Click to view</span>
+      </span>
+      <span class="guidelines-arrow">↗</span>
+    </a>
   </div>
 
-  <!-- All Candidates Table -->
-  <div class="section-title">All Candidates</div>
-  <div class="table-card">
-    <div class="table-controls">
-      <div class="table-header-title" id="candidateTableTitle">Candidates</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search candidate..." oninput="renderCandidates()" />
-        <div class="filter-bar">
-          <button class="filter-btn active" onclick="setCandFilter('all',this)">All</button>
-          <button class="filter-btn" onclick="setCandFilter('Live',this)">Live</button>
-          <button class="filter-btn" onclick="setCandFilter('Pending',this)">Pending</button>
+  <div class="progress-label">
+    <span>Progress</span>
+    <span id="pct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBar"></div>
+  </div>
+
+  <form id="surveyForm" novalidate>
+
+    <!-- BASIC DETAILS -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-orange">👤</div>
+        Basic Details
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="fullName">Full Name <span class="req">*</span></label>
+          <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+          <div class="error-message">Please enter your full name</div>
+        </div>
+        <div class="field">
+          <label for="phone">Phone Number <span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" required>
+          <div class="error-message">Please enter your phone number</div>
         </div>
       </div>
-    </div>
-    <div class="table-scroll">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Candidate</th>
-            <th>Status</th>
-            <th>Domain</th>
-            <th id="sessColHead">Sessions</th>
-          </tr>
-        </thead>
-        <tbody id="candidateBody"><tr><td colspan="5" style="text-align:center;padding:24px;color:#4a8a60">Loading...</td></tr></tbody>
-      </table>
-    </div>
-    <div class="pagination" id="candPagination"></div>
-  </div>
 
-  <!-- Session Detail -->
-  <div class="section-title" id="sessionDetailTitle">Session Detail</div>
-  <div class="table-card">
-    <div class="table-controls">
-      <div class="table-header-title" id="sessionTableTitle">Select a candidate above to view detail</div>
-      <div class="filter-bar" id="sessionFilterBar">
-        <button class="filter-btn active" onclick="setSessionFilter('all',this)">All</button>
-        <button class="filter-btn" onclick="setSessionFilter('present',this)">Present</button>
-        <button class="filter-btn" onclick="setSessionFilter('submitted',this)">Submitted</button>
-        <button class="filter-btn" onclick="setSessionFilter('absent',this)">Absent</button>
+      <div class="field-row">
+        <div class="field">
+          <label for="email">Email ID <span class="req">*</span></label>
+          <input type="email" id="email" name="email" placeholder="yourname@email.com" required>
+          <div class="error-message">Please enter a valid email address</div>
+        </div>
+        <div class="field">
+          <label for="regNo">Register No. <span class="req">*</span></label>
+          <input type="text" id="regNo" name="regNo" placeholder="e.g. 22CS001" required>
+          <div class="error-message">Please enter your register number</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="collegeName">College Name <span class="req">*</span></label>
+        <div class="select-wrapper">
+          <select id="collegeName" name="collegeName" required>
+            <option value="" disabled selected>Select your college</option>
+            <option value="Kamaraj College">Kamaraj College</option>
+            <option value="Rathinam College of Arts &amp; Science">Rathinam College of Arts &amp; Science</option>
+            <option value="Kamaraj Women's College">Kamaraj Women's College</option>
+            <option value="Sree Saraswathi Thyagaraja College">Sree Saraswathi Thyagaraja College</option>
+            <option value="Nagarathinam Angalammal Arts &amp; Science College">Nagarathinam Angalammal Arts &amp; Science College</option>
+            <option value="Sri Amaraavathi College of Arts &amp; Science">Sri Amaraavathi College of Arts &amp; Science</option>
+            <option value="Bharathidasan College of Arts &amp; Science">Bharathidasan College of Arts &amp; Science</option>
+            <option value="SDNB Vaishnav College for Women">SDNB Vaishnav College for Women</option>
+            <option value="TERF's College of Arts and Science">TERF's College of Arts and Science</option>
+            <option value="TJS College of Arts and Science">TJS College of Arts and Science</option>
+            <option value="Vinayaga Mission's Research Foundation School of Arts &amp; Science">Vinayaga Mission's Research Foundation School of Arts &amp; Science</option>
+            <option value="Patrician College of Arts &amp; Science">Patrician College of Arts &amp; Science</option>
+            <option value="Takshashila University">Takshashila University</option>
+            <option value="AMET University">AMET University</option>
+            <option value="Joy University">Joy University</option>
+            <option value="Noorul Islam Centre for Higher Education (NICHE)">Noorul Islam Centre for Higher Education (NICHE)</option>
+            <option value="Study World Group of Institution">Study World Group of Institution</option>
+            <option value="Sasurie College of Arts and Science">Sasurie College of Arts and Science</option>
+            <option value="S-VYASA University">S-VYASA University</option>
+            <option value="Asian School of Business">Asian School of Business</option>
+            <option value="Alliance University">Alliance University</option>
+            <option value="Kristu Jayanti (Deemed to be University)">Kristu Jayanti (Deemed to be University)</option>
+          </select>
+        </div>
+        <div class="error-message">Please select your college</div>
+      </div>
+
+      <div class="field">
+        <label for="department">Course / Department <span class="req">*</span></label>
+        <div class="select-wrapper">
+          <select id="department" name="department" required disabled>
+            <option value="" disabled selected>First select your college</option>
+          </select>
+        </div>
+        <div class="error-message">Please select your department</div>
+      </div>
+
+      <div class="field">
+        <label for="city">City <span class="req">*</span></label>
+        <input type="text" id="city" name="city" placeholder="Enter your city" required>
+        <div class="error-message">Please enter your city</div>
       </div>
     </div>
-    <div class="table-scroll">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Topic</th>
-            <th>Attendance</th>
-            <th>Assignment</th>
-            <th>Mark</th>
-            <th>Progress</th>
-          </tr>
-        </thead>
-        <tbody id="sessionBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:#4a8a60;font-size:13px">Click a candidate row to view their session detail.</td></tr></tbody>
-      </table>
-    </div>
-  </div>
 
-  <div class="footer">
-    English Training Batch · Live Data from Google Sheets ·
-    <a href="https://docs.google.com/spreadsheets/d/1_3cZ2i1Y4YtivZWguP42AMd9ToBxPmLEmTyqohnFpq4/edit" target="_blank" style="color:#1a6b3a">Edit Sheet ↗</a>
-  </div>
+    <!-- PROJECT DETAILS -->
+    <div class="section">
+      <div class="section-title">
+        <div class="icon icon-blue">📋</div>
+        Project Details
+      </div>
+
+      <div class="field">
+        <label for="projectTitle">Project Title / Topic <span class="req">*</span></label>
+        <input type="text" id="projectTitle" name="projectTitle" placeholder="e.g. Smart Home Energy Monitor" required>
+        <div class="error-message">Please enter your project title</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label for="problemStatement">Problem Statement <span class="req">*</span></label>
+        <p class="section-subtitle">Describe the real-world problem your project is solving.</p>
+        <textarea id="problemStatement" name="problemStatement" placeholder="What problem does your project address?…" required></textarea>
+        <div class="char-hint" id="psCount">0 / 500</div>
+        <div class="error-message">Please describe the problem your project is solving</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field" id="impactField">
+        <label for="impactOfProblem">Impact of Problem <span class="req">*</span></label>
+        <p class="section-subtitle">Briefly explain how your project solves the problem.</p>
+        <textarea id="impactOfProblem" name="impactOfProblem" placeholder="How does your project solve the problem?…" required></textarea>
+        <div class="char-hint" id="impCount">0 / 500</div>
+        <div class="error-message">Please describe the impact of the problem</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label for="brandName">Business / Brand Name <span class="req">*</span></label>
+        <input type="text" id="brandName" name="brandName" placeholder="Enter your business or brand name" required>
+        <div class="error-message">Please enter a business/brand name</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field" id="ptField">
+        <label>Project Type <span class="req">*</span> <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:12px;">(Select one)</span></label>
+        <div class="checkbox-grid">
+          <input type="radio" id="pt1" name="projectType" value="Home Automation"          required><label for="pt1">Home Automation</label>
+          <input type="radio" id="pt2" name="projectType" value="Healthcare">               <label for="pt2">Healthcare</label>
+          <input type="radio" id="pt3" name="projectType" value="Agriculture">              <label for="pt3">Agriculture</label>
+          <input type="radio" id="pt4" name="projectType" value="Safety &amp; Security">   <label for="pt4">Safety &amp; Security</label>
+          <input type="radio" id="pt5" name="projectType" value="Smart City">               <label for="pt5">Smart City</label>
+          <input type="radio" id="pt6" name="projectType" value="Assistive Technology">    <label for="pt6">Assistive Technology</label>
+          <input type="radio" id="pt7" name="projectType" value="Environmental Monitoring"> <label for="pt7">Environmental Monitoring</label>
+          <input type="radio" id="pt8" name="projectType" value="Industrial IoT">           <label for="pt8">Industrial IoT</label>
+          <input type="radio" id="pt9" name="projectType" value="Other">                    <label for="pt9">Other</label>
+        </div>
+        <div class="other-input-wrap" id="ptOtherWrap">
+          <input type="text" id="ptOther" name="projectTypeOther" placeholder="Please specify your project type">
+        </div>
+        <div class="error-message">Please select a project type</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field" id="tuField">
+        <label>Target Users <span class="req">*</span> <span style="font-weight:300;text-transform:none;letter-spacing:0;font-size:12px;">(Select all that apply)</span></label>
+        <div class="checkbox-grid" id="targetUsersGrid">
+          <input type="checkbox" id="tu1" name="targetUsers" value="Students">       <label for="tu1">Students</label>
+          <input type="checkbox" id="tu2" name="targetUsers" value="Families">       <label for="tu2">Families</label>
+          <input type="checkbox" id="tu3" name="targetUsers" value="Farmers">        <label for="tu3">Farmers</label>
+          <input type="checkbox" id="tu4" name="targetUsers" value="Elderly People"> <label for="tu4">Elderly People</label>
+          <input type="checkbox" id="tu5" name="targetUsers" value="Industries">     <label for="tu5">Industries</label>
+          <input type="checkbox" id="tu6" name="targetUsers" value="General Public"> <label for="tu6">General Public</label>
+          <input type="checkbox" id="tu7" name="targetUsers" value="Other">          <label for="tu7">Other</label>
+        </div>
+        <div class="other-input-wrap" id="tuOtherWrap">
+          <input type="text" id="tuOther" name="targetUsersOther" placeholder="Please specify target users">
+        </div>
+        <div class="error-message">Please select at least one target user group</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label for="keyOutcome">Key Outcome / Goal of the Project <span class="req">*</span></label>
+        <p class="section-subtitle">What impact do you want this project to create?</p>
+        <textarea id="keyOutcome" name="keyOutcome" placeholder="Describe the expected impact, goals, or outcomes of your project…" required style="min-height:130px;"></textarea>
+        <div class="char-hint" id="koCount">0 / 800</div>
+        <div class="error-message">Please describe your project's key outcome</div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span>Submit Survey</span>
+        <span>→</span>
+      </button>
+      <p class="note">🔒 Your response is confidential and will be used only for internship programme evaluation.</p>
+    </div>
+
+  </form>
 </div>
 
+<div id="toast"></div>
+
 <script>
-/* ═══════════════════════════════════════
-   CONFIG — change only this block
-═══════════════════════════════════════ */
-const SHEET_ID  = '1_3cZ2i1Y4YtivZWguP42AMd9ToBxPmLEmTyqohnFpq4';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+  const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyn-l_zrTxM--TJ_7dE77uoRa_gJ1apS9F-RDkohjTgZfi0fToo_IJ7I1X1TuB3DGLB/exec";
 
-/* ═══════════════════════════════════════
-   STATE
-═══════════════════════════════════════ */
-let allCandidates   = [];
-let allSessions     = [];   // [{date,topic,sessions:[{att,assign,mark}]}]
-let sessionDates    = [];
-let sessionTopics   = [];
-let candFilter      = 'all';
-let sessionFilter   = 'all';
-let selectedCand    = null;
-let candPage        = 0;
-const PAGE_SIZE     = 10;
-let attChartInst    = null;
-let scoreChartInst  = null;
+  const COLLEGE_DEPTS = {
+    "Kamaraj College":                   ["I BCA - A","I BCA - B","II BCA","B.Com Honors","BBA Digital Marketing"],
+    "Kamaraj Women's College":           ["I BCA - A"],
+    "SDNB Vaishnav College for Women":   ["II B.Sc. CS with AI","I B.Sc. CS with AI (Shift 1)","I B.Sc. CS with AI (Shift 2)","I B.Sc. DS & AI","I B.Com FinTech with AI","I BBA DM & BA"],
+    "Patrician College of Arts & Science":["B.Sc. CS with AI"],
+    "Sree Saraswathi Thyagaraja College":["I BBA","I MCA"],
+    "TERF's College of Arts and Science":["III BCA","II B.Sc IT"],
+    "TJS College of Arts and Science":   ["II B.Sc CS with AI"],
+    "Bharathidasan College of Arts & Science":["I B.Sc CT","I BBA CA","II B.Sc CT"],
+    "Nagarathinam Angalammal Arts & Science College":["II B.Sc AI","I B.Sc AI","I B.Sc CC","BBA DM","B.Com BC & FT"],
+    "Vinayaga Mission's Research Foundation School of Arts & Science":["B.Com FinTech with AI","B.Sc AI & ML"],
+    "Sri Amaraavathi College of Arts & Science":["I BCA","II BCA","I B.Sc AI & ML","B.Com FinTech"],
+    "Takshashila University":            ["II B.Sc CS AI & ML","I B.Sc CS AI & ML","B.Com FinTech with AI"],
+    "Study World Group of Institution":  ["BCA"],
+    "Rathinam College of Arts & Science":["BCA (AI)","B.Sc CT (GenAI)"],
+    "Noorul Islam Centre for Higher Education (NICHE)":["B.Sc AI & ML"],
+    "AMET University":                   ["II B.Sc AI & ML","I B.Sc AI & ML","I B.Sc AI & DS","I B.Com Fintech with AI","I BBA E-Commerce & Digital Marketing"],
+    "Joy University":                    ["BCA AI"],
+    "Sasurie College of Arts and Science":["B.Sc AI & DS","B.Sc CS","B.Sc IT","BBA CA","B.Com PA"],
+    "S-VYASA University":                ["II BCA"],
+    "Asian School of Business":          ["BCA","BBA","B.Com"],
+    "Alliance University":               ["I BCA (DS + AI & ML)","I BCA (Game Development)","II BCA DS (A+B)","II BCA AI & ML (A+B)","II BCA Game Development (A+B)","I MCA - A","I MCA - B"],
+    "Kristu Jayanti (Deemed to be University)":["BBA - AI & DS","BBA - FinTech"]
+  };
 
-/* ═══════════════════════════════════════
-   CSV PARSER
-═══════════════════════════════════════ */
-function parseCSV(text) {
-  const rows = [];
-  let inQuote = false, field = '', row = [];
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"') {
-      if (inQuote && text[i+1] === '"') { field += '"'; i++; }
-      else inQuote = !inQuote;
-    } else if (ch === ',' && !inQuote) { row.push(field.trim()); field = ''; }
-    else if ((ch === '\n' || ch === '\r') && !inQuote) {
-      if (ch === '\r' && text[i+1] === '\n') i++;
-      row.push(field.trim()); rows.push(row); row = []; field = '';
-    } else field += ch;
-  }
-  if (field || row.length) { row.push(field.trim()); rows.push(row); }
-  return rows;
-}
-
-/* ═══════════════════════════════════════
-   MAIN LOAD
-═══════════════════════════════════════ */
-async function loadData() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  document.getElementById('refreshBtn').disabled = true;
-  document.getElementById('errorBanner').style.display = 'none';
-
-  try {
-    const res  = await fetch(SHEET_URL);
-    if (!res.ok) throw new Error('Fetch failed: ' + res.status);
-    const text = await res.text();
-    const rows = parseCSV(text);
-    processData(rows);
-    document.getElementById('lastUpdated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
-  } catch (err) {
-    console.warn('Sheet fetch error:', err);
-    document.getElementById('errorBanner').style.display = 'block';
-    useFallbackData();
-  } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
-    document.getElementById('refreshBtn').disabled = false;
-  }
-}
-
-/* ═══════════════════════════════════════
-   DATA PROCESSOR
-═══════════════════════════════════════ */
-function processData(rows) {
-  if (!rows || rows.length < 3) { useFallbackData(); return; }
-
-  /* Row 0 = mega-header, Row 1 = sub-header with dates / col labels, Row 2 = sub-sub */
-
-  // Find rows that look like date headers (row index 2 or 3)
-  // Detect date columns by scanning row 2 for "Date :" pattern
-  let dateRow = -1, labelRow = -1;
-  for (let r = 0; r < Math.min(6, rows.length); r++) {
-    if (rows[r].some(c => /date/i.test(c) && /\d{2}\/\d{2}\/\d{4}/.test(c))) {
-      dateRow = r; break;
+  document.getElementById('collegeName').addEventListener('change', function () {
+    const college = this.value;
+    const deptSel = document.getElementById('department');
+    deptSel.innerHTML = '<option value="" disabled selected>Select your department</option>';
+    const depts = COLLEGE_DEPTS[college];
+    if (depts && depts.length) {
+      depts.forEach(d => {
+        const o = document.createElement('option');
+        o.value = d; o.textContent = d;
+        deptSel.appendChild(o);
+      });
+      deptSel.disabled = false;
+    } else {
+      deptSel.disabled = true;
+      deptSel.innerHTML = '<option value="" disabled selected>No departments available</option>';
     }
-  }
-
-  // Detect "Attendance / Assignment / Mark" columns
-  for (let r = 0; r < Math.min(8, rows.length); r++) {
-    if (rows[r].filter(c => /attendance/i.test(c)).length >= 2) {
-      labelRow = r; break;
-    }
-  }
-
-  // If we can parse the real structure, use it; otherwise use known structure
-  if (dateRow === -1 || labelRow === -1) {
-    parseKnownStructure(rows);
-  } else {
-    parseKnownStructure(rows);
-  }
-}
-
-function parseKnownStructure(rows) {
-  /*
-    Based on the actual sheet:
-    Row 0: "Candidate Details", "Status", "Topic 1...", "Topic 2...", ... (6 topics)
-    Row 1: (blank/merge), (blank), dates repeated across 3 cols each
-    Row 2: domain, name, email, then per-session: Attendance, Assignment Completion Status, Assignment Mark (x6)
-    Row 3+: data rows
-  */
-
-  // Try to find the header rows dynamically
-  let domainCol = 0, nameCol = 1, emailCol = 2;
-  let firstDataRow = -1;
-
-  // Find row with "Domain" or first cell that looks like a domain name
-  for (let r = 0; r < rows.length; r++) {
-    const row = rows[r];
-    if (row[0] && /English|Math|Science/i.test(row[0])) {
-      firstDataRow = r;
-      break;
-    }
-  }
-
-  if (firstDataRow === -1) { useFallbackData(); return; }
-
-  // Extract session dates from row before data
-  sessionDates = [];
-  sessionTopics = [];
-
-  // Scan header rows for dates and topics
-  for (let r = 0; r < firstDataRow; r++) {
-    rows[r].forEach((cell, ci) => {
-      if (/\d{2}\/\d{2}\/\d{4}/.test(cell)) {
-        const d = cell.replace('Date : ','').replace('Date :','').trim();
-        if (!sessionDates.includes(d)) sessionDates.push(d);
-      }
-      if (/Topic\s*\d+\s*:/i.test(cell)) {
-        const t = cell.replace(/Topic\s*\d+\s*:\s*/i,'').trim();
-        if (!sessionTopics.includes(t)) sessionTopics.push(t);
-      }
-    });
-  }
-
-  // Determine session columns: each session = 3 cols (Att, Assignment, Mark) starting after email col
-  // Find column positions by looking for "Attendance" in header rows
-  let sessionStartCol = 3;
-  for (let r = 0; r < firstDataRow; r++) {
-    const idx = rows[r].findIndex(c => /^attendance$/i.test(c.trim()));
-    if (idx > 0) { sessionStartCol = idx; break; }
-  }
-
-  const numSessions = Math.min(sessionDates.length || 6, Math.floor((rows[firstDataRow].length - sessionStartCol) / 3));
-  const actualSessions = numSessions || 6;
-
-  allCandidates = [];
-  allSessions   = [];
-
-  rows.slice(firstDataRow).forEach((row, ri) => {
-    if (!row[nameCol] || row[nameCol].trim() === '') return;
-    const name   = row[nameCol].trim();
-    const domain = row[domainCol].trim() || 'English';
-    const status = (ri === 0) ? 'Live' : 'Pending';
-
-    const candSessions = [];
-    for (let s = 0; s < actualSessions; s++) {
-      const base = sessionStartCol + s * 3;
-      const att    = (row[base]   || '').trim();
-      const assign = (row[base+1] || '').trim();
-      const mark   = parseFloat(row[base+2]) || 0;
-      candSessions.push({ att, assign, mark });
-    }
-
-    allCandidates.push({ name, domain, status, sessions: candSessions });
+    updateProgress();
   });
 
-  // Use fallback dates/topics if sheet didn't have them
-  if (sessionDates.length === 0) {
-    sessionDates  = ['16/04/2026','17/04/2026','18/04/2026','20/04/2026','22/04/2026','24/04/2026'];
-  }
-  if (sessionTopics.length === 0) {
-    sessionTopics = [
-      'Role of Mentors, Mentoring Stages & Strategies',
-      'Syllabus & Mapping, CLT',
-      'Basic Communication Skills',
-      'Vocabulary & Listening',
-      'Reading & Comprehension',
-      'Speaking & Expression'
-    ];
-  }
-
-  if (allCandidates.length === 0) { useFallbackData(); return; }
-
-  renderDashboard();
-}
-
-/* ═══════════════════════════════════════
-   FALLBACK DATA
-═══════════════════════════════════════ */
-function useFallbackData() {
-  sessionDates  = ['16/04/2026','17/04/2026','18/04/2026','20/04/2026','22/04/2026','24/04/2026'];
-  sessionTopics = [
-    'Role of Mentors, Mentoring Stages & Strategies',
-    'Syllabus & Mapping, CLT',
-    'Basic Communication Skills',
-    'Vocabulary & Listening',
-    'Reading & Comprehension',
-    'Speaking & Expression'
-  ];
-  allCandidates = [
-    { name:'T G Swathi',            domain:'English', status:'Live',    sessions:[{att:'Present',assign:'Not Submitted',mark:5},{att:'Absent',assign:'Submitted',mark:8},{att:'Present',assign:'Not Submitted',mark:5},{att:'Present',assign:'Submitted',mark:9},{att:'Present',assign:'Not Submitted',mark:7},{att:'Absent',assign:'Submitted',mark:7}] },
-    { name:'Megavarshini V',        domain:'English', status:'Pending', sessions:[{att:'',assign:'',mark:0},{att:'',assign:'',mark:0},{att:'',assign:'',mark:0},{att:'',assign:'',mark:0},{att:'',assign:'',mark:0},{att:'',assign:'',mark:0}] },
-    { name:'Monica R',              domain:'English', status:'Pending', sessions:[] },
-    { name:'John Wycliffee J',      domain:'English', status:'Pending', sessions:[] },
-    { name:'Akhila P',              domain:'English', status:'Pending', sessions:[] },
-    { name:'Mohammed Kaif S',       domain:'English', status:'Pending', sessions:[] },
-    { name:'Kowsalya V',            domain:'English', status:'Pending', sessions:[] },
-    { name:'Sam Edison R',          domain:'English', status:'Pending', sessions:[] },
-    { name:'Jaisha Priyam',         domain:'English', status:'Pending', sessions:[] },
-    { name:'Mohana',                domain:'English', status:'Pending', sessions:[] },
-    { name:'Bharathi Bhuvaneshwari',domain:'English', status:'Pending', sessions:[] },
-    { name:'Derin',                 domain:'English', status:'Pending', sessions:[] },
-    { name:'Ganeesh',               domain:'English', status:'Pending', sessions:[] },
-    { name:'Suvarna',               domain:'English', status:'Pending', sessions:[] },
-    { name:'Christina',             domain:'English', status:'Pending', sessions:[] },
-  ];
-  renderDashboard();
-}
-
-/* ═══════════════════════════════════════
-   RENDER DASHBOARD
-═══════════════════════════════════════ */
-function renderDashboard() {
-  const numSess = sessionDates.length;
-  const numCand = allCandidates.length;
-
-  // Gather all session data across candidates
-  let totalAtt = 0, totalAttPossible = 0;
-  let totalSub = 0, totalSubPossible = 0;
-  let allMarks = [];
-
-  allCandidates.forEach(c => {
-    (c.sessions || []).forEach(s => {
-      if (s.att) {
-        totalAttPossible++;
-        if (/present/i.test(s.att)) totalAtt++;
+  document.querySelectorAll('[name="projectType"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const wrap = document.getElementById('ptOtherWrap');
+      const otherInp = document.getElementById('ptOther');
+      if (r.value === 'Other' && r.checked) {
+        wrap.classList.add('visible'); otherInp.required = true;
+      } else {
+        wrap.classList.remove('visible'); otherInp.required = false; otherInp.value = '';
       }
-      if (s.assign) {
-        totalSubPossible++;
-        if (/submitted/i.test(s.assign) && !/not/i.test(s.assign)) totalSub++;
-      }
-      if (s.mark > 0) allMarks.push(s.mark);
+      updateProgress();
     });
   });
 
-  const avgAtt  = totalAttPossible ? Math.round(totalAtt / totalAttPossible * 100) : 0;
-  const subRate = totalSubPossible ? Math.round(totalSub / totalSubPossible * 100) : 0;
-  const avgScore= allMarks.length ? (allMarks.reduce((a,b)=>a+b,0)/allMarks.length).toFixed(1) : '—';
-  const highScore = allMarks.length ? Math.max(...allMarks) : '—';
-  const lowScore  = allMarks.length ? Math.min(...allMarks) : '—';
-
-  // Find best session date (highest avg mark across candidates)
-  let bestIdx = 0, bestAvg = -1;
-  for (let s = 0; s < numSess; s++) {
-    const marks = allCandidates.map(c => (c.sessions[s] && c.sessions[s].mark) || 0).filter(m => m > 0);
-    const avg   = marks.length ? marks.reduce((a,b)=>a+b,0)/marks.length : 0;
-    if (avg > bestAvg) { bestAvg = avg; bestIdx = s; }
-  }
-  const bestDate = sessionDates[bestIdx] ? formatDate(sessionDates[bestIdx]) : '—';
-
-  // Header sub
-  document.getElementById('headerSub').textContent =
-    `${sessionDates[0] ? formatDate(sessionDates[0]) : ''} – ${sessionDates[numSess-1] ? formatDate(sessionDates[numSess-1]) : ''} · ${numSess} Sessions · English Domain`;
-
-  // KPIs
-  document.getElementById('kpiCandidates').textContent  = numCand;
-  document.getElementById('kpiSessions').textContent    = numSess;
-  document.getElementById('kpiSessionsSub').textContent = `Topics 1–${numSess}`;
-  document.getElementById('kpiAttendance').innerHTML    = avgAtt + '<span>%</span>';
-  document.getElementById('kpiAttSub').textContent      = `${totalAtt} of ${totalAttPossible} sessions`;
-  document.getElementById('kpiSubmission').innerHTML    = subRate + '<span>%</span>';
-  document.getElementById('kpiSubSub').textContent      = `${totalSub} of ${totalSubPossible} submitted`;
-  document.getElementById('kpiScore').textContent       = avgScore;
-
-  // Strip
-  document.getElementById('sumHigh').textContent     = highScore !== '—' ? highScore+' / 10' : '—';
-  document.getElementById('sumLow').textContent      = lowScore !== '—' ? lowScore+' / 10' : '—';
-  document.getElementById('sumBest').textContent     = bestDate;
-  document.getElementById('sumSessions').textContent = numSess;
-
-  // Topics
-  renderTopics();
-
-  // Charts — use first candidate with session data
-  const chartCand = allCandidates.find(c => c.sessions && c.sessions.some(s => s.att)) || allCandidates[0];
-  renderCharts(chartCand);
-
-  // Tables
-  renderCandidates();
-
-  // Pre-select first candidate
-  if (allCandidates.length > 0 && !selectedCand) {
-    selectCandidate(allCandidates[0]);
-  }
-}
-
-/* ── Topics ── */
-function renderTopics() {
-  const grid = document.getElementById('topicGrid');
-  grid.innerHTML = sessionDates.map((date, i) => {
-    const topic = sessionTopics[i] || `Topic ${i+1}`;
-    // Calculate attendance % for this session across all candidates
-    const atts = allCandidates.map(c => c.sessions[i] && /present/i.test(c.sessions[i].att) ? 1 : 0);
-    const pct  = atts.length ? Math.round(atts.reduce((a,b)=>a+b,0)/atts.length*100) : 0;
-    return `
-      <div class="topic-card">
-        <div class="topic-num">Topic ${i+1} · ${formatDate(date)}</div>
-        <div class="topic-name">${topic}</div>
-        <div class="topic-bar"><div class="topic-fill" data-pct="${pct}" style="width:0%"></div></div>
-        <div class="topic-pct">${pct}% attended</div>
-      </div>`;
-  }).join('');
-  setTimeout(() => {
-    document.querySelectorAll('.topic-fill').forEach(el => { el.style.width = el.dataset.pct + '%'; });
-  }, 200);
-}
-
-/* ── Charts ── */
-function renderCharts(cand) {
-  const labels   = sessionDates.map(d => formatDate(d));
-  const sessions = cand ? (cand.sessions || []) : [];
-
-  // Attendance per session (all candidates)
-  const attData = sessionDates.map((d, i) => {
-    const pres = allCandidates.filter(c => c.sessions[i] && /present/i.test(c.sessions[i].att)).length;
-    return pres;
+  document.getElementById('tu7').addEventListener('change', function () {
+    const wrap = document.getElementById('tuOtherWrap');
+    const otherInp = document.getElementById('tuOther');
+    if (this.checked) { wrap.classList.add('visible'); otherInp.required = true; }
+    else              { wrap.classList.remove('visible'); otherInp.required = false; otherInp.value = ''; }
+    updateProgress();
   });
-  const attColors = attData.map(v => v > 0 ? '#2ecc71' : '#ddd090');
 
-  if (attChartInst) attChartInst.destroy();
-  attChartInst = new Chart(document.getElementById('attChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Present',
-        data: attData,
-        backgroundColor: attColors,
-        borderColor: attData.map(v => v > 0 ? '#1a6b3a' : '#b0b060'),
-        borderWidth: 1.5,
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#4a8a60', font: { size: 11 } }, grid: { color: 'rgba(26,107,58,0.07)' } },
-        y: { ticks: { color: '#4a8a60', stepSize: 1 }, grid: { color: 'rgba(26,107,58,0.07)' }, min: 0 }
-      }
+  document.querySelectorAll('[name="targetUsers"]').forEach(cb => cb.addEventListener('change', updateProgress));
+
+  function setupCharCount(id, countId, max) {
+    const ta = document.getElementById(id), ct = document.getElementById(countId);
+    if (!ta || !ct) return;
+    ta.addEventListener('input', () => {
+      const l = ta.value.length;
+      ct.textContent = `${l} / ${max}`;
+      ct.style.color = l > max * 0.9 ? 'var(--accent)' : 'var(--muted)';
+    });
+  }
+  setupCharCount('problemStatement','psCount',500);
+  setupCharCount('impactOfProblem','impCount',500);
+  setupCharCount('keyOutcome','koCount',800);
+
+  function updateProgress() {
+    let req = 0, done = 0;
+    const radioGroups = new Set();
+    document.querySelectorAll('[required]').forEach(el => {
+      if (el.type === 'radio')    { radioGroups.add(el.name); return; }
+      if (el.type === 'checkbox') return;
+      req++;
+      if (el.tagName === 'SELECT') { if (el.value) done++; }
+      else { if (el.value.trim()) done++; }
+    });
+    radioGroups.forEach(name => { req++; if (document.querySelector(`[name="${name}"]:checked`)) done++; });
+    req++; if (document.querySelectorAll('[name="targetUsers"]:checked').length > 0) done++;
+    const pct = Math.min(100, Math.round((done / Math.max(req,1)) * 100));
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+  }
+  document.getElementById('surveyForm').addEventListener('input',  updateProgress);
+  document.getElementById('surveyForm').addEventListener('change', updateProgress);
+
+  function clearAllErrors() { document.querySelectorAll('.field.error').forEach(f=>f.classList.remove('error')); }
+
+  function validateForm() {
+    clearAllErrors();
+    let isValid = true, firstError = null;
+    document.querySelectorAll('.field').forEach(field => {
+      const inp = field.querySelector('input:not([type="radio"]):not([type="checkbox"]), textarea, select');
+      if (!inp || !inp.required) return;
+      let ok = true;
+      if (inp.type === 'email')          ok = inp.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value);
+      else if (inp.tagName === 'SELECT') ok = !!inp.value;
+      else                               ok = inp.value.trim().length > 0;
+      if (!ok) { field.classList.add('error'); isValid = false; if (!firstError) firstError = field; }
+    });
+    if (!document.querySelector('[name="projectType"]:checked')) {
+      const f = document.getElementById('ptField');
+      f.classList.add('error'); isValid = false; if (!firstError) firstError = f;
+    }
+    if (document.querySelectorAll('[name="targetUsers"]:checked').length === 0) {
+      const f = document.getElementById('tuField');
+      f.classList.add('error'); isValid = false; if (!firstError) firstError = f;
+    }
+    if (!isValid && firstError) {
+      firstError.scrollIntoView({ behavior:'smooth', block:'center' });
+      const sec = firstError.closest('.section');
+      if (sec) { sec.classList.add('shake'); setTimeout(()=>sec.classList.remove('shake'),500); }
+      showToast('Please fill in all required fields','error');
+    }
+    return isValid;
+  }
+
+  document.getElementById('surveyForm').addEventListener('input',  e => { const f=e.target.closest('.field'); if(f)f.classList.remove('error'); });
+  document.getElementById('surveyForm').addEventListener('change', e => { const f=e.target.closest('.field'); if(f)f.classList.remove('error'); });
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type==='success'?'✅ ':'❌ ') + msg;
+    t.className = 'show ' + type;
+    setTimeout(()=>{ t.className=''; }, 4500);
+  }
+
+  document.getElementById('surveyForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>Submitting…</span><span>⏳</span>';
+
+    const fd = new FormData(this);
+    const ptVal   = fd.get('projectType');
+    const ptFinal = ptVal === 'Other' ? (fd.get('projectTypeOther') || 'Other') : ptVal;
+    const tuVals  = fd.getAll('targetUsers');
+    const tuOther = fd.get('targetUsersOther') || '';
+    const tuFinal = tuVals.map(v => v==='Other' && tuOther ? tuOther : v).join('; ');
+    const impFinal = fd.get('impactOfProblem') || '';
+
+    const data = {
+      timestamp:        new Date().toISOString(),
+      fullName:         fd.get('fullName'),
+      phone:            fd.get('phone'),
+      email:            fd.get('email'),
+      registerNo:       fd.get('regNo'),
+      collegeName:      fd.get('collegeName'),
+      department:       fd.get('department'),
+      city:             fd.get('city'),
+      projectTitle:     fd.get('projectTitle'),
+      problemStatement: fd.get('problemStatement') || '',
+      impactOfProblem:  impFinal,
+      brandName:        fd.get('brandName'),
+      projectType:      ptFinal,
+      targetUsers:      tuFinal,
+      keyOutcome:       fd.get('keyOutcome'),
+    };
+
+    try {
+      await new Promise((resolve, reject) => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = SHEET_SCRIPT_URL;
+        form.target = 'hidden_iframe';
+        form.style.display = 'none';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = JSON.stringify(data);
+        form.appendChild(input);
+
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.style.display = 'none';
+        iframe.onload = () => resolve();
+        iframe.onerror = () => reject(new Error('Submit failed'));
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        form.submit();
+
+        setTimeout(() => {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          resolve();
+        }, 5000);
+      });
+      showToast('Survey submitted successfully! Thank you 🎉', 'success');
+      this.reset();
+      clearAllErrors();
+      document.getElementById('department').disabled = true;
+      document.getElementById('department').innerHTML = '<option value="" disabled selected>First select your college</option>';
+      document.getElementById('ptOtherWrap').classList.remove('visible');
+      document.getElementById('tuOtherWrap').classList.remove('visible');
+      document.getElementById('psCount').textContent = '0 / 500';
+      document.getElementById('impCount').textContent = '0 / 500';
+      document.getElementById('koCount').textContent = '0 / 800';
+      updateProgress();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    } catch(err) {
+      console.error(err);
+      showToast('Submission failed. Please try again.','error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Submit Survey</span><span>→</span>';
     }
   });
-
-  // Score trend
-  const scoreData = sessions.map(s => s.mark || null);
-  if (scoreChartInst) scoreChartInst.destroy();
-  scoreChartInst = new Chart(document.getElementById('scoreChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Score',
-        data: scoreData,
-        borderColor: '#1a6b3a',
-        backgroundColor: 'rgba(46,204,113,0.1)',
-        pointBackgroundColor: '#f5c842',
-        pointBorderColor: '#1a6b3a',
-        pointBorderWidth: 2,
-        pointRadius: 6,
-        pointHoverRadius: 8,
-        borderWidth: 2.5,
-        fill: true,
-        tension: 0.4,
-        spanGaps: true,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#4a8a60', font: { size: 11 } }, grid: { color: 'rgba(26,107,58,0.07)' } },
-        y: { ticks: { color: '#4a8a60' }, grid: { color: 'rgba(26,107,58,0.07)' }, min: 0, max: 10 }
-      }
-    }
-  });
-}
-
-/* ── Candidates Table ── */
-function renderCandidates() {
-  const search  = (document.getElementById('searchBox').value || '').toLowerCase();
-  let filtered  = allCandidates.filter(c => {
-    const matchStatus = candFilter === 'all' || c.status === candFilter;
-    const matchSearch = !search || c.name.toLowerCase().includes(search);
-    return matchStatus && matchSearch;
-  });
-
-  document.getElementById('candidateTableTitle').textContent = `${filtered.length} of ${allCandidates.length} candidates`;
-
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  if (candPage >= totalPages) candPage = 0;
-  const pageData = filtered.slice(candPage * PAGE_SIZE, (candPage + 1) * PAGE_SIZE);
-
-  const body = document.getElementById('candidateBody');
-  if (!pageData.length) {
-    body.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:#4a8a60;font-size:13px">No candidates found.</td></tr>`;
-  } else {
-    body.innerHTML = pageData.map((c, i) => {
-      const idx    = allCandidates.indexOf(c);
-      const init   = c.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-      const active = selectedCand === c ? 'background:#edfaf3;' : '';
-      const attCount = c.sessions.filter(s => /present/i.test(s.att)).length;
-      const subCount = c.sessions.filter(s => /submitted/i.test(s.assign) && !/not/i.test(s.assign)).length;
-      return `
-        <tr style="cursor:pointer;${active}" onclick="selectCandidate(allCandidates[${idx}])">
-          <td style="color:#7ab890;font-weight:500">${String(candPage * PAGE_SIZE + i + 1).padStart(2,'0')}</td>
-          <td>
-            <div class="name-cell">
-              <span class="name-init">${init}</span>
-              <span style="color:#0d3320;font-weight:500">${c.name}</span>
-            </div>
-          </td>
-          <td><span class="status-pill ${c.status==='Live'?'pill-live':'pill-pending'}">${c.status}</span></td>
-          <td style="color:#1a8a48;font-weight:500">${c.domain}</td>
-          <td style="color:#4a8a60">${attCount}P / ${subCount}S / ${c.sessions.length} total</td>
-        </tr>`;
-    }).join('');
-  }
-
-  // Pagination
-  const pag = document.getElementById('candPagination');
-  if (totalPages <= 1) { pag.innerHTML = ''; return; }
-  let html = `<span class="page-info">Page ${candPage+1} of ${totalPages}</span>`;
-  html += `<button class="page-btn" onclick="goPage(${candPage-1})" ${candPage===0?'disabled':''}>‹</button>`;
-  for (let p = 0; p < totalPages; p++) {
-    html += `<button class="page-btn ${p===candPage?'active':''}" onclick="goPage(${p})">${p+1}</button>`;
-  }
-  html += `<button class="page-btn" onclick="goPage(${candPage+1})" ${candPage===totalPages-1?'disabled':''}>›</button>`;
-  pag.innerHTML = html;
-}
-
-function goPage(p) { candPage = p; renderCandidates(); }
-
-function setCandFilter(f, btn) {
-  candFilter = f; candPage = 0;
-  document.querySelectorAll('#candidateBody').length;
-  document.querySelectorAll('.filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderCandidates();
-}
-
-/* ── Select Candidate ── */
-function selectCandidate(cand) {
-  selectedCand = cand;
-  renderCandidates();
-  renderSessionDetail();
-  renderCharts(cand);
-  document.getElementById('sessionDetailTitle').textContent = `Session Detail — ${cand.name}`;
-}
-
-/* ── Session Detail ── */
-function renderSessionDetail() {
-  if (!selectedCand) return;
-  const sessions = selectedCand.sessions || [];
-  document.getElementById('sessionTableTitle').textContent = `${selectedCand.name} — ${sessions.length} sessions`;
-
-  const filtered = sessions.filter((s, i) => {
-    if (sessionFilter === 'present')   return /present/i.test(s.att);
-    if (sessionFilter === 'absent')    return /absent/i.test(s.att);
-    if (sessionFilter === 'submitted') return /submitted/i.test(s.assign) && !/not/i.test(s.assign);
-    return true;
-  });
-
-  const body = document.getElementById('sessionBody');
-  if (!filtered.length) {
-    body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:#4a8a60;font-size:13px">No records match.</td></tr>`;
-    return;
-  }
-
-  body.innerHTML = filtered.map((s, i) => {
-    const realIdx  = sessions.indexOf(s);
-    const date     = sessionDates[realIdx] ? formatDate(sessionDates[realIdx]) : `Session ${realIdx+1}`;
-    const topic    = sessionTopics[realIdx] || `Topic ${realIdx+1}`;
-    const present  = /present/i.test(s.att);
-    const submitted= /submitted/i.test(s.assign) && !/not/i.test(s.assign);
-    const pct      = s.mark * 10;
-    return `
-      <tr>
-        <td style="color:#1a8a48;font-weight:500;white-space:nowrap">${date}</td>
-        <td style="color:#0d3320">${topic}</td>
-        <td>
-          <span class="att-dot ${present?'dot-present':'dot-absent'}"></span>
-          <span style="color:${present?'#0d6b30':'#9a8a40'}">${s.att || 'N/A'}</span>
-        </td>
-        <td class="${submitted?'assign-yes':'assign-no'}">${s.assign || 'N/A'}</td>
-        <td>
-          <span class="score-val">${s.mark||'—'}</span>
-          <span style="font-size:11px;color:#7ab890"> /10</span>
-        </td>
-        <td>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width:${pct}%"></div>
-          </div>
-        </td>
-      </tr>`;
-  }).join('');
-}
-
-function setSessionFilter(f, btn) {
-  sessionFilter = f;
-  document.querySelectorAll('#sessionFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderSessionDetail();
-}
-
-/* ── Helpers ── */
-function formatDate(d) {
-  if (!d) return '';
-  const parts = d.split('/');
-  if (parts.length === 3) {
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${parseInt(parts[0])} ${months[parseInt(parts[1])-1]}`;
-  }
-  return d;
-}
-
-function initials(name) {
-  return name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-}
-
-/* ── Boot ── */
-loadData();
 </script>
 </body>
 </html>
