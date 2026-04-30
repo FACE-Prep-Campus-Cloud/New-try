@@ -3,24 +3,15 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Leetcode Performance Tracker — Rathinam College Of Arts & Science </title>
+<title>Leetcode Performance Tracker — Study World Group of Institutions</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Clash+Display:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #f5f2eb;
-    --surface: #ffffff;
-    --surface2: #fcfaf6;
-    --border: #d8d2c4;
-    --ink: #1a1714;
-    --muted: #7a7368;
-    --easy: #3d9970;
-    --medium: #e67e22;
-    --hard: #c0392b;
-    --accent: #2c5f8a;
-    --rank: #7b2d8b;
-    --tag-bg: #1a1714;
-    --tag-text: #f5f2eb;
+    --bg: #f5f2eb; --surface: #ffffff; --surface2: #fcfaf6; --border: #d8d2c4;
+    --ink: #1a1714; --muted: #7a7368; --easy: #3d9970; --medium: #e67e22;
+    --hard: #c0392b; --accent: #2c5f8a; --rank: #7b2d8b;
+    --tag-bg: #1a1714; --tag-text: #f5f2eb;
     --font-head: 'Clash Display', 'Georgia', serif;
     --font-mono: 'DM Mono', monospace;
     --shadow: 0 2px 12px rgba(26,23,20,0.08);
@@ -29,158 +20,70 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--ink); font-family: var(--font-mono); min-height: 100vh; }
 
-  /* ── TOPBAR ── */
   .topbar {
-    background: var(--ink);
-    color: #aaa;
-    padding: 0 40px;
-    height: 68px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 3px solid var(--easy);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    background: var(--ink); color: #aaa; padding: 0 40px; height: 66px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 3px solid var(--easy); position: sticky; top: 0; z-index: 100;
     box-shadow: 0 4px 24px rgba(26,23,20,0.35);
   }
   .topbar-title {
-    font-family: var(--font-head);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #0dc173b8;
+    font-family: var(--font-head); font-size: 1.3rem; font-weight: 700;
+    letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; color: #0dc173b8;
   }
-  .topbar-title .college { color: #0dc173b8; }
   .topbar-title .sep { color: #ffffff; font-weight: 300; font-family: var(--font-mono); }
   .topbar-title .sub { color: #c9c4c4; font-family: var(--font-mono); font-size: 1.0rem; font-weight: 550; }
   .topbar-right { display: flex; align-items: center; gap: 14px; }
   .topbar-logo { height: 47px; border-radius: 8px; background: #fff; padding: 4px 10px; margin-right: 4px; }
 
-  /* ── CLASS DROPDOWN ── */
   .class-dropdown-wrap { position: relative; display: flex; align-items: center; }
-  .class-dropdown-wrap::before {
-    content: ''; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    width: 7px; height: 7px; border-radius: 50%; background: var(--easy);
-    pointer-events: none; z-index: 1; box-shadow: 0 0 8px rgba(34,197,94,0.6);
-  }
-  .class-dropdown-wrap::after {
-    content: ''; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
-    border-top: 5px solid var(--muted); pointer-events: none; z-index: 1;
-  }
-  .class-select {
-    appearance: none; -webkit-appearance: none;
-    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
-    border-radius: 10px; padding: 9px 38px 9px 28px;
-    font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
-    letter-spacing: 0.8px; text-transform: uppercase; color: #fff;
-    cursor: pointer; outline: none; min-width: 155px;
-    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-  }
+  .class-dropdown-wrap::before { content: ''; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: var(--easy); pointer-events: none; z-index: 1; }
+  .class-dropdown-wrap::after { content: ''; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #aaa; pointer-events: none; z-index: 1; }
+  .class-select { appearance: none; -webkit-appearance: none; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 9px 38px 9px 28px; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: #fff; cursor: pointer; outline: none; min-width: 140px; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; }
   .class-select:hover { background: rgba(255,255,255,0.14); border-color: var(--easy); box-shadow: 0 0 0 3px rgba(61,153,112,0.18); }
   .class-select:focus { border-color: var(--easy); box-shadow: 0 0 0 3px rgba(61,153,112,0.25); background: rgba(255,255,255,0.14); }
   .class-select option { background: #1a1714; color: #fff; font-family: var(--font-mono); font-size: 0.78rem; }
 
-  /* ── BUTTONS ── */
-  .sync-btn {
-    display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px;
-    background: rgba(255,255,255,0.1); color: #fff;
-    border: 1.5px solid rgba(255,255,255,0.25); border-radius: 8px;
-    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500;
-    letter-spacing: 0.7px; text-transform: uppercase; cursor: pointer;
-    transition: all 0.18s; white-space: nowrap;
-  }
+  .sync-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; background: rgba(255,255,255,0.1); color: #fff; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 8px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.7px; text-transform: uppercase; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
   .sync-btn:hover { background: rgba(255,255,255,0.18); border-color: var(--easy); }
   .sync-btn.syncing { border-color: var(--easy); color: #5dd4a0; pointer-events: none; }
   .sync-btn.errstate { border-color: var(--hard); color: #f5a0a0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .pdf-btn {
-    display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px;
-    background: var(--easy); color: #fff; border: none; border-radius: 8px;
-    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500;
-    letter-spacing: 0.8px; text-transform: uppercase; cursor: pointer;
-    transition: background 0.18s, transform 0.12s;
-    box-shadow: 0 2px 8px rgba(61,153,112,0.35);
-  }
+  .pdf-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; background: var(--easy); color: #fff; border: none; border-radius: 8px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; cursor: pointer; transition: background 0.18s, transform 0.12s; box-shadow: 0 2px 8px rgba(61,153,112,0.35); }
   .pdf-btn:hover { background: #2d7a58; transform: translateY(-1px); }
   .pdf-btn:active { transform: translateY(0); }
 
-  /* ── MAIN ── */
-  .main { max-width: 1320px; margin: 0 auto; padding: 36px 40px 60px; }
+  .main { max-width: 1280px; margin: 0 auto; padding: 36px 40px 60px; }
 
-  /* ── SKELETON ── */
-  .skeleton { display: none; padding: 80px 40px; text-align: center; color: var(--muted); font-size: 0.78rem; }
-  .skeleton.show { display: block; }
-  .sk-spin { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
-
-  /* ── LIVE STATUS BAR ── */
-  .live-bar {
-    display: flex; align-items: center; gap: 10px; padding: 10px 18px;
-    background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: 10px; font-size: 0.7rem; flex-wrap: wrap; gap: 8px;
-    box-shadow: var(--shadow);
-  }
-  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background 0.3s; }
-  .live-dot.ok { background: var(--easy); box-shadow: 0 0 0 3px rgba(34,197,94,0.2); animation: pulse 2.5s ease infinite; }
+  .live-bar { display: flex; align-items: center; gap: 10px; padding: 9px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 0; box-shadow: var(--shadow); font-size: 0.7rem; flex-wrap: wrap; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; transition: background 0.3s; }
+  .live-dot.ok  { background: var(--easy); box-shadow: 0 0 0 3px rgba(61,153,112,0.2); animation: pulse 2.5s ease infinite; }
   .live-dot.loading { background: var(--medium); animation: pulse 0.9s ease infinite; }
   .live-dot.err { background: var(--hard); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .live-status { color: var(--muted); }
   .live-status b { color: var(--ink); }
-  .live-time { margin-left: auto; font-size: 0.63rem; color: var(--muted); }
-  .sheet-link {
-    padding: 2px 10px; border: 1.5px solid var(--border); border-radius: 6px;
-    background: transparent; font-family: var(--font-mono); font-size: 0.62rem;
-    color: var(--accent); cursor: pointer; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;
-  }
-  .sheet-link:hover { background: rgba(99,102,241,0.1); border-color: var(--accent); }
-  .cd-wrap { font-size: 0.62rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
-  .cd-badge {
-    background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
-    border-radius: 4px; padding: 1px 7px; font-size: 0.62rem; color: var(--accent);
-    font-weight: 600; min-width: 32px; text-align: center;
-  }
+  .live-time { margin-left: auto; font-size: 0.65rem; color: var(--muted); }
+  .sheet-link { padding: 2px 10px; border: 1.5px solid var(--border); border-radius: 6px; background: transparent; font-family: var(--font-mono); font-size: 0.63rem; color: var(--accent); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+  .sheet-link:hover { background: var(--surface2); border-color: var(--accent); }
+  .cd-wrap { font-size: 0.63rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .cd-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 0.62rem; color: var(--accent); font-weight: 600; min-width: 30px; text-align: center; }
 
-  /* ── ERROR ── */
-  .err-banner {
-    display: none; align-items: flex-start; gap: 12px; padding: 14px 18px;
-    background: rgba(239,68,68,0.08); border: 1.5px solid rgba(239,68,68,0.3);
-    border-radius: 10px; margin-bottom: 16px; font-size: 0.73rem;
-    color: #fca5a5; line-height: 1.7;
-  }
-  .err-banner.show { display: flex; }
-  .err-banner code { background: rgba(239,68,68,0.15); padding: 1px 5px; border-radius: 3px; font-size: 0.68rem; }
+  .skeleton { display: none; padding: 60px 40px; text-align: center; color: var(--muted); font-size: 0.78rem; }
+  .skeleton.show { display: block; }
+  .sk-spin { width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--easy); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
 
-  /* ── CLASS LABEL ── */
-  .class-label-bar {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
-    padding: 10px 18px; background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: 10px; box-shadow: var(--shadow); animation: fadeUp 0.3s ease both;
-  }
+  .class-label-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; padding: 10px 18px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); animation: fadeUp 0.3s ease both; }
   .class-label-badge { background: var(--easy); color: #fff; font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 6px; font-weight: 600; }
   .class-label-name { font-family: var(--font-head); font-size: 1rem; font-weight: 700; color: var(--ink); }
   .class-label-sub { font-size: 0.7rem; color: var(--muted); margin-left: auto; }
 
-  /* ── METRICS ── */
   .metrics-wrapper { display: flex; gap: 10px; margin-bottom: 24px; align-items: stretch; }
-  .metrics-group {
-    display: flex; flex-direction: column; border-radius: 12px; overflow: hidden;
-    border: 1.5px solid var(--border); box-shadow: var(--shadow); animation: fadeUp 0.4s ease both;
-  }
+  .metrics-group { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); box-shadow: var(--shadow); animation: fadeUp 0.4s ease both; }
   .metrics-group.students { flex: 1.1; animation-delay: 0.05s; border-color: #d4c8f0; }
   .metrics-group.questions { flex: 2.2; animation-delay: 0.1s; border-color: #b8ddc8; }
-  .metrics-group.ranking { flex: 0.8; animation-delay: 0.15s; border-color: #e4c8f0; }
-  .metrics-group-label {
-    font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase;
-    padding: 6px 16px; font-family: var(--font-mono); font-weight: 600;
-    display: flex; align-items: center; gap: 7px;
-  }
+  .metrics-group.ranking { flex: 0.75; animation-delay: 0.15s; border-color: #e4c8f0; }
+  .metrics-group-label { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; font-family: var(--font-mono); font-weight: 600; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
   .metrics-group.students .metrics-group-label { background: #ede8ff; color: #5a3fa0; border-bottom: 1px solid #d4c8f0; }
   .metrics-group.questions .metrics-group-label { background: #e4f7ed; color: #1e6e47; border-bottom: 1px solid #b8ddc8; }
   .metrics-group.ranking .metrics-group-label { background: #f5e4ff; color: #7b2d8b; border-bottom: 1px solid #e4c8f0; }
@@ -189,130 +92,90 @@
   .questions .metrics-group-dot { background: var(--easy); }
   .ranking .metrics-group-dot { background: var(--rank); }
   .metrics-group-cards { display: flex; flex: 1; background: var(--surface); }
-  .metrics-group-cards .metric-card {
-    border: none; border-radius: 0; box-shadow: none; flex: 1;
-    margin: 0; animation: none; padding: 16px 18px; overflow: hidden; min-width: 0;
-  }
+  .metrics-group-cards .metric-card { border: none; border-radius: 0; box-shadow: none; flex: 1; margin: 0; animation: none; padding: 14px 18px; overflow: hidden; min-width: 0; }
   .metrics-group-cards .metric-card + .metric-card { border-left: 1px solid var(--border); }
-  .metric-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); animation: fadeUp 0.4s ease both; }
-  .metric-label { font-size: 0.62rem; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-  .metric-value { font-family: var(--font-head); font-size: 2.4rem; font-weight: 800; line-height: 1; color: var(--ink); }
-  .metric-value.easy { color: var(--easy); }
-  .metric-value.medium { color: var(--medium); }
-  .metric-value.hard { color: var(--hard); }
-  .metric-value.accent { color: var(--accent); }
-  .metric-value.rank { color: var(--rank); }
-  .metric-sub { font-size: 0.68rem; color: var(--muted); margin-top: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .metrics-group.questions .metric-value { font-size: 2.6rem; }
-  .metrics-group.ranking .metric-value { font-size: 1.5rem; word-break: break-word; white-space: normal; line-height: 1.2; }
-  .metrics-group.ranking .metric-label { font-size: 0.56rem; }
-  .metrics-group.ranking .metric-sub { font-size: 0.6rem; white-space: normal; overflow: visible; line-height: 1.5; }
+  .metric-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 20px; box-shadow: var(--shadow); animation: fadeUp 0.4s ease both; }
+  .metric-label { font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .metric-value { font-family: var(--font-head); font-size: 2.2rem; font-weight: 700; line-height: 1; color: var(--ink); }
+  .metric-value.easy { color: var(--easy); } .metric-value.medium { color: var(--medium); }
+  .metric-value.hard { color: var(--hard); } .metric-value.accent { color: var(--accent); } .metric-value.rank { color: var(--rank); }
+  .metric-sub { font-size: 0.7rem; color: var(--muted); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .metrics-group.questions .metric-value { font-size: 2.5rem; }
+  .metrics-group.ranking .metric-value { font-size: 1.4rem; word-break: break-word; white-space: normal; line-height: 1.2; }
+  .metrics-group.ranking .metric-label { font-size: 0.58rem; letter-spacing: 1px; }
+  .metrics-group.ranking .metric-sub { font-size: 0.62rem; white-space: normal; overflow: visible; line-height: 1.4; }
 
-  /* ── CHARTS ── */
   .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
   .chart-wide { grid-column: 1 / -1; }
-  .chart-card {
-    background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px;
-    padding: 24px 26px; box-shadow: var(--shadow); animation: fadeUp 0.5s ease both;
-  }
-  .chart-title { font-family: var(--font-head); font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
-  .chart-sub { font-size: 0.66rem; color: var(--muted); margin-bottom: 18px; letter-spacing: 0.5px; }
+  .chart-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 24px 26px; box-shadow: var(--shadow); animation: fadeUp 0.5s ease both; }
+  .chart-title { font-family: var(--font-head); font-size: 1rem; font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+  .chart-sub { font-size: 0.68rem; color: var(--muted); margin-bottom: 18px; letter-spacing: 0.5px; }
   .chart-container { position: relative; }
-  .legend { display: flex; gap: 18px; align-items: center; font-size: 0.68rem; color: var(--muted); margin-bottom: 16px; }
+  .legend { display: flex; gap: 18px; align-items: center; font-size: 0.7rem; color: var(--muted); margin-bottom: 16px; }
   .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 5px; }
 
-  /* ── FILTER BAR ── */
   .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-  .filter-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-right: 4px; }
-  .filter-btn {
-    padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border);
-    background: transparent; font-family: var(--font-mono); font-size: 0.72rem;
-    cursor: pointer; color: var(--ink); transition: all 0.18s; letter-spacing: 0.5px;
-  }
+  .filter-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-right: 4px; }
+  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; color: var(--ink); transition: all 0.18s; letter-spacing: 0.5px; }
   .filter-btn:hover { background: var(--surface2); }
   .filter-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  .search-box {
-    margin-left: auto; padding: 6px 14px; border: 1.5px solid var(--border);
-    border-radius: 8px; background: var(--surface); font-family: var(--font-mono);
-    font-size: 0.75rem; color: var(--ink); outline: none; width: 200px; transition: border-color 0.2s;
-  }
+  .search-box { margin-left: auto; padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); outline: none; width: 200px; transition: border-color 0.2s; }
   .search-box:focus { border-color: var(--accent); }
-  .sort-group {
-    display: flex; align-items: center; gap: 4px; background: var(--surface2);
-    border: 1.5px solid var(--border); border-radius: 22px; padding: 3px 5px;
-  }
-  .sort-col-btn {
-    padding: 4px 12px; border-radius: 16px; border: none; background: transparent;
-    font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; color: var(--muted);
-    transition: all 0.16s; letter-spacing: 0.4px;
-  }
+  .sort-group { display: flex; align-items: center; gap: 4px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 22px; padding: 3px 5px; }
+  .sort-col-btn { padding: 4px 12px; border-radius: 16px; border: none; background: transparent; font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; color: var(--muted); transition: all 0.16s; letter-spacing: 0.4px; }
   .sort-col-btn:hover { color: var(--ink); background: var(--surface); }
   .sort-col-btn.active { background: var(--ink); color: var(--bg); }
-  .sort-dir-btn {
-    padding: 4px 10px; border-radius: 16px; border: 1.5px solid var(--border);
-    background: var(--surface); font-family: var(--font-mono); font-size: 0.68rem;
-    cursor: pointer; color: var(--accent); font-weight: 600; margin-left: 4px;
-    transition: all 0.16s; white-space: nowrap;
-  }
-  .sort-dir-btn:hover { background: var(--border); }
+  .sort-dir-btn { padding: 4px 10px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface); font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer; color: var(--accent); font-weight: 600; margin-left: 4px; transition: all 0.16s; white-space: nowrap; }
+  .sort-dir-btn:hover { background: var(--surface2); }
 
-  /* ── SECTION HEADER ── */
-  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; margin-top: 8px; }
-  .section-title { font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: var(--ink); }
-  .section-line { flex: 1; height: 1px; background: var(--border); border-radius: 2px; }
-
-  /* ── TABLE ── */
-  .table-card {
-    background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px;
-    overflow: hidden; box-shadow: var(--shadow); animation: fadeUp 0.6s ease both; animation-delay: 0.3s;
-  }
+  .table-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); animation: fadeUp 0.6s ease both; animation-delay: 0.3s; }
   .table-head-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; flex-wrap: wrap; gap: 12px; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.77rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
   thead tr { background: var(--surface2); border-bottom: 2px solid var(--border); }
-  th {
-    padding: 12px 16px; text-align: left; font-size: 0.62rem; letter-spacing: 1.8px;
-    text-transform: uppercase; color: var(--muted); font-weight: 500; cursor: pointer;
-    user-select: none; white-space: nowrap; transition: color 0.15s;
-  }
+  th { padding: 12px 16px; text-align: left; font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 500; cursor: pointer; user-select: none; white-space: nowrap; }
   th:hover { color: var(--ink); }
-  tbody tr { border-bottom: 1px solid rgba(42,48,69,0.6); transition: background 0.15s; line-height: 1.4; }
-  tbody tr:hover { background: rgba(99,102,241,0.05); }
+  tbody tr { border-bottom: 1px solid var(--surface2); transition: background 0.15s; line-height: 1.4; }
+  tbody tr:hover { background: #faf8f3; }
   tbody tr:last-child { border-bottom: none; }
   td { padding: 11px 16px; color: var(--ink); vertical-align: middle; }
-  .td-name { font-weight: 500; }
-  .td-sno { color: var(--muted); font-size: 0.68rem; text-align: center; }
+  .td-name { font-weight: 500; } .td-sno { color: var(--muted); font-size: 0.7rem; text-align: center; }
   .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; text-align: center; min-width: 32px; }
-  .badge-easy { background: #d4f1e4; color: #1e6e47; }
-  .badge-medium { background: #fde9d3; color: #8a4300; }
-  .badge-hard { background: #fad5d5; color: #7a1a1a; }
-  .badge-zero { background: var(--surface2); color: var(--muted); }
+  .badge-easy { background: #d4f1e4; color: #1e6e47; } .badge-medium { background: #fde9d3; color: #8a4300; }
+  .badge-hard { background: #fad5d5; color: #7a1a1a; } .badge-zero { background: var(--surface2); color: var(--muted); }
   .badge-rank { background: #f3e4ff; color: #7b2d8b; }
-  .total-bar-wrap { width: 110px; background: var(--surface2); border-radius: 4px; height: 5px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 8px; }
+  .total-bar-wrap { width: 120px; background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 8px; }
   .total-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--easy), var(--accent)); transition: width 0.4s ease; }
-  .topper-tag { display: inline-block; background: linear-gradient(135deg, var(--accent), #8b5cf6); color: #fff; font-size: 0.58rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
-  .no-attempt td { opacity: 0.4; }
-  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--muted); }
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-top: 1px solid var(--border); font-size: 0.72rem; color: var(--muted); }
   .page-btns { display: flex; gap: 6px; }
-  .page-btn { width: 30px; height: 30px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink); transition: all 0.15s; }
+  .page-btn { width: 30px; height: 30px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink); transition: all 0.15s; }
   .page-btn:hover, .page-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   .topper-tag { display: inline-block; background: var(--tag-bg); color: var(--tag-text); font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+  .no-attempt td { opacity: 0.5; }
+  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; margin-top: 8px; }
+  .section-title { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; }
+  .section-line { flex: 1; height: 1.5px; background: var(--border); border-radius: 2px; }
 
-  /* ── TOAST ── */
   .toast { position: fixed; bottom: 32px; right: 32px; padding: 12px 20px; border-radius: 10px; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; color: #fff; z-index: 999; opacity: 0; transform: translateY(12px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; display: flex; align-items: center; gap: 9px; box-shadow: var(--shadow-lg); }
   .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.success { background: var(--easy); }
-  .toast.error { background: var(--hard); }
-  .toast.info { background: var(--accent); }
+  .toast.success { background: var(--easy); } .toast.error { background: var(--hard); } .toast.info { background: var(--accent); }
+
+  .err-banner { display: none; align-items: flex-start; gap: 12px; padding: 13px 16px; background: #fff5f5; border: 1.5px solid #fcc; border-radius: 10px; margin-bottom: 16px; font-size: 0.73rem; color: #7a1a1a; line-height: 1.7; }
+  .err-banner.show { display: flex; }
+
+  /* Data source indicator */
+  .data-source-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 6px; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
+  .data-source-badge.live { background: #d4f1e4; color: #1e6e47; border: 1px solid #b8ddc8; }
+  .data-source-badge.static { background: #fde9d3; color: #8a4300; border: 1px solid #f5c6a0; }
+  .data-source-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .data-source-badge.live .dot { background: var(--easy); animation: pulse 2s ease infinite; }
+  .data-source-badge.static .dot { background: var(--medium); }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
   @media (max-width: 900px) {
-    .metrics-wrapper { flex-direction: column; }
-    .charts-row { grid-template-columns: 1fr; }
-    .main { padding: 24px 16px 40px; }
-    .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 12px; height: auto; }
+    .metrics-wrapper { flex-direction: column; } .charts-row { grid-template-columns: 1fr; }
+    .main { padding: 24px 16px 40px; } .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 12px; height: auto; }
   }
-
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; animation: none !important; }
     @page { size: A4 landscape; margin: 10mm 12mm; }
@@ -330,9 +193,7 @@
     .table-card { page-break-before: always !important; box-shadow: none !important; }
     .table-head-bar, .filter-bar, .search-box, .pagination { display: none !important; }
     .print-only-header { display: block !important; font-family: 'Clash Display', Georgia, serif !important; font-size: 0.85rem !important; font-weight: 700 !important; padding: 8px 14px 6px !important; border-bottom: 1px solid #d8d2c4 !important; background: #fcfaf6 !important; color: #1a1714 !important; }
-    table { font-size: 0.68rem !important; }
-    th { padding: 7px 10px !important; font-size: 0.58rem !important; }
-    td { padding: 5px 10px !important; }
+    table { font-size: 0.68rem !important; } th { padding: 7px 10px !important; font-size: 0.58rem !important; } td { padding: 5px 10px !important; }
     .no-attempt td { opacity: 0.4 !important; }
     #tableBody tr { display: table-row !important; }
     .no-print { display: none !important; }
@@ -343,20 +204,19 @@
 
 <div class="topbar">
   <div class="topbar-title">
-    <span class="college">Rathinam</span> College of Arts and Science
+    Study World Group of Institutions
     <span class="sep">—</span>
     <span class="sub">Leetcode Performance Tracker</span>
   </div>
   <div class="topbar-right">
     <div class="class-dropdown-wrap">
       <select class="class-select" id="classSelect" onchange="switchClass(this.value)">
-        <option value="BSC_CT">I B.Sc CT (GenAI)</option>
-        <option value="BCA_AI">I BCA AI</option>
+        <option value="BCA_I">I BCA</option>
       </select>
     </div>
     <img src="face prep campus.webp" alt="Logo" class="topbar-logo" onerror="this.style.display='none'"/>
     <button class="pdf-btn" onclick="downloadPDF()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
@@ -375,9 +235,10 @@
   <div id="dashboard" style="display:none">
 
     <div class="class-label-bar">
-      <span class="class-label-badge" id="classLabelBadge">I B.Sc CT</span>
-      <span class="class-label-name" id="classLabelName">I B.Sc Computer Technology (GenAI) — 2025–2028</span>
+      <span class="class-label-badge" id="classLabelBadge">I BCA</span>
+      <span class="class-label-name" id="classLabelName">Bachelor of Computer Applications</span>
       <span class="class-label-sub" id="classLabelSub"></span>
+      <span id="dataSourceBadge"></span>
     </div>
 
     <div class="metrics-wrapper">
@@ -428,7 +289,7 @@
     </div>
 
     <div class="table-card">
-      <div class="print-only-header" style="display:none" id="printHeader">All Students</div>
+      <div class="print-only-header" style="display:none" id="printHeader">All Students — I BCA</div>
       <div class="table-head-bar">
         <div class="filter-bar">
           <span class="filter-label">Filter:</span>
@@ -470,18 +331,17 @@
       </div>
     </div>
 
-  </div><!-- /#dashboard -->
+  </div>
 
   <div style="margin-top:28px">
     <div class="err-banner" id="errBanner">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <div id="errText"></div>
     </div>
-
     <div class="live-bar">
       <span class="live-dot loading" id="liveDot"></span>
       <span class="live-status" id="liveStatus">Connecting to Google Sheets…</span>
-      <a class="sheet-link" id="sheetLink" href="#" target="_blank">
+      <a class="sheet-link" id="sheetLink" href="https://docs.google.com/spreadsheets/d/19PnTCmWH9yuzM-0Di8RgRcoj34l1oQUFG5SPyB6uV2k/edit" target="_blank">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         Open Sheet
       </a>
@@ -496,7 +356,6 @@
       </button>
     </div>
   </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
@@ -504,36 +363,72 @@
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const CLASS_CONFIG = {
-  BSC_CT: {
-    label:     'I B.Sc CT',
-    name:      'I B.Sc Computer Technology (GenAI) — 2025–2028',
-    sheetId:   '1h-aTxw4TP2qNj1IeaABAnnJ6IyHhBSUoZKO5L7_T7Ac',
-    sheetName: 'Sheet1',
-  },
-  BCA_AI: {
-    label:     'I BCA AI',
-    name:      'I BCA Artificial Intelligence — 2025–2028',
-    sheetId:   '1E5llHhq0YZBkwA79RqGzYM6aeRUYhdu1uKjoeqPlRdA',
+  BCA_I: {
+    label:     'I BCA',
+    name:      'Bachelor of Computer Applications',
+    sheetId:   '19PnTCmWH9yuzM-0Di8RgRcoj34l1oQUFG5SPyB6uV2k',
     sheetName: 'Sheet1',
   },
 };
 
 const AUTO_REFRESH_SEC = 120;
 
-function buildUrls(sheetId, sheetName) {
-  const base = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&cachebust=${Date.now()}`;
+// ── BUILD URLS ────────────────────────────────────────────────────────
+// PRIMARY: Google Visualization JSON API — works cross-origin for public sheets
+// FALLBACKS: Two CORS proxies wrapping the CSV endpoint
+function buildFetchStrategies(sheetId, sheetName) {
+  const ts = Date.now();
+  const encodedSheet = encodeURIComponent(sheetName);
+
+  // Strategy 1: gviz JSON (no CORS issues for public sheets)
+  const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodedSheet}&t=${ts}`;
+
+  // Strategy 2: CSV via allorigins proxy
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodedSheet}&t=${ts}`;
+  const proxy1  = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
+
+  // Strategy 3: corsproxy.io
+  const proxy2  = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
+
   return [
-    base,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`,
-    `https://corsproxy.io/?${encodeURIComponent(base)}`
+    { url: gvizUrl,  type: 'gviz' },
+    { url: proxy1,   type: 'csv'  },
+    { url: proxy2,   type: 'csv'  },
   ];
 }
 
+// ── STATIC FALLBACK ───────────────────────────────────────────────────
+const STATIC_DATA = {
+  BCA_I: [
+    {sno:1,  name:"ABHINAV M V",        easy:4, medium:1, hard:0, globalRank:5000001},
+    {sno:2,  name:"AKASH K",            easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:3,  name:"AMIL MOHAMMED PM",   easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:4,  name:"ANUSREE K M",        easy:3, medium:0, hard:0, globalRank:5000001},
+    {sno:5,  name:"ASHISH RAM S",       easy:3, medium:0, hard:0, globalRank:5000001},
+    {sno:6,  name:"AYILYA S",           easy:4, medium:1, hard:0, globalRank:5000001},
+    {sno:7,  name:"DANIEL BIJU",        easy:4, medium:1, hard:0, globalRank:5000001},
+    {sno:8,  name:"GOKUL E",            easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:10, name:"JOVIYA CS",          easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:11, name:"MOHAMED THARICK P",  easy:5, medium:1, hard:0, globalRank:5000001},
+    {sno:12, name:"MUHAMMED BILAL",     easy:1, medium:1, hard:0, globalRank:5000001},
+    {sno:13, name:"NITHESH KUMAR J",    easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:14, name:"NITHIN K",           easy:4, medium:0, hard:0, globalRank:5000001},
+    {sno:15, name:"PRADHEEP V",         easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:16, name:"PUNITHA A",          easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:17, name:"RISHIKA S",          easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:18, name:"SHIBILA SHERIN",     easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:19, name:"SREEJITH K S",       easy:3, medium:0, hard:0, globalRank:5000001},
+    {sno:20, name:"SURYA KUMAR",        easy:0, medium:0, hard:0, globalRank:5000001},
+    {sno:21, name:"VINAYAK",            easy:4, medium:3, hard:0, globalRank:5000001},
+  ]
+};
+
 // ── STATE ─────────────────────────────────────────────────────────────
 let data = [], maxTotal = 0, chartInstances = {};
-let activeClass = 'BSC_CT';
+let activeClass = 'BCA_I';
 let currentFilter = 'all', currentSearch = '', currentSort = {key:'total', dir:'desc'}, currentPage = 1;
-let cdVal = AUTO_REFRESH_SEC, cdTimer = null;
+let cdVal = AUTO_REFRESH_SEC, cdTimer = null, firstLoad = true;
+let isLiveData = false;
 const PAGE_SIZE = 15;
 
 // ── TOAST ─────────────────────────────────────────────────────────────
@@ -544,7 +439,6 @@ function showToast(msg, type='success', ms=3000) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
 
-// ── STATUS ────────────────────────────────────────────────────────────
 function setStatus(state, msg) {
   document.getElementById('liveDot').className = 'live-dot ' + state;
   document.getElementById('liveStatus').innerHTML = msg;
@@ -554,10 +448,22 @@ function setStatus(state, msg) {
   else if (state === 'err') { btn.className = 'sync-btn errstate'; txt.textContent = 'Retry'; }
   else { btn.className = 'sync-btn'; txt.textContent = 'Refresh Now'; }
 }
+
 function markTime() {
   const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
   document.getElementById('liveTime').textContent = 'Updated: ' + t;
 }
+
+function updateDataSourceBadge(live) {
+  const el = document.getElementById('dataSourceBadge');
+  if (!el) return;
+  if (live) {
+    el.innerHTML = `<span class="data-source-badge live"><span class="dot"></span>Live Data</span>`;
+  } else {
+    el.innerHTML = `<span class="data-source-badge static"><span class="dot"></span>Offline Snapshot</span>`;
+  }
+}
+
 function startCountdown() {
   clearInterval(cdTimer);
   cdVal = AUTO_REFRESH_SEC;
@@ -569,8 +475,8 @@ function startCountdown() {
   }, 1000);
 }
 
-// ── SWITCH CLASS ──────────────────────────────────────────────────────
 function switchClass(cls) {
+  if (cls === activeClass && !firstLoad) return;
   activeClass = cls;
   document.getElementById('classSelect').value = cls;
   currentFilter = 'all'; currentSearch = ''; currentSort = {key:'total', dir:'desc'}; currentPage = 1;
@@ -579,69 +485,93 @@ function switchClass(cls) {
   document.querySelectorAll('.sort-col-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.sort-col-btn').classList.add('active');
   document.getElementById('sortDirBtn').textContent = '↓ Desc';
-  const si = document.getElementById('searchInput'); if (si) si.value = '';
+  if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
   const cfg = CLASS_CONFIG[cls];
   document.getElementById('classLabelBadge').textContent = cfg.label;
   document.getElementById('classLabelName').textContent  = cfg.name;
   document.getElementById('printHeader').textContent     = `All Students — ${cfg.name}`;
   document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${cfg.sheetId}/edit`;
-  document.getElementById('skeleton').classList.add('show');
-  document.getElementById('dashboard').style.display = 'none';
   fetchData(false);
 }
 
-// ── FETCH ─────────────────────────────────────────────────────────────
-async function fetchData(manual = false) {
-  if (manual) showToast('🔄 Refreshing from Google Sheets…', 'info', 2000);
-  setStatus('loading', '<b>Fetching</b> from Google Sheets…');
-  document.getElementById('errBanner').classList.remove('show');
-  const cfg = CLASS_CONFIG[activeClass];
-  try {
-    const urls = buildUrls(cfg.sheetId, cfg.sheetName);
-    let text = null, lastErr = null;
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, {cache: 'no-store'});
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const t = await res.text();
-        if (t.trim().startsWith('{') && t.includes('"contents"')) {
-          text = JSON.parse(t).contents;
-        } else { text = t; }
-        if (text && text.trim()) break;
-      } catch(e) { lastErr = e; }
+// ── GVIZ JSON PARSER ──────────────────────────────────────────────────
+// Parses the Google Visualization Query response (wrapped JSONP-like format)
+function parseGvizJSON(raw) {
+  // Strip the JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+  const jsonStr = raw
+    .replace(/^[^{]*/, '')   // remove everything before first {
+    .replace(/\);?\s*$/, ''); // remove trailing );
+
+  const obj = JSON.parse(jsonStr);
+  if (!obj || !obj.table) throw new Error('gviz: no table in response');
+
+  const table = obj.table;
+  const cols   = (table.cols || []).map(c => (c.label || c.id || '').toLowerCase().trim());
+  const rows   = table.rows || [];
+
+  // Column index finder
+  const col = (...aliases) => {
+    for (const a of aliases) {
+      const needle = a.toLowerCase();
+      let i = cols.findIndex(h => h === needle);
+      if (i >= 0) return i;
+      i = cols.findIndex(h => h.includes(needle) || needle.includes(h));
+      if (i >= 0) return i;
     }
-    if (!text || !text.trim()) throw new Error(lastErr?.message || 'All fetch strategies failed');
-    const parsed = parseCSV(text);
-    if (!parsed.length) throw new Error('No student rows found. Check that the sheet has data and the header row contains "Student Name", "Easy", "Medium", "Hard".');
-    applyData(parsed);
-    setStatus('ok', `<b>Live</b> — connected to Google Sheets · ${parsed.length} students`);
-    markTime();
-    document.getElementById('skeleton').classList.remove('show');
-    document.getElementById('dashboard').style.display = 'block';
-    if (manual) showToast(`✓ Synced — ${parsed.length} students loaded`, 'success');
-    startCountdown();
-  } catch (err) {
-    setStatus('err', '<b>Connection error</b> — could not fetch data');
-    document.getElementById('errBanner').classList.add('show');
-    document.getElementById('errText').innerHTML =
-      `<b>Could not load data for ${CLASS_CONFIG[activeClass].label}.</b> ${err.message}<br><br>
-       <b>Checklist:</b><br>
-       1. The sheet must be public: <em>Share → Anyone with the link → Viewer</em><br>
-       2. Open this file in a browser <b>with internet access</b><br>
-       3. Try Chrome or a different network (mobile data if on school Wi-Fi)<br>
-       4. Verify the Sheet ID in CLASS_CONFIG matches the actual Google Sheet URL`;
-    applyData([]);
-    document.getElementById('skeleton').classList.remove('show');
-    document.getElementById('dashboard').style.display = 'block';
-    if (manual) showToast('✕ Could not reach Google Sheets', 'error', 5000);
-    startCountdown();
+    return -1;
+  };
+
+  const nameC = col('student name', 'name', 'studentname', 'student');
+  const easyC = col('easy', 'no of easy', 'easy solved', 'no.of easy');
+  const medC  = col('medium', 'med', 'no of medium', 'medium solved', 'no.of medium');
+  const hardC = col('hard', 'no of hard', 'hard solved', 'no.of hard');
+  const snoC  = col('s.no', 'sno', 's no', 'no', '#', 'serial', 'sl no', 'sl.no');
+  const rankC = col('global rank', 'globalrank', 'global_rank', 'leetcode rank', 'lc rank', 'rank', 'world rank', 'contest rank');
+
+  if (nameC < 0 || easyC < 0 || medC < 0 || hardC < 0) {
+    throw new Error(`gviz: missing columns. Found: [${cols.join(', ')}]`);
   }
+
+  const getCellValue = (row, idx) => {
+    if (idx < 0 || !row.c || !row.c[idx]) return null;
+    const cell = row.c[idx];
+    return cell.v !== undefined && cell.v !== null ? cell.v : (cell.f || null);
+  };
+
+  const students = [];
+  rows.forEach((row, ri) => {
+    const nameVal = getCellValue(row, nameC);
+    const name = nameVal ? String(nameVal).trim() : '';
+    if (!name || /^[-\s,]*$/.test(name)) return;
+
+    const easy   = Math.max(0, parseInt(getCellValue(row, easyC)) || 0);
+    const medium = Math.max(0, parseInt(getCellValue(row, medC))  || 0);
+    const hard   = Math.max(0, parseInt(getCellValue(row, hardC)) || 0);
+
+    let globalRank = 0;
+    if (rankC >= 0) {
+      const rv = getCellValue(row, rankC);
+      if (rv !== null && rv !== undefined) {
+        const parsed = parseInt(String(rv).replace(/,/g, ''));
+        if (!isNaN(parsed) && parsed > 0) globalRank = parsed;
+      }
+    }
+
+    const snoVal = snoC >= 0 ? getCellValue(row, snoC) : null;
+    students.push({
+      sno: parseInt(snoVal) || students.length + 1,
+      name, easy, medium, hard, globalRank
+    });
+  });
+
+  if (students.length === 0) throw new Error('gviz: parsed 0 students');
+  return students;
 }
 
-// ── PARSE CSV ─────────────────────────────────────────────────────────
+// ── CSV PARSER ────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) throw new Error('File appears empty');
+  if (lines.length < 2) throw new Error('CSV appears empty');
   const rows = lines.map(line => {
     const cells = []; let inQ = false, cell = '';
     for (const ch of line) {
@@ -652,7 +582,6 @@ function parseCSV(text) {
     cells.push(cell.trim().replace(/^"|"$/g, ''));
     return cells;
   });
-
   let hIdx = -1;
   for (let i = 0; i < Math.min(rows.length, 8); i++) {
     const joined = rows[i].join('|').toLowerCase();
@@ -664,29 +593,21 @@ function parseCSV(text) {
       if (/easy/.test(joined) && /medium/.test(joined) && /hard/.test(joined)) { hIdx = i; break; }
     }
   }
-  if (hIdx === -1) {
-    const sample = rows.slice(0,4).map(r => r.join(' | ')).join('\n');
-    throw new Error(`Could not find header row. First rows:\n${sample}`);
-  }
-
+  if (hIdx === -1) throw new Error('CSV: could not find header row');
   const headers = rows[hIdx].map(h => h.toLowerCase().replace(/\s+/g,' ').trim());
   const col = (...aliases) => {
     for (const a of aliases) { const i = headers.findIndex(h => h === a.toLowerCase()); if (i >= 0) return i; }
     for (const a of aliases) { const needle = a.toLowerCase(); const i = headers.findIndex(h => h.includes(needle) || needle.includes(h)); if (i >= 0) return i; }
     return -1;
   };
-
   const nameC = col('student name', 'name', 'studentname', 'student');
-  const easyC = col('easy', 'no of easy', 'easy solved', 'easy problems', 'no.of easy');
-  const medC  = col('medium', 'med', 'no of medium', 'medium solved', 'medium problems', 'no.of medium');
-  const hardC = col('hard', 'no of hard', 'hard solved', 'hard problems', 'no.of hard');
+  const easyC = col('easy', 'no of easy', 'easy solved', 'no.of easy');
+  const medC  = col('medium', 'med', 'no of medium', 'medium solved', 'no.of medium');
+  const hardC = col('hard', 'no of hard', 'hard solved', 'no.of hard');
   const snoC  = col('s.no', 'sno', 's no', 'no', '#', 'serial', 'sl no', 'sl.no');
   const rankC = col('global rank', 'globalrank', 'global_rank', 'leetcode rank', 'lc rank', 'rank', 'world rank', 'contest rank');
-
-  if (nameC < 0 || easyC < 0 || medC < 0 || hardC < 0) {
-    throw new Error(`Missing required columns (found: [${headers.join(', ')}]).\nNeed: "Student Name", "Easy", "Medium", "Hard".`);
-  }
-
+  if (nameC < 0 || easyC < 0 || medC < 0 || hardC < 0)
+    throw new Error(`CSV: missing columns. Headers: [${headers.join(', ')}]`);
   const students = [];
   for (let i = hIdx + 1; i < rows.length; i++) {
     const r = rows[i];
@@ -704,12 +625,97 @@ function parseCSV(text) {
       globalRank,
     });
   }
+  if (students.length === 0) throw new Error('CSV: parsed 0 students');
   return students;
 }
 
-// ── APPLY DATA ────────────────────────────────────────────────────────
+// ── FETCH ─────────────────────────────────────────────────────────────
+async function fetchData(manual = false) {
+  if (manual) showToast('🔄 Refreshing from Google Sheets…', 'info', 2000);
+  setStatus('loading', '<b>Fetching</b> from Google Sheets…');
+  document.getElementById('errBanner').classList.remove('show');
+  if (firstLoad) {
+    document.getElementById('skeleton').classList.add('show');
+    document.getElementById('dashboard').style.display = 'none';
+  }
+
+  const cfg = CLASS_CONFIG[activeClass];
+  const strategies = buildFetchStrategies(cfg.sheetId, cfg.sheetName);
+
+  let parsed = null;
+  let lastError = '';
+
+  for (const strategy of strategies) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout per attempt
+
+      const res = await fetch(strategy.url, {
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if (!text || !text.trim()) throw new Error('Empty response');
+
+      if (strategy.type === 'gviz') {
+        parsed = parseGvizJSON(text);
+      } else {
+        // For proxy responses, check if it's wrapped JSON from allorigins
+        let csvText = text;
+        if (text.trim().startsWith('{') && text.includes('"contents"')) {
+          try { csvText = JSON.parse(text).contents; } catch(e) { /* use raw */ }
+        }
+        parsed = parseCSV(csvText);
+      }
+
+      if (parsed && parsed.length > 0) break; // success — stop trying
+
+    } catch (err) {
+      lastError = err.message || String(err);
+      console.warn(`[Tracker] Strategy failed (${strategy.type}):`, err.message);
+      // continue to next strategy
+    }
+  }
+
+  if (!parsed || parsed.length === 0) {
+    // All live strategies failed — use static data
+    parsed = STATIC_DATA[activeClass] || [];
+    isLiveData = false;
+    setStatus('ok', `<b>Offline snapshot</b> — could not reach Google Sheets · ${parsed.length} students`);
+    document.getElementById('errBanner').classList.add('show');
+    document.getElementById('errText').innerHTML =
+      `<b>Could not load live data.</b> Showing cached snapshot instead.<br>
+      Last error: <code>${lastError}</code><br>
+      Make sure your sheet is set to <b>Anyone with the link → Viewer</b> and try refreshing.`;
+  } else {
+    isLiveData = true;
+    setStatus('ok', `<b>Live</b> — synced from Google Sheets · ${parsed.length} students`);
+  }
+
+  updateDataSourceBadge(isLiveData);
+  applyData(parsed);
+  markTime();
+
+  if (firstLoad) {
+    document.getElementById('skeleton').classList.remove('show');
+    document.getElementById('dashboard').style.display = 'block';
+    firstLoad = false;
+  }
+
+  if (manual) {
+    if (isLiveData) showToast(`✓ Live data synced — ${parsed.length} students`, 'success');
+    else showToast('⚠ Loaded offline snapshot', 'info');
+  }
+
+  startCountdown();
+}
+
+// ── DATA ──────────────────────────────────────────────────────────────
 function applyData(raw) {
-  data = raw.map(s => ({...s, total: s.easy + s.medium + s.hard}));
+  data = raw.map(s => ({...s, total: s.easy + s.medium + s.hard, globalRank: s.globalRank || 0}));
   const sorted = [...data].sort((a, b) => b.total - a.total);
   sorted.forEach((s, i) => { const d = data.find(x => x.sno === s.sno && x.name === s.name); if (d) d.rank = i + 1; });
   maxTotal = Math.max(...data.map(d => d.total), 1);
@@ -724,23 +730,19 @@ function renderMetrics() {
   const T = E + M + H, A = data.filter(d=>d.total>0).length;
   const pct = (n,d) => d===0?'0':((n/d)*100).toFixed(0);
   const card = m => `<div class="metric-card"><div class="metric-label">${m.label}</div><div class="metric-value ${m.cls||''}">${m.value}</div><div class="metric-sub">${m.sub}</div></div>`;
-
   document.getElementById('metricsStudents').innerHTML = [
     {label:"Total Students", value:data.length, sub:"enrolled", cls:""},
     {label:"Active Students", value:A, sub:`${pct(A,data.length)}% participation`, cls:""}
   ].map(card).join('');
-
   document.getElementById('metricsQuestions').innerHTML = [
     {label:"Total Solved",  value:T, sub:"Questions", cls:"accent"},
     {label:"Easy",   value:E, sub:`${pct(E,T||1)}% of total`, cls:"easy"},
     {label:"Medium", value:M, sub:`${pct(M,T||1)}% of total`, cls:"medium"},
     {label:"Hard",   value:H, sub:`${pct(H,T||1)}% of total`, cls:"hard"}
   ].map(card).join('');
-
-  const ranked = data.filter(d => d.globalRank > 0);
+  const ranked = data.filter(d => d.globalRank > 0 && d.globalRank < 5000000);
   const bestRank = ranked.length > 0 ? Math.min(...ranked.map(d => d.globalRank)) : 0;
   const bestStudent = ranked.length > 0 ? ranked.find(d => d.globalRank === bestRank) : null;
-
   document.getElementById('metricsRanking').innerHTML = [
     {label:"Best Global Rank", value: bestRank > 0 ? '#'+bestRank.toLocaleString('en-IN') : '—', sub: bestStudent ? bestStudent.name : 'N/A', cls:"rank"},
   ].map(card).join('');
@@ -808,7 +810,7 @@ function renderCharts() {
     options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:24}},
       plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.raw} students`}}},
       scales:{x:{grid:{display:false}, ticks:{font:{family:'DM Mono',size:10}, color:'#7a7368'}},
-              y:{grid:{color:'#eeeae0'}, ticks:{font:{family:'DM Mono',size:10}, color:'#7a7368', stepSize:5}}}}
+              y:{grid:{color:'#eeeae0'}, ticks:{font:{family:'DM Mono',size:10}, color:'#7a7368', stepSize:1}}}}
   });
 
   const top15 = [...data].sort((a,b)=>b.total-a.total).slice(0,15);
@@ -825,8 +827,7 @@ function renderCharts() {
       ctx.lineTo(bx+pw,by+ph-rx); ctx.quadraticCurveTo(bx+pw,by+ph,bx+pw-rx,by+ph); ctx.lineTo(bx+rx,by+ph);
       ctx.quadraticCurveTo(bx,by+ph,bx,by+ph-rx); ctx.lineTo(bx,by+rx); ctx.quadraticCurveTo(bx,by,bx+rx,by);
       ctx.closePath(); ctx.fillStyle = '#2c5f8a'; ctx.fill();
-      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1; ctx.stroke();
       ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(lb, xP, by+ph/2); ctx.restore();
     });
@@ -838,15 +839,13 @@ function renderCharts() {
       {label:'Easy',   data:top15.map(s=>s.easy),   backgroundColor:'#3d9970', borderRadius:0, stack:'s0'},
       {label:'Medium', data:top15.map(s=>s.medium), backgroundColor:'#e67e22', borderRadius:0, stack:'s0'},
       {label:'Hard',   data:top15.map(s=>s.hard),   backgroundColor:'#c0392b', borderRadius:4, stack:'s0'},
-      {label:'Total',  data:top15.map(s=>s.total),  type:'line', borderColor:'#2c5f8a',
-       backgroundColor:'rgba(44,95,138,0.12)', borderWidth:2.5, pointBackgroundColor:'#2c5f8a',
-       pointRadius:5, pointHoverRadius:7, fill:false, tension:.35, yAxisID:'y', stack:undefined, order:0}
+      {label:'Total',  data:top15.map(s=>s.total),  type:'line', borderColor:'#2c5f8a', backgroundColor:'rgba(44,95,138,0.12)', borderWidth:2.5, pointBackgroundColor:'#2c5f8a', pointRadius:5, pointHoverRadius:7, fill:false, tension:.35, yAxisID:'y', stack:undefined, order:0}
     ]},
     options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:36}}, interaction:{mode:'index', intersect:false},
       plugins:{legend:{display:true, labels:{font:{family:'DM Mono',size:10}, color:'#7a7368', boxWidth:12, padding:16}},
         tooltip:{callbacks:{title:items=>top15[items[0].dataIndex]?.name||'', label:c=>` ${c.dataset.label}: ${c.raw}`}}},
       scales:{x:{stacked:true, grid:{display:false}, ticks:{font:{family:'DM Mono',size:10}, color:'#7a7368'}},
-              y:{stacked:true, grid:{color:'#eeeae0'}, ticks:{font:{family:'DM Mono',size:10}, color:'#7a7368', stepSize:2},
+              y:{stacked:true, grid:{color:'#eeeae0'}, ticks:{font:{family:'DM Mono',size:10}, color:'#7a7368', stepSize:1},
                  min:0, max:Math.max(5, ...top15.map(s=>s.total))+1}}}
   });
 }
@@ -875,7 +874,7 @@ function renderTable() {
   document.getElementById('tableBody').innerHTML = page.map((s,i) => {
     const pct = maxTotal>0?(s.total/maxTotal)*100:0;
     const isTop = s.rank<=3 && s.total>0;
-    const rankDisplay = s.globalRank > 0
+    const rankDisplay = s.globalRank > 0 && s.globalRank < 5000000
       ? `<span class="badge badge-rank">#${s.globalRank.toLocaleString('en-IN')}</span>`
       : `<span class="badge badge-zero">—</span>`;
     return `<tr class="${s.total===0?'no-attempt':''}">
@@ -933,7 +932,7 @@ function downloadPDF() {
   const all=[...data].sort((a,b)=>(a.rank||999)-(b.rank||999));
   tbody.innerHTML=all.map((s,i)=>{
     const pct=maxTotal>0?(s.total/maxTotal)*100:0, isTop=s.rank<=3&&s.total>0;
-    const rankDisplay=s.globalRank>0
+    const rankDisplay=s.globalRank>0 && s.globalRank < 5000000
       ?`<span class="badge badge-rank">#${s.globalRank.toLocaleString('en-IN')}</span>`
       :`<span class="badge badge-zero">—</span>`;
     return `<tr class="${s.total===0?'no-attempt':''}">
@@ -952,9 +951,8 @@ function downloadPDF() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────
-document.getElementById('sheetLink').href =
-  `https://docs.google.com/spreadsheets/d/${CLASS_CONFIG['BSC_CT'].sheetId}/edit`;
-switchClass('BSC_CT');
+document.getElementById('skeleton').classList.add('show');
+switchClass('BCA_I');
 </script>
 </body>
 </html>
