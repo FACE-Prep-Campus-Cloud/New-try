@@ -34,13 +34,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .loading-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none;}
 .spinner{width:48px;height:48px;border:3px solid var(--gold-light);border-top-color:var(--gold-mid);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
-@keyframes ringPulse{0%,100%{r:6;opacity:1;}50%{r:10;opacity:0.3;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes dropDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-@keyframes countUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideInDown{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
+@keyframes ringPulse{0%,100%{r:6;opacity:1;}50%{r:10;opacity:0.3;}}
 
 .loading-text{font-size:13px;color:var(--ink3);font-weight:500;}
 .error-message{max-width:500px;padding:20px;background:var(--rose-lt);border:1px solid var(--rose);border-radius:var(--radius);color:var(--rose);font-size:13px;line-height:1.6;display:none;}
@@ -174,7 +172,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .nps-hero-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.3);}
 
 .nps-index-banner{background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
-.nps-index-left{}
 .nps-index-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(253,233,160,0.6);margin-bottom:6px;}
 .nps-index-score{font-family:var(--font-display);font-size:64px;font-weight:400;line-height:1;letter-spacing:-0.03em;color:#f5c842;}
 .nps-index-desc{font-size:13px;color:rgba(253,233,160,0.75);margin-top:6px;}
@@ -212,47 +209,75 @@ tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:var(--surface2);}
 tbody tr{transition:background 0.12s;}
 
-/* MENTOR DETAIL EXPANSION ROW */
+/* ══ MENTOR DETAIL EXPANSION ══ */
 .mentor-detail-row{display:none;background:var(--bg2);}
 .mentor-detail-row.open{display:table-row;animation:slideInDown 0.25s cubic-bezier(.22,1,.36,1);}
 .mentor-detail-cell{padding:0 !important;border-bottom:2px solid var(--gold-mid) !important;}
 .mentor-detail-inner{padding:20px 24px;}
-.mentor-detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.mentor-detail-title{font-family:var(--font-display);font-size:16px;color:var(--ink);}
+.mentor-detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.mentor-detail-title{font-family:var(--font-display);font-size:17px;color:var(--ink);}
 .mentor-detail-hint{font-size:11px;color:var(--ink3);}
-.mentor-detail-grid{display:grid;gap:10px;}
-.q-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;}
-.q-name{font-size:12.5px;font-weight:500;color:var(--ink2);margin-bottom:10px;}
-.q-bars{display:flex;flex-direction:column;gap:6px;}
-.q-bar-line{display:grid;grid-template-columns:36px 1fr 40px;gap:10px;align-items:center;}
-.q-bar-label{font-size:11px;font-weight:600;}
-.q-bar-label.yes{color:#065f46;}
-.q-bar-label.no{color:#7f1d1d;}
-.q-bar-label.neutral{color:#78350f;}
-.q-bar-track{background:var(--bg2);border-radius:4px;height:18px;overflow:hidden;}
-.q-bar-fill{height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(.22,1,.36,1);}
-.q-bar-fill.yes{background:#10b981;}
-.q-bar-fill.no{background:#ef4444;}
-.q-bar-fill.neutral{background:#f59e0b;}
-.q-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
-.q-stats-row{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;}
-.q-stat-chip{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
-.q-stat-chip.yes{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
-.q-stat-chip.no{background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;}
-.q-stat-chip.neutral{background:#fef3c7;color:#78350f;border:1px solid #fcd34d;}
-.q-stat-chip.avg{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
+
+/* Subject card grid */
+.subject-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
+.subject-detail-card{background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.subject-card-header{padding:12px 16px;background:linear-gradient(135deg,#4a2800,#7a4f00);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.subject-card-name{font-size:12px;font-weight:600;color:#fde9a0;line-height:1.3;flex:1;min-width:0;}
+.subject-card-rating-pill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;background:rgba(253,233,160,0.15);border:1px solid rgba(253,233,160,0.3);border-radius:8px;padding:5px 10px;min-width:52px;}
+.subject-card-rating-num{font-family:var(--font-display);font-size:20px;color:#f5c842;line-height:1;}
+.subject-card-rating-label{font-size:9px;color:rgba(253,233,160,0.6);text-transform:uppercase;letter-spacing:0.07em;margin-top:1px;}
+.subject-card-responses{font-size:10px;color:rgba(253,233,160,0.5);margin-top:2px;}
+.subject-card-body{padding:12px 16px;}
+
+/* Per-question yes/no rows */
+.q-question-row{margin-bottom:10px;}
+.q-question-row:last-child{margin-bottom:0;}
+.q-question-label{font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:6px;line-height:1.35;}
+.q-yn-bars{display:flex;flex-direction:column;gap:4px;}
+.q-yn-bar-line{display:grid;grid-template-columns:28px 1fr 38px;gap:8px;align-items:center;}
+.q-yn-label{font-size:10px;font-weight:700;border-radius:4px;padding:1px 5px;text-align:center;}
+.q-yn-label.yes{background:#d1fae5;color:#065f46;}
+.q-yn-label.no{background:#fee2e2;color:#7f1d1d;}
+.q-yn-track{background:var(--bg2);border-radius:4px;height:16px;overflow:hidden;}
+.q-yn-fill{height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(.22,1,.36,1);}
+.q-yn-fill.yes{background:linear-gradient(90deg,#10b981,#34d399);}
+.q-yn-fill.no{background:linear-gradient(90deg,#ef4444,#f87171);}
+.q-yn-count{font-size:10px;font-weight:600;color:var(--ink3);text-align:right;}
+.q-yn-pct-row{display:flex;justify-content:flex-end;gap:8px;margin-top:3px;}
+.q-yn-pct-chip{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:500;}
+.q-yn-pct-chip.yes{background:#d1fae5;color:#065f46;}
+.q-yn-pct-chip.no{background:#fee2e2;color:#7f1d1d;}
+
+/* Overall rating summary bar (inside card) */
+.subject-rating-bar-wrap{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.subject-rating-stars{display:flex;gap:3px;margin-bottom:4px;}
+.subject-rating-star{font-size:13px;line-height:1;}
+.subject-rating-bar-outer{background:var(--bg2);border-radius:4px;height:8px;overflow:hidden;}
+.subject-rating-bar-inner{height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(.22,1,.36,1);}
+
+/* Summary stat pills */
+.subject-stat-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.subject-stat-pill{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.subject-stat-pill.yes{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
+.subject-stat-pill.no{background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;}
+.subject-stat-pill.rating{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
+.subject-stat-pill.responses{background:var(--bg2);color:var(--ink3);border:1px solid var(--border2);}
+
 .mentor-row-clickable{cursor:pointer;}
 .mentor-row-clickable:hover td{background:var(--gold-light) !important;}
 .mentor-row-clickable.expanded td{background:var(--gold-light);border-bottom:none !important;}
 .expand-arrow{display:inline-block;transition:transform 0.2s;font-size:10px;margin-left:6px;color:var(--gold-mid);}
 .mentor-row-clickable.expanded .expand-arrow{transform:rotate(180deg);}
-.detail-close-hint{font-size:11px;color:var(--ink4);display:flex;align-items:center;gap:4px;}
+.detail-close-hint{font-size:11px;color:var(--ink4);display:flex;align-items:center;gap:4px;cursor:pointer;}
+.detail-close-hint:hover{color:var(--gold-dark);}
+
+/* No data card */
+.no-data-card{text-align:center;padding:28px 20px;color:var(--ink3);font-size:13px;background:var(--surface);border:1px dashed var(--border2);border-radius:10px;}
+.no-data-card .icon{font-size:28px;margin-bottom:8px;opacity:0.5;}
 
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
 ::-webkit-scrollbar-thumb{background:var(--gold-mid);border-radius:99px;}
-.college-dropdown::-webkit-scrollbar{width:4px;}
-.college-dropdown::-webkit-scrollbar-thumb{background:var(--gold-mid);}
 
 @media(max-width:960px){
   .shell{grid-template-columns:1fr;}
@@ -263,6 +288,7 @@ tbody tr{transition:background 0.12s;}
   .nps-hero-row{grid-template-columns:1fr;}
   .nps-charts-row{grid-template-columns:1fr;}
   .logo-name{font-size:18px;}
+  .subject-cards-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -415,7 +441,7 @@ tbody tr{transition:background 0.12s;}
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Total Responses</span><span id="mtSumTotalResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Avg Rating × Responses</span><span id="mtSumAvgXResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:11px;color:rgba(253,233,160,0.55);">Click a row to expand questions</span>
+          <span style="font-size:11px;color:rgba(253,233,160,0.55);">Click a row to see ratings & question breakdown</span>
           <span class="badge badge-gold" id="mentorTableCountBadge">—</span>
         </div>
       </div>
@@ -425,7 +451,7 @@ tbody tr{transition:background 0.12s;}
           <tbody id="mentorTableBody"><tr><td colspan="9" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
         </table>
       </div>
-      <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses) · Click any mentor row to see per-question Yes/No breakdown</div>
+      <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses) · Click any mentor row to expand subject-wise ratings and Yes/No question breakdown</div>
     </div>
 
     <div class="card">
@@ -471,9 +497,8 @@ tbody tr{transition:background 0.12s;}
 
   <!-- ═══ NPS ANALYTICS PANEL ═══ -->
   <div class="panel" id="panel-nps">
-
     <div class="nps-index-banner">
-      <div class="nps-index-left">
+      <div>
         <div class="nps-index-label">Net Promoter Score Index</div>
         <div class="nps-index-score" id="npsIndexBig">—</div>
         <div class="nps-index-desc" id="npsIndexDesc">Select a college to load NPS data</div>
@@ -538,7 +563,6 @@ tbody tr{transition:background 0.12s;}
           <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>Detractors</div>
         </div>
       </div>
-
       <div class="nps-chart-card">
         <div class="card-header">
           <div class="card-title">Score Distribution (1–10)</div>
@@ -567,7 +591,7 @@ tbody tr{transition:background 0.12s;}
       </div>
       <div style="position:relative;width:100%;height:80px;" id="npsStackedWrap">
         <div id="npsStackedBar" style="display:flex;height:48px;border-radius:10px;overflow:hidden;gap:2px;margin-top:10px;">
-          <div id="stkPromoters" style="background:#10b981;height:100%;border-radius:10px 0 0 10px;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;" ></div>
+          <div id="stkPromoters" style="background:#10b981;height:100%;border-radius:10px 0 0 10px;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
           <div id="stkPassives"  style="background:#f59e0b;height:100%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
           <div id="stkDetractors" style="background:#ef4444;height:100%;border-radius:0 10px 10px 0;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
         </div>
@@ -579,13 +603,23 @@ tbody tr{transition:background 0.12s;}
       </div>
       <div style="font-size:11px;color:var(--ink4);margin-top:10px;">* NPS = %Promoters − %Detractors · Passives are excluded from the index calculation.</div>
     </div>
-
-  </div><!-- end nps panel -->
+  </div>
 
 </main>
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════
+// QUESTION LABELS (from feedback form Q1–Q5)
+// ═══════════════════════════════════════════════════════════
+const QUESTION_LABELS = [
+  "Were the sessions delivered by the Faculty clear and well-structured?",
+  "Are you convinced with the professional behavior of the Faculty during sessions?",
+  "Was the trainer effective in solving problems and explaining solutions with examples?",
+  "Did the trainer support doubt clearing and student queries?",
+  "Were the sessions useful in improving your understanding and skills?"
+];
+
 const COLLEGES=[
   {name:"Kamaraj College",gid:"0"},{name:"Kamaraj Women's College",gid:"1140723423"},
   {name:"SDNB Vaishnav College for Women",gid:"340022065"},{name:"Patrician College of Arts & Science",gid:"1890731138"},
@@ -608,11 +642,7 @@ let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
 let insightScatterInst=null,insightHorizInst=null,insightResponseInst=null;
 let currentInsightChart='scatter';
 let needleAnimRAF=null;
-
-// RAW_ROWS stores the original sheet rows for per-question drill-down
 let RAW_ROWS=[];
-
-// Expanded mentor tracking
 let expandedMentorName=null;
 
 /* ── DROPDOWN ── */
@@ -742,158 +772,204 @@ function processSheetData(rows){
   document.getElementById('pageSub').textContent=`${DEPT_LIST.length} departments · ${MENTORS.length} mentors · ${subjectSet.size} subjects`;
 }
 
-/* ── PER-QUESTION BREAKDOWN FOR A MENTOR ── */
-/*
-  Strategy:
-  - For each row in RAW_ROWS, scan all subject columns (subject1_Name … subject7_Name)
-  - If subjectN_Mentor matches the mentor name, pull subjectN_Name as the "question label"
-    and subjectN_Rating as the numeric rating.
-  - Ratings ≥ 4.0  → "Yes" (satisfied)
-  - Ratings 3.0–3.9 → "Neutral"
-  - Ratings < 3.0  → "No" (unsatisfied)
-  - Group by subject name; count yes/neutral/no per question.
-  
-  NOTE: If the sheet uses dedicated yes/no columns (e.g. subjectN_Q1_YN), the logic
-  below will still work — just extend the field detection below.
+/* ══════════════════════════════════════════════════════════
+   PER-MENTOR SUBJECT BREAKDOWN: Overall Rating + Q1–Q5 Yes/No
+   ══════════════════════════════════════════════════════════
+   Sheet columns (written by the feedback form):
+     subjectN_Name    → subject name
+     subjectN_Mentor  → mentor name
+     subjectN_Rating  → 1–5 numeric overall rating
+     subjectN_Q1 … subjectN_Q5 → "Yes" or "No"
 */
-function getMentorQuestionBreakdown(mentorName){
-  const subjectMap={};
-  RAW_ROWS.forEach(row=>{
-    for(let i=1;i<=7;i++){
-      const mn=row[`subject${i}_Mentor`];
-      if(!mn||mn.trim()!==mentorName.trim())continue;
-      const sn=(row[`subject${i}_Name`]||'').trim();
-      const rt=parseFloat(row[`subject${i}_Rating`]);
-      if(!sn||isNaN(rt)||rt<=0)continue;
-      if(!subjectMap[sn])subjectMap[sn]={name:sn,yes:0,no:0,neutral:0,total:0,ratings:[]};
-      subjectMap[sn].ratings.push(rt);
-      subjectMap[sn].total++;
-      if(rt>=4.0)subjectMap[sn].yes++;
-      else if(rt>=3.0)subjectMap[sn].neutral++;
-      else subjectMap[sn].no++;
-    }
+function getMentorSubjectBreakdown(mentorName) {
+  // Map: subjectName → { rating: [], q: [{yes,no}×5] }
+  const subjectMap = {};
 
-    // Also scan for explicit yes/no columns like subjectN_Q1 = "Yes"/"No"
-    for(let i=1;i<=7;i++){
-      const mn=row[`subject${i}_Mentor`];
-      if(!mn||mn.trim()!==mentorName.trim())continue;
-      const sn=(row[`subject${i}_Name`]||'').trim();
-      if(!sn)continue;
-      // Look for columns: subject{i}_Q1, subject{i}_Q2 … or question1, question2, etc.
-      for(let q=1;q<=10;q++){
-        const keys=[`subject${i}_Q${q}`,`subject${i}_q${q}`,`Q${q}_subject${i}`,`question${q}`];
-        for(const k of keys){
-          if(row[k]!==undefined){
-            const val=(row[k]||'').toString().trim().toLowerCase();
-            const qKey=`${sn} · Q${q}`;
-            if(!subjectMap[qKey])subjectMap[qKey]={name:qKey,yes:0,no:0,neutral:0,total:0,ratings:[]};
-            subjectMap[qKey].total++;
-            if(val==='yes'||val==='y'||val==='1'||val==='true')subjectMap[qKey].yes++;
-            else if(val==='no'||val==='n'||val==='0'||val==='false')subjectMap[qKey].no++;
-            else subjectMap[qKey].neutral++;
-          }
-        }
+  RAW_ROWS.forEach(row => {
+    for (let i = 1; i <= 7; i++) {
+      const mn = (row[`subject${i}_Mentor`] || '').trim();
+      if (mn !== mentorName.trim()) continue;
+      const sn = (row[`subject${i}_Name`] || '').trim();
+      if (!sn) continue;
+
+      const rt = parseFloat(row[`subject${i}_Rating`]);
+      if (!subjectMap[sn]) {
+        subjectMap[sn] = {
+          name: sn,
+          ratings: [],
+          questions: Array.from({length: 5}, () => ({yes: 0, no: 0}))
+        };
+      }
+
+      if (!isNaN(rt) && rt > 0) subjectMap[sn].ratings.push(rt);
+
+      // Read Q1–Q5 yes/no columns
+      for (let q = 1; q <= 5; q++) {
+        const val = (row[`subject${i}_Q${q}`] || '').toString().trim().toLowerCase();
+        if (val === 'yes' || val === 'y') subjectMap[sn].questions[q-1].yes++;
+        else if (val === 'no' || val === 'n') subjectMap[sn].questions[q-1].no++;
       }
     }
   });
 
-  return Object.values(subjectMap).sort((a,b)=>b.total-a.total);
+  return Object.values(subjectMap).sort((a,b)=>b.ratings.length-a.ratings.length);
 }
 
-function renderMentorQuestionDetail(mentorName){
-  const data=getMentorQuestionBreakdown(mentorName);
-  if(!data.length)return'<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">No detailed question data found for this mentor.</div>';
+/* ── RENDER MENTOR DETAIL EXPANSION ── */
+function renderMentorDetailHTML(mentorName) {
+  const subjects = getMentorSubjectBreakdown(mentorName);
+  if (!subjects.length) {
+    return `<div class="no-data-card"><div class="icon">📭</div>No subject data found for <strong>${mentorName}</strong> in this sheet.</div>`;
+  }
 
-  const maxTotal=Math.max(...data.map(d=>d.total),1);
-  return data.map(q=>{
-    const avg=q.ratings.length>0?(q.ratings.reduce((a,b)=>a+b,0)/q.ratings.length).toFixed(2):'—';
-    const yesPct=q.total>0?Math.round(q.yes/q.total*100):0;
-    const noPct=q.total>0?Math.round(q.no/q.total*100):0;
-    const neuPct=q.total>0?Math.round(q.neutral/q.total*100):0;
-    return`<div class="q-row">
-      <div class="q-name">${q.name}</div>
-      <div class="q-bars">
-        <div class="q-bar-line">
-          <span class="q-bar-label yes">Yes</span>
-          <div class="q-bar-track"><div class="q-bar-fill yes" style="width:0%" data-w="${yesPct}"></div></div>
-          <span class="q-bar-count">${q.yes}</span>
+  const cards = subjects.map(sub => {
+    const totalRatings = sub.ratings.length;
+    const avgRating = totalRatings > 0
+      ? (sub.ratings.reduce((a,b)=>a+b,0)/totalRatings)
+      : 0;
+    const ratingPct = (avgRating / 5) * 100;
+    const ratingColor = avgRating >= 4.3 ? '#10b981'
+      : avgRating >= 4.0 ? '#c48a00'
+      : avgRating >= 3.5 ? '#f59e0b'
+      : '#ef4444';
+
+    // Stars
+    const fullStars = Math.floor(avgRating);
+    const halfStar = (avgRating - fullStars) >= 0.5;
+    let starsHTML = '';
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) starsHTML += '<span class="subject-rating-star" style="color:#f5c842;">★</span>';
+      else if (i === fullStars && halfStar) starsHTML += '<span class="subject-rating-star" style="color:#f5c842;">½</span>';
+      else starsHTML += '<span class="subject-rating-star" style="color:#e0c88a;">☆</span>';
+    }
+
+    // Total yes/no across all 5 questions
+    const totalYes = sub.questions.reduce((s,q)=>s+q.yes,0);
+    const totalNo  = sub.questions.reduce((s,q)=>s+q.no,0);
+    const totalQAnswers = totalYes + totalNo;
+    const overallYesPct = totalQAnswers > 0 ? Math.round(totalYes/totalQAnswers*100) : 0;
+    const overallNoPct  = totalQAnswers > 0 ? Math.round(totalNo/totalQAnswers*100) : 0;
+
+    // Q1–Q5 breakdown
+    const questionRowsHTML = sub.questions.map((q, qi) => {
+      const total = q.yes + q.no;
+      const yesPct = total > 0 ? Math.round(q.yes/total*100) : 0;
+      const noPct  = total > 0 ? Math.round(q.no/total*100) : 0;
+      const shortLabel = `Q${qi+1}`;
+      const fullLabel = QUESTION_LABELS[qi] || `Question ${qi+1}`;
+      return `
+        <div class="q-question-row">
+          <div class="q-question-label" title="${fullLabel}">${shortLabel}. ${fullLabel}</div>
+          <div class="q-yn-bars">
+            <div class="q-yn-bar-line">
+              <span class="q-yn-label yes">Yes</span>
+              <div class="q-yn-track">
+                <div class="q-yn-fill yes" style="width:0%" data-w="${yesPct}"></div>
+              </div>
+              <span class="q-yn-count">${q.yes}</span>
+            </div>
+            <div class="q-yn-bar-line">
+              <span class="q-yn-label no">No</span>
+              <div class="q-yn-track">
+                <div class="q-yn-fill no" style="width:0%" data-w="${noPct}"></div>
+              </div>
+              <span class="q-yn-count">${q.no}</span>
+            </div>
+          </div>
+          <div class="q-yn-pct-row">
+            <span class="q-yn-pct-chip yes">${yesPct}% Yes</span>
+            <span class="q-yn-pct-chip no">${noPct}% No</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="subject-detail-card">
+        <div class="subject-card-header">
+          <div class="subject-card-name">${sub.name}</div>
+          <div class="subject-card-rating-pill">
+            <div class="subject-card-rating-num">${avgRating > 0 ? avgRating.toFixed(1) : '—'}</div>
+            <div class="subject-card-rating-label">/ 5</div>
+            <div class="subject-card-responses">${totalRatings} resp.</div>
+          </div>
         </div>
-        ${q.neutral>0?`<div class="q-bar-line">
-          <span class="q-bar-label neutral">~</span>
-          <div class="q-bar-track"><div class="q-bar-fill neutral" style="width:0%" data-w="${neuPct}"></div></div>
-          <span class="q-bar-count">${q.neutral}</span>
-        </div>`:''}
-        <div class="q-bar-line">
-          <span class="q-bar-label no">No</span>
-          <div class="q-bar-track"><div class="q-bar-fill no" style="width:0%" data-w="${noPct}"></div></div>
-          <span class="q-bar-count">${q.no}</span>
+        <div class="subject-card-body">
+          <!-- Overall rating bar -->
+          <div class="subject-rating-bar-wrap">
+            <div class="subject-rating-stars">${starsHTML}</div>
+            <div class="subject-rating-bar-outer" style="margin-top:5px;">
+              <div class="subject-rating-bar-inner" style="width:0%;background:${ratingColor};" data-w="${ratingPct.toFixed(1)}"></div>
+            </div>
+          </div>
+          <!-- Summary pills -->
+          <div class="subject-stat-pills">
+            <span class="subject-stat-pill rating">⭐ Avg: ${avgRating > 0 ? avgRating.toFixed(2) : '—'} / 5</span>
+            <span class="subject-stat-pill yes">✓ Yes: ${totalYes} (${overallYesPct}%)</span>
+            <span class="subject-stat-pill no">✗ No: ${totalNo} (${overallNoPct}%)</span>
+            <span class="subject-stat-pill responses">${totalRatings} responses</span>
+          </div>
+          <!-- Q1–Q5 breakdown -->
+          ${questionRowsHTML}
         </div>
-      </div>
-      <div class="q-stats-row">
-        <span class="q-stat-chip yes">✓ Yes: ${q.yes} (${yesPct}%)</span>
-        ${q.neutral>0?`<span class="q-stat-chip neutral">~ Neutral: ${q.neutral} (${neuPct}%)</span>`:''}
-        <span class="q-stat-chip no">✗ No: ${q.no} (${noPct}%)</span>
-        <span class="q-stat-chip avg">Avg: ${avg}/5</span>
-        <span class="q-stat-chip avg" style="background:var(--bg2);">Total: ${q.total}</span>
-      </div>
-    </div>`;
+      </div>`;
   }).join('');
+
+  return `<div class="subject-cards-grid">${cards}</div>`;
 }
 
-/* ── TOGGLE MENTOR ROW EXPANSION ── */
-function toggleMentorDetail(mentorName,rowEl){
-  const detailRowId='detail-'+mentorName.replace(/\W+/g,'-');
-  const existingDetail=document.getElementById(detailRowId);
+/* ── TOGGLE MENTOR ROW ── */
+function toggleMentorDetail(mentorName, rowEl) {
+  const detailRowId = 'detail-' + mentorName.replace(/\W+/g, '-');
+  const existingDetail = document.getElementById(detailRowId);
 
-  // If clicking the same mentor that's already open → close it
-  if(expandedMentorName===mentorName){
-    expandedMentorName=null;
+  if (expandedMentorName === mentorName) {
+    expandedMentorName = null;
     rowEl.classList.remove('expanded');
-    if(existingDetail){existingDetail.remove();}
+    if (existingDetail) existingDetail.remove();
     return;
   }
 
-  // Close any previously expanded
-  if(expandedMentorName){
-    const prevRow=document.querySelector('.mentor-row-clickable.expanded');
-    if(prevRow)prevRow.classList.remove('expanded');
-    const prevDetail=document.querySelector('.mentor-detail-row.open');
-    if(prevDetail)prevDetail.remove();
+  // Close previous
+  if (expandedMentorName) {
+    const prevRow = document.querySelector('.mentor-row-clickable.expanded');
+    if (prevRow) prevRow.classList.remove('expanded');
+    const prevDetail = document.querySelector('.mentor-detail-row.open');
+    if (prevDetail) prevDetail.remove();
   }
 
-  expandedMentorName=mentorName;
+  expandedMentorName = mentorName;
   rowEl.classList.add('expanded');
 
-  const colCount=9;
-  const detailContent=renderMentorQuestionDetail(mentorName);
-  const tr=document.createElement('tr');
-  tr.id=detailRowId;
-  tr.className='mentor-detail-row open';
-  tr.innerHTML=`<td colspan="${colCount}" class="mentor-detail-cell">
+  const tr = document.createElement('tr');
+  tr.id = detailRowId;
+  tr.className = 'mentor-detail-row open';
+  tr.innerHTML = `<td colspan="9" class="mentor-detail-cell">
     <div class="mentor-detail-inner">
       <div class="mentor-detail-header">
-        <div class="mentor-detail-title">📊 ${mentorName} — Question Breakdown</div>
-        <div class="detail-close-hint" onclick="toggleMentorDetail('${mentorName.replace(/'/g,"\\'")}',document.querySelector('.mentor-row-clickable.expanded'))" style="cursor:pointer;">
+        <div class="mentor-detail-title">📊 ${mentorName} — Subject Ratings & Question Breakdown</div>
+        <div class="detail-close-hint" onclick="toggleMentorDetail('${mentorName.replace(/'/g,"\\'")}', document.querySelector('.mentor-row-clickable.expanded'))">
           ✕ Close
         </div>
       </div>
-      <div class="mentor-detail-grid">${detailContent}</div>
-      <div style="font-size:11px;color:var(--ink4);margin-top:12px;">
-        * Yes = rating ≥ 4.0 · Neutral = 3.0–3.9 · No = &lt; 3.0 · Based on subject rating per response
+      ${renderMentorDetailHTML(mentorName)}
+      <div style="font-size:11px;color:var(--ink4);margin-top:14px;">
+        ★ Overall Rating = average of 1–5 scale per response · Q1–Q5 = Yes/No answers from the feedback form
       </div>
     </div>
   </td>`;
-  rowEl.insertAdjacentElement('afterend',tr);
+  rowEl.insertAdjacentElement('afterend', tr);
 
-  // Animate bars after DOM insertion
-  setTimeout(()=>{
-    tr.querySelectorAll('.q-bar-fill').forEach(bar=>{
-      bar.style.width=bar.getAttribute('data-w')+'%';
+  // Animate bars
+  setTimeout(() => {
+    tr.querySelectorAll('.q-yn-fill').forEach(bar => {
+      bar.style.width = bar.getAttribute('data-w') + '%';
     });
-  },80);
+    tr.querySelectorAll('.subject-rating-bar-inner').forEach(bar => {
+      bar.style.width = bar.getAttribute('data-w') + '%';
+    });
+  }, 80);
 
-  // Scroll the detail row into view smoothly
-  setTimeout(()=>tr.scrollIntoView({behavior:'smooth',block:'nearest'}),120);
+  setTimeout(() => tr.scrollIntoView({behavior:'smooth', block:'nearest'}), 120);
 }
 
 /* ── DEPT FILTER ── */
@@ -906,8 +982,8 @@ function updateDeptFilters(){
     btn.onclick=function(){setDeptFilter(dept,this);};
     fr.appendChild(btn);
   });
+  fr.style.visibility='visible';
 }
-
 function setDeptFilter(val,btn){
   currentDeptFilter=val;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
@@ -915,19 +991,9 @@ function setDeptFilter(val,btn){
   expandedMentorName=null;
   if(currentPanel==='mentors'){renderMentorTable();renderInsightCharts(val);}
 }
-
-/* ── GET FILTERED MENTORS WITH RECALCULATED RANKS ── */
 function getFilteredMentors(filterDept){
-  let list;
-  if(!filterDept || filterDept==='all'){
-    list = [...MENTORS];
-  } else {
-    list = MENTORS.filter(m=>m.depts.some(d=>d===filterDept));
-  }
-  list.forEach((m,idx)=>{
-    m.filteredRank = idx + 1;
-    m.filteredPercentile = list.length > 1 ? Math.round((1 - idx / (list.length - 1)) * 100) : 100;
-  });
+  let list=(!filterDept||filterDept==='all')?[...MENTORS]:MENTORS.filter(m=>m.depts.some(d=>d===filterDept));
+  list.forEach((m,idx)=>{m.filteredRank=idx+1;m.filteredPercentile=list.length>1?Math.round((1-idx/(list.length-1))*100):100;});
   return list;
 }
 
@@ -957,8 +1023,6 @@ function getNpsLabel(index){
   if(index>=-20)return'Needs Improvement';
   return'Critical';
 }
-
-/* ── NPS NEEDLE ANIMATION ── */
 function animateNPSNeedle(targetDeg,duration){
   duration=duration||1500;
   const group=document.getElementById('npsNeedleGroup');
@@ -986,7 +1050,6 @@ function animateNPSNeedle(targetDeg,duration){
   }
   needleAnimRAF=requestAnimationFrame(step);
 }
-
 function animateCounter(el,target,duration,prefix){
   duration=duration||1000;prefix=prefix||'';
   const startTime=performance.now(),isNeg=target<0,absT=Math.abs(target);
@@ -1054,7 +1117,6 @@ function renderNPSPanel(){
   document.getElementById('npsTotalBig').textContent=total>0?total:'—';
   document.getElementById('npsAvgBig').textContent=total>0?avg.toFixed(1):'—';
   document.getElementById('npsMedianBig').textContent=total>0?median.toFixed(1):'—';
-
   document.getElementById('npsP_count').textContent=total>0?promoters:'—';
   document.getElementById('npsN_count').textContent=total>0?passives:'—';
   document.getElementById('npsD_count').textContent=total>0?detractors:'—';
@@ -1071,16 +1133,15 @@ function renderNPSPanel(){
   document.getElementById('npsStackedBadge').textContent=total>0?`NPS = ${npsIndex!==null?(npsIndex>0?'+'+npsIndex:npsIndex):'—'}`:'No data';
 
   if(total>0){
-    const pW=promoPct,nW=passPct,dW=detrPct;
-    document.getElementById('stkPromoters').style.width=pW+'%';
-    document.getElementById('stkPassives').style.width=nW+'%';
-    document.getElementById('stkDetractors').style.width=dW+'%';
-    document.getElementById('stkPromoters').innerHTML=pW>8?`<span style="color:white;font-size:11px;font-weight:600;">${pW}%</span>`:'';
-    document.getElementById('stkPassives').innerHTML=nW>8?`<span style="color:white;font-size:11px;font-weight:600;">${nW}%</span>`:'';
-    document.getElementById('stkDetractors').innerHTML=dW>8?`<span style="color:white;font-size:11px;font-weight:600;">${dW}%</span>`:'';
-    document.getElementById('stkPromLabel').textContent=`Promoters ${pW}%`;
-    document.getElementById('stkPassLabel').textContent=`Passives ${nW}%`;
-    document.getElementById('stkDetrLabel').textContent=`Detractors ${dW}%`;
+    document.getElementById('stkPromoters').style.width=promoPct+'%';
+    document.getElementById('stkPassives').style.width=passPct+'%';
+    document.getElementById('stkDetractors').style.width=detrPct+'%';
+    document.getElementById('stkPromoters').innerHTML=promoPct>8?`<span style="color:white;font-size:11px;font-weight:600;">${promoPct}%</span>`:'';
+    document.getElementById('stkPassives').innerHTML=passPct>8?`<span style="color:white;font-size:11px;font-weight:600;">${passPct}%</span>`:'';
+    document.getElementById('stkDetractors').innerHTML=detrPct>8?`<span style="color:white;font-size:11px;font-weight:600;">${detrPct}%</span>`:'';
+    document.getElementById('stkPromLabel').textContent=`Promoters ${promoPct}%`;
+    document.getElementById('stkPassLabel').textContent=`Passives ${passPct}%`;
+    document.getElementById('stkDetrLabel').textContent=`Detractors ${detrPct}%`;
   }
 
   if(total>0&&scoreFreq){
@@ -1110,9 +1171,7 @@ function renderNPSPanel(){
       </div>`;
     }).join('');
     setTimeout(()=>{
-      document.querySelectorAll('.nps-bar-inner').forEach(bar=>{
-        bar.style.width=bar.getAttribute('data-width')+'%';
-      });
+      document.querySelectorAll('.nps-bar-inner').forEach(bar=>{bar.style.width=bar.getAttribute('data-width')+'%';});
     },300);
   }else{
     document.getElementById('npsBarEnhanced').innerHTML='<div style="text-align:center;padding:24px;color:var(--ink3);">No NPS data. Ensure a column named <code>nps_score</code> exists in the sheet.</div>';
@@ -1120,114 +1179,20 @@ function renderNPSPanel(){
 
   if(npsDonutInst){npsDonutInst.destroy();npsDonutInst=null;}
   if(npsBarChartInst){npsBarChartInst.destroy();npsBarChartInst=null;}
-
   if(total>0){
     npsDonutInst=new Chart(document.getElementById('npsDonutChart'),{
       type:'doughnut',
-      data:{
-        labels:['Promoters','Passives','Detractors'],
-        datasets:[{
-          data:[promoters,passives,detractors],
-          backgroundColor:['#10b981','#f59e0b','#ef4444'],
-          borderColor:['#d1fae5','#fef3c7','#fee2e2'],
-          borderWidth:3,
-          hoverOffset:8
-        }]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        cutout:'68%',
-        plugins:{
-          legend:{display:false},
-          tooltip:{
-            backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',
-            borderColor:'#c48a00',borderWidth:1,padding:10,
-            callbacks:{
-              label:ctx=>{
-                const pct=Math.round(ctx.parsed/total*100);
-                return` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
-              }
-            }
-          },
-          datalabels:{
-            color:'#fff',font:{weight:'bold',size:12},
-            formatter:(v,ctx)=>{
-              const pct=Math.round(v/total*100);
-              return pct>8?pct+'%':'';
-            }
-          }
-        },
-        animation:{animateRotate:true,duration:900}
-      },
+      data:{labels:['Promoters','Passives','Detractors'],datasets:[{data:[promoters,passives,detractors],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderColor:['#d1fae5','#fef3c7','#fee2e2'],borderWidth:3,hoverOffset:8}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/total*100);return` ${ctx.label}: ${ctx.parsed} (${pct}%)`;}}},datalabels:{color:'#fff',font:{weight:'bold',size:12},formatter:(v,ctx)=>{const pct=Math.round(v/total*100);return pct>8?pct+'%':'';}}}},animation:{animateRotate:true,duration:900}},
       plugins:[ChartDataLabels]
     });
-
     const scoreLabels=Object.keys(scoreFreq);
     const scoreData=Object.values(scoreFreq);
-    const barBgColors=scoreLabels.map(s=>{
-      const n=parseInt(s);
-      if(n>=9)return'rgba(16,185,129,0.85)';
-      if(n>=7)return'rgba(245,158,11,0.85)';
-      return'rgba(239,68,68,0.80)';
-    });
-    const barBorderColors=scoreLabels.map(s=>{
-      const n=parseInt(s);
-      if(n>=9)return'#059669';
-      if(n>=7)return'#d97706';
-      return'#dc2626';
-    });
+    const barBgColors=scoreLabels.map(s=>{const n=parseInt(s);if(n>=9)return'rgba(16,185,129,0.85)';if(n>=7)return'rgba(245,158,11,0.85)';return'rgba(239,68,68,0.80)';});
+    const barBorderColors=scoreLabels.map(s=>{const n=parseInt(s);if(n>=9)return'#059669';if(n>=7)return'#d97706';return'#dc2626';});
     npsBarChartInst=new Chart(document.getElementById('npsBarChart'),{
-      type:'bar',
-      data:{
-        labels:scoreLabels,
-        datasets:[{
-          label:'Responses',
-          data:scoreData,
-          backgroundColor:barBgColors,
-          borderColor:barBorderColors,
-          borderWidth:1.5,
-          borderRadius:5,
-          borderSkipped:false
-        }]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{
-            backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',
-            borderColor:'#c48a00',borderWidth:1,padding:10,
-            callbacks:{
-              title:ctx=>`Score ${ctx[0].label}`,
-              label:ctx=>{
-                const pct=total>0?Math.round(ctx.parsed.y/total*100):0;
-                const seg=parseInt(ctx.label)>=9?'Promoter':parseInt(ctx.label)>=7?'Passive':'Detractor';
-                return[` Count: ${ctx.parsed.y} (${pct}%)`,` Segment: ${seg}`];
-              }
-            }
-          },
-          datalabels:{
-            anchor:'end',align:'end',
-            color:ctx=>barBorderColors[ctx.dataIndex],
-            font:{weight:'bold',size:10},
-            formatter:v=>v>0?v:''
-          }
-        },
-        scales:{
-          x:{
-            ticks:{font:{size:11},color:'#8a6020'},
-            grid:{display:false},border:{display:false},
-            title:{display:true,text:'NPS Score (1–10)',font:{size:11},color:'#8a6020'}
-          },
-          y:{
-            ticks:{stepSize:1,font:{size:10},color:'#8a6020'},
-            grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},
-            title:{display:true,text:'Responses',font:{size:11},color:'#8a6020'}
-          }
-        },
-        animation:{duration:800,easing:'easeOutQuart'},
-        layout:{padding:{top:20,right:10}}
-      },
+      type:'bar',data:{labels:scoreLabels,datasets:[{label:'Responses',data:scoreData,backgroundColor:barBgColors,borderColor:barBorderColors,borderWidth:1.5,borderRadius:5,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>`Score ${ctx[0].label}`,label:ctx=>{const pct=total>0?Math.round(ctx.parsed.y/total*100):0;const seg=parseInt(ctx.label)>=9?'Promoter':parseInt(ctx.label)>=7?'Passive':'Detractor';return[` Count: ${ctx.parsed.y} (${pct}%)`,` Segment: ${seg}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>barBorderColors[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v>0?v:''}},scales:{x:{ticks:{font:{size:11},color:'#8a6020'},grid:{display:false},border:{display:false},title:{display:true,text:'NPS Score (1–10)',font:{size:11},color:'#8a6020'}},y:{ticks:{stepSize:1,font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Responses',font:{size:11},color:'#8a6020'}}},animation:{duration:800,easing:'easeOutQuart'},layout:{padding:{top:20,right:10}}},
       plugins:[ChartDataLabels]
     });
   }else{
@@ -1237,7 +1202,7 @@ function renderNPSPanel(){
   }
 }
 
-/* ── HELPERS ── */
+/* ── TABLE HELPERS ── */
 function statusBadge(r){
   if(r>=4.3)return'<span class="badge badge-gold">Excellent</span>';
   if(r>=4.0)return'<span class="badge badge-green">Good</span>';
@@ -1272,251 +1237,74 @@ function showPanel(id,el){
   if(id==='nps'){renderNPSPanel();}
 }
 
-/* ── INSIGHT CHART TAB SWITCH ── */
+/* ── INSIGHT CHART TABS ── */
 function setInsightChart(type,btn){
   currentInsightChart=type;
   document.querySelectorAll('.bubble-tab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-
   document.getElementById('insightScatterWrap').style.display=type==='scatter'?'block':'none';
   document.getElementById('insightHorizWrap').style.display=type==='horizontal'?'block':'none';
   document.getElementById('insightResponseWrap').style.display=type==='responses'?'block':'none';
-
-  const legend=document.getElementById('insightScatterLegend');
-  legend.style.display=type==='scatter'?'flex':'none';
-
+  document.getElementById('insightScatterLegend').style.display=type==='scatter'?'flex':'none';
   renderInsightCharts(currentDeptFilter);
 }
-
-/* ── INSIGHT CHARTS ── */
 function renderInsightCharts(filterDept){
-  const list = getFilteredMentors(filterDept);
+  const list=getFilteredMentors(filterDept);
   document.getElementById('insightChartBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-
-  if(currentInsightChart==='scatter') renderScatterChart(list);
-  else if(currentInsightChart==='horizontal') renderHorizChart(list);
-  else if(currentInsightChart==='responses') renderResponseChart(list);
+  if(currentInsightChart==='scatter')renderScatterChart(list);
+  else if(currentInsightChart==='horizontal')renderHorizChart(list);
+  else if(currentInsightChart==='responses')renderResponseChart(list);
 }
 
 function renderScatterChart(list){
   if(insightScatterInst){insightScatterInst.destroy();insightScatterInst=null;}
-  if(!list.length){
-    document.getElementById('insightScatterWrap').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:380px;color:var(--ink3);font-size:13px;">No mentor data available</div>';
-    return;
-  }
-  if(!document.getElementById('insightScatterChart'))
-    document.getElementById('insightScatterWrap').innerHTML='<canvas id="insightScatterChart"></canvas>';
-
-  const scatterData=list.map(m=>({
-    x:m.responses,
-    y:m.rating,
-    r:Math.max(6,m.subjects*4),
-    label:m.name,
-    subjects:m.subjects,
-    bayesian:m.bayesianRating,
-    dept:m.depts[0]||''
-  }));
-
+  if(!list.length){document.getElementById('insightScatterWrap').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:380px;color:var(--ink3);font-size:13px;">No mentor data available</div>';return;}
+  if(!document.getElementById('insightScatterChart'))document.getElementById('insightScatterWrap').innerHTML='<canvas id="insightScatterChart"></canvas>';
+  const scatterData=list.map(m=>({x:m.responses,y:m.rating,r:Math.max(6,m.subjects*4),label:m.name,subjects:m.subjects,bayesian:m.bayesianRating,dept:m.depts[0]||''}));
   insightScatterInst=new Chart(document.getElementById('insightScatterChart'),{
-    type:'bubble',
-    data:{
-      datasets:[{
-        label:'Mentors',
-        data:scatterData,
-        backgroundColor:scatterData.map(d=>getStatusColor(d.y)+'cc'),
-        borderColor:scatterData.map(d=>getStatusColor(d.y)),
-        borderWidth:1.5,
-        hoverBorderWidth:2.5
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'rgba(42,24,0,0.95)',
-          titleColor:'#fde9a0',bodyColor:'#f5e9c8',
-          borderColor:'#c48a00',borderWidth:1,padding:12,
-          callbacks:{
-            title:ctx=>ctx[0].raw.label,
-            label:ctx=>{
-              const d=ctx.raw;
-              return[
-                ` Avg Rating: ${d.y.toFixed(2)} / 5`,
-                ` Responses: ${d.x}`,
-                ` Subjects: ${d.subjects}`,
-                ` Bayesian: ${d.bayesian.toFixed(4)}`,
-                ` Dept: ${d.dept}`
-              ];
-            }
-          }
-        },
-        datalabels:{
-          display:ctx=>{
-            const d=ctx.dataset.data[ctx.dataIndex];
-            return d.r>=12;
-          },
-          color:'#2a1800',
-          font:{size:9,weight:'600'},
-          formatter:(v,ctx)=>{
-            const name=ctx.dataset.data[ctx.dataIndex].label;
-            return name.length>12?name.slice(0,11)+'…':name;
-          },
-          anchor:'center',align:'center'
-        }
-      },
-      scales:{
-        x:{
-          title:{display:true,text:'Total Responses',font:{size:12},color:'#8a6020'},
-          ticks:{font:{size:10},color:'#8a6020'},
-          grid:{color:'rgba(120,80,10,0.06)'},
-          border:{display:false}
-        },
-        y:{
-          min:0,max:5,
-          title:{display:true,text:'Average Rating / 5',font:{size:12},color:'#8a6020'},
-          ticks:{stepSize:0.5,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},
-          grid:{color:'rgba(120,80,10,0.06)'},
-          border:{display:false}
-        }
-      },
-      layout:{padding:{top:20,right:20,bottom:10,left:10}},
-      animation:{duration:700,easing:'easeOutQuart'}
-    },
+    type:'bubble',data:{datasets:[{label:'Mentors',data:scatterData,backgroundColor:scatterData.map(d=>getStatusColor(d.y)+'cc'),borderColor:scatterData.map(d=>getStatusColor(d.y)),borderWidth:1.5,hoverBorderWidth:2.5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:12,callbacks:{title:ctx=>ctx[0].raw.label,label:ctx=>{const d=ctx.raw;return[` Avg Rating: ${d.y.toFixed(2)} / 5`,` Responses: ${d.x}`,` Subjects: ${d.subjects}`,` Bayesian: ${d.bayesian.toFixed(4)}`,` Dept: ${d.dept}`];}}},datalabels:{display:ctx=>{const d=ctx.dataset.data[ctx.dataIndex];return d.r>=12;},color:'#2a1800',font:{size:9,weight:'600'},formatter:(v,ctx)=>{const name=ctx.dataset.data[ctx.dataIndex].label;return name.length>12?name.slice(0,11)+'…':name;},anchor:'center',align:'center'}},scales:{x:{title:{display:true,text:'Total Responses',font:{size:12},color:'#8a6020'},ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}},y:{min:0,max:5,title:{display:true,text:'Average Rating / 5',font:{size:12},color:'#8a6020'},ticks:{stepSize:0.5,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}}},layout:{padding:{top:20,right:20,bottom:10,left:10}},animation:{duration:700,easing:'easeOutQuart'}},
     plugins:[ChartDataLabels]
   });
 }
 
 function renderHorizChart(list){
   if(insightHorizInst){insightHorizInst.destroy();insightHorizInst=null;}
-  if(!list.length) return;
-  if(!document.getElementById('insightHorizChart'))
-    document.getElementById('insightHorizWrap').innerHTML='<canvas id="insightHorizChart"></canvas>';
-
-  const top5=list.slice(0,Math.min(5, list.length));
-  const bottom5=list.slice(-Math.min(5, list.length)).reverse();
+  if(!list.length)return;
+  if(!document.getElementById('insightHorizChart'))document.getElementById('insightHorizWrap').innerHTML='<canvas id="insightHorizChart"></canvas>';
+  const top5=list.slice(0,Math.min(5,list.length));
+  const bottom5=list.slice(-Math.min(5,list.length)).reverse();
   const combined=[...top5,...bottom5];
   const labels=combined.map((m,i)=>(i<top5.length?'▲ ':'▼ ')+m.name);
   const data=combined.map(m=>m.bayesianRating);
   const colors=combined.map((m,i)=>i<top5.length?'rgba(16,185,129,0.80)':'rgba(239,68,68,0.75)');
   const borders=combined.map((m,i)=>i<top5.length?'#059669':'#dc2626');
-
   document.getElementById('insightHorizWrap').style.height=Math.max(340,combined.length*38+80)+'px';
-
   insightHorizInst=new Chart(document.getElementById('insightHorizChart'),{
-    type:'bar',
-    data:{
-      labels,
-      datasets:[{
-        data,
-        backgroundColor:colors,
-        borderColor:borders,
-        borderWidth:1.5,
-        borderRadius:5,
-        borderSkipped:false,
-        barThickness:22
-      }]
-    },
-    options:{
-      indexAxis:'y',
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',
-          borderColor:'#c48a00',borderWidth:1,padding:10,
-          callbacks:{
-            title:ctx=>combined[ctx[0].dataIndex].name,
-            label:ctx=>{
-              const m=combined[ctx.dataIndex];
-              return[` Bayesian: ${m.bayesianRating.toFixed(4)}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Responses: ${m.responses}`];
-            }
-          }
-        },
-        datalabels:{
-          anchor:'end',align:'end',
-          color:ctx=>borders[ctx.dataIndex],
-          font:{weight:'bold',size:10},
-          formatter:v=>v.toFixed(2)
-        }
-      },
-      scales:{
-        x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},
-        y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}
-      },
-      layout:{padding:{right:50,top:10}}
-    },
+    type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderColor:borders,borderWidth:1.5,borderRadius:5,borderSkipped:false,barThickness:22}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>combined[ctx[0].dataIndex].name,label:ctx=>{const m=combined[ctx.dataIndex];return[` Bayesian: ${m.bayesianRating.toFixed(4)}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Responses: ${m.responses}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>borders[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v.toFixed(2)}},scales:{x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},
     plugins:[ChartDataLabels]
   });
 }
 
 function renderResponseChart(list){
   if(insightResponseInst){insightResponseInst.destroy();insightResponseInst=null;}
-  if(!list.length) return;
-  if(!document.getElementById('insightResponseChart'))
-    document.getElementById('insightResponseWrap').innerHTML='<canvas id="insightResponseChart"></canvas>';
-
+  if(!list.length)return;
+  if(!document.getElementById('insightResponseChart'))document.getElementById('insightResponseWrap').innerHTML='<canvas id="insightResponseChart"></canvas>';
   const sorted=[...list].sort((a,b)=>b.responses-a.responses).slice(0,20);
   const maxR=Math.max(...sorted.map(m=>m.responses),1);
-  const colors=sorted.map(m=>{
-    const ratio=m.responses/maxR;
-    const r=Math.round(92+(196-92)*ratio);
-    const g=Math.round(54+(138-54)*ratio);
-    return`rgba(${r},${g},0,${0.55+0.35*ratio})`;
-  });
-
+  const colors=sorted.map(m=>{const ratio=m.responses/maxR;const r=Math.round(92+(196-92)*ratio);const g=Math.round(54+(138-54)*ratio);return`rgba(${r},${g},0,${0.55+0.35*ratio})`;});
   document.getElementById('insightResponseWrap').style.height=Math.max(320,sorted.length*28+100)+'px';
-
   insightResponseInst=new Chart(document.getElementById('insightResponseChart'),{
-    type:'bar',
-    data:{
-      labels:sorted.map(m=>m.name),
-      datasets:[{
-        data:sorted.map(m=>m.responses),
-        backgroundColor:colors,
-        borderColor:sorted.map(m=>'#c48a00'),
-        borderWidth:1,
-        borderRadius:5,
-        borderSkipped:false,
-        barThickness:20
-      }]
-    },
-    options:{
-      indexAxis:'y',
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',
-          borderColor:'#c48a00',borderWidth:1,padding:10,
-          callbacks:{
-            title:ctx=>sorted[ctx[0].dataIndex].name,
-            label:ctx=>{
-              const m=sorted[ctx.dataIndex];
-              return[` Responses: ${m.responses}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Subjects: ${m.subjects}`];
-            }
-          }
-        },
-        datalabels:{
-          anchor:'end',align:'end',
-          color:'#5c3600',
-          font:{weight:'bold',size:10},
-          formatter:v=>v
-        }
-      },
-      scales:{
-        x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Total Responses',font:{size:11},color:'#8a6020'}},
-        y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}
-      },
-      layout:{padding:{right:50,top:10}}
-    },
+    type:'bar',data:{labels:sorted.map(m=>m.name),datasets:[{data:sorted.map(m=>m.responses),backgroundColor:colors,borderColor:sorted.map(m=>'#c48a00'),borderWidth:1,borderRadius:5,borderSkipped:false,barThickness:20}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>sorted[ctx[0].dataIndex].name,label:ctx=>{const m=sorted[ctx.dataIndex];return[` Responses: ${m.responses}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Subjects: ${m.subjects}`];}}},datalabels:{anchor:'end',align:'end',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v}},scales:{x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Total Responses',font:{size:11},color:'#8a6020'}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},
     plugins:[ChartDataLabels]
   });
 }
 
 /* ── MENTOR TABLE ── */
 function renderMentorTable(){
-  const list = getFilteredMentors(currentDeptFilter);
+  const list=getFilteredMentors(currentDeptFilter);
   const sumResponses=list.reduce((s,m)=>s+m.responses,0);
   const sumAvgXResp=list.reduce((s,m)=>s+m.avgXResponses,0);
   const gm=sumResponses>0?(sumAvgXResp/sumResponses):0;
@@ -1525,20 +1313,18 @@ function renderMentorTable(){
   document.getElementById('mtSumAvgXResp').textContent=sumAvgXResp>0?sumAvgXResp.toFixed(2):'—';
   document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
   if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found for this department</td></tr>';return;}
-
-  const deptLabel = (currentDeptFilter && currentDeptFilter !== 'all') ? currentDeptFilter : null;
+  const deptLabel=(currentDeptFilter&&currentDeptFilter!=='all')?currentDeptFilter:null;
   const rankColors={1:'#f5c842',2:'#e0e0e0',3:'#f0c498'};
-
   document.getElementById('mentorTableBody').innerHTML=list.map(m=>{
-    const displayRank = m.filteredRank;
+    const displayRank=m.filteredRank;
     const rankBg=rankColors[displayRank]||'transparent';
     const rankColor=displayRank<=3?'#3d2200':'var(--ink3)';
     const rankBorder=displayRank<=3?'none':'1px solid var(--border2)';
-    const displayDept = deptLabel || m.depts.join(', ');
-    const s=deptStyle(deptLabel || m.depts[0]||'');
+    const displayDept=deptLabel||m.depts.join(', ');
+    const s=deptStyle(deptLabel||m.depts[0]||'');
     const escapedName=m.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return`<tr class="mentor-row-clickable" onclick="toggleMentorDetail('${escapedName}',this)">
-      <td style="text-align:center;width:32px;color:var(--gold-mid);font-size:12px;">▼<span class="expand-arrow"></span></td>
+      <td style="text-align:center;width:32px;color:var(--gold-mid);font-size:12px;"><span class="expand-arrow">▼</span></td>
       <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td>
       <td style="font-weight:600;font-size:13.5px;color:var(--ink);">${m.name}</td>
       <td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${displayDept}</span></td>
@@ -1554,37 +1340,19 @@ function renderMentorTable(){
 /* ── SUMMARY CHARTS ── */
 Chart.defaults.font.family='Inter';
 Chart.defaults.color='#8a6020';
-
 function initSummaryCharts(){
   const top=MENTORS.slice(0,Math.min(15,MENTORS.length));
   const chartH=Math.max(200,top.length*38);
-  const wrap=document.getElementById('topMentorsWrap');
-  wrap.style.height=chartH+'px';
+  document.getElementById('topMentorsWrap').style.height=chartH+'px';
   if(chartInstances.topMentors){chartInstances.topMentors.destroy();chartInstances.topMentors=null;}
   chartInstances.topMentors=new Chart(document.getElementById('topMentorsChart'),{
     type:'bar',
-    data:{
-      labels:top.map(m=>m.name),
-      datasets:[{data:top.map(m=>m.bayesianRating),backgroundColor:top.map((m,i)=>i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00'),borderRadius:5,borderSkipped:false,barThickness:22}]
-    },
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>{const m=top[ctx.dataIndex];return`Bayesian: ${ctx.parsed.x.toFixed(2)} | Avg: ${m.rating.toFixed(1)}/5 (${m.subjects} subjects, ${m.responses} responses)`;}}},
-        datalabels:{anchor:'end',align:'end',color:'#2a1800',font:{weight:'bold',size:11},formatter:v=>v.toFixed(2)}
-      },
-      scales:{
-        x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},
-        y:{ticks:{font:{size:11},autoSkip:false},grid:{display:false},border:{display:false}}
-      },
-      layout:{padding:{right:40}}
-    },
+    data:{labels:top.map(m=>m.name),datasets:[{data:top.map(m=>m.bayesianRating),backgroundColor:top.map((m,i)=>i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00'),borderRadius:5,borderSkipped:false,barThickness:22}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const m=top[ctx.dataIndex];return`Bayesian: ${ctx.parsed.x.toFixed(2)} | Avg: ${m.rating.toFixed(1)}/5 (${m.subjects} subjects, ${m.responses} responses)`;}}},datalabels:{anchor:'end',align:'end',color:'#2a1800',font:{weight:'bold',size:11},formatter:v=>v.toFixed(2)}},scales:{x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:40}}},
     plugins:[ChartDataLabels]
   });
   document.getElementById('topMentorsBadge').textContent=top.length>0?`Top ${top.length}`:'No data';
 }
-
 function updateSummaryCharts(){
   if(chartInstances.topMentors){
     const top=MENTORS.slice(0,Math.min(15,MENTORS.length));
@@ -1598,13 +1366,6 @@ function updateSummaryCharts(){
 }
 
 /* ── DOWNLOAD ── */
-function statusBadgeInline(r){
-  if(r>=4.3)return'<span style="background:#fde9a0;color:#5c3600;border:1px solid #e6b84a;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Excellent</span>';
-  if(r>=4.0)return'<span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Good</span>';
-  if(r>=3.5)return'<span style="background:#fef3c7;color:#78350f;border:1px solid #fcd34d;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Average</span>';
-  return'<span style="background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Needs work</span>';
-}
-
 function downloadReport(){
   if(!MENTORS.length&&!NPS_DATA.total){alert('No data to download. Please select a college first.');return;}
   const collegeName=currentCollege?.name||'Report';
@@ -1614,7 +1375,7 @@ function downloadReport(){
   const promoPct=npsTotal>0?Math.round(promoters/npsTotal*100):0;
   const passPct=npsTotal>0?Math.round(passives/npsTotal*100):0;
   const detrPct=npsTotal>0?Math.round(detractors/npsTotal*100):0;
-  const tableHead=cols=>`<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;
+  const th=cols=>`<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;
   const mentorRows=MENTORS.map((m,idx)=>`<tr style="background:${idx%2===0?'#fff':'#fdf8ed'}">
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600">${m.rank}</td>
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;color:#2a1800">${m.name}</td>
@@ -1622,39 +1383,27 @@ function downloadReport(){
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:16px;color:#5c3600">${m.bayesianRating.toFixed(2)}</td>
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:16px;color:#5c3600">${m.rating.toFixed(1)}/5</td>
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${m.responses}</td>
-    <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${statusBadgeInline(m.rating)}</td>
   </tr>`).join('');
   const npsRows=npsTotal>0?Object.entries(scoreFreq).map(([score,count])=>{
     const pct=Math.round(count/npsTotal*100);
     const seg=parseInt(score)>=9?'Promoter':parseInt(score)>=7?'Passive':'Detractor';
     return`<tr><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:700;font-size:16px;color:#5c3600">${score}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${seg}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${count}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${pct}%</td></tr>`;
   }).join(''):'<tr><td colspan="4" style="text-align:center;padding:20px;color:#8a6020">No NPS data available</td></tr>';
-
-  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title>
-<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;font-size:13px;line-height:1.6;}
-.rh{background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}
-.rh h1{font-family:Georgia,serif;font-size:26px;font-weight:400;}.rb{padding:36px 40px;max-width:1100px;margin:0 auto;}
-table{width:100%;border-collapse:collapse;font-size:13px;}.sec{margin-bottom:40px;}.st{font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;}
-.ncard{display:inline-flex;flex-direction:column;align-items:center;padding:16px 24px;border-radius:12px;margin:4px;}
-@media print{.rh{-webkit-print-color-adjust:exact;print-color-adjust:exact;}thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.pb{page-break-before:always;}}
-</style></head><body>
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;font-size:13px;}.rh{background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}.rh h1{font-family:Georgia,serif;font-size:26px;font-weight:400;}.rb{padding:36px 40px;max-width:1100px;margin:0 auto;}table{width:100%;border-collapse:collapse;font-size:13px;}.sec{margin-bottom:40px;}.st{font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;}.ncard{display:inline-flex;flex-direction:column;align-items:center;padding:16px 24px;border-radius:12px;margin:4px;}@media print{.rh,.thead{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>
 <div class="rh"><div><h1>Performance Report</h1><p>${collegeName}</p></div><div style="text-align:right;font-size:11px;opacity:0.75"><div>Generated: ${now}</div><div>${MENTORS.length} mentors · ${DEPT_LIST.length} depts</div></div></div>
 <div class="rb">
 <div class="sec"><div class="st">NPS Overview</div>
 <div style="background:linear-gradient(135deg,#4a2800,#7a4f00);border-radius:14px;padding:24px;margin-bottom:20px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
-  <div><div style="font-size:10px;color:rgba(253,233,160,0.6);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">NPS Index</div><div style="font-family:Georgia,serif;font-size:56px;color:#f5c842;line-height:1">${npsDisplay}</div><div style="font-size:12px;color:rgba(253,233,160,0.7);margin-top:6px">${getNpsLabel(npsIndex)}</div></div>
-  <div style="display:flex;gap:24px;flex-wrap:wrap;">
-    <div class="ncard" style="background:#d1fae5;"><div style="font-family:Georgia,serif;font-size:36px;color:#065f46">${npsTotal>0?promoters:'—'}</div><div style="font-size:10px;font-weight:600;color:#065f46;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Promoters</div><div style="font-size:11px;color:#065f46">${promoPct}% · Score 9–10</div></div>
-    <div class="ncard" style="background:#fef3c7;"><div style="font-family:Georgia,serif;font-size:36px;color:#78350f">${npsTotal>0?passives:'—'}</div><div style="font-size:10px;font-weight:600;color:#78350f;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Passives</div><div style="font-size:11px;color:#78350f">${passPct}% · Score 7–8</div></div>
-    <div class="ncard" style="background:#fee2e2;"><div style="font-family:Georgia,serif;font-size:36px;color:#7f1d1d">${npsTotal>0?detractors:'—'}</div><div style="font-size:10px;font-weight:600;color:#7f1d1d;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Detractors</div><div style="font-size:11px;color:#7f1d1d">${detrPct}% · Score 1–6</div></div>
-    <div class="ncard" style="background:var(--surface,#fff);border:1px solid rgba(120,80,10,0.1)"><div style="font-family:Georgia,serif;font-size:36px;color:#5c3600">${npsTotal>0?npsAvg.toFixed(1):'—'}</div><div style="font-size:10px;font-weight:600;color:#8a6020;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Avg Score</div><div style="font-size:11px;color:#8a6020">out of 10</div></div>
-  </div>
-</div>
-<div style="margin-bottom:16px"><div style="font-family:Georgia,serif;font-size:16px;color:#5c3600;margin-bottom:10px">Score Breakdown</div>
-<table>${tableHead(['Score','Segment','Count','%'])}<tbody>${npsRows}</tbody></table></div></div>
-<div class="sec pb"><div class="st">Mentor Rankings (Bayesian)</div>
-<table>${tableHead(['Rank','Mentor','Department(s)','Bayesian Score','Avg Rating','Responses','Status'])}<tbody>${mentorRows}</tbody></table>
-<div style="font-size:11px;color:#c09840;margin-top:10px">* NPS = %Promoters − %Detractors · Bayesian = (GlobalMean × ΣResponses + AvgRating × MentorResponses) / (ΣResponses + MentorResponses)</div></div>
+<div><div style="font-size:10px;color:rgba(253,233,160,0.6);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">NPS Index</div><div style="font-family:Georgia,serif;font-size:56px;color:#f5c842;line-height:1">${npsDisplay}</div><div style="font-size:12px;color:rgba(253,233,160,0.7);margin-top:6px">${getNpsLabel(npsIndex)}</div></div>
+<div style="display:flex;gap:24px;flex-wrap:wrap;">
+<div class="ncard" style="background:#d1fae5;"><div style="font-family:Georgia,serif;font-size:36px;color:#065f46">${npsTotal>0?promoters:'—'}</div><div style="font-size:10px;font-weight:600;color:#065f46;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Promoters</div><div style="font-size:11px;color:#065f46">${promoPct}% · Score 9–10</div></div>
+<div class="ncard" style="background:#fef3c7;"><div style="font-family:Georgia,serif;font-size:36px;color:#78350f">${npsTotal>0?passives:'—'}</div><div style="font-size:10px;font-weight:600;color:#78350f;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Passives</div><div style="font-size:11px;color:#78350f">${passPct}% · Score 7–8</div></div>
+<div class="ncard" style="background:#fee2e2;"><div style="font-family:Georgia,serif;font-size:36px;color:#7f1d1d">${npsTotal>0?detractors:'—'}</div><div style="font-size:10px;font-weight:600;color:#7f1d1d;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Detractors</div><div style="font-size:11px;color:#7f1d1d">${detrPct}% · Score 1–6</div></div>
+</div></div>
+<table>${th(['Score','Segment','Count','%'])}<tbody>${npsRows}</tbody></table></div>
+<div class="sec"><div class="st">Mentor Rankings</div>
+<table>${th(['Rank','Mentor','Department(s)','Bayesian Score','Avg Rating','Responses'])}<tbody>${mentorRows}</tbody></table>
+<div style="font-size:11px;color:#c09840;margin-top:10px">* Bayesian = (GlobalMean × ΣResponses + AvgRating × MentorResponses) / (ΣResponses + MentorResponses)</div></div>
 </div></body></html>`;
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const a=document.createElement('a');
