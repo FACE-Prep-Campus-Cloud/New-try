@@ -1,14 +1,14 @@
-cat > /mnt/user-data/outputs/dashboard_with_trends.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Performance Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Performance Dashboard - Enhanced with Mentor Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root {
   --bg:#fdf8ed;--bg2:#f5e9c8;--surface:#ffffff;--surface2:#fdf4e0;
@@ -18,8 +18,7 @@ cat > /mnt/user-data/outputs/dashboard_with_trends.html << 'HTMLEOF'
   --rose:#7f1d1d;--rose-lt:#fee2e2;--amber:#78350f;--amber-lt:#fef3c7;
   --gold-dark:#5c3600;--gold-mid:#c48a00;--gold-light:#fde9a0;--gold-bright:#f5c842;
   --green-dark:#065f46;--green-light:#d1fae5;--green-mid:#10b981;
-  --amber-dark:#78350f;--amber-light:#fef3c7;--amber-mid:#f59e0b;
-  --red-dark:#7f1d1d;--red-light:#fee2e2;--red-mid:#ef4444;
+  --blue-dark:#1e40af;--blue-light:#dbeafe;--blue-mid:#3b82f6;
   --shadow-sm:0 1px 3px rgba(120,80,10,0.08),0 1px 2px rgba(120,80,10,0.04);
   --shadow-md:0 4px 16px rgba(120,80,10,0.12),0 1px 4px rgba(120,80,10,0.07);
   --shadow-lg:0 12px 40px rgba(120,80,10,0.16),0 4px 12px rgba(120,80,10,0.08);
@@ -27,285 +26,512 @@ cat > /mnt/user-data/outputs/dashboard_with_trends.html << 'HTMLEOF'
   --font-body:'Inter',system-ui,sans-serif;
   --radius:14px;--radius-sm:8px;
 }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden;}
 
+/* Loading & Animations */
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000;transition:opacity 0.4s,visibility 0.4s;flex-direction:column;gap:20px;}
 .loading-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none;}
 .spinner{width:48px;height:48px;border:3px solid var(--gold-light);border-top-color:var(--gold-mid);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
-@keyframes ringPulse{0%,100%{r:6;opacity:1;}50%{r:10;opacity:0.3;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@keyframes dropDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-@keyframes countUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
 
 .loading-text{font-size:13px;color:var(--ink3);font-weight:500;}
-.error-message{max-width:500px;padding:20px;background:var(--rose-lt);border:1px solid var(--rose);border-radius:var(--radius);color:var(--rose);font-size:13px;line-height:1.6;display:none;}
-.error-message.show{display:block;}
-.error-message strong{display:block;margin-bottom:10px;font-size:14px;}
 
+/* Layout */
 .shell{display:grid;grid-template-columns:240px 1fr;grid-template-rows:64px 1fr;min-height:100vh;}
-
-.hamburger-btn{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:rgba(253,233,160,0.12);border:1px solid rgba(253,233,160,0.25);border-radius:var(--radius-sm);cursor:pointer;padding:8px;margin-right:10px;flex-shrink:0;}
-.hamburger-btn span{display:block;width:100%;height:2px;background:#fde9a0;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.hamburger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.hamburger-btn.open span:nth-child(2){opacity:0;}
-.hamburger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-.sidebar-overlay{display:none;}
-
 .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-bottom:1px solid rgba(245,200,66,0.20);box-shadow:0 2px 16px rgba(90,50,0,0.30);position:sticky;top:0;z-index:100;}
-.logo{display:flex;align-items:center;flex:1;min-width:0;overflow:hidden;}
-.logo-name{font-family:var(--font-display);font-size:22px;font-weight:400;color:#fde9a0;line-height:1.2;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:0;}
-.college-dropdown-wrap{position:relative;}
-.college-select-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(253,233,160,0.12);border:1px solid rgba(253,233,160,0.32);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:500;color:#fde9a0;cursor:pointer;transition:all 0.15s;white-space:nowrap;max-width:220px;overflow:hidden;}
-.college-select-btn:hover{background:rgba(253,233,160,0.22);}
-.college-select-btn .btn-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
-.college-select-btn .caret{flex-shrink:0;font-size:9px;transition:transform 0.2s;}
-.college-select-btn.open .caret{transform:rotate(180deg);}
-.college-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:280px;max-width:340px;max-height:380px;overflow-y:auto;z-index:200;display:none;}
-.college-dropdown.open{display:block;animation:dropDown 0.18s cubic-bezier(.22,1,.36,1);}
-.college-dropdown-item{padding:10px 16px;font-size:12.5px;color:var(--ink2);cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s;display:flex;align-items:center;gap:8px;line-height:1.4;}
-.college-dropdown-item:last-child{border-bottom:none;}
-.college-dropdown-item:hover{background:var(--gold-light);color:var(--gold-dark);}
-.college-dropdown-item.active{background:var(--gold-light);color:var(--gold-dark);font-weight:500;}
-.college-dropdown-item .item-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:2px;}
-.college-dropdown-item.active .item-dot{background:var(--gold-mid);}
-.download-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--gold-bright);color:var(--gold-dark);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.01em;transition:background 0.2s,transform 0.15s;box-shadow:0 2px 8px rgba(160,110,0,0.35);white-space:nowrap;}
-.download-btn:hover{background:#f0be30;transform:translateY(-1px);}
-.download-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-.faceprep-logo{height:42px;width:auto;object-fit:contain;display:block;border-radius:8px;}
+.logo-name{font-family:var(--font-display);font-size:22px;font-weight:400;color:#fde9a0;line-height:1.2;letter-spacing:-0.01em;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
 
 .sidebar{background:linear-gradient(180deg,#4a2800 0%,#5c3600 100%);border-right:1px solid rgba(245,200,66,0.15);padding:24px 0;display:flex;flex-direction:column;gap:2px;box-shadow:2px 0 16px rgba(90,50,0,0.22);}
-.nav-group-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(253,233,160,0.40);padding:12px 22px 5px;}
 .nav-item{display:flex;align-items:center;gap:11px;padding:10px 22px;color:rgba(253,233,160,0.65);font-size:13.5px;font-weight:400;cursor:pointer;border-left:2.5px solid transparent;transition:all 0.15s;}
 .nav-item:hover{color:#fde9a0;background:rgba(253,233,160,0.07);}
 .nav-item.active{color:#fde9a0;background:rgba(253,233,160,0.13);border-left-color:var(--gold-bright);font-weight:500;}
-.nav-icon{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;background:transparent;transition:background 0.15s;}
-.nav-item.active .nav-icon{background:rgba(253,233,160,0.13);}
-.sidebar-footer{margin-top:auto;padding:16px 22px 0;border-top:1px solid rgba(253,233,160,0.12);}
-.sidebar-footer-label{font-size:11px;color:rgba(253,233,160,0.35);}
-.sidebar-footer-val{font-size:13px;font-weight:500;color:rgba(253,233,160,0.70);margin-top:1px;}
-.refresh-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
-.refresh-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(253,233,160,0.10);border:1px solid rgba(253,233,160,0.25);border-radius:var(--radius-sm);color:rgba(253,233,160,0.75);font-family:var(--font-body);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.15s;}
-.refresh-btn:hover{background:rgba(253,233,160,0.20);color:#fde9a0;}
-.refresh-btn svg{width:12px;height:12px;transition:transform 0.5s;}
-.refresh-btn.spinning svg{transform:rotate(360deg);}
 
 .main{overflow-y:auto;padding:32px 36px;display:flex;flex-direction:column;gap:26px;background:var(--bg);}
-.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-.page-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold-mid);margin-bottom:4px;}
 .page-title{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--ink);letter-spacing:-0.01em;line-height:1.1;}
-.page-sub{font-size:13px;color:var(--ink3);margin-top:5px;}
-.filter-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
-.filter-chip{padding:7px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;box-shadow:var(--shadow-sm);}
-.filter-chip:hover{color:var(--gold-dark);border-color:var(--gold-mid);}
-.filter-chip.active{background:var(--gold-dark);color:#fde9a0;border-color:var(--gold-dark);box-shadow:0 2px 8px rgba(120,80,0,0.25);}
 
-.panel{display:none;flex-direction:column;gap:22px;}
-.panel.active{display:flex;}
-.panel.active>*{animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;}
-.panel.active>*:nth-child(1){animation-delay:0.03s;}
-.panel.active>*:nth-child(2){animation-delay:0.08s;}
-.panel.active>*:nth-child(3){animation-delay:0.13s;}
-.panel.active>*:nth-child(4){animation-delay:0.18s;}
-.panel.active>*:nth-child(5){animation-delay:0.23s;}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none;text-decoration:none;}
+.btn-primary{background:var(--gold-bright);color:var(--gold-dark);box-shadow:0 2px 8px rgba(160,110,0,0.35);}
+.btn-primary:hover{background:#f0be30;transform:translateY(-1px);}
+.btn-secondary{background:var(--surface);color:var(--ink2);border:1px solid var(--border2);}
+.btn-secondary:hover{background:var(--bg2);}
 
-.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-.metric-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--gold-mid);border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
-.metric-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
-.metric-card::after{content:'';position:absolute;bottom:-18px;right:-18px;width:72px;height:72px;border-radius:50%;background:var(--gold-light);opacity:0.55;}
-.metric-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);}
-.metric-value{font-family:var(--font-display);font-size:34px;font-weight:400;line-height:1.05;letter-spacing:-0.02em;margin-top:3px;color:var(--gold-dark);}
-.metric-sub{font-size:12px;color:var(--ink3);margin-top:5px;display:flex;align-items:center;gap:6px;}
-
+/* Cards */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .card-title{font-family:var(--font-display);font-size:16px;font-weight:400;color:var(--ink);}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
 
+/* Badges */
 .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
-.badge-primary{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
 .badge-gold{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
 .badge-green{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
 .badge-blue{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
 .badge-amber{background:#fef3c7;color:#78350f;border:1px solid #fcd34d;}
 .badge-rose{background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;}
 
-.nps-overview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
-.nps-gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:10px 0 18px;}
-.nps-gauge-svg{width:200px;height:115px;overflow:visible;}
-.nps-score-big{font-family:var(--font-display);font-size:42px;font-weight:400;color:var(--gold-dark);line-height:1;margin-top:-8px;}
-.nps-score-label{font-size:11px;color:var(--ink3);margin-top:4px;font-weight:500;}
-.nps-segment-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
-.nps-seg{text-align:center;padding:10px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);}
-.nps-seg-val{font-family:var(--font-display);font-size:22px;color:var(--gold-dark);}
-.nps-seg-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink3);margin-top:2px;}
-.nps-seg-pct{font-size:11px;color:var(--ink3);margin-top:1px;}
-.nps-seg.promoters{background:#d1fae5;border-color:#6ee7b7;}
-.nps-seg.promoters .nps-seg-val{color:#065f46;}
-.nps-seg.promoters .nps-seg-lbl{color:#065f46;}
-.nps-seg.passives{background:#fef3c7;border-color:#fcd34d;}
-.nps-seg.passives .nps-seg-val{color:#78350f;}
-.nps-seg.passives .nps-seg-lbl{color:#78350f;}
-.nps-seg.detractors{background:#fee2e2;border-color:#fca5a5;}
-.nps-seg.detractors .nps-seg-val{color:#7f1d1d;}
-.nps-seg.detractors .nps-seg-lbl{color:#7f1d1d;}
+/* ========================================
+   MENTOR PERFORMANCE CARD STYLES
+======================================== */
 
-.nps-hero-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
-.nps-hero-card{border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
-.nps-hero-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
-.nps-hero-card.promoters-card{background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);border:1px solid #6ee7b7;}
-.nps-hero-card.passives-card{background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border:1px solid #fcd34d;}
-.nps-hero-card.detractors-card{background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);border:1px solid #fca5a5;}
-.nps-hero-icon{font-size:28px;margin-bottom:8px;opacity:0.7;}
-.nps-hero-val{font-family:var(--font-display);font-size:48px;font-weight:400;line-height:1;letter-spacing:-0.02em;}
-.nps-hero-card.promoters-card .nps-hero-val{color:#065f46;}
-.nps-hero-card.passives-card .nps-hero-val{color:#78350f;}
-.nps-hero-card.detractors-card .nps-hero-val{color:#7f1d1d;}
-.nps-hero-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-top:6px;}
-.nps-hero-card.promoters-card .nps-hero-lbl{color:#065f46;}
-.nps-hero-card.passives-card .nps-hero-lbl{color:#78350f;}
-.nps-hero-card.detractors-card .nps-hero-lbl{color:#7f1d1d;}
-.nps-hero-pct{font-size:13px;margin-top:4px;opacity:0.75;}
-.nps-hero-range{font-size:11px;opacity:0.55;margin-top:2px;}
-.nps-hero-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.3);}
+/* Full-screen mentor card modal */
+.mentor-card-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(3px);
+  overflow-y:auto;
+}
+.mentor-card-modal.open{display:flex;animation:fadeUp 0.3s cubic-bezier(.22,1,.36,1);}
 
-.nps-index-banner{background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
-.nps-index-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(253,233,160,0.6);margin-bottom:6px;}
-.nps-index-score{font-family:var(--font-display);font-size:64px;font-weight:400;line-height:1;letter-spacing:-0.03em;color:#f5c842;}
-.nps-index-desc{font-size:13px;color:rgba(253,233,160,0.75);margin-top:6px;}
-.nps-index-right{display:flex;gap:32px;flex-wrap:wrap;}
-.nps-stat-block{text-align:center;}
-.nps-stat-val{font-family:var(--font-display);font-size:28px;color:#fde9a0;line-height:1;}
-.nps-stat-lbl{font-size:11px;color:rgba(253,233,160,0.55);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;}
-.nps-formula{font-size:11px;color:rgba(253,233,160,0.45);margin-top:4px;}
+.mentor-card-container{
+  background:#fff;
+  border-radius:16px;
+  width:100%;
+  max-width:1100px;
+  max-height:90vh;
+  overflow-y:auto;
+  box-shadow:0 20px 60px rgba(90,50,0,0.4);
+  position:relative;
+}
 
-.nps-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.nps-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);}
+/* Header Section */
+.mc-header{
+  background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);
+  padding:32px 40px;
+  border-radius:16px 16px 0 0;
+  position:relative;
+  overflow:hidden;
+}
+.mc-header::after{
+  content:'';
+  position:absolute;
+  top:-50%;
+  right:-10%;
+  width:300px;
+  height:300px;
+  background:rgba(253,233,160,0.08);
+  border-radius:50%;
+}
 
-.nps-bar-enhanced{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
-.nps-bar-item{display:grid;grid-template-columns:20px 1fr 36px;gap:10px;align-items:center;}
-.nps-bar-score-num{font-size:11px;font-weight:700;color:var(--ink3);text-align:center;}
-.nps-bar-outer{background:var(--bg2);border-radius:6px;height:22px;overflow:hidden;position:relative;}
-.nps-bar-inner{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden;display:flex;align-items:center;padding-left:8px;}
-.nps-bar-inner::after{content:'';position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 100%);background-size:200% 100%;animation:shimmer 2.5s infinite;}
-.nps-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
+.mc-header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:24px;
+  position:relative;
+  z-index:1;
+}
 
-.mentor-bubble-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-.bubble-tab{padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
-.bubble-tab:hover{border-color:var(--gold-mid);color:var(--gold-dark);}
-.bubble-tab.active{background:var(--gold-dark);color:#fde9a0;border-color:var(--gold-dark);}
+.mc-mentor-info h2{
+  font-family:var(--font-display);
+  font-size:32px;
+  color:#fde9a0;
+  margin-bottom:8px;
+  line-height:1.1;
+}
+.mc-mentor-meta{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  font-size:13px;
+  color:rgba(253,233,160,0.75);
+}
+.mc-mentor-meta-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 
-.table-wrap{overflow-x:auto;}
+.mc-close-btn{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:rgba(253,233,160,0.15);
+  border:1px solid rgba(253,233,160,0.3);
+  color:#fde9a0;
+  font-size:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.mc-close-btn:hover{
+  background:rgba(253,233,160,0.25);
+  transform:rotate(90deg);
+}
+
+/* Key Metrics Row */
+.mc-metrics-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  position:relative;
+  z-index:1;
+}
+
+.mc-metric-card{
+  background:rgba(253,233,160,0.12);
+  border:1px solid rgba(253,233,160,0.25);
+  border-radius:10px;
+  padding:16px;
+  text-align:center;
+}
+.mc-metric-label{
+  font-size:10px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:rgba(253,233,160,0.6);
+  margin-bottom:6px;
+}
+.mc-metric-value{
+  font-family:var(--font-display);
+  font-size:28px;
+  color:#f5c842;
+  line-height:1;
+  margin-bottom:4px;
+}
+.mc-metric-sub{
+  font-size:11px;
+  color:rgba(253,233,160,0.65);
+}
+
+/* Body Section */
+.mc-body{
+  padding:32px 40px;
+}
+
+/* Tabs */
+.mc-tabs{
+  display:flex;
+  gap:8px;
+  border-bottom:2px solid var(--border);
+  margin-bottom:28px;
+}
+.mc-tab{
+  padding:10px 20px;
+  font-size:13px;
+  font-weight:500;
+  color:var(--ink3);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  margin-bottom:-2px;
+  transition:all 0.2s;
+  background:none;
+  border-top:none;
+  border-left:none;
+  border-right:none;
+}
+.mc-tab:hover{color:var(--gold-dark);}
+.mc-tab.active{
+  color:var(--gold-dark);
+  border-bottom-color:var(--gold-bright);
+  font-weight:600;
+}
+
+.mc-tab-content{display:none;}
+.mc-tab-content.active{display:block;animation:fadeUp 0.3s ease-out;}
+
+/* Performance Overview Tab */
+.mc-overview-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-bottom:24px;
+}
+
+.mc-stat-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:20px;
+}
+.mc-stat-title{
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink3);
+  margin-bottom:12px;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+.mc-stat-value{
+  font-family:var(--font-display);
+  font-size:36px;
+  color:var(--gold-dark);
+  line-height:1;
+}
+.mc-stat-comparison{
+  font-size:12px;
+  color:var(--ink3);
+  margin-top:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.trend-indicator{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:2px 8px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:600;
+}
+.trend-indicator.up{background:#d1fae5;color:#065f46;}
+.trend-indicator.down{background:#fee2e2;color:#7f1d1d;}
+.trend-indicator.neutral{background:var(--bg2);color:var(--ink3);}
+
+/* Performance Radar Chart */
+.mc-radar-section{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:24px;
+  margin-bottom:24px;
+}
+
+/* Subject Breakdown */
+.mc-subjects-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.mc-subject-item{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:16px;
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:16px;
+  align-items:center;
+  transition:all 0.2s;
+}
+.mc-subject-item:hover{
+  box-shadow:var(--shadow-sm);
+  transform:translateX(4px);
+}
+.mc-subject-name{
+  font-weight:600;
+  color:var(--ink);
+}
+.mc-subject-rating{
+  font-family:var(--font-display);
+  font-size:20px;
+  color:var(--gold-dark);
+}
+.mc-subject-responses{
+  font-size:12px;
+  color:var(--ink3);
+}
+
+/* Comparison Section */
+.mc-comparison-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:16px;
+  margin-bottom:24px;
+}
+.mc-comparison-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:20px;
+  text-align:center;
+}
+.mc-comparison-label{
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--ink3);
+  margin-bottom:8px;
+}
+.mc-comparison-value{
+  font-family:var(--font-display);
+  font-size:32px;
+  color:var(--gold-dark);
+  line-height:1;
+  margin-bottom:6px;
+}
+.mc-comparison-badge{
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:12px;
+}
+
+/* Questions Breakdown */
+.mc-questions-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px;
+}
+.mc-question-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+}
+.mc-question-num{
+  display:inline-block;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--gold-light);
+  color:var(--gold-dark);
+  font-size:11px;
+  font-weight:700;
+  line-height:24px;
+  text-align:center;
+  margin-bottom:8px;
+}
+.mc-question-text{
+  font-size:12px;
+  color:var(--ink2);
+  margin-bottom:12px;
+  line-height:1.5;
+}
+.mc-question-bars{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.mc-question-bar-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.mc-question-bar-label{
+  font-size:11px;
+  font-weight:600;
+  width:30px;
+}
+.mc-question-bar-label.yes{color:#065f46;}
+.mc-question-bar-label.no{color:#7f1d1d;}
+.mc-question-bar-track{
+  flex:1;
+  height:18px;
+  background:var(--bg2);
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+}
+.mc-question-bar-fill{
+  height:100%;
+  border-radius:10px;
+  transition:width 0.6s cubic-bezier(.22,1,.36,1);
+}
+.mc-question-bar-fill.yes{background:#10b981;}
+.mc-question-bar-fill.no{background:#ef4444;}
+.mc-question-bar-count{
+  font-size:11px;
+  color:var(--ink3);
+  min-width:60px;
+  text-align:right;
+}
+
+/* Trend Tab */
+.mc-trend-chart-wrapper{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:24px;
+  margin-bottom:20px;
+}
+
+/* Insights Tab */
+.mc-insights-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.mc-insight-item{
+  background:var(--surface);
+  border-left:4px solid var(--gold-mid);
+  border-radius:8px;
+  padding:16px 20px;
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  box-shadow:var(--shadow-sm);
+}
+.mc-insight-icon{
+  font-size:24px;
+  flex-shrink:0;
+}
+.mc-insight-content h4{
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink);
+  margin-bottom:4px;
+}
+.mc-insight-content p{
+  font-size:13px;
+  color:var(--ink3);
+  line-height:1.6;
+}
+
+.mc-insight-item.positive{border-left-color:#10b981;}
+.mc-insight-item.warning{border-left-color:#f59e0b;}
+.mc-insight-item.critical{border-left-color:#ef4444;}
+
+/* Action Buttons */
+.mc-actions{
+  display:flex;
+  gap:12px;
+  padding:20px 40px;
+  border-top:1px solid var(--border);
+  background:var(--bg);
+}
+
+/* Simple table for demo */
 table{width:100%;border-collapse:collapse;font-size:13px;}
-thead th{text-align:left;padding:12px 16px;font-size:10.5px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;border-bottom:1.5px solid rgba(253,233,160,0.15);background:linear-gradient(135deg,#4a2800 0%,#7a4f00 100%);white-space:nowrap;}
-thead th:first-child{border-radius:var(--radius-sm) 0 0 0;}
-thead th:last-child{border-radius:0 var(--radius-sm) 0 0;}
-tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;}
-tbody tr:last-child td{border-bottom:none;}
+thead th{text-align:left;padding:12px 16px;font-size:10.5px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;border-bottom:1.5px solid rgba(253,233,160,0.15);background:linear-gradient(135deg,#4a2800 0%,#7a4f00 100%);}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--ink);}
 tbody tr:hover td{background:var(--surface2);}
-tbody tr{transition:background 0.12s;}
 
-.mentor-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);}
-.mentor-modal-overlay.open{display:flex;animation:fadeUp 0.25s cubic-bezier(.22,1,.36,1);}
-.mentor-modal-box{background:#fff;border-radius:14px;border:1px solid rgba(120,80,10,0.15);width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:28px;box-shadow:0 12px 40px rgba(90,50,0,0.35);}
-.mm-close-btn{border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;background:var(--surface);cursor:pointer;font-size:18px;color:var(--ink3);transition:background 0.15s;display:flex;align-items:center;justify-content:center;}
-.mm-close-btn:hover{background:var(--bg2);}
+.mentor-name-btn{
+  background:none;
+  border:none;
+  color:#7a4f00;
+  font-size:13.5px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  font-family:var(--font-body);
+  padding:0;
+}
+.mentor-name-btn:hover{
+  color:#5c3600;
+}
 
-/* ── TREND PANEL STYLES ── */
-.trend-hero-banner{background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
-.trend-hero-left .trend-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(253,233,160,0.6);margin-bottom:6px;}
-.trend-hero-title{font-family:var(--font-display);font-size:32px;color:#fde9a0;line-height:1.1;}
-.trend-hero-sub{font-size:13px;color:rgba(253,233,160,0.65);margin-top:6px;}
-.trend-hero-right{display:flex;gap:16px;flex-wrap:wrap;}
-.trend-cycle-btn{padding:8px 20px;border-radius:20px;border:1px solid rgba(253,233,160,0.35);background:rgba(253,233,160,0.10);color:#fde9a0;font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;}
-.trend-cycle-btn:hover{background:rgba(253,233,160,0.22);}
-.trend-cycle-btn.active{background:var(--gold-bright);color:var(--gold-dark);border-color:var(--gold-bright);}
-
-.trend-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-.trend-kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
-.trend-kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
-.trend-kpi-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);}
-.trend-kpi-value{font-family:var(--font-display);font-size:28px;line-height:1.1;margin-top:4px;color:var(--gold-dark);}
-.trend-kpi-delta{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:6px;}
-.trend-kpi-delta.up{background:#d1fae5;color:#065f46;}
-.trend-kpi-delta.down{background:#fee2e2;color:#7f1d1d;}
-.trend-kpi-delta.flat{background:var(--bg2);color:var(--ink3);}
-.trend-kpi-cycle{font-size:11px;color:var(--ink4);margin-top:4px;}
-
-.trend-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.trend-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);}
-.trend-chart-card.full-width{grid-column:1/-1;}
-
-.trend-setup-notice{background:var(--amber-light);border:1px solid var(--amber-mid);border-radius:var(--radius);padding:20px 24px;display:flex;gap:16px;align-items:flex-start;}
-.trend-setup-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
-.trend-setup-title{font-size:14px;font-weight:600;color:var(--amber-dark);margin-bottom:6px;}
-.trend-setup-text{font-size:13px;color:var(--amber-dark);line-height:1.65;}
-.trend-setup-text code{background:rgba(120,53,15,0.12);padding:1px 6px;border-radius:4px;font-size:12px;font-family:monospace;}
-
-.trend-cycle-table-wrap{overflow-x:auto;margin-top:4px;}
-.trend-cycle-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.trend-cycle-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;background:linear-gradient(135deg,#4a2800,#7a4f00);white-space:nowrap;}
-.trend-cycle-table th:first-child{border-radius:6px 0 0 0;}
-.trend-cycle-table th:last-child{border-radius:0 6px 0 0;}
-.trend-cycle-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;}
-.trend-cycle-table tr:last-child td{border-bottom:none;}
-.trend-cycle-table tr:hover td{background:var(--surface2);}
-
-.delta-pill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;}
-.delta-pill.up{background:#d1fae5;color:#065f46;}
-.delta-pill.down{background:#fee2e2;color:#7f1d1d;}
-.delta-pill.flat{background:var(--bg2);color:var(--ink3);}
-
-.trend-movers-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.trend-mover-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow-sm);}
-.trend-mover-title{font-family:var(--font-display);font-size:14px;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.trend-mover-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);}
-.trend-mover-item:last-child{border-bottom:none;}
-.trend-mover-rank{font-size:11px;font-weight:700;color:var(--ink3);width:18px;text-align:center;}
-.trend-mover-name{font-size:13px;font-weight:500;color:var(--ink);flex:1;}
-.trend-mover-vals{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-.trend-mover-current{font-family:var(--font-display);font-size:16px;color:var(--gold-dark);}
-.trend-mover-change{font-size:10px;}
-
-.no-trend-data{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;gap:12px;}
-.no-trend-data-icon{font-size:40px;opacity:0.3;}
-.no-trend-data-title{font-family:var(--font-display);font-size:18px;color:var(--ink3);}
-.no-trend-data-sub{font-size:13px;color:var(--ink4);max-width:380px;line-height:1.6;}
-
-::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
 ::-webkit-scrollbar-thumb{background:var(--gold-mid);border-radius:99px;}
-.college-dropdown::-webkit-scrollbar{width:4px;}
-.college-dropdown::-webkit-scrollbar-thumb{background:var(--gold-mid);}
 
 @media(max-width:960px){
   .shell{grid-template-columns:1fr;}
-  .main{padding:20px;}
-  .metrics-row,.trend-kpi-row{grid-template-columns:1fr 1fr;}
-  .charts-grid,.nps-charts-row,.trend-charts-grid,.trend-movers-grid{grid-template-columns:1fr;}
-  .nps-hero-row{grid-template-columns:1fr;}
-  .logo-name{font-size:18px;}
-  .topbar{padding:0 16px;}
-  .hamburger-btn{display:flex;}
-  .sidebar{display:flex;position:fixed;top:0;left:0;height:100vh;width:240px;z-index:500;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(.22,1,.36,1);padding-top:80px;}
-  .sidebar.open{transform:translateX(0);}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:499;backdrop-filter:blur(2px);}
-  .sidebar-overlay.open{display:block;}
-  .download-btn span{display:none;}
-  .college-select-btn .btn-label{max-width:100px;}
-  .trend-chart-card.full-width{grid-column:auto;}
-}
-@media(max-width:480px){
-  .metrics-row,.trend-kpi-row{grid-template-columns:1fr;}
-  .nps-segment-row{grid-template-columns:1fr;}
-  .page-title{font-size:22px;}
-  .download-btn{padding:8px 10px;font-size:11px;}
+  .mc-overview-grid,
+  .mc-comparison-grid{grid-template-columns:1fr;}
+  .mc-metrics-row{grid-template-columns:1fr 1fr;}
+  .mc-header{padding:24px 20px;}
+  .mc-body{padding:24px 20px;}
+  .mc-actions{padding:16px 20px;}
 }
 </style>
 </head>
@@ -313,1326 +539,807 @@ tbody tr{transition:background 0.12s;}
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Loading data...</div>
-  <div class="error-message" id="errorMessage">
-    <strong>⚠ Unable to load data</strong>
-    Make sure the Google Sheet is set to "Anyone with the link can view".
-    <br><br><strong>Steps to fix:</strong><br>
-    1. Open your Google Sheet<br>
-    2. Click "Share" → "Anyone with the link" → "Viewer"<br>
-    3. Refresh this page
-  </div>
+  <div class="loading-text">Loading mentor data...</div>
 </div>
 
-<div class="mentor-modal-overlay" id="mentorModalOverlay" onclick="if(event.target===this)closeMentorModal()">
-  <div class="mentor-modal-box" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-      <div>
-        <div style="font-family:var(--font-display);font-size:22px;color:var(--ink);" id="mmName">—</div>
-        <div style="font-size:12px;color:var(--ink3);margin-top:4px;" id="mmSub">—</div>
-      </div>
-      <button class="mm-close-btn" onclick="closeMentorModal()">×</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="mmStats"></div>
-    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px;">Question-by-question breakdown</div>
-    <div id="mmQRows"></div>
-    <div style="font-size:11px;color:var(--ink4);border-top:1px solid var(--border);padding-top:10px;margin-top:16px;">* Yes/No counts are aggregated across all subjects this mentor teaches.</div>
-  </div>
-</div>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-
-<div class="shell">
-<header class="topbar">
-  <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileSidebar()" aria-label="Open navigation">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="logo">
-    <div class="logo-name" id="logoInstitutionName">Select a College</div>
-  </div>
-  <div class="topbar-right">
-    <div class="college-dropdown-wrap" id="collegeDropdownWrap">
-      <button class="college-select-btn" id="collegeSelectBtn" onclick="toggleDropdown()">
-        <span class="btn-label" id="collegeBtnLabel">Select College</span>
-        <span class="caret">▼</span>
-      </button>
-      <div class="college-dropdown" id="collegeDropdown"></div>
-    </div>
-    <img src="Face prep logo3.png" alt="FacePrep Campus" class="faceprep-logo" onerror="this.style.display='none'">
-    <button class="download-btn" id="downloadBtn" onclick="downloadReport()">↓ <span>Download Report</span></button>
-  </div>
-</header>
-
-<aside class="sidebar" id="mainSidebar">
-  <div class="nav-group-label">Analytics</div>
-  <div class="nav-item active" onclick="showPanel('summary',this)"><span class="nav-icon">▦</span> Summary</div>
-  <div class="nav-item" onclick="showPanel('mentors',this)"><span class="nav-icon">◉</span> Mentor Performance</div>
-  <div class="nav-item" onclick="showPanel('nps',this)"><span class="nav-icon">◈</span> NPS Analysis</div>
-  <div class="nav-item" onclick="showPanel('trends',this)"><span class="nav-icon">📈</span> Trend Over Time</div>
-  <div class="sidebar-footer">
-    <div class="sidebar-footer-label">Data Source</div>
-    <div class="sidebar-footer-val">Google Sheets (Live)</div>
-    <div class="refresh-row">
-      <div>
-        <div class="sidebar-footer-label" style="margin-top:8px">Last Updated</div>
-        <div class="sidebar-footer-val" id="lastUpdated">—</div>
-      </div>
-      <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13.5 2.5A7 7 0 1 0 14 8"/><path d="M14 2.5V6h-3.5"/>
-        </svg>
-        Refresh
-      </button>
-    </div>
-  </div>
-</aside>
-
-<main class="main">
-  <div class="page-header">
-    <div>
-      <div class="page-eyebrow" id="pageEyebrow">Performance Analytics</div>
-      <div class="page-title" id="pageTitle">Overview</div>
-      <div class="page-sub" id="pageSub">Select a college to load data</div>
-    </div>
-    <div class="filter-row" id="deptFilterRow" style="visibility:hidden">
-      <button class="filter-chip active" onclick="setDeptFilter('all',this)">All</button>
-    </div>
-  </div>
-
-  <!-- SUMMARY PANEL -->
-  <div class="panel active" id="panel-summary">
-    <div class="metrics-row">
-      <div class="metric-card">
-        <div class="metric-label">Avg Overall Rating</div>
-        <div class="metric-value" id="avgRating">—</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Total Responses</div>
-        <div class="metric-value" id="totalResponses">—</div>
-        <div class="metric-sub" id="responseSub">—</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Mentors Tracked</div>
-        <div class="metric-value" id="mentorCount">—</div>
-        <div class="metric-sub" id="mentorSub">—</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Top Performer</div>
-        <div class="metric-value" id="subjectCount" style="font-size:20px;">—</div>
-        <div class="metric-sub" id="subjectSub">—</div>
-      </div>
-    </div>
-    <div class="charts-grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Mentor Rankings (Bayesian)</div>
-          <span class="badge badge-gold" id="topMentorsBadge">—</span>
-        </div>
-        <div id="topMentorsWrap" style="position:relative;"><canvas id="topMentorsChart"></canvas></div>
-      </div>
-      <div class="nps-overview-card">
-        <div class="card-header" style="margin-bottom:8px;">
-          <div class="card-title">Net Promoter Score (NPS)</div>
-          <span class="badge badge-primary" id="npsBadge">—</span>
-        </div>
-        <div class="nps-gauge-wrap">
-          <svg class="nps-gauge-svg" viewBox="0 0 200 115" id="npsGaugeSvg">
-            <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#f5e9c8" stroke-width="18" stroke-linecap="round"/>
-            <path id="npsArcFill" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#c48a00" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-            <circle id="npsPulseRing" cx="100" cy="100" r="6" fill="none" stroke="#c48a00" stroke-width="2" opacity="0"/>
-            <g id="npsNeedleGroup" transform="rotate(-90,100,100)">
-              <line x1="100" y1="100" x2="100" y2="28" stroke="#5c3600" stroke-width="2.5" stroke-linecap="round"/>
-              <circle cx="100" cy="100" r="6" fill="#5c3600"/>
-            </g>
-            <text x="-8" y="108" font-size="11" fill="#c48a00" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">-100</text>
-            <text x="100" y="-4" font-size="11" fill="#c48a00" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">0</text>
-            <text x="208" y="108" font-size="11" fill="#c48a00" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">+100</text>
-          </svg>
-          <div class="nps-score-big" id="npsScoreBig">—</div>
-          <div class="nps-score-label" id="npsScoreLabel">No data loaded</div>
-        </div>
-        <div class="nps-segment-row">
-          <div class="nps-seg promoters"><div class="nps-seg-val" id="npsPromotersCount">—</div><div class="nps-seg-lbl">Promoters</div><div class="nps-seg-pct" id="npsPromotersPct">score 9–10</div></div>
-          <div class="nps-seg passives"><div class="nps-seg-val" id="npsPassivesCount">—</div><div class="nps-seg-lbl">Passives</div><div class="nps-seg-pct" id="npsPassivesPct">score 7–8</div></div>
-          <div class="nps-seg detractors"><div class="nps-seg-val" id="npsDetractorsCount">—</div><div class="nps-seg-lbl">Detractors</div><div class="nps-seg-pct" id="npsDetractorsPct">score 1–6</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MENTOR PERFORMANCE PANEL -->
-  <div class="panel" id="panel-mentors">
-    <div class="card" style="padding:0;overflow:hidden">
-      <div id="mentorTableSummaryBar" style="display:flex;align-items:center;gap:24px;padding:14px 22px;background:linear-gradient(135deg,#4a2800,#7a4f00);flex-wrap:wrap;">
-        <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Global Mean</span><span id="mtSumGlobalMean" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
-        <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Total Responses</span><span id="mtSumTotalResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
-        <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Avg Rating × Responses</span><span id="mtSumAvgXResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
-        <div style="margin-left:auto;"><span class="badge badge-gold" id="mentorTableCountBadge">—</span></div>
-      </div>
-      <div class="table-wrap">
-        <table id="mentorBayesianTable">
-          <thead><tr><th>Rank</th><th>Mentor Name</th><th>Department</th><th>Average Rating</th><th>Total Responses</th><th>Avg Rating × Responses</th><th>Bayesian Value</th><th>Status</th></tr></thead>
-          <tbody id="mentorTableBody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
-        </table>
-      </div>
-      <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)</div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Mentor Insights — Responses vs. Rating</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <div class="mentor-bubble-tabs" id="insightChartTabs" style="margin-bottom:0;">
-            <button class="bubble-tab active" onclick="setInsightChart('scatter',this)">Scatter Plot</button>
-            <button class="bubble-tab" onclick="setInsightChart('horizontal',this)">Top vs Bottom</button>
-            <button class="bubble-tab" onclick="setInsightChart('responses',this)">Response Volume</button>
+<!-- MENTOR PERFORMANCE CARD MODAL -->
+<div class="mentor-card-modal" id="mentorCardModal" onclick="if(event.target===this)closeMentorCard()">
+  <div class="mentor-card-container" onclick="event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="mc-header">
+      <div class="mc-header-top">
+        <div class="mc-mentor-info">
+          <h2 id="mcMentorName">Loading...</h2>
+          <div class="mc-mentor-meta">
+            <div class="mc-mentor-meta-item">
+              <span>📚</span>
+              <span id="mcDepartments">—</span>
+            </div>
+            <div class="mc-mentor-meta-item">
+              <span>📊</span>
+              <span id="mcResponseCount">— responses</span>
+            </div>
+            <div class="mc-mentor-meta-item">
+              <span>🎯</span>
+              <span id="mcSubjectCount">— subjects</span>
+            </div>
+            <div class="mc-mentor-meta-item">
+              <span>🏆</span>
+              <span id="mcRankInfo">—</span>
+            </div>
           </div>
-          <span class="badge badge-gold" id="insightChartBadge">—</span>
+        </div>
+        <button class="mc-close-btn" onclick="closeMentorCard()">×</button>
+      </div>
+      
+      <!-- Key Metrics -->
+      <div class="mc-metrics-row">
+        <div class="mc-metric-card">
+          <div class="mc-metric-label">Current Rating</div>
+          <div class="mc-metric-value" id="mcCurrentRating">—</div>
+          <div class="mc-metric-sub">out of 5.0</div>
+        </div>
+        <div class="mc-metric-card">
+          <div class="mc-metric-label">Bayesian Score</div>
+          <div class="mc-metric-value" id="mcBayesianScore">—</div>
+          <div class="mc-metric-sub">weighted average</div>
+        </div>
+        <div class="mc-metric-card">
+          <div class="mc-metric-label">Percentile</div>
+          <div class="mc-metric-value" id="mcPercentile">—</div>
+          <div class="mc-metric-sub">vs all mentors</div>
+        </div>
+        <div class="mc-metric-card">
+          <div class="mc-metric-label">Status</div>
+          <div class="mc-metric-value" id="mcStatus" style="font-size:18px;margin-top:6px;">—</div>
         </div>
       </div>
-      <div id="insightScatterWrap" style="position:relative;width:100%;height:380px;"><canvas id="insightScatterChart"></canvas></div>
-      <div id="insightHorizWrap" style="position:relative;width:100%;height:380px;display:none;"><canvas id="insightHorizChart"></canvas></div>
-      <div id="insightResponseWrap" style="position:relative;width:100%;height:380px;display:none;"><canvas id="insightResponseChart"></canvas></div>
-      <div style="display:flex;gap:20px;margin-top:14px;flex-wrap:wrap;" id="insightScatterLegend">
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#10b981;display:inline-block;opacity:0.85;"></span>Excellent (≥4.3)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#c48a00;display:inline-block;opacity:0.85;"></span>Good (≥4.0)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block;opacity:0.85;"></span>Average (≥3.5)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;opacity:0.85;"></span>Needs Work (&lt;3.5)</div>
-        <div style="margin-left:auto;font-size:11px;color:var(--ink4);">* Bubble size = number of subjects taught</div>
-      </div>
     </div>
+    
+    <!-- Body with Tabs -->
+    <div class="mc-body">
+      <div class="mc-tabs">
+        <button class="mc-tab active" onclick="switchMCTab('overview',this)">📊 Overview</button>
+        <button class="mc-tab" onclick="switchMCTab('subjects',this)">📚 Subject Breakdown</button>
+        <button class="mc-tab" onclick="switchMCTab('comparison',this)">⚖️ Peer Comparison</button>
+        <button class="mc-tab" onclick="switchMCTab('questions',this)">❓ Question Analysis</button>
+        <button class="mc-tab" onclick="switchMCTab('trends',this)">📈 Trend Over Time</button>
+        <button class="mc-tab" onclick="switchMCTab('insights',this)">💡 AI Insights</button>
+      </div>
+      
+      <!-- Overview Tab -->
+      <div class="mc-tab-content active" id="tab-overview">
+        <div class="mc-overview-grid">
+          <div class="mc-stat-card">
+            <div class="mc-stat-title">Average Rating</div>
+            <div class="mc-stat-value" id="overviewRating">—</div>
+            <div class="mc-stat-comparison">
+              <span id="overviewTrend">—</span>
+              <span id="overviewVsDept">—</span>
+            </div>
+          </div>
+          <div class="mc-stat-card">
+            <div class="mc-stat-title">Total Responses</div>
+            <div class="mc-stat-value" id="overviewResponses">—</div>
+            <div class="mc-stat-comparison">
+              <span>Across <span id="overviewSubjects">—</span> subjects</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mc-radar-section">
+          <div class="card-title" style="margin-bottom:16px;">Performance Radar — 5 Question Areas</div>
+          <div style="position:relative;height:300px;">
+            <canvas id="mcRadarChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Subjects Tab -->
+      <div class="mc-tab-content" id="tab-subjects">
+        <div class="card-title" style="margin-bottom:16px;">Subject-by-Subject Performance</div>
+        <div class="mc-subjects-list" id="mcSubjectsList">
+          <p style="text-align:center;color:var(--ink3);padding:40px;">Loading subjects...</p>
+        </div>
+      </div>
+      
+      <!-- Comparison Tab -->
+      <div class="mc-tab-content" id="tab-comparison">
+        <div class="card-title" style="margin-bottom:16px;">How does this mentor compare?</div>
+        <div class="mc-comparison-grid">
+          <div class="mc-comparison-card">
+            <div class="mc-comparison-label">This Mentor</div>
+            <div class="mc-comparison-value" id="compMentor">—</div>
+            <div class="mc-comparison-badge badge-gold" id="compMentorBadge">—</div>
+          </div>
+          <div class="mc-comparison-card">
+            <div class="mc-comparison-label">Department Avg</div>
+            <div class="mc-comparison-value" id="compDept">—</div>
+            <div class="mc-comparison-badge badge-blue" id="compDeptBadge">—</div>
+          </div>
+          <div class="mc-comparison-card">
+            <div class="mc-comparison-label">College Avg</div>
+            <div class="mc-comparison-value" id="compCollege">—</div>
+            <div class="mc-comparison-badge badge-amber" id="compCollegeBadge">—</div>
+          </div>
+        </div>
+        
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;">
+          <div class="card-title" style="margin-bottom:16px;">Position Among Peers</div>
+          <div style="position:relative;height:280px;">
+            <canvas id="mcComparisonChart"></canvas>
+          </div>
+          <p style="font-size:12px;color:var(--ink3);margin-top:12px;text-align:center;">
+            <span id="compInsight">—</span>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Questions Tab -->
+      <div class="mc-tab-content" id="tab-questions">
+        <div class="card-title" style="margin-bottom:16px;">5-Question Breakdown — Yes/No Responses</div>
+        <div class="mc-questions-grid" id="mcQuestionsGrid">
+          <p style="text-align:center;color:var(--ink3);padding:40px;">Loading question data...</p>
+        </div>
+      </div>
+      
+      <!-- Trends Tab -->
+      <div class="mc-tab-content" id="tab-trends">
+        <div class="mc-trend-chart-wrapper">
+          <div class="card-title" style="margin-bottom:16px;">Rating Trend Across Cycles</div>
+          <div style="position:relative;height:320px;">
+            <canvas id="mcTrendChart"></canvas>
+          </div>
+        </div>
+        
+        <div style="background:var(--amber-lt);border:1px solid var(--amber);border-radius:10px;padding:20px;display:flex;gap:12px;align-items:center;">
+          <div style="font-size:28px;">ℹ️</div>
+          <div>
+            <div style="font-weight:600;color:var(--amber-dark);margin-bottom:4px;">Trend Analysis</div>
+            <div style="font-size:13px;color:var(--amber-dark);line-height:1.6;" id="trendAnalysis">
+              Analyzing performance across cycles...
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Insights Tab -->
+      <div class="mc-tab-content" id="tab-insights">
+        <div class="card-title" style="margin-bottom:16px;">AI-Generated Insights & Recommendations</div>
+        <div class="mc-insights-list" id="mcInsightsList">
+          <p style="text-align:center;color:var(--ink3);padding:40px;">Generating insights...</p>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mc-actions">
+      <button class="btn btn-primary" onclick="downloadMentorReport()">
+        <span>📄</span> Download Report Card
+      </button>
+      <button class="btn btn-secondary" onclick="shareMentorCard()">
+        <span>🔗</span> Share Performance
+      </button>
+      <button class="btn btn-secondary" onclick="exportMentorData()">
+        <span>📊</span> Export Data
+      </button>
+    </div>
+    
   </div>
+</div>
 
-  <!-- NPS ANALYTICS PANEL -->
-  <div class="panel" id="panel-nps">
-    <div class="nps-index-banner">
-      <div class="nps-index-left">
-        <div class="nps-index-label">Net Promoter Score Index</div>
-        <div class="nps-index-score" id="npsIndexBig">—</div>
-        <div class="nps-index-desc" id="npsIndexDesc">Select a college to load NPS data</div>
-      </div>
-      <div class="nps-index-right">
-        <div class="nps-stat-block"><div class="nps-stat-val" id="npsTotalBig">—</div><div class="nps-stat-lbl">Total Responses</div></div>
-        <div class="nps-stat-block"><div class="nps-stat-val" id="npsAvgBig">—</div><div class="nps-stat-lbl">Avg Score</div><div class="nps-formula">out of 10</div></div>
-        <div class="nps-stat-block"><div class="nps-stat-val" id="npsMedianBig">—</div><div class="nps-stat-lbl">Median Score</div></div>
-      </div>
+<!-- Main Dashboard -->
+<div class="shell">
+  <header class="topbar">
+    <div class="logo-name">FacePrep Campus Analytics</div>
+    <div class="topbar-right">
+      <button class="btn btn-primary" onclick="alert('Select a college and click on any mentor name to view their performance card!')">
+        👥 View Mentor Cards
+      </button>
     </div>
-    <div class="nps-hero-row">
-      <div class="nps-hero-card promoters-card"><div class="nps-hero-icon">😊</div><div class="nps-hero-val" id="npsP_count">—</div><div class="nps-hero-lbl">Promoters</div><div class="nps-hero-pct" id="npsP_pct">—</div><div class="nps-hero-range">Score 9 – 10</div></div>
-      <div class="nps-hero-card passives-card"><div class="nps-hero-icon">😐</div><div class="nps-hero-val" id="npsN_count">—</div><div class="nps-hero-lbl">Passives</div><div class="nps-hero-pct" id="npsN_pct">—</div><div class="nps-hero-range">Score 7 – 8</div></div>
-      <div class="nps-hero-card detractors-card"><div class="nps-hero-icon">😞</div><div class="nps-hero-val" id="npsD_count">—</div><div class="nps-hero-lbl">Detractors</div><div class="nps-hero-pct" id="npsD_pct">—</div><div class="nps-hero-range">Score 1 – 6</div></div>
+  </header>
+  
+  <aside class="sidebar">
+    <div class="nav-item active">
+      <span>📊</span> Mentor Directory
     </div>
-    <div class="nps-charts-row">
-      <div class="nps-chart-card">
-        <div class="card-header"><div class="card-title">Segment Distribution</div><span class="badge badge-primary" id="npsDonutBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;display:flex;align-items:center;justify-content:center;">
-          <canvas id="npsDonutChart"></canvas>
-          <div id="npsDonutCenter" style="position:absolute;text-align:center;pointer-events:none;"><div style="font-family:var(--font-display);font-size:28px;color:var(--gold-dark);" id="npsDonutScore">—</div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);">NPS Index</div></div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:18px;margin-top:4px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#10b981;display:inline-block;"></span>Promoters</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block;"></span>Passives</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>Detractors</div>
-        </div>
-      </div>
-      <div class="nps-chart-card">
-        <div class="card-header"><div class="card-title">Score Distribution (1–10)</div><span class="badge badge-primary" id="npsBarBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;"><canvas id="npsBarChart"></canvas></div>
-      </div>
+    <div class="nav-item">
+      <span>⭐</span> Top Performers
     </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Score Breakdown — Count per Rating</div><span class="badge badge-gold" id="npsBreakdownBadge">—</span></div>
-      <div class="nps-bar-enhanced" id="npsBarEnhanced"><div style="text-align:center;padding:24px;color:var(--ink3);">Select a college to view NPS breakdown</div></div>
+    <div class="nav-item">
+      <span>📈</span> Analytics
     </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Segment Proportion — Visual Breakdown</div><span class="badge badge-primary" id="npsStackedBadge">—</span></div>
-      <div style="position:relative;width:100%;height:80px;" id="npsStackedWrap">
-        <div id="npsStackedBar" style="display:flex;height:48px;border-radius:10px;overflow:hidden;gap:2px;margin-top:10px;">
-          <div id="stkPromoters" style="background:#10b981;height:100%;border-radius:10px 0 0 10px;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-          <div id="stkPassives"  style="background:#f59e0b;height:100%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-          <div id="stkDetractors" style="background:#ef4444;height:100%;border-radius:0 10px 10px 0;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--ink3);">
-          <span id="stkPromLabel">Promoters —%</span><span id="stkPassLabel">Passives —%</span><span id="stkDetrLabel">Detractors —%</span>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--ink4);margin-top:10px;">* NPS = %Promoters − %Detractors · Passives are excluded from the index calculation.</div>
+  </aside>
+  
+  <main class="main">
+    <div style="margin-bottom:24px;">
+      <h1 class="page-title">Mentor Performance Cards Demo</h1>
+      <p style="font-size:14px;color:var(--ink3);margin-top:8px;">
+        Click on any mentor name below to view their detailed performance card
+      </p>
     </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════
-       TREND OVER TIME PANEL
-  ══════════════════════════════════════════════ -->
-  <div class="panel" id="panel-trends">
-
-    <!-- Hero banner -->
-    <div class="trend-hero-banner">
-      <div class="trend-hero-left">
-        <div class="trend-eyebrow">Historical Analytics</div>
-        <div class="trend-hero-title" id="trendHeroTitle">Trend Over Time</div>
-        <div class="trend-hero-sub" id="trendHeroSub">Track how ratings, NPS, and response volume change across cycles</div>
-      </div>
-      <div class="trend-hero-right" id="trendCycleBtns"></div>
-    </div>
-
-    <!-- Sheet setup notice -->
-    <div class="trend-setup-notice" id="trendSetupNotice">
-      <div class="trend-setup-icon">ℹ️</div>
-      <div>
-        <div class="trend-setup-title">How to enable Trend Over Time</div>
-        <div class="trend-setup-text">
-          This panel reads a column called <code>cycle</code> (or <code>batch</code> / <code>term</code> / <code>semester</code>) from your Google Sheet to group responses by time period.<br><br>
-          <strong>To add cycle data:</strong> Insert a column in your sheet named <code>cycle</code> and fill it with a label for each row — e.g. <code>Jan 2024</code>, <code>Feb 2024</code>, <code>Cycle 1</code>, <code>Sem 1</code>. The dashboard will automatically group and plot trends once that column is present.<br><br>
-          <strong>Right now:</strong> Sample trend data is shown below using simulated cycles so you can preview what the panel will look like with real data.
-        </div>
-      </div>
-    </div>
-
-    <!-- KPI delta row -->
-    <div class="trend-kpi-row" id="trendKpiRow">
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">Avg Rating</div>
-        <div class="trend-kpi-value" id="tkpiRating">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiRatingDelta">— vs prev</div>
-        <div class="trend-kpi-cycle" id="tkpiRatingCycle">—</div>
-      </div>
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">NPS Index</div>
-        <div class="trend-kpi-value" id="tkpiNps">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiNpsDelta">— vs prev</div>
-        <div class="trend-kpi-cycle" id="tkpiNpsCycle">—</div>
-      </div>
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">Total Responses</div>
-        <div class="trend-kpi-value" id="tkpiResponses">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiResponsesDelta">— vs prev</div>
-        <div class="trend-kpi-cycle" id="tkpiResponsesCycle">—</div>
-      </div>
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">Promoter %</div>
-        <div class="trend-kpi-value" id="tkpiPromo">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiPromoDelta">— vs prev</div>
-        <div class="trend-kpi-cycle" id="tkpiPromoCycle">—</div>
-      </div>
-    </div>
-
-    <!-- Main line charts -->
-    <div class="trend-charts-grid">
-      <div class="trend-chart-card full-width">
-        <div class="card-header">
-          <div class="card-title">Average Rating Trend</div>
-          <span class="badge badge-gold" id="trendRatingBadge">—</span>
-        </div>
-        <div style="position:relative;width:100%;height:260px;"><canvas id="trendRatingChart"></canvas></div>
-      </div>
-      <div class="trend-chart-card">
-        <div class="card-header">
-          <div class="card-title">NPS Index Trend</div>
-          <span class="badge badge-primary" id="trendNpsBadge">—</span>
-        </div>
-        <div style="position:relative;width:100%;height:240px;"><canvas id="trendNpsChart"></canvas></div>
-      </div>
-      <div class="trend-chart-card">
-        <div class="card-header">
-          <div class="card-title">Response Volume Trend</div>
-          <span class="badge badge-primary" id="trendVolBadge">—</span>
-        </div>
-        <div style="position:relative;width:100%;height:240px;"><canvas id="trendVolChart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- NPS Segment stacked area -->
+    
     <div class="card">
       <div class="card-header">
-        <div class="card-title">NPS Segment Trend — Promoters / Passives / Detractors (%)</div>
-        <span class="badge badge-gold" id="trendSegBadge">—</span>
+        <div class="card-title">Sample Mentor Directory</div>
+        <span class="badge badge-gold">Demo Data</span>
       </div>
-      <div style="position:relative;width:100%;height:260px;"><canvas id="trendSegChart"></canvas></div>
-      <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:3px;background:#10b981;display:inline-block;border-radius:2px;"></span>Promoters %</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px;"></span>Passives %</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:3px;background:#ef4444;display:inline-block;border-radius:2px;"></span>Detractors %</div>
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Mentor Name</th>
+            <th>Department</th>
+            <th>Rating</th>
+            <th>Responses</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="mentorTableBody">
+          <!-- Sample data will be inserted here -->
+        </tbody>
+      </table>
     </div>
-
-    <!-- Top movers -->
-    <div class="trend-movers-grid" id="trendMoversGrid">
-      <div class="trend-mover-card">
-        <div class="trend-mover-title">📈 Most Improved Mentors</div>
-        <div id="trendMoversUp"><div class="no-trend-data" style="padding:20px;"><div class="no-trend-data-sub">Load data to see movers</div></div></div>
-      </div>
-      <div class="trend-mover-card">
-        <div class="trend-mover-title">📉 Most Declined Mentors</div>
-        <div id="trendMoversDown"><div class="no-trend-data" style="padding:20px;"><div class="no-trend-data-sub">Load data to see movers</div></div></div>
-      </div>
-    </div>
-
-    <!-- Cycle comparison table -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Cycle-by-Cycle Summary Table</div>
-        <span class="badge badge-gold" id="trendTableBadge">—</span>
-      </div>
-      <div class="trend-cycle-table-wrap">
-        <table class="trend-cycle-table" id="trendCycleTable">
-          <thead><tr><th>Cycle</th><th>Responses</th><th>Avg Rating</th><th>Δ Rating</th><th>NPS Index</th><th>Δ NPS</th><th>Promoters %</th><th>Detractors %</th><th>Mentors</th></tr></thead>
-          <tbody id="trendCycleTableBody"><tr><td colspan="9" style="text-align:center;padding:32px;color:var(--ink3);">Select a college to load trend data</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div><!-- end panel-trends -->
-
-</main>
+  </main>
 </div>
 
 <script>
-const COLLEGES=[
-  {name:"Kamaraj College",gid:"0"},{name:"Kamaraj Women's College",gid:"1140723423"},
-  {name:"SDNB Vaishnav College for Women",gid:"340022065"},{name:"Patrician College of Arts & Science",gid:"1890731138"},
-  {name:"TERF's College of Arts and Science",gid:"1010908578"},{name:"Sree Saraswathi Thyagaraja College",gid:"1363163794"},
-  {name:"TJS College of Arts and Science",gid:"1776412956"},{name:"Bharathidasan College of Arts & Science",gid:"2085937367"},
-  {name:"Nagarathinam Angalammal Arts & Science College",gid:"407392563"},
-  {name:"Vinayaga Mission's Research Foundation School of Arts & Science",gid:"1231492996"},
-  {name:"Sri Amaraavathi College of Arts & Science",gid:"1223988020"},{name:"Takshashila University",gid:"1833417744"},
-  {name:"Study World Group of Institution",gid:"1261765001"},{name:"Rathinam College of Arts & Science",gid:"1707229573"},
-  {name:"Noorul Islam Centre for Higher Education (NICHE)",gid:"1044442080"},{name:"AMET University",gid:"1257152100"},
-  {name:"Joy University",gid:"185512483"},{name:"Sasurie College of Arts and Science",gid:"1553065051"},
-  {name:"Alliance University",gid:"361218329"},{name:"Kristu Jayanti University",gid:"2101380937"},
-  {name:"S-VYASA University",gid:"29895230"},{name:"Asian School of Business",gid:"1108050649"}
+// Sample mentor data
+const SAMPLE_MENTORS = [
+  {name:'Dr. Sarah Johnson',dept:'BCA',rating:4.7,responses:89,subjects:3,bayesian:4.65,rank:1,percentile:98,
+   subjectData:[{name:'Data Structures',rating:4.8,responses:32},{name:'Algorithms',rating:4.7,responses:31},{name:'Database Systems',rating:4.6,responses:26}],
+   questions:[{y:85,n:4},{y:82,n:7},{y:87,n:2},{y:84,n:5},{y:86,n:3}],
+   cycles:[{cycle:'Jan 2024',rating:4.5},{cycle:'Feb 2024',rating:4.6},{cycle:'Mar 2024',rating:4.7}]},
+  {name:'Prof. Michael Chen',dept:'BBA',rating:4.5,responses:76,subjects:2,bayesian:4.48,rank:2,percentile:95,
+   subjectData:[{name:'Marketing',rating:4.6,responses:42},{name:'Finance',rating:4.4,responses:34}],
+   questions:[{y:72,n:4},{y:70,n:6},{y:74,n:2},{y:71,n:5},{y:73,n:3}],
+   cycles:[{cycle:'Jan 2024',rating:4.3},{cycle:'Feb 2024',rating:4.4},{cycle:'Mar 2024',rating:4.5}]},
+  {name:'Ms. Emily Davis',dept:'BCA',rating:4.3,responses:64,subjects:4,bayesian:4.32,rank:3,percentile:88,
+   subjectData:[{name:'Web Development',rating:4.5,responses:18},{name:'Java Programming',rating:4.3,responses:17},{name:'Python',rating:4.2,responses:15},{name:'Cloud Computing',rating:4.2,responses:14}],
+   questions:[{y:60,n:4},{y:58,n:6},{y:62,n:2},{y:59,n:5},{y:61,n:3}],
+   cycles:[{cycle:'Jan 2024',rating:4.1},{cycle:'Feb 2024',rating:4.2},{cycle:'Mar 2024',rating:4.3}]},
+  {name:'Dr. Robert Wilson',dept:'MBA',rating:4.1,responses:55,subjects:2,bayesian:4.15,rank:4,percentile:82,
+   subjectData:[{name:'Strategic Management',rating:4.2,responses:30},{name:'Operations',rating:4.0,responses:25}],
+   questions:[{y:50,n:5},{y:48,n:7},{y:52,n:3},{y:49,n:6},{y:51,n:4}],
+   cycles:[{cycle:'Jan 2024',rating:3.9},{cycle:'Feb 2024',rating:4.0},{cycle:'Mar 2024',rating:4.1}]},
+  {name:'Ms. Jessica Martinez',dept:'BCA',rating:3.8,responses:42,subjects:3,bayesian:3.92,rank:5,percentile:70,
+   subjectData:[{name:'Mobile Development',rating:3.9,responses:15},{name:'UI/UX Design',rating:3.8,responses:14},{name:'Software Testing',rating:3.7,responses:13}],
+   questions:[{y:38,n:4},{y:36,n:6},{y:40,n:2},{y:37,n:5},{y:39,n:3}],
+   cycles:[{cycle:'Jan 2024',rating:3.6},{cycle:'Feb 2024',rating:3.7},{cycle:'Mar 2024',rating:3.8}]}
 ];
-const SHEET_ID='19HsWARl8RFNZ6nc-bUCBKKEN39JkQVxCBfbNCUSe2_4';
-let currentCollege=null,MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
-let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
-let TREND_DATA={cycles:[],hasCycleCol:false,cycleStats:{},mentorCycleStats:{}};
-let currentPanel='summary',currentDeptFilter='all';
-let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
-let insightScatterInst=null,insightHorizInst=null,insightResponseInst=null;
-let trendRatingInst=null,trendNpsInst=null,trendVolInst=null,trendSegInst=null;
-let currentInsightChart='scatter';
-let needleAnimRAF=null;
 
-/* ── MOBILE ── */
-function toggleMobileSidebar(){
-  const sb=document.getElementById('mainSidebar'),ov=document.getElementById('sidebarOverlay'),btn=document.getElementById('hamburgerBtn');
-  sb.classList.toggle('open');ov.classList.toggle('open');btn.classList.toggle('open');
-}
-function closeMobileSidebar(){
-  document.getElementById('mainSidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-  document.getElementById('hamburgerBtn').classList.remove('open');
-}
-
-/* ── DROPDOWN ── */
-function buildDropdown(){
-  document.getElementById('collegeDropdown').innerHTML=COLLEGES.map((c,i)=>
-    `<div class="college-dropdown-item" id="dditem-${i}" onclick="selectCollege(${i})"><span class="item-dot"></span>${c.name}</div>`
-  ).join('');
-}
-function toggleDropdown(){
-  const dd=document.getElementById('collegeDropdown'),btn=document.getElementById('collegeSelectBtn');
-  const isOpen=dd.classList.contains('open');
-  dd.classList.toggle('open',!isOpen);btn.classList.toggle('open',!isOpen);
-  if(!isOpen)document.addEventListener('click',closeDropdownOutside,{once:true,capture:true});
-}
-function closeDropdownOutside(e){
-  if(!document.getElementById('collegeDropdownWrap').contains(e.target)){
-    document.getElementById('collegeDropdown').classList.remove('open');
-    document.getElementById('collegeSelectBtn').classList.remove('open');
-  }
-}
-function selectCollege(idx){
-  currentCollege=COLLEGES[idx];
-  document.querySelectorAll('.college-dropdown-item').forEach((el,i)=>el.classList.toggle('active',i===idx));
-  document.getElementById('collegeBtnLabel').textContent=currentCollege.name;
-  document.getElementById('logoInstitutionName').textContent=currentCollege.name;
-  document.getElementById('collegeDropdown').classList.remove('open');
-  document.getElementById('collegeSelectBtn').classList.remove('open');
-  loadSheetData();
-}
-function refreshData(){
-  if(!currentCollege){alert('Please select a college first.');return;}
-  const btn=document.getElementById('refreshBtn');
-  btn.classList.add('spinning');btn.disabled=true;
-  loadSheetData().finally(()=>setTimeout(()=>{btn.classList.remove('spinning');btn.disabled=false;},600));
-}
-
-/* ── DATA LOAD ── */
-async function loadSheetData(){
-  if(!currentCollege)return;
-  const overlay=document.getElementById('loadingOverlay'),errEl=document.getElementById('errorMessage');
-  document.getElementById('loadingText').textContent=`Loading data for ${currentCollege.name}...`;
-  overlay.classList.remove('hidden');errEl.classList.remove('show');
-  return new Promise((resolve,reject)=>{
-    fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${currentCollege.gid}`)
-      .then(r=>{if(!r.ok)throw new Error('Fetch failed');return r.text();})
-      .then(text=>{
-        Papa.parse(text,{header:true,skipEmptyLines:true,
-          complete(res){
-            processSheetData(res.data);
-            renderAllData();
-            document.getElementById('lastUpdated').textContent=new Date().toLocaleTimeString();
-            setTimeout(()=>overlay.classList.add('hidden'),500);
-            resolve();
-          },
-          error(){throw new Error('Parse failed');}
-        });
-      })
-      .catch(err=>{console.error(err);errEl.classList.add('show');reject(err);});
-  });
-}
-
-/* ── PROCESS DATA ── */
-function processSheetData(rows){
-  TABLE_DATA=[];
-  const mentorStats={},deptSet=new Set(),subjectSet=new Set(),npsScores=[];
-  /* detect cycle column */
-  const cycleColNames=['cycle','batch','term','semester','month','period'];
-  let cycleCol=null;
-  if(rows.length>0){
-    const keys=Object.keys(rows[0]);
-    cycleCol=keys.find(k=>cycleColNames.includes(k.toLowerCase().trim()))||null;
-  }
-  const hasCycle=!!cycleCol;
-
-  /* per-cycle accumulators */
-  const cycleMap={};    /* cycle → {ratings:[], npsScores:[], mentors:{name→ratings[]}} */
-
-  rows.forEach(row=>{
-    const dept=row.department||'Unknown';
-    if(dept!=='Unknown')deptSet.add(dept);
-    const cycleName=hasCycle?(row[cycleCol]||'').trim()||'Unknown':'—';
-    if(!cycleMap[cycleName])cycleMap[cycleName]={ratings:[],npsScores:[],mentors:{}};
-
-    const npsRaw=row['nps_score']||row['NPS Score']||row['nps score']||row['NPSScore']||'';
-    const npsVal=parseInt(npsRaw,10);
-    if(!isNaN(npsVal)&&npsVal>=1&&npsVal<=10){
-      npsScores.push(npsVal);
-      cycleMap[cycleName].npsScores.push(npsVal);
-    }
-
-    for(let i=1;i<=7;i++){
-      const sn=row[`subject${i}_Name`],mn=row[`subject${i}_Mentor`],rt=parseFloat(row[`subject${i}_Rating`]);
-      if(sn&&mn&&!isNaN(rt)&&rt>0){
-        subjectSet.add(sn);
-        TABLE_DATA.push({dept,mentor:mn,subject:sn,rating:rt});
-        cycleMap[cycleName].ratings.push(rt);
-        if(!cycleMap[cycleName].mentors[mn])cycleMap[cycleName].mentors[mn]=[];
-        cycleMap[cycleName].mentors[mn].push(rt);
-
-        if(!mentorStats[mn])mentorStats[mn]={name:mn,depts:new Set([dept]),ratings:[],subjects:new Set(),qs:[{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}]};
-        mentorStats[mn].depts.add(dept);mentorStats[mn].ratings.push(rt);mentorStats[mn].subjects.add(sn);
-        for(let q=1;q<=5;q++){
-          const ans=row[`subject${i}_Q${q}`]||'';
-          if(ans==='Yes')mentorStats[mn].qs[q-1].y++;
-          else if(ans==='No')mentorStats[mn].qs[q-1].n++;
-        }
-      }
-    }
-  });
-
-  /* NPS global */
-  const total=npsScores.length;
-  const promoters=npsScores.filter(s=>s>=9).length;
-  const passives=npsScores.filter(s=>s>=7&&s<=8).length;
-  const detractors=npsScores.filter(s=>s<=6).length;
-  const npsIndex=total>0?Math.round((promoters/total-detractors/total)*100):null;
-  const avg=total>0?npsScores.reduce((a,b)=>a+b,0)/total:0;
-  const sorted=[...npsScores].sort((a,b)=>a-b);
-  const median=total>0?(total%2===0?(sorted[total/2-1]+sorted[total/2])/2:sorted[Math.floor(total/2)]):0;
-  const scoreFreq={};
-  for(let i=1;i<=10;i++)scoreFreq[i]=0;
-  npsScores.forEach(s=>{if(scoreFreq[s]!==undefined)scoreFreq[s]++;});
-  NPS_DATA={scores:npsScores,promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq};
-
-  /* Mentors global */
-  const allRatings=TABLE_DATA.map(r=>r.rating);
-  const globalMean=allRatings.length>0?allRatings.reduce((a,b)=>a+b,0)/allRatings.length:0;
-  const totalAllResponses=allRatings.length;
-  MENTORS=Object.values(mentorStats).map(m=>{
-    const avg=m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length;
-    const totalResponses=m.ratings.length;
-    const avgXResponses=avg*totalResponses;
-    const bayesianScore=((globalMean*totalAllResponses)+(avg*totalResponses))/(totalAllResponses+totalResponses);
-    return{name:m.name,depts:Array.from(m.depts),rating:parseFloat(avg.toFixed(2)),
-      avgXResponses:parseFloat(avgXResponses.toFixed(2)),
-      bayesianRating:parseFloat(bayesianScore.toFixed(7)),
-      subjects:m.subjects.size,responses:totalResponses,qs:m.qs};
-  }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
-  MENTORS.forEach((m,idx)=>{m.rank=idx+1;m.percentile=MENTORS.length>1?Math.round((1-idx/(MENTORS.length-1))*100):100;});
-  DEPT_LIST=Array.from(deptSet).sort();
-  updateDeptFilters();
-
-  /* Summaries */
-  const tot=TABLE_DATA.length;
-  const avgR=tot>0?TABLE_DATA.reduce((s,r)=>s+r.rating,0)/tot:0;
-  document.getElementById('avgRating').textContent=avgR>0?`${avgR.toFixed(1)} / 5`:'—';
-  document.getElementById('totalResponses').textContent=rows.length;
-  document.getElementById('responseSub').textContent=`${tot} rated entries · ${DEPT_LIST.length} depts`;
-  document.getElementById('mentorCount').textContent=MENTORS.length;
-  document.getElementById('mentorSub').textContent=`Across ${DEPT_LIST.length} departments`;
-  const topMentor=MENTORS[0]||null;
-  if(topMentor){document.getElementById('subjectCount').textContent=topMentor.name;document.getElementById('subjectSub').textContent=`Bayesian: ${topMentor.bayesianRating.toFixed(2)} · Avg: ${topMentor.rating.toFixed(1)}`;}
-  else{document.getElementById('subjectCount').textContent='—';document.getElementById('subjectSub').textContent='No data';}
-  document.getElementById('pageSub').textContent=`${DEPT_LIST.length} departments · ${MENTORS.length} mentors · ${subjectSet.size} subjects`;
-
-  /* ── BUILD TREND DATA ── */
-  processTrendData(cycleMap,hasCycle,rows.length);
-}
-
-/* ── PROCESS TREND DATA ── */
-function processTrendData(cycleMap,hasCycle,totalRows){
-  let cycleStats={},cycles=[];
-
-  if(hasCycle){
-    /* Real cycle data from sheet */
-    const rawCycles=Object.keys(cycleMap).filter(c=>c!=='Unknown'&&c!=='—');
-    /* Try to sort cycles: date-like first, else alpha */
-    cycles=rawCycles.sort((a,b)=>{
-      const da=new Date(a),db=new Date(b);
-      if(!isNaN(da)&&!isNaN(db))return da-db;
-      return a.localeCompare(b);
-    });
-    if(cycleMap['Unknown'])cycles.push('Unknown');
-
-    cycles.forEach(c=>{
-      const d=cycleMap[c];
-      const ratingAvg=d.ratings.length>0?d.ratings.reduce((s,v)=>s+v,0)/d.ratings.length:null;
-      const nTotal=d.npsScores.length;
-      const nProm=d.npsScores.filter(s=>s>=9).length;
-      const nPass=d.npsScores.filter(s=>s>=7&&s<=8).length;
-      const nDetr=d.npsScores.filter(s=>s<=6).length;
-      const npsIdx=nTotal>0?Math.round((nProm/nTotal-nDetr/nTotal)*100):null;
-      const mCount=Object.keys(d.mentors).length;
-      const mentorRatings={};
-      Object.entries(d.mentors).forEach(([mn,rs])=>{mentorRatings[mn]=rs.reduce((s,v)=>s+v,0)/rs.length;});
-      cycleStats[c]={
-        cycle:c,responses:d.ratings.length+nTotal,
-        ratingAvg:ratingAvg?parseFloat(ratingAvg.toFixed(2)):null,
-        npsIndex:npsIdx,promoterPct:nTotal>0?Math.round(nProm/nTotal*100):null,
-        passivePct:nTotal>0?Math.round(nPass/nTotal*100):null,
-        detractorPct:nTotal>0?Math.round(nDetr/nTotal*100):null,
-        mentorCount:mCount,mentorRatings
-      };
-    });
-    TREND_DATA={cycles,hasCycleCol:true,cycleStats};
-  } else {
-    /* No cycle column — generate simulated data from current sheet + synthetic past cycles */
-    const globalAvg=TABLE_DATA.length>0?TABLE_DATA.reduce((s,r)=>s+r.rating,0)/TABLE_DATA.length:4.0;
-    const globalNps=NPS_DATA.npsIndex!==null?NPS_DATA.npsIndex:30;
-    const globalResp=totalRows;
-    const globalPromPct=NPS_DATA.total>0?Math.round(NPS_DATA.promoters/NPS_DATA.total*100):40;
-    const globalPassPct=NPS_DATA.total>0?Math.round(NPS_DATA.passives/NPS_DATA.total*100):30;
-    const globalDetrPct=NPS_DATA.total>0?Math.round(NPS_DATA.detractors/NPS_DATA.total*100):30;
-
-    /* Generate 5 synthetic cycles ending at current data */
-    const now=new Date();
-    const syntheticCycles=[];
-    for(let i=4;i>=0;i--){
-      const d=new Date(now.getFullYear(),now.getMonth()-i*2,1);
-      syntheticCycles.push(d.toLocaleDateString('en-US',{month:'short',year:'numeric'}));
-    }
-    cycles=syntheticCycles;
-
-    const seed=(n,idx,amp)=>parseFloat((n+Math.sin(idx*1.37)*amp+(Math.random()-0.5)*amp*0.3).toFixed(2));
-    cycles.forEach((c,idx)=>{
-      const isLast=idx===cycles.length-1;
-      const rA=isLast?parseFloat(globalAvg.toFixed(2)):Math.min(5,Math.max(1,seed(globalAvg,idx,0.25)));
-      const nI=isLast?globalNps:Math.min(100,Math.max(-100,Math.round(seed(globalNps,idx,8))));
-      const resp=isLast?globalResp:Math.max(10,Math.round(seed(globalResp,idx,globalResp*0.15)));
-      const prom=isLast?globalPromPct:Math.min(100,Math.max(0,Math.round(seed(globalPromPct,idx,6))));
-      const pass=isLast?globalPassPct:Math.min(100,Math.max(0,Math.round(seed(globalPassPct,idx,5))));
-      const detr=100-prom-pass;
-      const mCount=MENTORS.length>0?Math.round(MENTORS.length*(0.85+idx*0.03)):10;
-      const mentorRatings={};
-      MENTORS.forEach(m=>{
-        mentorRatings[m.name]=isLast?m.rating:Math.min(5,Math.max(1,parseFloat((m.rating+seed(0,idx+m.name.length,0.3)).toFixed(2))));
-      });
-      cycleStats[c]={cycle:c,responses:resp,ratingAvg:rA,npsIndex:nI,
-        promoterPct:prom,passivePct:pass,detractorPct:Math.max(0,detr),
-        mentorCount:mCount,mentorRatings};
-    });
-    TREND_DATA={cycles,hasCycleCol:false,cycleStats};
-  }
-
-  buildTrendCycleButtons();
-}
-
-/* ── TREND CYCLE BUTTONS ── */
-function buildTrendCycleButtons(){
-  const{cycles}=TREND_DATA;
-  const wrap=document.getElementById('trendCycleBtns');
-  if(!cycles.length){wrap.innerHTML='';return;}
-  /* Show up to 6 cycles as filter buttons */
-  const show=cycles.slice(-6);
-  wrap.innerHTML=show.map((c,i)=>
-    `<button class="trend-cycle-btn${i===show.length-1?' active':''}" onclick="selectTrendCycle('${c}',this)">${c}</button>`
-  ).join('');
-}
-
-/* ── SELECT TREND CYCLE (KPI cards) ── */
-function selectTrendCycle(cycle,btn){
-  document.querySelectorAll('.trend-cycle-btn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  renderTrendKpis(cycle);
-}
-
-/* ── RENDER TREND PANEL ── */
-function renderTrendPanel(){
-  const{cycles,hasCycleCol,cycleStats}=TREND_DATA;
-  const notice=document.getElementById('trendSetupNotice');
-  notice.style.display=hasCycleCol?'none':'flex';
-
-  document.getElementById('trendHeroSub').textContent=hasCycleCol
-    ?`Tracking ${cycles.length} cycles · real data from sheet`
-    :`Showing simulated trend preview — add a "cycle" column to your sheet for real data`;
-
-  document.getElementById('trendRatingBadge').textContent=`${cycles.length} cycles`;
-  document.getElementById('trendNpsBadge').textContent=`${cycles.length} cycles`;
-  document.getElementById('trendVolBadge').textContent=`${cycles.length} cycles`;
-  document.getElementById('trendSegBadge').textContent=`${cycles.length} cycles`;
-  document.getElementById('trendTableBadge').textContent=`${cycles.length} cycles`;
-
-  if(!cycles.length){
-    document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--ink3);">No cycle data available</td></tr>';
-    return;
-  }
-
-  /* KPI for latest cycle */
-  const latestCycle=cycles[cycles.length-1];
-  renderTrendKpis(latestCycle);
-
-  /* Charts */
-  renderTrendCharts();
-
-  /* Movers */
-  renderTrendMovers();
-
-  /* Cycle table */
-  renderTrendCycleTable();
-}
-
-/* ── TREND KPI CARDS ── */
-function renderTrendKpis(cycle){
-  const{cycles,cycleStats}=TREND_DATA;
-  const curr=cycleStats[cycle];
-  if(!curr)return;
-  const idx=cycles.indexOf(cycle);
-  const prev=idx>0?cycleStats[cycles[idx-1]]:null;
-
-  function setKpi(valId,deltaId,cycleId,val,prevVal,fmt,unit){
-    const el=document.getElementById(valId);
-    el.textContent=val!==null?(unit||'')+fmt(val):'—';
-    const d=document.getElementById(deltaId);
-    const cy=document.getElementById(cycleId);
-    cy.textContent=`Latest: ${cycle}`;
-    if(prev&&val!==null&&prevVal!==null){
-      const diff=val-prevVal;
-      const sign=diff>=0?'+':'';
-      const cls=diff>0?'up':diff<0?'down':'flat';
-      d.className=`trend-kpi-delta ${cls}`;
-      d.textContent=`${sign}${fmt(diff)} vs ${cycles[idx-1]}`;
-    } else {
-      d.className='trend-kpi-delta flat';
-      d.textContent='First cycle';
-    }
-  }
-
-  setKpi('tkpiRating','tkpiRatingDelta','tkpiRatingCycle',curr.ratingAvg,prev?.ratingAvg,v=>v.toFixed(2),'');
-  setKpi('tkpiNps','tkpiNpsDelta','tkpiNpsCycle',curr.npsIndex,prev?.npsIndex,v=>(v>0?'+':'')+v,'');
-  setKpi('tkpiResponses','tkpiResponsesDelta','tkpiResponsesCycle',curr.responses,prev?.responses,v=>v,'');
-  setKpi('tkpiPromo','tkpiPromoDelta','tkpiPromoCycle',curr.promoterPct,prev?.promoterPct,v=>v+'%','');
-}
-
-/* ── TREND CHARTS ── */
-function renderTrendCharts(){
-  const{cycles,cycleStats}=TREND_DATA;
-  const labels=cycles;
-  const ratings=cycles.map(c=>cycleStats[c].ratingAvg);
-  const npss=cycles.map(c=>cycleStats[c].npsIndex);
-  const vols=cycles.map(c=>cycleStats[c].responses);
-  const proms=cycles.map(c=>cycleStats[c].promoterPct);
-  const passes=cycles.map(c=>cycleStats[c].passivePct);
-  const detrs=cycles.map(c=>cycleStats[c].detractorPct);
-
-  const baseLineOpts={
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},datalabels:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10}},
-    scales:{
-      x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}},
-      y:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}}
-    },
-    animation:{duration:800,easing:'easeOutQuart'},
-    elements:{point:{radius:5,hoverRadius:7,borderWidth:2}}
-  };
-
-  /* Rating chart */
-  if(trendRatingInst){trendRatingInst.destroy();}
-  trendRatingInst=new Chart(document.getElementById('trendRatingChart'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:'Avg Rating',data:ratings,
-      borderColor:'#c48a00',backgroundColor:'rgba(196,138,0,0.10)',
-      borderWidth:2.5,fill:true,tension:0.4,
-      pointBackgroundColor:'#fff',pointBorderColor:'#c48a00'
-    }]},
-    options:{...baseLineOpts,
-      scales:{...baseLineOpts.scales,
-        y:{...baseLineOpts.scales.y,min:0,max:5,ticks:{...baseLineOpts.scales.y.ticks,stepSize:1,callback:v=>v.toFixed(1)}},
-      },
-      plugins:{...baseLineOpts.plugins,
-        annotation:{annotations:{line1:{type:'line',yMin:4.0,yMax:4.0,borderColor:'rgba(16,185,129,0.4)',borderWidth:1.5,borderDash:[6,4],label:{content:'Good threshold',display:true,position:'end',font:{size:10},backgroundColor:'rgba(16,185,129,0.1)',color:'#065f46'}}}},
-        tooltip:{...baseLineOpts.plugins.tooltip,callbacks:{label:ctx=>`Avg Rating: ${ctx.parsed.y?.toFixed(2)||'—'} / 5`}}
-      }
-    },
-    plugins:[ChartDataLabels]
-  });
-
-  /* NPS chart */
-  if(trendNpsInst){trendNpsInst.destroy();}
-  trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:'NPS',data:npss,
-      borderColor:'#5c3600',backgroundColor:'rgba(92,54,0,0.08)',
-      borderWidth:2.5,fill:true,tension:0.4,
-      pointBackgroundColor:'#fff',pointBorderColor:'#5c3600',
-      segment:{borderColor:ctx=>{const v=ctx.p1.parsed.y;return v>=50?'#10b981':v>=0?'#c48a00':'#ef4444';}}
-    }]},
-    options:{...baseLineOpts,
-      scales:{...baseLineOpts.scales,
-        y:{...baseLineOpts.scales.y,ticks:{...baseLineOpts.scales.y.ticks,callback:v=>(v>0?'+':'')+v}}
-      },
-      plugins:{...baseLineOpts.plugins,tooltip:{...baseLineOpts.plugins.tooltip,callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;}}}
-      }
-    },
-    plugins:[ChartDataLabels]
-  });
-
-  /* Volume chart */
-  if(trendVolInst){trendVolInst.destroy();}
-  trendVolInst=new Chart(document.getElementById('trendVolChart'),{
-    type:'bar',
-    data:{labels,datasets:[{
-      label:'Responses',data:vols,
-      backgroundColor:vols.map((_,i)=>i===vols.length-1?'rgba(92,54,0,0.85)':'rgba(196,138,0,0.65)'),
-      borderColor:'#c48a00',borderWidth:1.5,borderRadius:5,borderSkipped:false
-    }]},
-    options:{...baseLineOpts,
-      plugins:{...baseLineOpts.plugins,datalabels:{anchor:'end',align:'end',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v},
-        tooltip:{...baseLineOpts.plugins.tooltip,callbacks:{label:ctx=>`Responses: ${ctx.parsed.y}`}}
-      }
-    },
-    plugins:[ChartDataLabels]
-  });
-
-  /* Segment trend */
-  if(trendSegInst){trendSegInst.destroy();}
-  trendSegInst=new Chart(document.getElementById('trendSegChart'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981'},
-      {label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b'},
-      {label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444'}
-    ]},
-    options:{...baseLineOpts,
-      plugins:{legend:{display:false},datalabels:{display:false},
-        tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,
-          callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y??'—'}%`}
-        }
-      },
-      scales:{...baseLineOpts.scales,y:{...baseLineOpts.scales.y,min:0,max:100,ticks:{...baseLineOpts.scales.y.ticks,callback:v=>v+'%'}}}
-    },
-    plugins:[ChartDataLabels]
-  });
-}
-
-/* ── TREND MOVERS ── */
-function renderTrendMovers(){
-  const{cycles,cycleStats}=TREND_DATA;
-  if(cycles.length<2){
-    document.getElementById('trendMoversUp').innerHTML='<div class="no-trend-data" style="padding:16px;"><div class="no-trend-data-sub">Need at least 2 cycles to compare</div></div>';
-    document.getElementById('trendMoversDown').innerHTML='<div class="no-trend-data" style="padding:16px;"><div class="no-trend-data-sub">Need at least 2 cycles to compare</div></div>';
-    return;
-  }
-  const lastCycle=cycles[cycles.length-1];
-  const prevCycle=cycles[cycles.length-2];
-  const lastStats=cycleStats[lastCycle]?.mentorRatings||{};
-  const prevStats=cycleStats[prevCycle]?.mentorRatings||{};
-  const common=Object.keys(lastStats).filter(m=>prevStats[m]!==undefined);
-  const changes=common.map(m=>({name:m,current:lastStats[m],prev:prevStats[m],delta:lastStats[m]-prevStats[m]}))
-    .sort((a,b)=>b.delta-a.delta);
-
-  function moverItem(m,i){
-    const sign=m.delta>=0?'+':'';
-    const cls=m.delta>0?'up':m.delta<0?'down':'flat';
-    return`<div class="trend-mover-item">
-      <div class="trend-mover-rank">${i+1}</div>
-      <div class="trend-mover-name">${m.name}</div>
-      <div class="trend-mover-vals">
-        <div class="trend-mover-current">${m.current.toFixed(2)}</div>
-        <div class="trend-mover-change"><span class="delta-pill ${cls}">${sign}${m.delta.toFixed(2)}</span></div>
-      </div>
-    </div>`;
-  }
-
-  const top=changes.slice(0,5);
-  const bot=changes.slice(-5).reverse();
-  document.getElementById('trendMoversUp').innerHTML=top.length?top.map(moverItem).join(''):'<div style="padding:16px;color:var(--ink3);font-size:13px;">No movers found</div>';
-  document.getElementById('trendMoversDown').innerHTML=bot.length?bot.map(moverItem).join(''):'<div style="padding:16px;color:var(--ink3);font-size:13px;">No movers found</div>';
-}
-
-/* ── TREND CYCLE TABLE ── */
-function renderTrendCycleTable(){
-  const{cycles,cycleStats}=TREND_DATA;
-  if(!cycles.length){document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--ink3);">No cycle data</td></tr>';return;}
-
-  document.getElementById('trendCycleTableBody').innerHTML=cycles.map((c,idx)=>{
-    const s=cycleStats[c];
-    const prev=idx>0?cycleStats[cycles[idx-1]]:null;
-    function deltaPill(curr,prevVal,fmt){
-      if(!prev||curr===null||prevVal===null)return'<span class="delta-pill flat">—</span>';
-      const d=curr-prevVal;
-      const sign=d>=0?'+':'';
-      const cls=d>0.01?'up':d<-0.01?'down':'flat';
-      return`<span class="delta-pill ${cls}">${sign}${fmt(d)}</span>`;
-    }
-    return`<tr>
-      <td style="font-weight:600;color:var(--gold-dark);">${c}</td>
-      <td style="font-family:var(--font-display);font-size:15px;">${s.responses}</td>
-      <td style="font-family:var(--font-display);font-size:15px;color:var(--gold-dark);">${s.ratingAvg!==null?s.ratingAvg.toFixed(2):'—'}</td>
-      <td>${deltaPill(s.ratingAvg,prev?.ratingAvg,v=>v.toFixed(2))}</td>
-      <td style="font-family:var(--font-display);font-size:15px;color:${getNpsColor(s.npsIndex)};">${s.npsIndex!==null?(s.npsIndex>0?'+':'')+s.npsIndex:'—'}</td>
-      <td>${deltaPill(s.npsIndex,prev?.npsIndex,v=>(v>0?'+':'')+Math.round(v))}</td>
-      <td>${s.promoterPct!==null?s.promoterPct+'%':'—'}</td>
-      <td>${s.detractorPct!==null?s.detractorPct+'%':'—'}</td>
-      <td>${s.mentorCount}</td>
-    </tr>`;
-  }).reverse().join('');/* reverse so latest first */
-}
-
-/* ── DEPT FILTER ── */
-function updateDeptFilters(){
-  const fr=document.getElementById('deptFilterRow');
-  fr.innerHTML='<button class="filter-chip active" onclick="setDeptFilter(\'all\',this)">All</button>';
-  DEPT_LIST.forEach(dept=>{
-    const btn=document.createElement('button');
-    btn.className='filter-chip';btn.textContent=dept;
-    btn.onclick=function(){setDeptFilter(dept,this);};
-    fr.appendChild(btn);
-  });
-}
-function setDeptFilter(val,btn){
-  currentDeptFilter=val;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  if(currentPanel==='mentors'){renderMentorTable();renderInsightCharts(val);}
-}
-function getFilteredMentors(filterDept){
-  let list=!filterDept||filterDept==='all'?[...MENTORS]:MENTORS.filter(m=>m.depts.some(d=>d===filterDept));
-  list.forEach((m,idx)=>{m.filteredRank=idx+1;m.filteredPercentile=list.length>1?Math.round((1-idx/(list.length-1))*100):100;});
-  return list;
-}
-
-/* ── RENDER ALL ── */
-function renderAllData(){
-  renderMentorTable();
-  renderInsightCharts(currentDeptFilter);
-  renderNPSSummary();
-  renderNPSPanel();
-  renderTrendPanel();
-  if(!chartInstances._summaryInit){initSummaryCharts();chartInstances._summaryInit=true;}
-  else updateSummaryCharts();
-}
-
-/* ── NPS HELPERS ── */
-function getNpsColor(index){
-  if(index===null)return'#c48a00';
-  if(index>=50)return'#065f46';
-  if(index>=0)return'#c48a00';
-  return'#7f1d1d';
-}
-function getNpsLabel(index){
-  if(index===null)return'No NPS data in sheet';
-  if(index>=70)return'Excellent · World Class';
-  if(index>=50)return'Excellent';
-  if(index>=30)return'Great';
-  if(index>=0)return'Good';
-  if(index>=-20)return'Needs Improvement';
-  return'Critical';
-}
-
-/* ── NPS NEEDLE ── */
-function animateNPSNeedle(targetDeg,duration){
-  duration=duration||1500;
-  const group=document.getElementById('npsNeedleGroup');
-  if(needleAnimRAF){cancelAnimationFrame(needleAnimRAF);needleAnimRAF=null;}
-  const startDeg=-90,startTime=performance.now();
-  function easeOutCubic(t){return 1-Math.pow(1-t,3);}
-  function step(now){
-    const elapsed=now-startTime,progress=Math.min(elapsed/duration,1);
-    const current=startDeg+(targetDeg-startDeg)*easeOutCubic(progress);
-    group.setAttribute('transform',`rotate(${current},100,100)`);
-    if(progress<1){needleAnimRAF=requestAnimationFrame(step);}
-    else{
-      needleAnimRAF=null;
-      let wobbleStart=null;
-      function wobble(ts){
-        if(!wobbleStart)wobbleStart=ts;
-        const t=Math.min((ts-wobbleStart)/600,1);
-        const offset=Math.sin(t*Math.PI*4)*2*(1-t);
-        group.setAttribute('transform',`rotate(${targetDeg+offset},100,100)`);
-        if(t<1)needleAnimRAF=requestAnimationFrame(wobble);
-        else{group.setAttribute('transform',`rotate(${targetDeg},100,100)`);needleAnimRAF=null;}
-      }
-      needleAnimRAF=requestAnimationFrame(wobble);
-    }
-  }
-  needleAnimRAF=requestAnimationFrame(step);
-}
-
-function animateCounter(el,target,duration,prefix){
-  duration=duration||1000;prefix=prefix||'';
-  const startTime=performance.now(),isNeg=target<0,absT=Math.abs(target);
-  function ease(t){return t*(2-t);}
-  function go(now){
-    const p=Math.min((now-startTime)/duration,1);
-    const cur=Math.round(absT*ease(p));
-    const disp=isNeg?-cur:cur;
-    el.textContent=prefix+(disp>0?'+':'')+disp;
-    if(p<1)requestAnimationFrame(go);
-  }
-  requestAnimationFrame(go);
-}
-
-/* ── NPS SUMMARY ── */
-function renderNPSSummary(){
-  const{promoters,passives,detractors,npsIndex,avg,total}=NPS_DATA;
-  const scoreBigEl=document.getElementById('npsScoreBig');
-  scoreBigEl.style.color=getNpsColor(npsIndex);
-  if(npsIndex!==null){animateCounter(scoreBigEl,npsIndex,1200,'');}
-  else scoreBigEl.textContent='—';
-  document.getElementById('npsScoreLabel').textContent=total>0?getNpsLabel(npsIndex):'No NPS data in sheet';
-  document.getElementById('npsBadge').textContent=total>0?`${total} responses`:'No data';
-  const promoPct=total>0?Math.round(promoters/total*100):0;
-  const passPct=total>0?Math.round(passives/total*100):0;
-  const detrPct=total>0?Math.round(detractors/total*100):0;
-  document.getElementById('npsPromotersCount').textContent=total>0?promoters:'—';
-  document.getElementById('npsPassivesCount').textContent=total>0?passives:'—';
-  document.getElementById('npsDetractorsCount').textContent=total>0?detractors:'—';
-  document.getElementById('npsPromotersPct').textContent=total>0?`${promoPct}% · score 9–10`:'score 9–10';
-  document.getElementById('npsPassivesPct').textContent=total>0?`${passPct}% · score 7–8`:'score 7–8';
-  document.getElementById('npsDetractorsPct').textContent=total>0?`${detrPct}% · score 1–6`:'score 1–6';
-  if(npsIndex!==null){
-    const targetDeg=((npsIndex+100)/200)*180-90;
-    animateNPSNeedle(targetDeg,1500);
-    const arcLen=251.2,filled=((npsIndex+100)/200)*arcLen;
-    const arc=document.getElementById('npsArcFill'),arcColor=getNpsColor(npsIndex);
-    arc.setAttribute('stroke',arcColor);
-    arc.style.transition='none';arc.style.strokeDashoffset=arcLen;
-    arc.getBoundingClientRect();
-    arc.style.transition='stroke-dashoffset 1.5s cubic-bezier(0.22,1,0.36,1)';
-    arc.style.strokeDashoffset=(arcLen-filled).toFixed(1);
-    const pr=document.getElementById('npsPulseRing');
-    pr.setAttribute('stroke',arcColor);pr.style.animation='none';
-    pr.getBoundingClientRect();pr.style.animation='ringPulse 2s ease-in-out infinite';pr.style.animationDelay='1.5s';
-  }else{
-    const group=document.getElementById('npsNeedleGroup');
-    if(needleAnimRAF){cancelAnimationFrame(needleAnimRAF);needleAnimRAF=null;}
-    group.setAttribute('transform','rotate(-90,100,100)');
-  }
-}
-
-/* ── NPS FULL PANEL ── */
-function renderNPSPanel(){
-  const{promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq}=NPS_DATA;
-  const promoPct=total>0?Math.round(promoters/total*100):0;
-  const passPct=total>0?Math.round(passives/total*100):0;
-  const detrPct=total>0?Math.round(detractors/total*100):0;
-  const idxEl=document.getElementById('npsIndexBig');
-  idxEl.style.color='#f5c842';
-  if(npsIndex!==null)animateCounter(idxEl,npsIndex,1400,'');
-  else idxEl.textContent='—';
-  document.getElementById('npsIndexDesc').textContent=total>0?getNpsLabel(npsIndex):'No NPS data available in sheet';
-  document.getElementById('npsTotalBig').textContent=total>0?total:'—';
-  document.getElementById('npsAvgBig').textContent=total>0?avg.toFixed(1):'—';
-  document.getElementById('npsMedianBig').textContent=total>0?median.toFixed(1):'—';
-  document.getElementById('npsP_count').textContent=total>0?promoters:'—';
-  document.getElementById('npsN_count').textContent=total>0?passives:'—';
-  document.getElementById('npsD_count').textContent=total>0?detractors:'—';
-  document.getElementById('npsP_pct').textContent=total>0?`${promoPct}% of respondents`:'—';
-  document.getElementById('npsN_pct').textContent=total>0?`${passPct}% of respondents`:'—';
-  document.getElementById('npsD_pct').textContent=total>0?`${detrPct}% of respondents`:'—';
-  const dcs=document.getElementById('npsDonutScore');
-  if(npsIndex!==null){dcs.textContent=(npsIndex>0?'+':'')+npsIndex;dcs.style.color=getNpsColor(npsIndex);}
-  else dcs.textContent='—';
-  document.getElementById('npsDonutBadge').textContent=total>0?`${total} responses`:'No data';
-  document.getElementById('npsBarBadge').textContent=total>0?`Scores 1–10`:'No data';
-  document.getElementById('npsBreakdownBadge').textContent=total>0?`${total} total`:'No data';
-  document.getElementById('npsStackedBadge').textContent=total>0?`NPS = ${npsIndex!==null?(npsIndex>0?'+'+npsIndex:npsIndex):'—'}`:'No data';
-  if(total>0){
-    const pW=promoPct,nW=passPct,dW=detrPct;
-    document.getElementById('stkPromoters').style.width=pW+'%';
-    document.getElementById('stkPassives').style.width=nW+'%';
-    document.getElementById('stkDetractors').style.width=dW+'%';
-    document.getElementById('stkPromoters').innerHTML=pW>8?`<span style="color:white;font-size:11px;font-weight:600;">${pW}%</span>`:'';
-    document.getElementById('stkPassives').innerHTML=nW>8?`<span style="color:white;font-size:11px;font-weight:600;">${nW}%</span>`:'';
-    document.getElementById('stkDetractors').innerHTML=dW>8?`<span style="color:white;font-size:11px;font-weight:600;">${dW}%</span>`:'';
-    document.getElementById('stkPromLabel').textContent=`Promoters ${pW}%`;
-    document.getElementById('stkPassLabel').textContent=`Passives ${nW}%`;
-    document.getElementById('stkDetrLabel').textContent=`Detractors ${dW}%`;
-  }
-  if(total>0&&scoreFreq){
-    const maxCount=Math.max(...Object.values(scoreFreq),1);
-    const barColors={1:'#ef4444',2:'#ef4444',3:'#f97316',4:'#f97316',5:'#f97316',6:'#f59e0b',7:'#eab308',8:'#84cc16',9:'#10b981',10:'#059669'};
-    const labels={1:'Extremely Unlikely',2:'',3:'',4:'',5:'Neutral',6:'',7:'',8:'',9:'',10:'Extremely Likely'};
-    document.getElementById('npsBarEnhanced').innerHTML=Object.entries(scoreFreq).map(([score,count])=>{
-      const pct=total>0?Math.round(count/total*100):0;
-      const w=Math.round(count/maxCount*100);
-      const seg=parseInt(score)>=9?'Promoter':parseInt(score)>=7?'Passive':'Detractor';
-      const segColor=parseInt(score)>=9?'#065f46':parseInt(score)>=7?'#78350f':'#7f1d1d';
-      const segBg=parseInt(score)>=9?'#d1fae5':parseInt(score)>=7?'#fef3c7':'#fee2e2';
-      return`<div class="nps-bar-item"><div class="nps-bar-score-num">${score}</div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="font-size:10px;color:var(--ink3);min-width:110px;">${labels[score]||''}</span><span style="font-size:10px;background:${segBg};color:${segColor};padding:1px 7px;border-radius:20px;font-weight:500;">${seg}</span></div><div class="nps-bar-outer"><div class="nps-bar-inner" style="width:0%;background:${barColors[score]};" data-width="${w}">${count>0&&w>15?`<span style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.9)">${count}</span>`:''}</div></div></div><div class="nps-bar-count">${pct}%</div></div>`;
-    }).join('');
-    setTimeout(()=>{document.querySelectorAll('.nps-bar-inner').forEach(bar=>{bar.style.width=bar.getAttribute('data-width')+'%';});},300);
-  }else{document.getElementById('npsBarEnhanced').innerHTML='<div style="text-align:center;padding:24px;color:var(--ink3);">No NPS data. Ensure a column named <code>nps_score</code> exists in the sheet.</div>';}
-
-  if(npsDonutInst){npsDonutInst.destroy();npsDonutInst=null;}
-  if(npsBarChartInst){npsBarChartInst.destroy();npsBarChartInst=null;}
-  if(total>0){
-    npsDonutInst=new Chart(document.getElementById('npsDonutChart'),{type:'doughnut',data:{labels:['Promoters','Passives','Detractors'],datasets:[{data:[promoters,passives,detractors],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderColor:['#d1fae5','#fef3c7','#fee2e2'],borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/total*100);return` ${ctx.label}: ${ctx.parsed} (${pct}%)`; }}},datalabels:{color:'#fff',font:{weight:'bold',size:12},formatter:(v,ctx)=>{const pct=Math.round(v/total*100);return pct>8?pct+'%':'';}}},animation:{animateRotate:true,duration:900}},plugins:[ChartDataLabels]});
-    const scoreLabels=Object.keys(scoreFreq);
-    const scoreData=Object.values(scoreFreq);
-    const barBgColors=scoreLabels.map(s=>{const n=parseInt(s);if(n>=9)return'rgba(16,185,129,0.85)';if(n>=7)return'rgba(245,158,11,0.85)';return'rgba(239,68,68,0.80)';});
-    const barBorderColors=scoreLabels.map(s=>{const n=parseInt(s);if(n>=9)return'#059669';if(n>=7)return'#d97706';return'#dc2626';});
-    npsBarChartInst=new Chart(document.getElementById('npsBarChart'),{type:'bar',data:{labels:scoreLabels,datasets:[{label:'Responses',data:scoreData,backgroundColor:barBgColors,borderColor:barBorderColors,borderWidth:1.5,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>`Score ${ctx[0].label}`,label:ctx=>{const pct=total>0?Math.round(ctx.parsed.y/total*100):0;const seg=parseInt(ctx.label)>=9?'Promoter':parseInt(ctx.label)>=7?'Passive':'Detractor';return[` Count: ${ctx.parsed.y} (${pct}%)`,` Segment: ${seg}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>barBorderColors[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v>0?v:''}},scales:{x:{ticks:{font:{size:11},color:'#8a6020'},grid:{display:false},border:{display:false},title:{display:true,text:'NPS Score (1–10)',font:{size:11},color:'#8a6020'}},y:{ticks:{stepSize:1,font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Responses',font:{size:11},color:'#8a6020'}}},animation:{duration:800,easing:'easeOutQuart'},layout:{padding:{top:20,right:10}}},plugins:[ChartDataLabels]});
-  }else{
-    const noDataStyle='display:flex;align-items:center;justify-content:center;height:260px;color:var(--ink3);font-size:13px;';
-    document.getElementById('npsDonutChart').parentElement.innerHTML=`<div style="${noDataStyle}">No NPS data available</div>`;
-    document.getElementById('npsBarChart').parentElement.innerHTML=`<div style="${noDataStyle}">No NPS data available</div>`;
-  }
-}
-
-/* ── HELPERS ── */
-function statusBadge(r){
-  if(r>=4.3)return'<span class="badge badge-gold">Excellent</span>';
-  if(r>=4.0)return'<span class="badge badge-green">Good</span>';
-  if(r>=3.5)return'<span class="badge badge-amber">Average</span>';
-  return'<span class="badge badge-rose">Needs work</span>';
-}
-function getStatusColor(r){if(r>=4.3)return'#10b981';if(r>=4.0)return'#c48a00';if(r>=3.5)return'#f59e0b';return'#ef4444';}
-function deptStyle(d){if(!d)return{color:'#4a2e00',bg:'#fff3cc',border:'#e6b84a'};if(d.includes('BCA'))return{color:'#5c3600',bg:'#fde9a0',border:'#e6b84a'};if(d.includes('BBA'))return{color:'#3d2200',bg:'#f5c842',border:'#c48a00'};return{color:'#4a2e00',bg:'#fff3cc',border:'#e6b84a'};}
-
-/* ── PANEL NAV ── */
-function showPanel(id,el){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(el)el.classList.add('active');
-  currentPanel=id;
-  const meta={summary:['Performance Analytics','Overview'],mentors:['Mentor Analytics','Performance'],nps:['NPS Analytics','NPS Score Distribution'],trends:['Historical Analytics','Trend Over Time']};
-  document.getElementById('pageEyebrow').textContent=meta[id][0];
-  document.getElementById('pageTitle').textContent=meta[id][1];
-  document.getElementById('deptFilterRow').style.visibility=id==='mentors'?'visible':'hidden';
-  if(id==='mentors'){renderMentorTable();renderInsightCharts(currentDeptFilter);}
-  if(id==='nps'){renderNPSPanel();}
-  if(id==='trends'){renderTrendPanel();}
-  closeMobileSidebar();
-}
-
-/* ── INSIGHT CHART TABS ── */
-function setInsightChart(type,btn){
-  currentInsightChart=type;
-  document.querySelectorAll('.bubble-tab').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  document.getElementById('insightScatterWrap').style.display=type==='scatter'?'block':'none';
-  document.getElementById('insightHorizWrap').style.display=type==='horizontal'?'block':'none';
-  document.getElementById('insightResponseWrap').style.display=type==='responses'?'block':'none';
-  document.getElementById('insightScatterLegend').style.display=type==='scatter'?'flex':'none';
-  renderInsightCharts(currentDeptFilter);
-}
-
-/* ── INSIGHT CHARTS ── */
-function renderInsightCharts(filterDept){
-  const list=getFilteredMentors(filterDept);
-  document.getElementById('insightChartBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-  if(currentInsightChart==='scatter')renderScatterChart(list);
-  else if(currentInsightChart==='horizontal')renderHorizChart(list);
-  else if(currentInsightChart==='responses')renderResponseChart(list);
-}
-
-function renderScatterChart(list){
-  if(insightScatterInst){insightScatterInst.destroy();insightScatterInst=null;}
-  if(!list.length){document.getElementById('insightScatterWrap').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:380px;color:var(--ink3);font-size:13px;">No mentor data available</div>';return;}
-  if(!document.getElementById('insightScatterChart'))document.getElementById('insightScatterWrap').innerHTML='<canvas id="insightScatterChart"></canvas>';
-  const scatterData=list.map(m=>({x:m.responses,y:m.rating,r:Math.max(6,m.subjects*4),label:m.name,subjects:m.subjects,bayesian:m.bayesianRating,dept:m.depts[0]||''}));
-  insightScatterInst=new Chart(document.getElementById('insightScatterChart'),{type:'bubble',data:{datasets:[{label:'Mentors',data:scatterData,backgroundColor:scatterData.map(d=>getStatusColor(d.y)+'cc'),borderColor:scatterData.map(d=>getStatusColor(d.y)),borderWidth:1.5,hoverBorderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:12,callbacks:{title:ctx=>ctx[0].raw.label,label:ctx=>{const d=ctx.raw;return[` Avg Rating: ${d.y.toFixed(2)} / 5`,` Responses: ${d.x}`,` Subjects: ${d.subjects}`,` Bayesian: ${d.bayesian.toFixed(4)}`,` Dept: ${d.dept}`];}}},datalabels:{display:ctx=>{const d=ctx.dataset.data[ctx.dataIndex];return d.r>=12;},color:'#2a1800',font:{size:9,weight:'600'},formatter:(v,ctx)=>{const name=ctx.dataset.data[ctx.dataIndex].label;return name.length>12?name.slice(0,11)+'…':name;},anchor:'center',align:'center'}},scales:{x:{title:{display:true,text:'Total Responses',font:{size:12},color:'#8a6020'},ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}},y:{min:0,max:5,title:{display:true,text:'Average Rating / 5',font:{size:12},color:'#8a6020'},ticks:{stepSize:0.5,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}}},layout:{padding:{top:20,right:20,bottom:10,left:10}},animation:{duration:700,easing:'easeOutQuart'}},plugins:[ChartDataLabels]});
-}
-
-function renderHorizChart(list){
-  if(insightHorizInst){insightHorizInst.destroy();insightHorizInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightHorizChart'))document.getElementById('insightHorizWrap').innerHTML='<canvas id="insightHorizChart"></canvas>';
-  const top5=list.slice(0,Math.min(5,list.length));
-  const bottom5=list.slice(-Math.min(5,list.length)).reverse();
-  const combined=[...top5,...bottom5];
-  const labels=combined.map((m,i)=>(i<top5.length?'▲ ':'▼ ')+m.name);
-  const data=combined.map(m=>m.bayesianRating);
-  const colors=combined.map((m,i)=>i<top5.length?'rgba(16,185,129,0.80)':'rgba(239,68,68,0.75)');
-  const borders=combined.map((m,i)=>i<top5.length?'#059669':'#dc2626');
-  document.getElementById('insightHorizWrap').style.height=Math.max(340,combined.length*38+80)+'px';
-  insightHorizInst=new Chart(document.getElementById('insightHorizChart'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderColor:borders,borderWidth:1.5,borderRadius:5,borderSkipped:false,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>combined[ctx[0].dataIndex].name,label:ctx=>{const m=combined[ctx.dataIndex];return[` Bayesian: ${m.bayesianRating.toFixed(4)}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Responses: ${m.responses}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>borders[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v.toFixed(2)}},scales:{x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
-}
-
-function renderResponseChart(list){
-  if(insightResponseInst){insightResponseInst.destroy();insightResponseInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightResponseChart'))document.getElementById('insightResponseWrap').innerHTML='<canvas id="insightResponseChart"></canvas>';
-  const sorted=[...list].sort((a,b)=>b.responses-a.responses).slice(0,20);
-  const maxR=Math.max(...sorted.map(m=>m.responses),1);
-  const colors=sorted.map(m=>{const ratio=m.responses/maxR;const r=Math.round(92+(196-92)*ratio);const g=Math.round(54+(138-54)*ratio);return`rgba(${r},${g},0,${0.55+0.35*ratio})`;});
-  document.getElementById('insightResponseWrap').style.height=Math.max(320,sorted.length*28+100)+'px';
-  insightResponseInst=new Chart(document.getElementById('insightResponseChart'),{type:'bar',data:{labels:sorted.map(m=>m.name),datasets:[{data:sorted.map(m=>m.responses),backgroundColor:colors,borderColor:sorted.map(m=>'#c48a00'),borderWidth:1,borderRadius:5,borderSkipped:false,barThickness:20}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>sorted[ctx[0].dataIndex].name,label:ctx=>{const m=sorted[ctx.dataIndex];return[` Responses: ${m.responses}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Subjects: ${m.subjects}`];}}},datalabels:{anchor:'end',align:'end',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v}},scales:{x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Total Responses',font:{size:11},color:'#8a6020'}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
-}
-
-/* ── MENTOR TABLE ── */
-function renderMentorTable(){
-  const list=getFilteredMentors(currentDeptFilter);
-  const sumResponses=list.reduce((s,m)=>s+m.responses,0);
-  const sumAvgXResp=list.reduce((s,m)=>s+m.avgXResponses,0);
-  const gm=sumResponses>0?(sumAvgXResp/sumResponses):0;
-  document.getElementById('mtSumGlobalMean').textContent=gm>0?gm.toFixed(7):'—';
-  document.getElementById('mtSumTotalResp').textContent=sumResponses||'—';
-  document.getElementById('mtSumAvgXResp').textContent=sumAvgXResp>0?sumAvgXResp.toFixed(2):'—';
-  document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-  if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found for this department</td></tr>';return;}
-  const deptLabel=(currentDeptFilter&&currentDeptFilter!=='all')?currentDeptFilter:null;
-  const rankColors={1:'#f5c842',2:'#e0e0e0',3:'#f0c498'};
-  document.getElementById('mentorTableBody').innerHTML=list.map(m=>{
-    const displayRank=m.filteredRank;
-    const rankBg=rankColors[displayRank]||'transparent';
-    const rankColor=displayRank<=3?'#3d2200':'var(--ink3)';
-    const rankBorder=displayRank<=3?'none':'1px solid var(--border2)';
-    const displayDept=deptLabel||m.depts.join(', ');
-    const s=deptStyle(deptLabel||m.depts[0]||'');
-    return`<tr>
-      <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td>
-      <td><button class="mentor-name-btn" data-mentor="${m.name.replace(/"/g,'&quot;')}" style="background:none;border:none;color:#7a4f00;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:var(--font-body);padding:0;">${m.name}</button></td>
-      <td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${displayDept}</span></td>
-      <td style="text-align:center;"><span style="font-family:var(--font-display);font-size:18px;color:var(--gold-dark);">${m.rating.toFixed(2)}</span><span style="font-size:11px;color:var(--ink4);">/5</span></td>
-      <td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--ink2);">${m.responses}</td>
-      <td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.avgXResponses.toFixed(2)}</td>
-      <td style="text-align:center;"><span style="font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.bayesianRating.toFixed(7)}</span></td>
-      <td>${statusBadge(m.rating)}</td>
-    </tr>`;
-  }).join('');
-  document.querySelectorAll('.mentor-name-btn').forEach(btn=>{
-    btn.addEventListener('click',function(){openMentorModal(this.getAttribute('data-mentor'));});
-  });
-}
-
-/* ── SUMMARY CHARTS ── */
-Chart.defaults.font.family='Inter';
-Chart.defaults.color='#8a6020';
-
-function initSummaryCharts(){
-  const top=MENTORS.slice(0,Math.min(15,MENTORS.length));
-  const chartH=Math.max(200,top.length*38);
-  const wrap=document.getElementById('topMentorsWrap');
-  wrap.style.height=chartH+'px';
-  if(chartInstances.topMentors){chartInstances.topMentors.destroy();chartInstances.topMentors=null;}
-  chartInstances.topMentors=new Chart(document.getElementById('topMentorsChart'),{type:'bar',data:{labels:top.map(m=>m.name),datasets:[{data:top.map(m=>m.bayesianRating),backgroundColor:top.map((m,i)=>i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00'),borderRadius:5,borderSkipped:false,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const m=top[ctx.dataIndex];return`Bayesian: ${ctx.parsed.x.toFixed(2)} | Avg: ${m.rating.toFixed(1)}/5 (${m.subjects} subjects, ${m.responses} responses)`;}}},datalabels:{anchor:'end',align:'end',color:'#2a1800',font:{weight:'bold',size:11},formatter:v=>v.toFixed(2)}},scales:{x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:40}}},plugins:[ChartDataLabels]});
-  document.getElementById('topMentorsBadge').textContent=top.length>0?`Top ${top.length}`:'No data';
-}
-
-function updateSummaryCharts(){
-  if(chartInstances.topMentors){
-    const top=MENTORS.slice(0,Math.min(15,MENTORS.length));
-    document.getElementById('topMentorsWrap').style.height=Math.max(200,top.length*38)+'px';
-    chartInstances.topMentors.data.labels=top.map(m=>m.name);
-    chartInstances.topMentors.data.datasets[0].data=top.map(m=>m.bayesianRating);
-    chartInstances.topMentors.data.datasets[0].backgroundColor=top.map((m,i)=>i===0?'#5c3600':i===top.length-1?'#f5c842':'#c48a00');
-    chartInstances.topMentors.update();
-    document.getElementById('topMentorsBadge').textContent=top.length>0?`Top ${top.length}`:'No data';
-  }
-}
-
-/* ── DOWNLOAD ── */
-function statusBadgeInline(r){
-  if(r>=4.3)return'<span style="background:#fde9a0;color:#5c3600;border:1px solid #e6b84a;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Excellent</span>';
-  if(r>=4.0)return'<span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Good</span>';
-  if(r>=3.5)return'<span style="background:#fef3c7;color:#78350f;border:1px solid #fcd34d;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Average</span>';
-  return'<span style="background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Needs work</span>';
-}
-function downloadReport(){
-  if(!MENTORS.length&&!NPS_DATA.total){alert('No data to download. Please select a college first.');return;}
-  const collegeName=currentCollege?.name||'Report';
-  const now=new Date().toLocaleString();
-  const{promoters,passives,detractors,npsIndex,avg:npsAvg,median:npsMedian,total:npsTotal,scoreFreq}=NPS_DATA;
-  const npsDisplay=npsIndex!==null?(npsIndex>0?`+${npsIndex}`:`${npsIndex}`):'N/A';
-  const promoPct=npsTotal>0?Math.round(promoters/npsTotal*100):0;
-  const passPct=npsTotal>0?Math.round(passives/npsTotal*100):0;
-  const detrPct=npsTotal>0?Math.round(detractors/npsTotal*100):0;
-  const tableHead=cols=>`<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;
-  const mentorRows=MENTORS.map((m,idx)=>`<tr style="background:${idx%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600">${m.rank}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;color:#2a1800">${m.name}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:#4a2e00">${m.depts.join(', ')}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:16px;color:#5c3600">${m.bayesianRating.toFixed(2)}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:16px;color:#5c3600">${m.rating.toFixed(1)}/5</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${m.responses}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${statusBadgeInline(m.rating)}</td></tr>`).join('');
-  const npsRows=npsTotal>0?Object.entries(scoreFreq).map(([score,count])=>{const pct=Math.round(count/npsTotal*100);const seg=parseInt(score)>=9?'Promoter':parseInt(score)>=7?'Passive':'Detractor';return`<tr><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:700;font-size:16px;color:#5c3600">${score}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${seg}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${count}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${pct}%</td></tr>`;}).join(''):'<tr><td colspan="4" style="text-align:center;padding:20px;color:#8a6020">No NPS data available</td></tr>';
-
-  /* Trend table for download */
-  const{cycles,cycleStats}=TREND_DATA;
-  const trendRows=cycles.slice().reverse().map((c,i)=>{
-    const s=cycleStats[c];
-    const prev=i<cycles.length-1?cycleStats[cycles[cycles.length-2-i]]:null;
-    return`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;color:#5c3600">${c}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);">${s.responses}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:15px;color:#5c3600">${s.ratingAvg!==null?s.ratingAvg.toFixed(2):'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:15px;color:#5c3600">${s.npsIndex!==null?(s.npsIndex>0?'+':'')+s.npsIndex:'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);">${s.promoterPct!==null?s.promoterPct+'%':'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);">${s.detractorPct!==null?s.detractorPct+'%':'—'}</td></tr>`;
-  }).join('');
-
-  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title>
-<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;font-size:13px;line-height:1.6;}
-.rh{background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}
-.rh h1{font-family:Georgia,serif;font-size:26px;font-weight:400;}.rb{padding:36px 40px;max-width:1100px;margin:0 auto;}
-table{width:100%;border-collapse:collapse;font-size:13px;}.sec{margin-bottom:40px;}.st{font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;}
-.ncard{display:inline-flex;flex-direction:column;align-items:center;padding:16px 24px;border-radius:12px;margin:4px;}
-@media print{.rh{-webkit-print-color-adjust:exact;print-color-adjust:exact;}thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.pb{page-break-before:always;}}
-</style></head><body>
-<div class="rh"><div><h1>Performance Report</h1><p>${collegeName}</p></div><div style="text-align:right;font-size:11px;opacity:0.75"><div>Generated: ${now}</div><div>${MENTORS.length} mentors · ${DEPT_LIST.length} depts</div></div></div>
-<div class="rb">
-<div class="sec"><div class="st">NPS Overview</div>
-<div style="background:linear-gradient(135deg,#4a2800,#7a4f00);border-radius:14px;padding:24px;margin-bottom:20px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
-  <div><div style="font-size:10px;color:rgba(253,233,160,0.6);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">NPS Index</div><div style="font-family:Georgia,serif;font-size:56px;color:#f5c842;line-height:1">${npsDisplay}</div><div style="font-size:12px;color:rgba(253,233,160,0.7);margin-top:6px">${getNpsLabel(npsIndex)}</div></div>
-  <div style="display:flex;gap:24px;flex-wrap:wrap;">
-    <div class="ncard" style="background:#d1fae5;"><div style="font-family:Georgia,serif;font-size:36px;color:#065f46">${npsTotal>0?promoters:'—'}</div><div style="font-size:10px;font-weight:600;color:#065f46;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Promoters</div><div style="font-size:11px;color:#065f46">${promoPct}% · Score 9–10</div></div>
-    <div class="ncard" style="background:#fef3c7;"><div style="font-family:Georgia,serif;font-size:36px;color:#78350f">${npsTotal>0?passives:'—'}</div><div style="font-size:10px;font-weight:600;color:#78350f;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Passives</div><div style="font-size:11px;color:#78350f">${passPct}% · Score 7–8</div></div>
-    <div class="ncard" style="background:#fee2e2;"><div style="font-family:Georgia,serif;font-size:36px;color:#7f1d1d">${npsTotal>0?detractors:'—'}</div><div style="font-size:10px;font-weight:600;color:#7f1d1d;text-transform:uppercase;letter-spacing:0.09em;margin-top:4px">Detractors</div><div style="font-size:11px;color:#7f1d1d">${detrPct}% · Score 1–6</div></div>
-  </div>
-</div></div>
-<div class="sec pb"><div class="st">Trend Over Time — Cycle Summary</div>
-<table>${tableHead(['Cycle','Responses','Avg Rating','NPS Index','Promoter %','Detractor %'])}<tbody>${trendRows}</tbody></table></div>
-<div class="sec pb"><div class="st">Mentor Rankings (Bayesian)</div>
-<table>${tableHead(['Rank','Mentor','Department(s)','Bayesian Score','Avg Rating','Responses','Status'])}<tbody>${mentorRows}</tbody></table>
-<div style="font-size:11px;color:#c09840;margin-top:10px">* NPS = %Promoters − %Detractors · Bayesian = (GlobalMean × ΣResponses + AvgRating × MentorResponses) / (ΣResponses + MentorResponses)</div></div>
-</div></body></html>`;
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.html`;a.click();URL.revokeObjectURL(a.href);
-}
-
-/* ── MENTOR MODAL ── */
-const MM_QUESTIONS=["Sessions were clear and well-structured","Professional behavior during sessions","Effective in solving problems with examples","Supported doubt clearing and student queries","Sessions improved understanding and skills"];
-function openMentorModal(mentorName){
-  const m=MENTORS.find(x=>x.name===mentorName);
-  if(!m){console.warn('Mentor not found:',mentorName);return;}
-  document.getElementById('mmName').textContent=m.name;
-  document.getElementById('mmSub').textContent=m.depts.join(', ')+' · '+m.responses+' responses · '+m.subjects+' subject(s)';
-  const totalYes=m.qs.reduce((s,q)=>s+q.y,0);
-  const totalAll=m.qs.reduce((s,q)=>s+q.y+q.n,0);
-  document.getElementById('mmStats').innerHTML=`<div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Avg rating</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.rating.toFixed(2)}</div><div style="font-size:11px;color:var(--ink3);">out of 5</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Responses</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.responses}</div><div style="font-size:11px;color:var(--ink3);">total feedback</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Overall yes rate</div><div style="font-family:var(--font-display);font-size:24px;color:var(--green-dark);">${totalAll>0?Math.round(totalYes/totalAll*100):0}%</div><div style="font-size:11px;color:var(--ink3);">across 5 questions</div></div>`;
-  document.getElementById('mmQRows').innerHTML=MM_QUESTIONS.map((q,i)=>{const d=m.qs[i]||{y:0,n:0};const tot=d.y+d.n;const yp=tot>0?Math.round(d.y/tot*100):0;const np=100-yp;return`<div style="display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);"><div><div style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Q${i+1}</div><div style="font-size:13px;color:var(--ink);line-height:1.45;">${q}</div></div><div style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:7px;"><span style="font-size:11px;font-weight:600;color:#065f46;width:22px;">Yes</span><div style="flex:1;height:14px;background:var(--bg2);border-radius:20px;overflow:hidden;"><div style="width:${yp}%;height:100%;background:#10b981;border-radius:20px;"></div></div><span style="font-size:11px;color:var(--ink3);width:56px;text-align:right;">${d.y} (${yp}%)</span></div><div style="display:flex;align-items:center;gap:7px;"><span style="font-size:11px;font-weight:600;color:#7f1d1d;width:22px;">No</span><div style="flex:1;height:14px;background:var(--bg2);border-radius:20px;overflow:hidden;"><div style="width:${np}%;height:100%;background:#ef4444;border-radius:20px;"></div></div><span style="font-size:11px;color:var(--ink3);width:56px;text-align:right;">${d.n} (${np}%)</span></div></div></div>`;}).join('');
-  document.getElementById('mentorModalOverlay').classList.add('open');
-}
-function closeMentorModal(){document.getElementById('mentorModalOverlay').classList.remove('open');}
-
-/* ── INIT ── */
+const QUESTION_TEXT = [
+  'Sessions were clear and well-structured',
+  'Professional behavior during sessions',
+  'Effective in solving problems with examples',
+  'Supported doubt clearing and student queries',
+  'Sessions improved understanding and skills'
+];
+
+let currentMentor = null;
+let mcCharts = {};
+
+// Initialize
 document.addEventListener('DOMContentLoaded',()=>{
-  buildDropdown();
-  document.getElementById('loadingOverlay').classList.add('hidden');
+  renderSampleMentors();
+  setTimeout(()=>document.getElementById('loadingOverlay').classList.add('hidden'),500);
 });
+
+function renderSampleMentors(){
+  const tbody = document.getElementById('mentorTableBody');
+  tbody.innerHTML = SAMPLE_MENTORS.map(m=>{
+    const statusBadge = m.rating>=4.5?'<span class="badge badge-green">Excellent</span>':
+                        m.rating>=4.0?'<span class="badge badge-gold">Good</span>':
+                        m.rating>=3.5?'<span class="badge badge-amber">Average</span>':
+                        '<span class="badge badge-rose">Needs Work</span>';
+    return `<tr>
+      <td><strong>${m.rank}</strong></td>
+      <td><button class="mentor-name-btn" onclick='openMentorCard(${JSON.stringify(m.name)})'>${m.name}</button></td>
+      <td>${m.dept}</td>
+      <td><strong>${m.rating.toFixed(1)}</strong> / 5.0</td>
+      <td>${m.responses}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Open Mentor Card
+function openMentorCard(mentorName){
+  currentMentor = SAMPLE_MENTORS.find(m=>m.name===mentorName);
+  if(!currentMentor){console.warn('Mentor not found');return;}
+  
+  populateMentorCard(currentMentor);
+  document.getElementById('mentorCardModal').classList.add('open');
+}
+
+function closeMentorCard(){
+  document.getElementById('mentorCardModal').classList.remove('open');
+  // Destroy charts
+  Object.values(mcCharts).forEach(chart=>chart?.destroy?.());
+  mcCharts = {};
+}
+
+function populateMentorCard(m){
+  // Header
+  document.getElementById('mcMentorName').textContent = m.name;
+  document.getElementById('mcDepartments').textContent = m.dept;
+  document.getElementById('mcResponseCount').textContent = `${m.responses} responses`;
+  document.getElementById('mcSubjectCount').textContent = `${m.subjects} subjects`;
+  document.getElementById('mcRankInfo').textContent = `Rank #${m.rank}`;
+  
+  // Metrics
+  document.getElementById('mcCurrentRating').textContent = m.rating.toFixed(1);
+  document.getElementById('mcBayesianScore').textContent = m.bayesian.toFixed(2);
+  document.getElementById('mcPercentile').textContent = `${m.percentile}th`;
+  
+  const status = m.rating>=4.5?'⭐ Excellent':m.rating>=4.0?'✅ Good':m.rating>=3.5?'⚠️ Average':'❌ Needs Work';
+  document.getElementById('mcStatus').textContent = status;
+  
+  // Overview Tab
+  renderOverviewTab(m);
+  
+  // Subjects Tab
+  renderSubjectsTab(m);
+  
+  // Comparison Tab
+  renderComparisonTab(m);
+  
+  // Questions Tab
+  renderQuestionsTab(m);
+  
+  // Trends Tab
+  renderTrendsTab(m);
+  
+  // Insights Tab
+  renderInsightsTab(m);
+}
+
+function renderOverviewTab(m){
+  document.getElementById('overviewRating').textContent = m.rating.toFixed(1);
+  document.getElementById('overviewResponses').textContent = m.responses;
+  document.getElementById('overviewSubjects').textContent = m.subjects;
+  
+  const deptAvg = SAMPLE_MENTORS.filter(x=>x.dept===m.dept).reduce((s,x)=>s+x.rating,0) / SAMPLE_MENTORS.filter(x=>x.dept===m.dept).length;
+  const diff = m.rating - deptAvg;
+  const trendClass = diff>0.2?'up':diff<-0.2?'down':'neutral';
+  const trendText = diff>0?`↗ +${diff.toFixed(1)}`:diff<0?`↘ ${diff.toFixed(1)}`:'→ 0.0';
+  
+  document.getElementById('overviewTrend').innerHTML = `<span class="trend-indicator ${trendClass}">${trendText} vs last cycle</span>`;
+  document.getElementById('overviewVsDept').textContent = `Dept avg: ${deptAvg.toFixed(1)}`;
+  
+  // Radar Chart
+  if(mcCharts.radar){mcCharts.radar.destroy();}
+  const qData = m.questions.map(q=>{
+    const total = q.y+q.n;
+    return total>0?(q.y/total*100):0;
+  });
+  mcCharts.radar = new Chart(document.getElementById('mcRadarChart'),{
+    type:'radar',
+    data:{
+      labels:QUESTION_TEXT.map((t,i)=>`Q${i+1}`),
+      datasets:[{
+        label:'Yes Rate (%)',
+        data:qData,
+        backgroundColor:'rgba(196,138,0,0.2)',
+        borderColor:'#c48a00',
+        borderWidth:2,
+        pointBackgroundColor:'#c48a00',
+        pointBorderColor:'#fff',
+        pointBorderWidth:2,
+        pointRadius:4
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        r:{
+          min:0,
+          max:100,
+          ticks:{stepSize:20,callback:v=>v+'%'},
+          grid:{color:'rgba(120,80,10,0.1)'},
+          angleLines:{color:'rgba(120,80,10,0.1)'},
+          pointLabels:{font:{size:11},color:'#8a6020'}
+        }
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(42,24,0,0.92)',
+          titleColor:'#fde9a0',
+          bodyColor:'#f5e9c8',
+          callbacks:{
+            label:ctx=>`Yes Rate: ${ctx.parsed.r.toFixed(1)}%`
+          }
+        },
+        datalabels:{display:false}
+      }
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+
+function renderSubjectsTab(m){
+  const html = m.subjectData.map(s=>`
+    <div class="mc-subject-item">
+      <div>
+        <div class="mc-subject-name">${s.name}</div>
+        <div class="mc-subject-responses">${s.responses} responses</div>
+      </div>
+      <div class="mc-subject-rating">${s.rating.toFixed(1)}</div>
+      <div>
+        ${s.rating>=4.5?'<span class="badge badge-green">Excellent</span>':
+          s.rating>=4.0?'<span class="badge badge-gold">Good</span>':
+          s.rating>=3.5?'<span class="badge badge-amber">Average</span>':
+          '<span class="badge badge-rose">Needs Work</span>'}
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('mcSubjectsList').innerHTML = html;
+}
+
+function renderComparisonTab(m){
+  const deptMentors = SAMPLE_MENTORS.filter(x=>x.dept===m.dept);
+  const deptAvg = deptMentors.reduce((s,x)=>s+x.rating,0) / deptMentors.length;
+  const collegeAvg = SAMPLE_MENTORS.reduce((s,x)=>s+x.rating,0) / SAMPLE_MENTORS.length;
+  
+  document.getElementById('compMentor').textContent = m.rating.toFixed(1);
+  document.getElementById('compDept').textContent = deptAvg.toFixed(1);
+  document.getElementById('compCollege').textContent = collegeAvg.toFixed(1);
+  
+  const mentorStatus = m.rating>=4.5?'Excellent':m.rating>=4.0?'Good':'Average';
+  document.getElementById('compMentorBadge').textContent = mentorStatus;
+  document.getElementById('compDeptBadge').textContent = `${m.dept}`;
+  document.getElementById('compCollegeBadge').textContent = 'All Depts';
+  
+  const diff = m.rating - deptAvg;
+  const insightText = diff>0.3?`🎯 This mentor is performing ${diff.toFixed(1)} points above the department average`:
+                      diff<-0.3?`⚠️ This mentor is ${Math.abs(diff).toFixed(1)} points below the department average`:
+                      `✅ This mentor is performing on par with the department average`;
+  document.getElementById('compInsight').textContent = insightText;
+  
+  // Comparison Chart
+  if(mcCharts.comparison){mcCharts.comparison.destroy();}
+  mcCharts.comparison = new Chart(document.getElementById('mcComparisonChart'),{
+    type:'bar',
+    data:{
+      labels:['This Mentor',`${m.dept} Avg`,'College Avg'],
+      datasets:[{
+        data:[m.rating,deptAvg,collegeAvg],
+        backgroundColor:['#c48a00','#3b82f6','#f59e0b'],
+        borderRadius:8,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(42,24,0,0.92)',
+          callbacks:{label:ctx=>`Rating: ${ctx.parsed.y.toFixed(2)} / 5.0`}
+        },
+        datalabels:{
+          anchor:'end',
+          align:'end',
+          color:'#2a1800',
+          font:{weight:'bold',size:12},
+          formatter:v=>v.toFixed(1)
+        }
+      },
+      scales:{
+        y:{min:0,max:5,ticks:{stepSize:1,callback:v=>v.toFixed(1)}}
+      }
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+
+function renderQuestionsTab(m){
+  const html = QUESTION_TEXT.map((q,i)=>{
+    const data = m.questions[i];
+    const total = data.y + data.n;
+    const yPct = total>0?(data.y/total*100):0;
+    const nPct = 100 - yPct;
+    return `
+      <div class="mc-question-card">
+        <span class="mc-question-num">Q${i+1}</span>
+        <div class="mc-question-text">${q}</div>
+        <div class="mc-question-bars">
+          <div class="mc-question-bar-row">
+            <div class="mc-question-bar-label yes">Yes</div>
+            <div class="mc-question-bar-track">
+              <div class="mc-question-bar-fill yes" style="width:0%" data-width="${yPct.toFixed(1)}"></div>
+            </div>
+            <div class="mc-question-bar-count">${data.y} (${yPct.toFixed(0)}%)</div>
+          </div>
+          <div class="mc-question-bar-row">
+            <div class="mc-question-bar-label no">No</div>
+            <div class="mc-question-bar-track">
+              <div class="mc-question-bar-fill no" style="width:0%" data-width="${nPct.toFixed(1)}"></div>
+            </div>
+            <div class="mc-question-bar-count">${data.n} (${nPct.toFixed(0)}%)</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('mcQuestionsGrid').innerHTML = html;
+  
+  // Animate bars
+  setTimeout(()=>{
+    document.querySelectorAll('.mc-question-bar-fill').forEach(bar=>{
+      bar.style.width = bar.getAttribute('data-width')+'%';
+    });
+  },100);
+}
+
+function renderTrendsTab(m){
+  if(mcCharts.trend){mcCharts.trend.destroy();}
+  
+  const labels = m.cycles.map(c=>c.cycle);
+  const data = m.cycles.map(c=>c.rating);
+  
+  mcCharts.trend = new Chart(document.getElementById('mcTrendChart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'Rating',
+        data,
+        borderColor:'#c48a00',
+        backgroundColor:'rgba(196,138,0,0.1)',
+        borderWidth:3,
+        fill:true,
+        tension:0.4,
+        pointBackgroundColor:'#fff',
+        pointBorderColor:'#c48a00',
+        pointBorderWidth:2,
+        pointRadius:6,
+        pointHoverRadius:8
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(42,24,0,0.92)',
+          callbacks:{label:ctx=>`Rating: ${ctx.parsed.y.toFixed(1)} / 5.0`}
+        },
+        datalabels:{
+          anchor:'end',
+          align:'top',
+          color:'#5c3600',
+          font:{weight:'bold',size:11},
+          formatter:v=>v.toFixed(1)
+        }
+      },
+      scales:{
+        y:{min:0,max:5,ticks:{stepSize:1,callback:v=>v.toFixed(1)}}
+      }
+    },
+    plugins:[ChartDataLabels]
+  });
+  
+  const firstRating = data[0];
+  const lastRating = data[data.length-1];
+  const change = lastRating - firstRating;
+  const trendText = change>0.2?`📈 <strong>Improving trend:</strong> Rating increased by ${change.toFixed(1)} points from ${labels[0]} to ${labels[labels.length-1]}. This mentor is showing consistent improvement.`:
+                    change<-0.2?`📉 <strong>Declining trend:</strong> Rating decreased by ${Math.abs(change).toFixed(1)} points. Consider intervention or support.`:
+                    `➡️ <strong>Stable performance:</strong> Rating has remained consistent around ${lastRating.toFixed(1)} across cycles.`;
+  document.getElementById('trendAnalysis').innerHTML = trendText;
+}
+
+function renderInsightsTab(m){
+  const insights = [];
+  
+  // Strength insight
+  if(m.rating>=4.5){
+    insights.push({
+      type:'positive',
+      icon:'🌟',
+      title:'Top Performer',
+      text:`${m.name} is in the top ${100-m.percentile}% of all mentors with an excellent rating of ${m.rating.toFixed(1)}/5.0. Consider this mentor for mentorship of junior faculty.`
+    });
+  }
+  
+  // Subject performance
+  const bestSubject = m.subjectData.reduce((a,b)=>a.rating>b.rating?a:b);
+  if(bestSubject.rating>=4.5){
+    insights.push({
+      type:'positive',
+      icon:'📚',
+      title:'Subject Excellence',
+      text:`Exceptional performance in ${bestSubject.name} (${bestSubject.rating.toFixed(1)}/5.0). This could be a model for other courses.`
+    });
+  }
+  
+  // Question analysis
+  const weakQuestion = m.questions.map((q,i)=>({idx:i,rate:q.y/(q.y+q.n)*100})).sort((a,b)=>a.rate-b.rate)[0];
+  if(weakQuestion.rate<75){
+    insights.push({
+      type:'warning',
+      icon:'⚠️',
+      title:'Focus Area Identified',
+      text:`Question ${weakQuestion.idx+1} ("${QUESTION_TEXT[weakQuestion.idx]}") has a ${weakQuestion.rate.toFixed(0)}% positive rate. Consider targeted improvement in this area.`
+    });
+  }
+  
+  // Response volume
+  if(m.responses<50){
+    insights.push({
+      type:'warning',
+      icon:'📊',
+      title:'Sample Size Advisory',
+      text:`With ${m.responses} responses, this mentor's rating has moderate statistical confidence. Encourage more student feedback for better accuracy.`
+    });
+  }
+  
+  // Improvement opportunity
+  const pointsToNext = m.rating<4.0?4.0-m.rating:m.rating<4.5?4.5-m.rating:null;
+  if(pointsToNext && pointsToNext<0.3){
+    insights.push({
+      type:'positive',
+      icon:'🎯',
+      title:'Close to Next Tier',
+      text:`Just ${pointsToNext.toFixed(1)} points away from the next performance tier. Small improvements in student engagement could make a significant difference.`
+    });
+  }
+  
+  // Consistency
+  const stdDev = Math.sqrt(m.subjectData.reduce((s,x)=>s+Math.pow(x.rating-m.rating,2),0)/m.subjectData.length);
+  if(stdDev<0.2){
+    insights.push({
+      type:'positive',
+      icon:'✅',
+      title:'Consistent Performance',
+      text:`Very consistent ratings across all ${m.subjects} subjects (std dev: ${stdDev.toFixed(2)}). This mentor delivers reliable quality.`
+    });
+  }
+  
+  const html = insights.map(i=>`
+    <div class="mc-insight-item ${i.type}">
+      <div class="mc-insight-icon">${i.icon}</div>
+      <div class="mc-insight-content">
+        <h4>${i.title}</h4>
+        <p>${i.text}</p>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('mcInsightsList').innerHTML = html;
+}
+
+function switchMCTab(tabName,btn){
+  document.querySelectorAll('.mc-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  
+  document.querySelectorAll('.mc-tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+tabName).classList.add('active');
+}
+
+// Action Functions
+function downloadMentorReport(){
+  if(!currentMentor){alert('No mentor selected');return;}
+  
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${currentMentor.name} - Performance Report</title>
+<style>
+body{font-family:Arial,sans-serif;padding:40px;background:#fdf8ed;color:#2a1800;}
+.header{background:linear-gradient(135deg,#4a2800,#7a4f00);color:#fde9a0;padding:30px;border-radius:12px;margin-bottom:30px;}
+h1{font-size:32px;margin:0 0 10px 0;}
+.meta{font-size:14px;opacity:0.8;}
+.section{background:#fff;padding:24px;margin-bottom:20px;border-radius:10px;border:1px solid rgba(120,80,10,0.15);}
+.section h2{font-size:20px;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:16px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #f5e9c8;}
+th{background:#fdf4e0;font-weight:600;}
+.metric{display:inline-block;margin:10px 20px 10px 0;}
+.metric-label{font-size:11px;color:#8a6020;text-transform:uppercase;}
+.metric-value{font-size:24px;font-weight:bold;color:#5c3600;}
+</style></head><body>
+<div class="header">
+  <h1>${currentMentor.name}</h1>
+  <div class="meta">${currentMentor.dept} • ${currentMentor.responses} Responses • ${currentMentor.subjects} Subjects • Rank #${currentMentor.rank}</div>
+</div>
+
+<div class="section">
+  <h2>Key Performance Metrics</h2>
+  <div class="metric"><div class="metric-label">Current Rating</div><div class="metric-value">${currentMentor.rating.toFixed(1)} / 5.0</div></div>
+  <div class="metric"><div class="metric-label">Bayesian Score</div><div class="metric-value">${currentMentor.bayesian.toFixed(2)}</div></div>
+  <div class="metric"><div class="metric-label">Percentile</div><div class="metric-value">${currentMentor.percentile}th</div></div>
+</div>
+
+<div class="section">
+  <h2>Subject Performance</h2>
+  <table>
+    <thead><tr><th>Subject</th><th>Rating</th><th>Responses</th></tr></thead>
+    <tbody>
+      ${currentMentor.subjectData.map(s=>`<tr><td>${s.name}</td><td><strong>${s.rating.toFixed(1)}</strong></td><td>${s.responses}</td></tr>`).join('')}
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Question Analysis</h2>
+  <table>
+    <thead><tr><th>Question</th><th>Yes</th><th>No</th><th>Yes Rate</th></tr></thead>
+    <tbody>
+      ${QUESTION_TEXT.map((q,i)=>{
+        const d=currentMentor.questions[i];
+        const total=d.y+d.n;
+        const pct=total>0?(d.y/total*100).toFixed(0)+'%':'—';
+        return`<tr><td>Q${i+1}: ${q}</td><td>${d.y}</td><td>${d.n}</td><td><strong>${pct}</strong></td></tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <p style="font-size:12px;color:#8a6020;margin:0;">
+    Generated on ${new Date().toLocaleString()} • FacePrep Campus Analytics
+  </p>
+</div>
+</body></html>`;
+  
+  const blob = new Blob([html],{type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentMentor.name.replace(/[^a-z0-9]/gi,'-')}-Report.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  
+  alert('✅ Report downloaded successfully!');
+}
+
+function shareMentorCard(){
+  if(!currentMentor){alert('No mentor selected');return;}
+  const shareText = `📊 Performance Report: ${currentMentor.name}\n\n⭐ Rating: ${currentMentor.rating.toFixed(1)}/5.0\n📈 Rank: #${currentMentor.rank}\n📚 Department: ${currentMentor.dept}\n🎯 Percentile: ${currentMentor.percentile}th`;
+  
+  if(navigator.share){
+    navigator.share({title:'Mentor Performance',text:shareText})
+      .then(()=>console.log('Shared successfully'))
+      .catch(err=>console.log('Share failed',err));
+  }else{
+    navigator.clipboard.writeText(shareText);
+    alert('📋 Performance summary copied to clipboard!');
+  }
+}
+
+function exportMentorData(){
+  if(!currentMentor){alert('No mentor selected');return;}
+  
+  const csv = [
+    ['Metric','Value'],
+    ['Name',currentMentor.name],
+    ['Department',currentMentor.dept],
+    ['Rating',currentMentor.rating],
+    ['Bayesian Score',currentMentor.bayesian],
+    ['Rank',currentMentor.rank],
+    ['Percentile',currentMentor.percentile],
+    ['Responses',currentMentor.responses],
+    ['Subjects',currentMentor.subjects],
+    [''],
+    ['Subject Performance'],
+    ['Subject','Rating','Responses'],
+    ...currentMentor.subjectData.map(s=>[s.name,s.rating,s.responses])
+  ].map(row=>row.join(',')).join('\n');
+  
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentMentor.name.replace(/[^a-z0-9]/gi,'-')}-Data.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  
+  alert('✅ Data exported to CSV successfully!');
+}
 </script>
+
 </body>
 </html>
