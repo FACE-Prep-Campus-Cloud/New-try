@@ -1331,7 +1331,7 @@ function renderMentorTable(){
     const s=deptStyle(deptLabel||m.depts[0]||'');
     return`<tr>
       <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td>
-      <td><button class="mentor-name-btn" data-mentor="${m.name.replace(/"/g,'&quot;')}" onclick="openMentorCard('${m.name.replace(/'/g,"\\'")}')">✦ ${m.name}</button></td>
+      <td><button class="mentor-name-btn" onclick="openMentorCard(${idx})">✦ ${m.name}</button></td>
       <td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${displayDept}</span></td>
       <td style="text-align:center;"><span style="font-family:var(--font-display);font-size:18px;color:var(--gold-dark);">${m.rating.toFixed(2)}</span><span style="font-size:11px;color:var(--ink4);">/5</span></td>
       <td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--ink2);">${m.responses}</td>
@@ -1511,11 +1511,12 @@ function renderTrendCycleTable(){
 /* ════════════════════════════════════════════════════
    ★ MENTOR PERFORMANCE CARD — FULL IMPLEMENTATION ★
 ════════════════════════════════════════════════════ */
-function openMentorCard(mentorName){
-  const m=MENTORS.find(x=>x.name===mentorName);
-  if(!m){console.warn('Mentor not found:',mentorName);return;}
-  currentMcMentor=m;
-
+function openMentorCard(idx){
+  const list = (currentDeptFilter && currentDeptFilter !== 'all')
+    ? MENTORS.filter(m => m.depts.some(d => d === currentDeptFilter))
+    : MENTORS;
+  const m = list[idx];
+  if(!m){console.warn('Mentor not found at index:',idx);return;}
   // Destroy old charts
   Object.values(mcCharts).forEach(c=>c?.destroy?.());
   mcCharts={};
