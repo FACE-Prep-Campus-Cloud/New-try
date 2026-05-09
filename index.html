@@ -31,7 +31,6 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden;}
 
-/* ── LOADING ── */
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000;transition:opacity 0.4s,visibility 0.4s;flex-direction:column;gap:20px;}
 .loading-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none;}
 .spinner{width:48px;height:48px;border:3px solid var(--gold-light);border-top-color:var(--gold-mid);border-radius:50%;animation:spin 0.8s linear infinite;}
@@ -39,13 +38,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes dropDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 @keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
-@keyframes ringPulse{0%,100%{r:6;opacity:1;}50%{r:10;opacity:0.3;}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
 .loading-text{font-size:13px;color:var(--ink3);font-weight:500;}
 .error-message{max-width:500px;padding:20px;background:var(--rose-lt);border:1px solid var(--rose);border-radius:var(--radius);color:var(--rose);font-size:13px;line-height:1.6;display:none;}
 .error-message.show{display:block;}
 
-/* ── SHELL ── */
 .shell{display:grid;grid-template-columns:240px 1fr;grid-template-rows:64px 1fr;min-height:100vh;}
 .hamburger-btn{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:rgba(253,233,160,0.12);border:1px solid rgba(253,233,160,0.25);border-radius:var(--radius-sm);cursor:pointer;padding:8px;margin-right:10px;flex-shrink:0;}
 .hamburger-btn span{display:block;width:100%;height:2px;background:#fde9a0;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
@@ -54,7 +51,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .hamburger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 .sidebar-overlay{display:none;}
 
-/* ── TOPBAR ── */
 .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-bottom:1px solid rgba(245,200,66,0.20);box-shadow:0 2px 16px rgba(90,50,0,0.30);position:sticky;top:0;z-index:100;}
 .logo{display:flex;align-items:center;flex:1;min-width:0;overflow:hidden;}
 .logo-name{font-family:var(--font-display);font-size:22px;font-weight:400;color:#fde9a0;line-height:1.2;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -77,7 +73,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .download-btn:hover{background:#f0be30;transform:translateY(-1px);}
 .faceprep-logo{height:42px;width:auto;object-fit:contain;display:block;border-radius:8px;}
 
-/* ── SIDEBAR ── */
 .sidebar{background:linear-gradient(180deg,#4a2800 0%,#5c3600 100%);border-right:1px solid rgba(245,200,66,0.15);padding:24px 0;display:flex;flex-direction:column;gap:2px;box-shadow:2px 0 16px rgba(90,50,0,0.22);}
 .nav-group-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(253,233,160,0.40);padding:12px 22px 5px;}
 .nav-item{display:flex;align-items:center;gap:11px;padding:10px 22px;color:rgba(253,233,160,0.65);font-size:13.5px;font-weight:400;cursor:pointer;border-left:2.5px solid transparent;transition:all 0.15s;}
@@ -94,7 +89,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .refresh-btn svg{width:12px;height:12px;transition:transform 0.5s;}
 .refresh-btn.spinning svg{transform:rotate(360deg);}
 
-/* ── MAIN ── */
 .main{overflow-y:auto;padding:32px 36px;display:flex;flex-direction:column;gap:26px;background:var(--bg);}
 .page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .page-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold-mid);margin-bottom:4px;}
@@ -105,7 +99,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .filter-chip:hover{color:var(--gold-dark);border-color:var(--gold-mid);}
 .filter-chip.active{background:var(--gold-dark);color:#fde9a0;border-color:var(--gold-dark);box-shadow:0 2px 8px rgba(120,80,0,0.25);}
 
-/* ── PANELS ── */
 .panel{display:none;flex-direction:column;gap:22px;}
 .panel.active{display:flex;}
 .panel.active>*{animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;}
@@ -115,7 +108,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .panel.active>*:nth-child(4){animation-delay:0.18s;}
 .panel.active>*:nth-child(5){animation-delay:0.23s;}
 
-/* ── METRIC CARDS ── */
 .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 .metric-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--gold-mid);border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
 .metric-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
@@ -124,13 +116,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .metric-value{font-family:var(--font-display);font-size:34px;font-weight:400;line-height:1.05;letter-spacing:-0.02em;margin-top:3px;color:var(--gold-dark);}
 .metric-sub{font-size:12px;color:var(--ink3);margin-top:5px;display:flex;align-items:center;gap:6px;}
 
-/* ── CARDS ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .card-title{font-family:var(--font-display);font-size:16px;font-weight:400;color:var(--ink);}
 .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
 
-/* ── BADGES ── */
 .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
 .badge-primary{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
 .badge-gold{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
@@ -139,7 +129,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .badge-amber{background:#fef3c7;color:#78350f;border:1px solid #fcd34d;}
 .badge-rose{background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;}
 
-/* ── NPS COMPONENTS ── */
 .nps-overview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
 .nps-gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:10px 0 18px;}
 .nps-gauge-svg{width:200px;height:115px;overflow:visible;}
@@ -187,10 +176,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .nps-bar-score-num{font-size:11px;font-weight:700;color:var(--ink3);text-align:center;}
 .nps-bar-outer{background:var(--bg2);border-radius:6px;height:22px;overflow:hidden;position:relative;}
 .nps-bar-inner{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;padding-left:8px;}
-.nps-bar-inner::after{content:'';position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 100%);background-size:200% 100%;animation:shimmer 2.5s infinite;}
 .nps-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
 
-/* ── TABLE ── */
 .mentor-bubble-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .bubble-tab{padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
 .bubble-tab:hover{border-color:var(--gold-mid);color:var(--gold-dark);}
@@ -207,7 +194,6 @@ tbody tr{transition:background 0.12s;}
 .mentor-name-btn{background:none;border:none;color:#7a4f00;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:var(--font-body);padding:0;transition:color 0.15s;}
 .mentor-name-btn:hover{color:#5c3600;}
 
-/* ── TREND PANEL ── */
 .trend-hero-banner{background:linear-gradient(135deg,#4a2800,#7a4f00 60%,#a06e00);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
 .trend-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(253,233,160,0.6);margin-bottom:6px;}
 .trend-hero-title{font-family:var(--font-display);font-size:32px;color:#fde9a0;line-height:1.1;}
@@ -254,28 +240,11 @@ tbody tr{transition:background 0.12s;}
 .trend-mover-vals{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
 .trend-mover-current{font-family:var(--font-display);font-size:16px;color:var(--gold-dark);}
 
-/* ════════════════════════════════════════
-   MENTOR PERFORMANCE CARD MODAL
-════════════════════════════════════════ */
-.mentor-card-modal{
-  position:fixed;inset:0;background:rgba(0,0,0,0.65);
-  z-index:9999;display:none;align-items:flex-start;
-  justify-content:center;padding:20px;
-  backdrop-filter:blur(3px);overflow-y:auto;
-}
+/* MENTOR CARD MODAL */
+.mentor-card-modal{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;display:none;align-items:flex-start;justify-content:center;padding:20px;backdrop-filter:blur(3px);overflow-y:auto;}
 .mentor-card-modal.open{display:flex;animation:fadeUp 0.28s cubic-bezier(.22,1,.36,1);}
-.mc-container{
-  background:#fff;border-radius:18px;width:100%;max-width:1060px;
-  box-shadow:0 24px 64px rgba(90,50,0,0.45);position:relative;
-  margin:auto;
-}
-
-/* MC Header */
-.mc-header{
-  background:linear-gradient(135deg,#4a2800 0%,#7a4f00 55%,#a06e00 100%);
-  padding:32px 40px 28px;border-radius:18px 18px 0 0;
-  position:relative;overflow:hidden;
-}
+.mc-container{background:#fff;border-radius:18px;width:100%;max-width:1060px;box-shadow:0 24px 64px rgba(90,50,0,0.45);position:relative;margin:auto;}
+.mc-header{background:linear-gradient(135deg,#4a2800 0%,#7a4f00 55%,#a06e00 100%);padding:32px 40px 28px;border-radius:18px 18px 0 0;position:relative;overflow:hidden;}
 .mc-header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;background:rgba(245,200,66,0.07);border-radius:50%;}
 .mc-header::after{content:'';position:absolute;bottom:-40px;left:30%;width:200px;height:200px;background:rgba(253,233,160,0.05);border-radius:50%;}
 .mc-header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;position:relative;z-index:1;}
@@ -289,20 +258,14 @@ tbody tr{transition:background 0.12s;}
 .mc-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:rgba(253,233,160,0.58);margin-bottom:5px;}
 .mc-kpi-value{font-family:var(--font-display);font-size:26px;color:#f5c842;line-height:1;margin-bottom:3px;}
 .mc-kpi-sub{font-size:11px;color:rgba(253,233,160,0.6);}
-
-/* MC Tabs */
 .mc-tabs-bar{display:flex;gap:2px;border-bottom:2px solid var(--border);padding:0 40px;background:var(--surface2);overflow-x:auto;}
 .mc-tabs-bar::-webkit-scrollbar{height:0;}
 .mc-tab-btn{padding:14px 18px;font-size:13px;font-weight:500;color:var(--ink3);cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all 0.18s;font-family:var(--font-body);}
 .mc-tab-btn:hover{color:var(--gold-dark);}
 .mc-tab-btn.active{color:var(--gold-dark);border-bottom-color:var(--gold-bright);font-weight:600;}
-
-/* MC Body */
 .mc-body{padding:28px 40px;}
 .mc-pane{display:none;}
 .mc-pane.active{display:block;animation:slideIn 0.25s ease-out;}
-
-/* MC Overview */
 .mc-ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
 .mc-stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;}
 .mc-stat-title{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
@@ -313,22 +276,16 @@ tbody tr{transition:background 0.12s;}
 .mc-trend-badge.down{background:#fee2e2;color:#7f1d1d;}
 .mc-trend-badge.flat{background:var(--bg2);color:var(--ink3);}
 .mc-radar-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;}
-
-/* MC Subjects */
 .mc-subject-row{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;transition:all 0.2s;margin-bottom:10px;}
 .mc-subject-row:hover{box-shadow:var(--shadow-sm);transform:translateX(4px);border-color:var(--gold-mid);}
 .mc-subject-row:last-child{margin-bottom:0;}
 .mc-subject-name{font-weight:600;color:var(--ink);font-size:13.5px;}
 .mc-subject-meta{font-size:12px;color:var(--ink3);margin-top:3px;}
 .mc-subject-rating{font-family:var(--font-display);font-size:22px;color:var(--gold-dark);}
-
-/* MC Comparison */
 .mc-comp-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;}
 .mc-comp-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;}
 .mc-comp-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);margin-bottom:8px;}
 .mc-comp-val{font-family:var(--font-display);font-size:34px;color:var(--gold-dark);line-height:1;margin-bottom:8px;}
-
-/* MC Questions */
 .mc-q-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .mc-q-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
 .mc-q-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--gold-light);color:var(--gold-dark);font-size:11px;font-weight:700;margin-bottom:8px;}
@@ -342,12 +299,8 @@ tbody tr{transition:background 0.12s;}
 .mc-q-bar-fill.yes{background:#10b981;}
 .mc-q-bar-fill.no{background:#ef4444;}
 .mc-q-count{font-size:11px;color:var(--ink3);min-width:64px;text-align:right;}
-
-/* MC Trends */
 .mc-trend-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:18px;}
 .mc-trend-note{background:var(--amber-light);border:1px solid var(--amber-mid);border-radius:10px;padding:18px 20px;display:flex;gap:12px;align-items:flex-start;}
-
-/* MC AI Insights */
 .mc-insight-item{background:var(--surface);border-left:4px solid var(--gold-mid);border-radius:8px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow-sm);margin-bottom:12px;}
 .mc-insight-item:last-child{margin-bottom:0;}
 .mc-insight-item.positive{border-left-color:#10b981;}
@@ -358,8 +311,6 @@ tbody tr{transition:background 0.12s;}
 .mc-insight-text{font-size:13px;color:var(--ink3);line-height:1.6;}
 .mc-ai-loading{display:flex;align-items:center;gap:12px;padding:28px;color:var(--ink3);font-size:13px;}
 .mc-ai-loading .spinner{width:24px;height:24px;border-width:2px;}
-
-/* MC Footer */
 .mc-footer{display:flex;gap:10px;padding:18px 40px;border-top:1px solid var(--border);background:var(--surface2);border-radius:0 0 18px 18px;flex-wrap:wrap;}
 .mc-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;border:none;}
 .mc-btn-primary{background:var(--gold-bright);color:var(--gold-dark);box-shadow:0 2px 8px rgba(160,110,0,0.30);}
@@ -367,13 +318,11 @@ tbody tr{transition:background 0.12s;}
 .mc-btn-secondary{background:var(--surface);color:var(--ink2);border:1px solid var(--border2);}
 .mc-btn-secondary:hover{background:var(--bg2);}
 
-/* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
 ::-webkit-scrollbar-thumb{background:var(--gold-mid);border-radius:99px;}
 .college-dropdown::-webkit-scrollbar{width:4px;}
 
-/* ── RESPONSIVE ── */
 @media(max-width:960px){
   .shell{grid-template-columns:1fr;}
   .main{padding:20px;}
@@ -405,7 +354,6 @@ tbody tr{transition:background 0.12s;}
 </head>
 <body>
 
-<!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
   <div class="loading-text" id="loadingText">Loading data...</div>
@@ -419,13 +367,9 @@ tbody tr{transition:background 0.12s;}
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     MENTOR PERFORMANCE CARD MODAL
-════════════════════════════════════════ -->
+<!-- MENTOR CARD MODAL -->
 <div class="mentor-card-modal" id="mentorCardModal" onclick="if(event.target===this)closeMentorCard()">
   <div class="mc-container" onclick="event.stopPropagation()">
-
-    <!-- Header -->
     <div class="mc-header">
       <div class="mc-header-row">
         <div>
@@ -440,29 +384,13 @@ tbody tr{transition:background 0.12s;}
         <button class="mc-close-btn" onclick="closeMentorCard()">×</button>
       </div>
       <div class="mc-kpi-row">
-        <div class="mc-kpi-box">
-          <div class="mc-kpi-label">Avg Rating</div>
-          <div class="mc-kpi-value" id="mcKpiRating">—</div>
-          <div class="mc-kpi-sub">out of 5.0</div>
-        </div>
-        <div class="mc-kpi-box">
-          <div class="mc-kpi-label">Bayesian Score</div>
-          <div class="mc-kpi-value" id="mcKpiBayesian">—</div>
-          <div class="mc-kpi-sub">weighted avg</div>
-        </div>
-        <div class="mc-kpi-box">
-          <div class="mc-kpi-label">Percentile</div>
-          <div class="mc-kpi-value" id="mcKpiPercentile">—</div>
-          <div class="mc-kpi-sub">vs all mentors</div>
-        </div>
-        <div class="mc-kpi-box">
-          <div class="mc-kpi-label">Status</div>
-          <div class="mc-kpi-value" id="mcKpiStatus" style="font-size:16px;margin-top:6px;">—</div>
-        </div>
+        <div class="mc-kpi-box"><div class="mc-kpi-label">Avg Rating</div><div class="mc-kpi-value" id="mcKpiRating">—</div><div class="mc-kpi-sub">out of 5.0</div></div>
+        <div class="mc-kpi-box"><div class="mc-kpi-label">Bayesian Score</div><div class="mc-kpi-value" id="mcKpiBayesian">—</div><div class="mc-kpi-sub">weighted avg</div></div>
+        <div class="mc-kpi-box"><div class="mc-kpi-label">Percentile</div><div class="mc-kpi-value" id="mcKpiPercentile">—</div><div class="mc-kpi-sub">vs all mentors</div></div>
+        <div class="mc-kpi-box"><div class="mc-kpi-label">Status</div><div class="mc-kpi-value" id="mcKpiStatus" style="font-size:16px;margin-top:6px;">—</div></div>
       </div>
     </div>
 
-    <!-- Tab Bar -->
     <div class="mc-tabs-bar">
       <button class="mc-tab-btn active" onclick="switchMcTab('overview',this)">📊 Overview</button>
       <button class="mc-tab-btn" onclick="switchMcTab('subjects',this)">📚 Subjects</button>
@@ -472,19 +400,14 @@ tbody tr{transition:background 0.12s;}
       <button class="mc-tab-btn" onclick="switchMcTab('insights',this)" id="mcInsightsTabBtn">💡 AI Insights</button>
     </div>
 
-    <!-- Body / Panes -->
     <div class="mc-body">
-
       <!-- OVERVIEW -->
       <div class="mc-pane active" id="mc-pane-overview">
         <div class="mc-ov-grid">
           <div class="mc-stat-box">
             <div class="mc-stat-title">Average Rating</div>
             <div class="mc-stat-val" id="ovRating">—</div>
-            <div class="mc-stat-sub">
-              <span id="ovTrendBadge">—</span>
-              <span id="ovVsDept" style="font-size:12px;color:var(--ink3);">—</span>
-            </div>
+            <div class="mc-stat-sub"><span id="ovTrendBadge">—</span><span id="ovVsDept" style="font-size:12px;color:var(--ink3);">—</span></div>
           </div>
           <div class="mc-stat-box">
             <div class="mc-stat-title">Total Responses</div>
@@ -508,21 +431,9 @@ tbody tr{transition:background 0.12s;}
       <div class="mc-pane" id="mc-pane-comparison">
         <div style="font-family:var(--font-display);font-size:15px;color:var(--ink);margin-bottom:16px;">How Does This Mentor Compare?</div>
         <div class="mc-comp-row">
-          <div class="mc-comp-box">
-            <div class="mc-comp-label">This Mentor</div>
-            <div class="mc-comp-val" id="compSelf">—</div>
-            <span class="badge badge-gold" id="compSelfBadge">—</span>
-          </div>
-          <div class="mc-comp-box">
-            <div class="mc-comp-label">Dept Average</div>
-            <div class="mc-comp-val" id="compDept">—</div>
-            <span class="badge badge-blue" id="compDeptBadge">—</span>
-          </div>
-          <div class="mc-comp-box">
-            <div class="mc-comp-label">College Average</div>
-            <div class="mc-comp-val" id="compCollege">—</div>
-            <span class="badge badge-amber" id="compCollegeBadge">All Depts</span>
-          </div>
+          <div class="mc-comp-box"><div class="mc-comp-label">This Mentor</div><div class="mc-comp-val" id="compSelf">—</div><span class="badge badge-gold" id="compSelfBadge">—</span></div>
+          <div class="mc-comp-box"><div class="mc-comp-label">Dept Average</div><div class="mc-comp-val" id="compDept">—</div><span class="badge badge-blue" id="compDeptBadge">—</span></div>
+          <div class="mc-comp-box"><div class="mc-comp-label">College Average</div><div class="mc-comp-val" id="compCollege">—</div><span class="badge badge-amber" id="compCollegeBadge">All Depts</span></div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 24px;">
           <div style="font-family:var(--font-display);font-size:15px;color:var(--ink);margin-bottom:16px;">Position Among Peers</div>
@@ -559,23 +470,18 @@ tbody tr{transition:background 0.12s;}
           <div class="mc-ai-loading"><div class="spinner"></div>Generating insights from Claude AI…</div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /mc-body -->
-
-    <!-- Footer Actions -->
     <div class="mc-footer">
       <button class="mc-btn mc-btn-primary" onclick="downloadMentorCard()">📄 Download Report Card</button>
       <button class="mc-btn mc-btn-secondary" onclick="shareMentorCard()">🔗 Share Performance</button>
       <button class="mc-btn mc-btn-secondary" onclick="exportMentorCSV()">📊 Export CSV</button>
     </div>
-
   </div>
 </div>
 
-<!-- Sidebar Overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
-<!-- ════════════════════ SHELL ════════════════════ -->
 <div class="shell">
   <header class="topbar">
     <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileSidebar()">
@@ -633,7 +539,7 @@ tbody tr{transition:background 0.12s;}
       </div>
     </div>
 
-    <!-- ── SUMMARY PANEL ── -->
+    <!-- SUMMARY PANEL -->
     <div class="panel active" id="panel-summary">
       <div class="metrics-row">
         <div class="metric-card"><div class="metric-label">Avg Overall Rating</div><div class="metric-value" id="avgRating">—</div></div>
@@ -655,7 +561,6 @@ tbody tr{transition:background 0.12s;}
             <svg class="nps-gauge-svg" viewBox="0 0 200 115" id="npsGaugeSvg">
               <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#f5e9c8" stroke-width="18" stroke-linecap="round"/>
               <path id="npsArcFill" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#c48a00" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-              <circle id="npsPulseRing" cx="100" cy="100" r="6" fill="none" stroke="#c48a00" stroke-width="2" opacity="0"/>
               <g id="npsNeedleGroup" transform="rotate(-90,100,100)">
                 <line x1="100" y1="100" x2="100" y2="28" stroke="#5c3600" stroke-width="2.5" stroke-linecap="round"/>
                 <circle cx="100" cy="100" r="6" fill="#5c3600"/>
@@ -676,7 +581,7 @@ tbody tr{transition:background 0.12s;}
       </div>
     </div>
 
-    <!-- ── MENTOR PERFORMANCE PANEL ── -->
+    <!-- MENTOR PERFORMANCE PANEL -->
     <div class="panel" id="panel-mentors">
       <div class="card" style="padding:0;overflow:hidden">
         <div id="mentorTableSummaryBar" style="display:flex;align-items:center;gap:24px;padding:14px 22px;background:linear-gradient(135deg,#4a2800,#7a4f00);flex-wrap:wrap;">
@@ -718,7 +623,7 @@ tbody tr{transition:background 0.12s;}
       </div>
     </div>
 
-    <!-- ── NPS PANEL ── -->
+    <!-- NPS PANEL -->
     <div class="panel" id="panel-nps">
       <div class="nps-index-banner">
         <div><div class="nps-index-label">Net Promoter Score Index</div><div class="nps-index-score" id="npsIndexBig">—</div><div class="nps-index-desc" id="npsIndexDesc">Select a college to load NPS data</div></div>
@@ -772,7 +677,7 @@ tbody tr{transition:background 0.12s;}
       </div>
     </div>
 
-    <!-- ── TREND PANEL ── -->
+    <!-- TREND PANEL -->
     <div class="panel" id="panel-trends">
       <div class="trend-hero-banner">
         <div>
@@ -786,9 +691,7 @@ tbody tr{transition:background 0.12s;}
         <div style="font-size:24px;flex-shrink:0;">ℹ️</div>
         <div>
           <div class="trend-setup-title">How to enable Trend Over Time</div>
-          <div class="trend-setup-text">
-            Add a column named <code>cycle</code> (or <code>batch</code> / <code>term</code> / <code>semester</code>) to your sheet. Fill it with labels like <code>Jan 2024</code>, <code>Cycle 1</code>, etc. Sample trend data is shown below as a preview.
-          </div>
+          <div class="trend-setup-text">Add a column named <code>cycle</code> (or <code>batch</code> / <code>term</code> / <code>semester</code>) to your sheet. Fill it with labels like <code>Jan 2024</code>, <code>Cycle 1</code>, etc.</div>
         </div>
       </div>
       <div class="trend-kpi-row" id="trendKpiRow">
@@ -834,14 +737,11 @@ tbody tr{transition:background 0.12s;}
         </div>
       </div>
     </div>
-
   </main>
 </div>
 
 <script>
-/* ════════════════════════════════
-   COLLEGES CONFIG
-════════════════════════════════ */
+/* ── COLLEGES CONFIG ── */
 const COLLEGES=[
   {name:"Kamaraj College",gid:"0"},{name:"Kamaraj Women's College",gid:"1140723423"},
   {name:"SDNB Vaishnav College for Women",gid:"340022065"},{name:"Patrician College of Arts & Science",gid:"1890731138"},
@@ -866,9 +766,7 @@ const QUESTION_TEXT=[
   "Sessions improved understanding and skills"
 ];
 
-/* ════════════════════════════════
-   STATE
-════════════════════════════════ */
+/* ── STATE ── */
 let currentCollege=null,MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
 let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
 let TREND_DATA={cycles:[],hasCycleCol:false,cycleStats:{},mentorCycleStats:{}};
@@ -879,10 +777,10 @@ let trendRatingInst=null,trendNpsInst=null,trendVolInst=null,trendSegInst=null;
 let mcCharts={};
 let needleAnimRAF=null;
 let currentMcMentor=null;
+/* ── KEY FIX: global lookup map so we never pass names through onclick strings ── */
+let MENTOR_INDEX_MAP={};
 
-/* ════════════════════════════════
-   MOBILE SIDEBAR
-════════════════════════════════ */
+/* ── MOBILE SIDEBAR ── */
 function toggleMobileSidebar(){
   const sb=document.getElementById('mainSidebar'),ov=document.getElementById('sidebarOverlay'),btn=document.getElementById('hamburgerBtn');
   sb.classList.toggle('open');ov.classList.toggle('open');btn.classList.toggle('open');
@@ -893,9 +791,7 @@ function closeMobileSidebar(){
   document.getElementById('hamburgerBtn').classList.remove('open');
 }
 
-/* ════════════════════════════════
-   DROPDOWN
-════════════════════════════════ */
+/* ── DROPDOWN ── */
 function buildDropdown(){
   document.getElementById('collegeDropdown').innerHTML=COLLEGES.map((c,i)=>
     `<div class="college-dropdown-item" id="dditem-${i}" onclick="selectCollege(${i})"><span class="item-dot"></span>${c.name}</div>`
@@ -929,9 +825,7 @@ function refreshData(){
   loadSheetData().finally(()=>setTimeout(()=>{btn.classList.remove('spinning');btn.disabled=false;},600));
 }
 
-/* ════════════════════════════════
-   DATA LOAD
-════════════════════════════════ */
+/* ── DATA LOAD ── */
 async function loadSheetData(){
   if(!currentCollege)return;
   const overlay=document.getElementById('loadingOverlay'),errEl=document.getElementById('errorMessage');
@@ -956,9 +850,7 @@ async function loadSheetData(){
   });
 }
 
-/* ════════════════════════════════
-   PROCESS DATA
-════════════════════════════════ */
+/* ── PROCESS DATA ── */
 function processSheetData(rows){
   TABLE_DATA=[];
   const mentorStats={},deptSet=new Set(),subjectSet=new Set(),npsScores=[];
@@ -1030,7 +922,13 @@ function processSheetData(rows){
       bayesianRating:parseFloat(bayesianScore.toFixed(7)),
       subjects:m.subjects.size,responses:totalResponses,qs:m.qs,subjectBreakdown};
   }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
+
   MENTORS.forEach((m,idx)=>{m.rank=idx+1;m.percentile=MENTORS.length>1?Math.round((1-idx/(MENTORS.length-1))*100):100;});
+
+  /* ── Build global index map (key fix for click) ── */
+  MENTOR_INDEX_MAP={};
+  MENTORS.forEach((m,idx)=>{MENTOR_INDEX_MAP[idx]=m;});
+
   DEPT_LIST=Array.from(deptSet).sort();
   updateDeptFilters();
 
@@ -1048,9 +946,7 @@ function processSheetData(rows){
   processTrendData(cycleMap,hasCycle,rows.length);
 }
 
-/* ════════════════════════════════
-   TREND DATA PROCESSING
-════════════════════════════════ */
+/* ── TREND DATA PROCESSING ── */
 function processTrendData(cycleMap,hasCycle,totalRows){
   let cycleStats={},cycles=[];
   if(hasCycle){
@@ -1103,18 +999,14 @@ function processTrendData(cycleMap,hasCycle,totalRows){
   buildTrendCycleButtons();
 }
 
-/* ════════════════════════════════
-   HELPERS
-════════════════════════════════ */
+/* ── HELPERS ── */
 function getNpsColor(index){if(index===null)return'#c48a00';if(index>=50)return'#065f46';if(index>=0)return'#c48a00';return'#7f1d1d';}
 function getNpsLabel(index){if(index===null)return'No NPS data';if(index>=70)return'Excellent · World Class';if(index>=50)return'Excellent';if(index>=30)return'Great';if(index>=0)return'Good';if(index>=-20)return'Needs Improvement';return'Critical';}
 function statusBadge(r){if(r>=4.3)return'<span class="badge badge-gold">Excellent</span>';if(r>=4.0)return'<span class="badge badge-green">Good</span>';if(r>=3.5)return'<span class="badge badge-amber">Average</span>';return'<span class="badge badge-rose">Needs work</span>';}
 function getStatusColor(r){if(r>=4.3)return'#10b981';if(r>=4.0)return'#c48a00';if(r>=3.5)return'#f59e0b';return'#ef4444';}
 function deptStyle(d){if(!d)return{color:'#4a2e00',bg:'#fff3cc',border:'#e6b84a'};if(d.includes('BCA'))return{color:'#5c3600',bg:'#fde9a0',border:'#e6b84a'};if(d.includes('BBA'))return{color:'#3d2200',bg:'#f5c842',border:'#c48a00'};return{color:'#4a2e00',bg:'#fff3cc',border:'#e6b84a'};}
 
-/* ════════════════════════════════
-   PANEL NAVIGATION
-════════════════════════════════ */
+/* ── PANEL NAVIGATION ── */
 function showPanel(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
@@ -1131,9 +1023,7 @@ function showPanel(id,el){
   closeMobileSidebar();
 }
 
-/* ════════════════════════════════
-   DEPT FILTER
-════════════════════════════════ */
+/* ── DEPT FILTER ── */
 function updateDeptFilters(){
   const fr=document.getElementById('deptFilterRow');
   fr.innerHTML='<button class="filter-chip active" onclick="setDeptFilter(\'all\',this)">All</button>';
@@ -1155,9 +1045,7 @@ function getFilteredMentors(filterDept){
   return list;
 }
 
-/* ════════════════════════════════
-   RENDER ALL
-════════════════════════════════ */
+/* ── RENDER ALL ── */
 function renderAllData(){
   renderMentorTable();
   renderInsightCharts(currentDeptFilter);
@@ -1168,9 +1056,7 @@ function renderAllData(){
   else updateSummaryCharts();
 }
 
-/* ════════════════════════════════
-   NPS NEEDLE ANIMATION
-════════════════════════════════ */
+/* ── NPS NEEDLE ANIMATION ── */
 function animateNPSNeedle(targetDeg,duration){
   duration=duration||1500;
   const group=document.getElementById('npsNeedleGroup');
@@ -1211,9 +1097,7 @@ function animateCounter(el,target,duration,prefix){
   requestAnimationFrame(go);
 }
 
-/* ════════════════════════════════
-   NPS SUMMARY (for summary panel)
-════════════════════════════════ */
+/* ── NPS SUMMARY ── */
 function renderNPSSummary(){
   const{promoters,passives,detractors,npsIndex,total}=NPS_DATA;
   const scoreBigEl=document.getElementById('npsScoreBig');
@@ -1242,9 +1126,7 @@ function renderNPSSummary(){
   }
 }
 
-/* ════════════════════════════════
-   NPS FULL PANEL
-════════════════════════════════ */
+/* ── NPS FULL PANEL ── */
 function renderNPSPanel(){
   const{promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq}=NPS_DATA;
   const promoPct=total>0?Math.round(promoters/total*100):0;
@@ -1307,9 +1189,9 @@ function renderNPSPanel(){
   }
 }
 
-/* ════════════════════════════════
-   MENTOR TABLE
-════════════════════════════════ */
+/* ════════════════════════════════════════
+   MENTOR TABLE — KEY FIX: use index not name in onclick
+════════════════════════════════════════ */
 function renderMentorTable(){
   const list=getFilteredMentors(currentDeptFilter);
   const sumResponses=list.reduce((s,m)=>s+m.responses,0);
@@ -1320,15 +1202,21 @@ function renderMentorTable(){
   document.getElementById('mtSumAvgXResp').textContent=sumAvgXResp>0?sumAvgXResp.toFixed(2):'—';
   document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
   if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found for this department</td></tr>';return;}
+
+  /* Build a temporary lookup so onclick passes a safe integer index */
+  window._filteredMentorList=list;
+
   const deptLabel=(currentDeptFilter&&currentDeptFilter!=='all')?currentDeptFilter:null;
   const rankColors={1:'#f5c842',2:'#e0e0e0',3:'#f0c498'};
-  document.getElementById('mentorTableBody').innerHTML=list.map(m=>{
+
+  document.getElementById('mentorTableBody').innerHTML=list.map((m,idx)=>{
     const displayRank=m.filteredRank;
     const rankBg=rankColors[displayRank]||'transparent';
     const rankColor=displayRank<=3?'#3d2200':'var(--ink3)';
     const rankBorder=displayRank<=3?'none':'1px solid var(--border2)';
     const displayDept=deptLabel||m.depts.join(', ');
     const s=deptStyle(deptLabel||m.depts[0]||'');
+    /* ✅ FIX: pass numeric idx — no quote escaping, works for ANY mentor name */
     return`<tr>
       <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td>
       <td><button class="mentor-name-btn" onclick="openMentorCard(${idx})">✦ ${m.name}</button></td>
@@ -1342,9 +1230,7 @@ function renderMentorTable(){
   }).join('');
 }
 
-/* ════════════════════════════════
-   SUMMARY CHARTS
-════════════════════════════════ */
+/* ── SUMMARY CHARTS ── */
 Chart.defaults.font.family='Inter';Chart.defaults.color='#8a6020';
 function initSummaryCharts(){
   const top=MENTORS.slice(0,Math.min(15,MENTORS.length));
@@ -1366,9 +1252,7 @@ function updateSummaryCharts(){
   }
 }
 
-/* ════════════════════════════════
-   INSIGHT CHARTS
-════════════════════════════════ */
+/* ── INSIGHT CHARTS ── */
 function setInsightChart(type,btn){
   currentInsightChart=type;
   document.querySelectorAll('.bubble-tab').forEach(b=>b.classList.remove('active'));
@@ -1418,9 +1302,7 @@ function renderResponseChart(list){
   insightResponseInst=new Chart(document.getElementById('insightResponseChart'),{type:'bar',data:{labels:sorted.map(m=>m.name),datasets:[{data:sorted.map(m=>m.responses),backgroundColor:colors,borderColor:sorted.map(()=>'#c48a00'),borderWidth:1,borderRadius:5,borderSkipped:false,barThickness:20}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',callbacks:{title:ctx=>sorted[ctx[0].dataIndex].name,label:ctx=>{const m=sorted[ctx.dataIndex];return[` Responses: ${m.responses}`,` Avg Rating: ${m.rating.toFixed(2)}/5`];}}},datalabels:{anchor:'end',align:'end',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v}},scales:{x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
 }
 
-/* ════════════════════════════════
-   TREND PANEL
-════════════════════════════════ */
+/* ── TREND PANEL ── */
 function buildTrendCycleButtons(){
   const{cycles}=TREND_DATA;
   const wrap=document.getElementById('trendCycleBtns');
@@ -1508,53 +1390,57 @@ function renderTrendCycleTable(){
   }).join('');
 }
 
-/* ════════════════════════════════════════════════════
-   ★ MENTOR PERFORMANCE CARD — FULL IMPLEMENTATION ★
-════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   MENTOR PERFORMANCE CARD
+   KEY FIX: openMentorCard(idx) takes a number,
+   looks up window._filteredMentorList[idx]
+════════════════════════════════════════ */
 function openMentorCard(idx){
-  const list = (currentDeptFilter && currentDeptFilter !== 'all')
-    ? MENTORS.filter(m => m.depts.some(d => d === currentDeptFilter))
-    : MENTORS;
-  const m = list[idx];
+  /* Support both numeric index (from table) and direct object (internal calls) */
+  let m;
+  if(typeof idx==='number'){
+    const list=window._filteredMentorList||MENTORS;
+    m=list[idx];
+  }else{
+    m=idx; /* allow passing object directly if ever needed */
+  }
   if(!m){console.warn('Mentor not found at index:',idx);return;}
-  // Destroy old charts
+  currentMcMentor=m;
+
   Object.values(mcCharts).forEach(c=>c?.destroy?.());
   mcCharts={};
 
-  // Reset tabs to Overview
   document.querySelectorAll('.mc-tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.mc-pane').forEach(p=>p.classList.remove('active'));
   document.querySelector('.mc-tab-btn').classList.add('active');
   document.getElementById('mc-pane-overview').classList.add('active');
 
-  // Header
   document.getElementById('mcName').textContent=m.name;
   document.getElementById('mcDept').textContent=m.depts.join(', ');
   document.getElementById('mcRespMeta').textContent=`${m.responses} responses`;
   document.getElementById('mcSubjMeta').textContent=`${m.subjects} subjects`;
   document.getElementById('mcRankMeta').textContent=`Rank #${m.rank} of ${MENTORS.length}`;
 
-  // KPIs
   document.getElementById('mcKpiRating').textContent=m.rating.toFixed(1);
   document.getElementById('mcKpiBayesian').textContent=m.bayesianRating.toFixed(3);
   document.getElementById('mcKpiPercentile').textContent=`${m.percentile}th`;
   document.getElementById('mcKpiStatus').textContent=m.rating>=4.5?'⭐ Excellent':m.rating>=4.0?'✅ Good':m.rating>=3.5?'⚠️ Average':'❌ Needs Work';
 
-  // Populate panes
   populateMcOverview(m);
   populateMcSubjects(m);
   populateMcComparison(m);
   populateMcQuestions(m);
   populateMcTrends(m);
 
-  // Reset insights — will be fetched when tab is clicked
-  document.getElementById('mcInsightsList').innerHTML=`<div class="mc-ai-loading"><div class="spinner"></div>Click this tab to generate AI insights for ${m.name}…</div>`;
+  document.getElementById('mcInsightsList').innerHTML=`<div class="mc-ai-loading"><div class="spinner"></div>Click the AI Insights tab to generate insights for ${m.name}…</div>`;
 
   document.getElementById('mentorCardModal').classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
 function closeMentorCard(){
   document.getElementById('mentorCardModal').classList.remove('open');
+  document.body.style.overflow='';
   Object.values(mcCharts).forEach(c=>c?.destroy?.());
   mcCharts={};
   currentMcMentor=null;
@@ -1565,15 +1451,10 @@ function switchMcTab(tabName,btn){
   btn.classList.add('active');
   document.querySelectorAll('.mc-pane').forEach(p=>p.classList.remove('active'));
   document.getElementById('mc-pane-'+tabName).classList.add('active');
-
-  // Auto-fetch AI insights on first visit to that tab
   if(tabName==='insights'&&currentMcMentor){
     const container=document.getElementById('mcInsightsList');
-    if(container.querySelector('.mc-ai-loading')){
-      fetchAIInsights(currentMcMentor);
-    }
+    if(container.querySelector('.mc-ai-loading')){fetchAIInsights(currentMcMentor);}
   }
-  // Lazy-render charts when tabs become visible
   if(tabName==='comparison'&&currentMcMentor&&!mcCharts.comparison)populateMcComparison(currentMcMentor,true);
   if(tabName==='trends'&&currentMcMentor&&!mcCharts.trend)populateMcTrends(currentMcMentor,true);
 }
@@ -1583,7 +1464,6 @@ function populateMcOverview(m){
   document.getElementById('ovRating').textContent=m.rating.toFixed(1);
   document.getElementById('ovResponses').textContent=m.responses;
   document.getElementById('ovSubjCount').textContent=m.subjects;
-
   const deptMentors=MENTORS.filter(x=>x.depts.some(d=>m.depts.includes(d)));
   const deptAvg=deptMentors.length>0?deptMentors.reduce((s,x)=>s+x.rating,0)/deptMentors.length:m.rating;
   const diff=m.rating-deptAvg;
@@ -1591,8 +1471,6 @@ function populateMcOverview(m){
   const sign=diff>=0?'+':'';
   document.getElementById('ovTrendBadge').innerHTML=`<span class="mc-trend-badge ${cls}">${sign}${diff.toFixed(1)} vs dept avg</span>`;
   document.getElementById('ovVsDept').textContent=`Dept avg: ${deptAvg.toFixed(1)} / 5.0`;
-
-  // Radar
   if(mcCharts.radar){mcCharts.radar.destroy();}
   const qData=m.qs.map(q=>{const tot=q.y+q.n;return tot>0?(q.y/tot*100):0;});
   mcCharts.radar=new Chart(document.getElementById('mcRadarChart'),{
@@ -1624,7 +1502,6 @@ function populateMcComparison(m,chartOnly=false){
   const deptMentors=MENTORS.filter(x=>x.depts.some(d=>m.depts.includes(d)));
   const deptAvg=deptMentors.length>0?deptMentors.reduce((s,x)=>s+x.rating,0)/deptMentors.length:m.rating;
   const collegeAvg=MENTORS.length>0?MENTORS.reduce((s,x)=>s+x.rating,0)/MENTORS.length:m.rating;
-
   if(!chartOnly){
     document.getElementById('compSelf').textContent=m.rating.toFixed(2);
     document.getElementById('compDept').textContent=deptAvg.toFixed(2);
@@ -1635,7 +1512,6 @@ function populateMcComparison(m,chartOnly=false){
     const d=m.rating-deptAvg;
     document.getElementById('compInsightText').textContent=d>0.3?`🎯 ${d.toFixed(1)} pts above dept avg`:d<-0.3?`⚠️ ${Math.abs(d).toFixed(1)} pts below dept avg`:`✅ On par with dept average`;
   }
-
   if(mcCharts.comparison){mcCharts.comparison.destroy();}
   mcCharts.comparison=new Chart(document.getElementById('mcComparisonChart'),{
     type:'bar',
@@ -1671,7 +1547,6 @@ function populateMcTrends(m,chartOnly=false){
     return mr[m.name]!==undefined?mr[m.name]:null;
   });
   const validData=data.filter(v=>v!==null);
-
   if(!chartOnly){
     const first=validData[0],last=validData[validData.length-1];
     let note='No historical cycle data available for this mentor.';
@@ -1681,7 +1556,6 @@ function populateMcTrends(m,chartOnly=false){
     }else if(validData.length===1){note=`Only 1 cycle of data available. Rating: ${last.toFixed(1)}/5.0.`;}
     document.getElementById('mcTrendNote').innerHTML=note;
   }
-
   if(mcCharts.trend){mcCharts.trend.destroy();}
   mcCharts.trend=new Chart(document.getElementById('mcTrendChart'),{
     type:'line',
@@ -1691,17 +1565,15 @@ function populateMcTrends(m,chartOnly=false){
   });
 }
 
-/* ── MC: AI INSIGHTS (Claude API) ── */
+/* ── MC: AI INSIGHTS ── */
 async function fetchAIInsights(m){
   const container=document.getElementById('mcInsightsList');
   container.innerHTML=`<div class="mc-ai-loading"><div class="spinner"></div>Analysing ${m.name}'s data with Claude AI…</div>`;
-
   const deptMentors=MENTORS.filter(x=>x.depts.some(d=>m.depts.includes(d)));
   const deptAvg=deptMentors.length>0?deptMentors.reduce((s,x)=>s+x.rating,0)/deptMentors.length:m.rating;
   const collegeAvg=MENTORS.length>0?MENTORS.reduce((s,x)=>s+x.rating,0)/MENTORS.length:m.rating;
   const qSummary=QUESTION_TEXT.map((q,i)=>{const d=m.qs[i]||{y:0,n:0};const tot=d.y+d.n;const pct=tot>0?Math.round(d.y/tot*100):0;return`Q${i+1} "${q}": ${pct}% Yes (${d.y}Y/${d.n}N)`;}).join('\n');
   const subjectSummary=(m.subjectBreakdown||[]).map(s=>`${s.name}: ${s.rating.toFixed(2)}/5 (${s.responses} resp)`).join(', ');
-
   const prompt=`You are an expert education quality analyst. Analyse this mentor's performance data and give 4-6 concise, actionable insights.
 
 MENTOR: ${m.name}
@@ -1720,41 +1592,21 @@ Comparison vs Dept: ${(m.rating-deptAvg).toFixed(2)} pts
 ${qSummary}
 
 Return ONLY a JSON array (no markdown, no explanation, raw JSON only):
-[
-  {
-    "type": "positive" | "warning" | "critical",
-    "icon": "<single emoji>",
-    "title": "<short title>",
-    "text": "<2-3 sentence insight or recommendation>"
-  }
-]`;
+[{"type":"positive"|"warning"|"critical","icon":"<single emoji>","title":"<short title>","text":"<2-3 sentence insight>"}]`;
 
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
-      })
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
     });
     const data=await resp.json();
     const raw=data.content?.map(b=>b.text||'').join('').trim();
     const clean=raw.replace(/^```json\s*|```$/g,'').trim();
     const insights=JSON.parse(clean);
-    container.innerHTML=insights.map(i=>`
-      <div class="mc-insight-item ${i.type}">
-        <div class="mc-insight-icon">${i.icon}</div>
-        <div>
-          <div class="mc-insight-title">${i.title}</div>
-          <div class="mc-insight-text">${i.text}</div>
-        </div>
-      </div>
-    `).join('');
+    container.innerHTML=insights.map(i=>`<div class="mc-insight-item ${i.type}"><div class="mc-insight-icon">${i.icon}</div><div><div class="mc-insight-title">${i.title}</div><div class="mc-insight-text">${i.text}</div></div></div>`).join('');
   }catch(err){
     console.error('Claude API error:',err);
-    // Fallback to rule-based
     container.innerHTML=buildRuleBasedInsights(m,deptAvg,collegeAvg);
   }
 }
@@ -1776,16 +1628,15 @@ function buildRuleBasedInsights(m,deptAvg,collegeAvg){
 
 /* ── MC: ACTIONS ── */
 function downloadMentorCard(){
-  if(!currentMcMentor){return;}
+  if(!currentMcMentor)return;
   const m=currentMcMentor;
   const now=new Date().toLocaleString();
   const subjectRows=(m.subjectBreakdown||[]).map(s=>`<tr><td>${s.name}</td><td style="font-weight:600;color:#5c3600;">${s.rating.toFixed(2)}/5</td><td>${s.responses}</td></tr>`).join('');
   const qRows=QUESTION_TEXT.map((q,i)=>{const d=m.qs[i]||{y:0,n:0};const tot=d.y+d.n;const pct=tot>0?Math.round(d.y/tot*100):0;return`<tr><td>Q${i+1}: ${q}</td><td style="color:#065f46;font-weight:600;">${d.y}</td><td style="color:#7f1d1d;font-weight:600;">${d.n}</td><td><strong>${pct}%</strong></td></tr>`;}).join('');
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${m.name} — Performance Report</title><style>body{font-family:Arial,sans-serif;padding:40px;background:#fdf8ed;color:#2a1800;max-width:900px;margin:0 auto;}.hdr{background:linear-gradient(135deg,#4a2800,#7a4f00);color:#fde9a0;padding:30px;border-radius:12px;margin-bottom:28px;}.hdr h1{font-size:30px;margin:0 0 8px;}.sec{background:#fff;padding:22px;margin-bottom:18px;border-radius:10px;border:1px solid rgba(120,80,10,0.12);}.sec h2{font-size:18px;border-bottom:2px solid #e6b84a;padding-bottom:8px;margin-bottom:14px;color:#5c3600;}table{width:100%;border-collapse:collapse;font-size:13px;}th,td{padding:10px 14px;text-align:left;border-bottom:1px solid #f5e9c8;}th{background:#fdf4e0;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;}.kpi{display:inline-block;margin:6px 18px 6px 0;}.kpi-label{font-size:10px;color:#8a6020;text-transform:uppercase;letter-spacing:0.07em;}.kpi-val{font-size:22px;font-weight:bold;color:#5c3600;}</style></head><body><div class="hdr"><h1>${m.name}</h1><div>${m.depts.join(', ')} · Rank #${m.rank} · ${m.percentile}th percentile</div></div><div class="sec"><h2>Key Metrics</h2><div class="kpi"><div class="kpi-label">Rating</div><div class="kpi-val">${m.rating.toFixed(2)}/5</div></div><div class="kpi"><div class="kpi-label">Bayesian</div><div class="kpi-val">${m.bayesianRating.toFixed(4)}</div></div><div class="kpi"><div class="kpi-label">Responses</div><div class="kpi-val">${m.responses}</div></div><div class="kpi"><div class="kpi-label">Subjects</div><div class="kpi-val">${m.subjects}</div></div></div><div class="sec"><h2>Subject Ratings</h2><table><thead><tr><th>Subject</th><th>Rating</th><th>Responses</th></tr></thead><tbody>${subjectRows||'<tr><td colspan="3" style="color:#8a6020;">No subject data</td></tr>'}</tbody></table></div><div class="sec"><h2>Question Analysis</h2><table><thead><tr><th>Question</th><th>Yes</th><th>No</th><th>Yes Rate</th></tr></thead><tbody>${qRows}</tbody></table></div><div class="sec" style="font-size:11px;color:#8a6020;">Generated: ${now} · FacePrep Campus Analytics · ${currentCollege?.name||'—'}</div></body></html>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${m.name} — Performance Report</title><style>body{font-family:Arial,sans-serif;padding:40px;background:#fdf8ed;color:#2a1800;max-width:900px;margin:0 auto;}.hdr{background:linear-gradient(135deg,#4a2800,#7a4f00);color:#fde9a0;padding:30px;border-radius:12px;margin-bottom:28px;}.hdr h1{font-size:30px;margin:0 0 8px;}.sec{background:#fff;padding:22px;margin-bottom:18px;border-radius:10px;border:1px solid rgba(120,80,10,0.12);}.sec h2{font-size:18px;border-bottom:2px solid #e6b84a;padding-bottom:8px;margin-bottom:14px;color:#5c3600;}table{width:100%;border-collapse:collapse;font-size:13px;}th,td{padding:10px 14px;text-align:left;border-bottom:1px solid #f5e9c8;}th{background:#fdf4e0;font-weight:600;font-size:11px;text-transform:uppercase;}.kpi{display:inline-block;margin:6px 18px 6px 0;}.kpi-label{font-size:10px;color:#8a6020;text-transform:uppercase;}.kpi-val{font-size:22px;font-weight:bold;color:#5c3600;}</style></head><body><div class="hdr"><h1>${m.name}</h1><div>${m.depts.join(', ')} · Rank #${m.rank} · ${m.percentile}th percentile</div></div><div class="sec"><h2>Key Metrics</h2><div class="kpi"><div class="kpi-label">Rating</div><div class="kpi-val">${m.rating.toFixed(2)}/5</div></div><div class="kpi"><div class="kpi-label">Bayesian</div><div class="kpi-val">${m.bayesianRating.toFixed(4)}</div></div><div class="kpi"><div class="kpi-label">Responses</div><div class="kpi-val">${m.responses}</div></div><div class="kpi"><div class="kpi-label">Subjects</div><div class="kpi-val">${m.subjects}</div></div></div><div class="sec"><h2>Subject Ratings</h2><table><thead><tr><th>Subject</th><th>Rating</th><th>Responses</th></tr></thead><tbody>${subjectRows||'<tr><td colspan="3">No subject data</td></tr>'}</tbody></table></div><div class="sec"><h2>Question Analysis</h2><table><thead><tr><th>Question</th><th>Yes</th><th>No</th><th>Yes Rate</th></tr></thead><tbody>${qRows}</tbody></table></div><div class="sec" style="font-size:11px;color:#8a6020;">Generated: ${now} · FacePrep Campus Analytics · ${currentCollege?.name||'—'}</div></body></html>`;
   const blob=new Blob([html],{type:'text/html'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${m.name.replace(/[^a-z0-9]/gi,'-')}-Report.html`;a.click();URL.revokeObjectURL(a.href);
 }
-
 function shareMentorCard(){
   if(!currentMcMentor)return;
   const m=currentMcMentor;
@@ -1793,7 +1644,6 @@ function shareMentorCard(){
   if(navigator.share){navigator.share({title:'Mentor Performance',text});}
   else{navigator.clipboard.writeText(text);alert('📋 Performance summary copied to clipboard!');}
 }
-
 function exportMentorCSV(){
   if(!currentMcMentor)return;
   const m=currentMcMentor;
@@ -1803,14 +1653,12 @@ function exportMentorCSV(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${m.name.replace(/[^a-z0-9]/gi,'-')}-Data.csv`;a.click();URL.revokeObjectURL(a.href);
 }
 
-/* ════════════════════════════════
-   DOWNLOAD FULL REPORT
-════════════════════════════════ */
+/* ── DOWNLOAD FULL REPORT ── */
 function downloadReport(){
   if(!MENTORS.length&&!NPS_DATA.total){alert('No data to download. Please select a college first.');return;}
   const collegeName=currentCollege?.name||'Report';
   const now=new Date().toLocaleString();
-  const{promoters,passives,detractors,npsIndex,avg:npsAvg,total:npsTotal,scoreFreq}=NPS_DATA;
+  const{promoters,passives,detractors,npsIndex,avg:npsAvg,total:npsTotal}=NPS_DATA;
   const npsDisplay=npsIndex!==null?(npsIndex>0?`+${npsIndex}`:`${npsIndex}`):'N/A';
   const promoPct=npsTotal>0?Math.round(promoters/npsTotal*100):0;
   const passPct=npsTotal>0?Math.round(passives/npsTotal*100):0;
@@ -1824,9 +1672,7 @@ function downloadReport(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.html`;a.click();URL.revokeObjectURL(a.href);
 }
 
-/* ════════════════════════════════
-   INIT
-════════════════════════════════ */
+/* ── INIT ── */
 document.addEventListener('DOMContentLoaded',()=>{
   buildDropdown();
   document.getElementById('loadingOverlay').classList.add('hidden');
