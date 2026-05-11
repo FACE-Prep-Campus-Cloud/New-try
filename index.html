@@ -79,6 +79,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .college-dropdown-item.active{background:var(--gold-light);color:var(--gold-dark);font-weight:500;}
 .college-dropdown-item .item-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:2px;}
 .college-dropdown-item.active .item-dot{background:var(--gold-mid);}
+/* Special dot for colleges with dedicated trend sheets */
+.college-dropdown-item.has-trend .item-dot{background:#10b981;}
+.college-dropdown-item.has-trend.active .item-dot{background:#059669;}
 .download-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--gold-bright);color:var(--gold-dark);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.01em;transition:background 0.2s,transform 0.15s;box-shadow:0 2px 8px rgba(160,110,0,0.35);white-space:nowrap;}
 .download-btn:hover{background:#f0be30;transform:translateY(-1px);}
 .download-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
@@ -250,6 +253,10 @@ tbody tr{transition:background 0.12s;}
 
 /* Hit Ratio Card Special Style */
 .hit-ratio-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;border:1px solid #6ee7b7;}
+
+/* Trend data source badge */
+.trend-source-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#065f46;}
+.trend-source-badge.simulated{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.35);color:#78350f;}
 
 /* MENTOR MODAL */
 .mentor-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);}
@@ -555,10 +562,7 @@ tbody tr{transition:background 0.12s;}
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════
-       TREND OVER TIME PANEL
-       Sep 2025 – Apr 2026 (8 months)
-  ══════════════════════════════════════ -->
+  <!-- TREND OVER TIME PANEL -->
   <div class="panel" id="panel-trends">
     <div class="trend-hero-banner">
       <div>
@@ -566,13 +570,10 @@ tbody tr{transition:background 0.12s;}
         <div class="trend-hero-title" id="trendHeroTitle">Trend Over Time</div>
         <div class="trend-hero-sub" id="trendHeroSub">Track how ratings, NPS, Hit Ratio, and response volume change across months</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="trendCycleBtns"></div>
-    </div>
-
-    <!-- Trend data loading indicator -->
-    <div id="trendLoadingNotice" style="display:none;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 24px;display:flex;gap:12px;align-items:center;">
-      <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
-      <span style="font-size:13px;color:var(--ink3);">Loading trend data from Rathinam College sheet…</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;" id="trendCycleBtnsWrap">
+        <div id="trendSourceIndicator" style="display:none;margin-right:8px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="trendCycleBtns"></div>
+      </div>
     </div>
 
     <div class="trend-kpi-row">
@@ -665,12 +666,38 @@ const COLLEGES=[
 /* Main performance sheet */
 const SHEET_ID='19HsWARl8RFNZ6nc-bUCBKKEN39JkQVxCBfbNCUSe2_4';
 
-/* ─── DEDICATED TREND SHEET for Rathinam College ─── */
-const TREND_SHEET_ID='1nDMDazG090HPikkrSohUYXmYfZiO-MaREitGlJHwoKc';
-const RATHINAM_COLLEGE_NAME='Rathinam College of Arts & Science';
+/* ─── DEDICATED TREND SHEETS ─── 
+   Map college name → { sheetId, gids[] }
+   Multiple GIDs tried in order until one succeeds.
+*/
+const DEDICATED_TREND_SHEETS={
+  'Rathinam College of Arts & Science':{
+    sheetId:'1nDMDazG090HPikkrSohUYXmYfZiO-MaREitGlJHwoKc',
+    gids:['0','1707229573']
+  },
+  'Kamaraj College':{
+    sheetId:'1Km7BgYceWvJB-npvqHQNDZsANDHA3vMx-IQcxwzSHvQ',
+    gids:['0']
+  }
+  /* Add more colleges here:
+  'College Name':{sheetId:'SHEET_ID_HERE',gids:['0']}
+  */
+};
 
 /* Fixed 8-month window Sep 2025 – Apr 2026 */
 const FIXED_CYCLES=['Sep 2025','Oct 2025','Nov 2025','Dec 2025','Jan 2026','Feb 2026','Mar 2026','Apr 2026'];
+
+/* Month alias normalisation map */
+const MONTH_ALIAS_MAP={
+  'sep 2025':'Sep 2025','september 2025':'Sep 2025','sep-2025':'Sep 2025','sep':'Sep 2025',
+  'oct 2025':'Oct 2025','october 2025':'Oct 2025','oct-2025':'Oct 2025','oct':'Oct 2025',
+  'nov 2025':'Nov 2025','november 2025':'Nov 2025','nov-2025':'Nov 2025','nov':'Nov 2025',
+  'dec 2025':'Dec 2025','december 2025':'Dec 2025','dec-2025':'Dec 2025','dec':'Dec 2025',
+  'jan 2026':'Jan 2026','january 2026':'Jan 2026','jan-2026':'Jan 2026','jan':'Jan 2026',
+  'feb 2026':'Feb 2026','february 2026':'Feb 2026','feb-2026':'Feb 2026','feb':'Feb 2026',
+  'mar 2026':'Mar 2026','march 2026':'Mar 2026','mar-2026':'Mar 2026','mar':'Mar 2026',
+  'apr 2026':'Apr 2026','april 2026':'Apr 2026','apr-2026':'Apr 2026','apr':'Apr 2026'
+};
 
 /* ─── STATE ─── */
 let currentCollege=null,MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
@@ -695,9 +722,11 @@ function closeMobileSidebar(){
 
 /* ─── DROPDOWN ─── */
 function buildDropdown(){
-  document.getElementById('collegeDropdown').innerHTML=COLLEGES.map((c,i)=>
-    `<div class="college-dropdown-item" id="dditem-${i}" onclick="selectCollege(${i})"><span class="item-dot"></span>${c.name}</div>`
-  ).join('');
+  document.getElementById('collegeDropdown').innerHTML=COLLEGES.map((c,i)=>{
+    const hasTrend=!!DEDICATED_TREND_SHEETS[c.name];
+    return`<div class="college-dropdown-item${hasTrend?' has-trend':''}" id="dditem-${i}" onclick="selectCollege(${i})" title="${hasTrend?'Live trend data available':''}">`+
+      `<span class="item-dot"></span>${c.name}${hasTrend?' <span style="font-size:9px;color:#065f46;font-weight:600;margin-left:4px;">●LIVE</span>':''}</div>`;
+  }).join('');
 }
 function toggleDropdown(){
   const dd=document.getElementById('collegeDropdown'),btn=document.getElementById('collegeSelectBtn');
@@ -734,8 +763,7 @@ async function loadSheetData(){
   document.getElementById('loadingText').textContent=`Loading data for ${currentCollege.name}...`;
   overlay.classList.remove('hidden');errEl.classList.remove('show');
 
-  /* Check if this is Rathinam – if so, also load dedicated trend sheet */
-  const isRathinam=currentCollege.name===RATHINAM_COLLEGE_NAME;
+  const hasDedicatedTrend=!!DEDICATED_TREND_SHEETS[currentCollege.name];
 
   return new Promise((resolve,reject)=>{
     fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${currentCollege.gid}`)
@@ -744,16 +772,14 @@ async function loadSheetData(){
         Papa.parse(text,{header:true,skipEmptyLines:true,
           complete(res){
             processSheetData(res.data);
-            if(isRathinam){
-              /* Load dedicated trend sheet for Rathinam */
-              document.getElementById('loadingText').textContent='Loading Rathinam trend data...';
-              loadRathinamTrendSheet().then(()=>{
+            if(hasDedicatedTrend){
+              document.getElementById('loadingText').textContent=`Loading trend data for ${currentCollege.name}...`;
+              loadDedicatedTrendSheet(currentCollege.name).then(()=>{
                 renderAllData();
                 document.getElementById('lastUpdated').textContent=new Date().toLocaleTimeString();
                 setTimeout(()=>overlay.classList.add('hidden'),500);
                 resolve();
               }).catch(()=>{
-                /* Fall back gracefully if trend sheet fails */
                 renderAllData();
                 document.getElementById('lastUpdated').textContent=new Date().toLocaleTimeString();
                 setTimeout(()=>overlay.classList.add('hidden'),500);
@@ -773,14 +799,16 @@ async function loadSheetData(){
   });
 }
 
-/* ─── LOAD RATHINAM DEDICATED TREND SHEET ─── */
-async function loadRathinamTrendSheet(){
-  /* Try GID 0 first (first sheet), then other GIDs */
-  const gidsToTry=['0','1707229573'];
-  for(const gid of gidsToTry){
+/* ─── GENERIC DEDICATED TREND SHEET LOADER ─── */
+async function loadDedicatedTrendSheet(collegeName){
+  const config=DEDICATED_TREND_SHEETS[collegeName];
+  if(!config){console.warn('No dedicated trend sheet config for',collegeName);return;}
+
+  const{sheetId,gids}=config;
+  for(const gid of gids){
     try{
-      const resp=await fetch(`https://docs.google.com/spreadsheets/d/${TREND_SHEET_ID}/export?format=csv&gid=${gid}`);
-      if(!resp.ok)continue;
+      const resp=await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`);
+      if(!resp.ok){console.warn(`Trend sheet GID ${gid} returned HTTP ${resp.status}`);continue;}
       const text=await resp.text();
       const parsed=await new Promise((res,rej)=>{
         Papa.parse(text,{header:true,skipEmptyLines:true,
@@ -788,22 +816,19 @@ async function loadRathinamTrendSheet(){
         });
       });
       if(parsed&&parsed.length>0){
-        processDedicatedTrendData(parsed);
+        processDedicatedTrendData(parsed,collegeName);
+        console.log(`✓ Loaded dedicated trend sheet for ${collegeName} (GID ${gid}): ${parsed.length} rows`);
         return;
+      }else{
+        console.warn(`Trend sheet GID ${gid} returned empty data`);
       }
-    }catch(e){console.warn('Trend sheet GID',gid,'failed:',e);}
+    }catch(e){console.warn(`Trend sheet GID ${gid} failed:`,e);}
   }
-  console.warn('Could not load dedicated trend sheet – using simulated data');
+  console.warn(`Could not load dedicated trend sheet for ${collegeName} – falling back to simulated data`);
 }
 
 /* ─── PROCESS DEDICATED TREND SHEET DATA ─── */
-/* Expected columns (case-insensitive, flexible matching):
-   month/cycle/period, responses/total_responses, avg_rating/average_rating/rating,
-   nps/nps_index/nps_score, hit_ratio/hitratio/hit ratio,
-   promoters/promoter_pct, passives/passive_pct, detractors/detractor_pct,
-   mentors/mentor_count, expected_responses/expected
-*/
-function processDedicatedTrendData(rows){
+function processDedicatedTrendData(rows,collegeName){
   if(!rows||!rows.length)return;
 
   const keys=Object.keys(rows[0]).map(k=>k.trim().toLowerCase());
@@ -811,24 +836,25 @@ function processDedicatedTrendData(rows){
 
   function findCol(...candidates){
     for(const c of candidates){
-      const idx=keys.findIndex(k=>k===c||k.replace(/[\s_-]/g,'')===c.replace(/[\s_-]/g,''));
+      const norm=c.replace(/[\s_-]/g,'').toLowerCase();
+      const idx=keys.findIndex(k=>k===c||k.replace(/[\s_-]/g,'')===norm);
       if(idx>=0)return rawKeys[idx];
     }
     return null;
   }
 
   const colMonth=findCol('month','cycle','period','term','batch');
-  const colResponses=findCol('responses','total_responses','totalresponses','count');
-  const colRating=findCol('avg_rating','average_rating','avgrating','rating','avg rating');
-  const colNps=findCol('nps_index','nps','npsindex','nps index','nps score');
+  const colResponses=findCol('responses','total_responses','totalresponses','count','actual_responses');
+  const colRating=findCol('avg_rating','average_rating','avgrating','rating','avg rating','averagerating');
+  const colNps=findCol('nps_index','nps','npsindex','nps index','nps score','npsscore');
   const colHitRatio=findCol('hit_ratio','hitratio','hit ratio','hitrate','hit_rate','hit rate');
-  const colPromoters=findCol('promoters','promoter_pct','promoters%','promoter%','promoter pct');
-  const colPassives=findCol('passives','passive_pct','passives%','passive%','passive pct');
-  const colDetractors=findCol('detractors','detractor_pct','detractors%','detractor%','detractor pct');
-  const colMentors=findCol('mentors','mentor_count','mentorcount','mentor count');
-  const colExpected=findCol('expected_responses','expectedresponses','expected','target');
+  const colPromoters=findCol('promoters','promoter_pct','promoters%','promoter%','promoter pct','promoterspct');
+  const colPassives=findCol('passives','passive_pct','passives%','passive%','passive pct','passivespct');
+  const colDetractors=findCol('detractors','detractor_pct','detractors%','detractor%','detractor pct','detractorspct');
+  const colMentors=findCol('mentors','mentor_count','mentorcount','mentor count','mentors_count');
+  const colExpected=findCol('expected_responses','expectedresponses','expected','target','target_responses');
 
-  console.log('Trend sheet columns detected:',{colMonth,colResponses,colRating,colNps,colHitRatio,colPromoters,colPassives,colDetractors,colMentors,colExpected});
+  console.log(`Trend columns for ${collegeName}:`,{colMonth,colResponses,colRating,colNps,colHitRatio,colPromoters,colPassives,colDetractors,colMentors,colExpected});
 
   const cycleStats={};
   const cycles=[];
@@ -838,40 +864,28 @@ function processDedicatedTrendData(rows){
     const rawMonth=(row[colMonth]||'').trim();
     if(!rawMonth)return;
 
-    /* Normalise month name */
-    const aliasMap={
-      'sep 2025':'Sep 2025','september 2025':'Sep 2025','sep-2025':'Sep 2025',
-      'oct 2025':'Oct 2025','october 2025':'Oct 2025','oct-2025':'Oct 2025',
-      'nov 2025':'Nov 2025','november 2025':'Nov 2025','nov-2025':'Nov 2025',
-      'dec 2025':'Dec 2025','december 2025':'Dec 2025','dec-2025':'Dec 2025',
-      'jan 2026':'Jan 2026','january 2026':'Jan 2026','jan-2026':'Jan 2026',
-      'feb 2026':'Feb 2026','february 2026':'Feb 2026','feb-2026':'Feb 2026',
-      'mar 2026':'Mar 2026','march 2026':'Mar 2026','mar-2026':'Mar 2026',
-      'apr 2026':'Apr 2026','april 2026':'Apr 2026','apr-2026':'Apr 2026'
-    };
-    const cycleName=aliasMap[rawMonth.toLowerCase()]||rawMonth;
+    const cycleName=MONTH_ALIAS_MAP[rawMonth.toLowerCase()]||rawMonth;
     if(cycles.indexOf(cycleName)===-1)cycles.push(cycleName);
 
-    const pv=s=>{const v=parseFloat((row[s]||'').toString().replace('%','').trim());return isNaN(v)?null:v;};
-    const iv=s=>{const v=parseInt((row[s]||'').toString().replace('%','').trim(),10);return isNaN(v)?null:v;};
+    const pv=s=>{if(!s||!row[s])return null;const v=parseFloat(row[s].toString().replace('%','').trim());return isNaN(v)?null:v;};
+    const iv=s=>{if(!s||!row[s])return null;const v=parseInt(row[s].toString().replace('%','').trim(),10);return isNaN(v)?null:v;};
 
-    const responses=colResponses?iv(colResponses):null;
-    const ratingAvg=colRating?pv(colRating):null;
+    const responses=iv(colResponses);
+    const ratingAvg=pv(colRating);
     const npsIndex=colNps?iv(colNps):null;
-    const expected=colExpected?iv(colExpected):null;
+    const expected=iv(colExpected);
 
-    /* Hit ratio: use direct column, or compute from responses/expected */
-    let hitRatio=colHitRatio?pv(colHitRatio):null;
+    let hitRatio=pv(colHitRatio);
     if(hitRatio===null&&responses!==null&&expected!==null&&expected>0){
       hitRatio=parseFloat(((responses/expected)*100).toFixed(1));
     }
 
-    let promoterPct=colPromoters?pv(colPromoters):null;
-    let passivePct=colPassives?pv(colPassives):null;
-    let detractorPct=colDetractors?pv(colDetractors):null;
-    const mentorCount=colMentors?iv(colMentors):null;
+    let promoterPct=pv(colPromoters);
+    let passivePct=pv(colPassives);
+    let detractorPct=pv(colDetractors);
+    const mentorCount=iv(colMentors);
 
-    /* Normalise percentages (if stored as decimals like 0.45 → 45) */
+    /* Normalise percentages stored as decimals (0.45 → 45) */
     if(promoterPct!==null&&promoterPct<=1)promoterPct=parseFloat((promoterPct*100).toFixed(1));
     if(passivePct!==null&&passivePct<=1)passivePct=parseFloat((passivePct*100).toFixed(1));
     if(detractorPct!==null&&detractorPct<=1)detractorPct=parseFloat((detractorPct*100).toFixed(1));
@@ -891,14 +905,14 @@ function processDedicatedTrendData(rows){
     };
   });
 
-  /* Sort cycles by fixed window order */
+  /* Sort by fixed window order first, then any extras */
   const fixedPresent=FIXED_CYCLES.filter(c=>cycles.includes(c));
   const extra=cycles.filter(c=>!FIXED_CYCLES.includes(c));
   const sortedCycles=[...fixedPresent,...extra];
 
   TREND_DATA={cycles:sortedCycles,hasCycleCol:true,hasDedicatedSheet:true,cycleStats,mentorCycleStats:{}};
   buildTrendCycleButtons();
-  console.log('Dedicated trend sheet loaded:',sortedCycles.length,'months',cycleStats);
+  console.log(`Dedicated trend data processed for ${collegeName}:`,sortedCycles.length,'months');
 }
 
 /* ─── PROCESS MAIN SHEET DATA ─── */
@@ -923,17 +937,7 @@ function processSheetData(rows){
     if(hasCycle){
       const raw=(row[cycleCol]||'').trim();
       cycleName=raw||'Unknown';
-      const aliasMap={
-        'sep 2025':'Sep 2025','september 2025':'Sep 2025',
-        'oct 2025':'Oct 2025','october 2025':'Oct 2025',
-        'nov 2025':'Nov 2025','november 2025':'Nov 2025',
-        'dec 2025':'Dec 2025','december 2025':'Dec 2025',
-        'jan 2026':'Jan 2026','january 2026':'Jan 2026',
-        'feb 2026':'Feb 2026','february 2026':'Feb 2026',
-        'mar 2026':'Mar 2026','march 2026':'Mar 2026',
-        'apr 2026':'Apr 2026','april 2026':'Apr 2026'
-      };
-      const mapped=aliasMap[cycleName.toLowerCase()];
+      const mapped=MONTH_ALIAS_MAP[cycleName.toLowerCase()];
       if(mapped)cycleName=mapped;
     }
 
@@ -1003,13 +1007,13 @@ function processSheetData(rows){
   else{document.getElementById('subjectCount').textContent='—';document.getElementById('subjectSub').textContent='No data';}
   document.getElementById('pageSub').textContent=`${DEPT_LIST.length} departments · ${MENTORS.length} mentors · ${subjectSet.size} subjects`;
 
-  /* Only build simulated trend if not Rathinam (Rathinam gets dedicated sheet) */
-  if(currentCollege&&currentCollege.name!==RATHINAM_COLLEGE_NAME){
+  /* Only build simulated trend if no dedicated sheet config */
+  if(currentCollege&&!DEDICATED_TREND_SHEETS[currentCollege.name]){
     processTrendData(cycleMap,hasCycle,rows.length);
   }
 }
 
-/* ─── TREND DATA PROCESSING (non-Rathinam / fallback) ─── */
+/* ─── TREND DATA PROCESSING (fallback / non-dedicated) ─── */
 function processTrendData(cycleMap,hasCycle,totalRows){
   let cycleStats={};
   let cycles=[];
@@ -1287,17 +1291,25 @@ function selectTrendCycle(cycle,btn){
 
 function renderTrendPanel(){
   const{cycles,hasCycleCol,hasDedicatedSheet,cycleStats}=TREND_DATA;
+  const collegeName=currentCollege?currentCollege.name:'';
+  const hasConfig=!!DEDICATED_TREND_SHEETS[collegeName];
 
-  /* Update hero subtitle based on data source */
-  const isRathinam=currentCollege&&currentCollege.name===RATHINAM_COLLEGE_NAME;
+  /* Update source indicator */
+  const srcIndicator=document.getElementById('trendSourceIndicator');
   if(hasDedicatedSheet){
-    document.getElementById('trendHeroSub').textContent=`Live trend data from Rathinam College dedicated sheet · ${cycles.length} months tracked`;
+    srcIndicator.style.display='inline-flex';
+    srcIndicator.innerHTML=`<span class="trend-source-badge">● Live Sheet Data</span>`;
+    document.getElementById('trendHeroSub').textContent=`Live trend data from dedicated sheet · ${cycles.length} months tracked`;
+  }else if(hasConfig){
+    srcIndicator.style.display='inline-flex';
+    srcIndicator.innerHTML=`<span class="trend-source-badge simulated">⚠ Sheet load failed — showing simulated</span>`;
+    document.getElementById('trendHeroSub').textContent=`Could not load dedicated trend sheet — showing simulated preview data`;
   }else if(hasCycleCol){
-    document.getElementById('trendHeroSub').textContent=`Tracking ${cycles.length} months with real data from your sheet`;
+    srcIndicator.style.display='none';
+    document.getElementById('trendHeroSub').textContent=`Tracking ${cycles.length} months with real cycle data from your sheet`;
   }else{
-    document.getElementById('trendHeroSub').textContent=isRathinam
-      ?`Loading trend data from Rathinam dedicated sheet…`
-      :`Preview mode — simulated trend for Sep 2025–Apr 2026. Add a "cycle" column to your sheet for real data.`;
+    srcIndicator.style.display='none';
+    document.getElementById('trendHeroSub').textContent=`Preview mode — simulated trend for Sep 2025–Apr 2026. Add a "cycle" column or dedicated trend sheet for real data.`;
   }
 
   document.getElementById('trendRatingBadge').textContent=`${cycles.length} months`;
@@ -1362,7 +1374,7 @@ function renderTrendCharts(){
     options:{...baseOpts,plugins:{...baseOpts.plugins,tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;}}}}},
     plugins:[ChartDataLabels]});
 
-  /* ── HIT RATIO CHART (replaces Response Volume) ── */
+  /* ── HIT RATIO CHART ── */
   if(trendHitRatioInst){trendHitRatioInst.destroy();}
   const hasHitRatioData=hitRatios.some(v=>v!==null&&v!==undefined);
   if(hasHitRatioData){
@@ -1384,7 +1396,6 @@ function renderTrendCharts(){
             callbacks:{label:ctx=>`Hit Ratio: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(1)+'%':'—'}`}}}},
       plugins:[ChartDataLabels]});
   }else{
-    /* Show a placeholder message in canvas area */
     const canvas=document.getElementById('trendHitRatioChart');
     const ctx2d=canvas.getContext('2d');
     canvas.width=canvas.offsetWidth||400;canvas.height=240;
