@@ -1048,6 +1048,7 @@ function getFilteredMentors(filterDept){
 /* ── RENDER ALL ── */
 function renderAllData(){
   renderMentorTable();
+  window._filteredMentorList=getFilteredMentors(currentDeptFilter); // ensure always set
   renderInsightCharts(currentDeptFilter);
   renderNPSSummary();
   renderNPSPanel();
@@ -1400,7 +1401,7 @@ function openMentorCard(idx){
   let m;
   if(typeof idx==='number'){
     const list=window._filteredMentorList||MENTORS;
-    m=list[idx];
+    if(!m){ m=MENTORS[idx]; }
   }else{
     m=idx; /* allow passing object directly if ever needed */
   }
@@ -1471,7 +1472,10 @@ function populateMcOverview(m){
   const sign=diff>=0?'+':'';
   document.getElementById('ovTrendBadge').innerHTML=`<span class="mc-trend-badge ${cls}">${sign}${diff.toFixed(1)} vs dept avg</span>`;
   document.getElementById('ovVsDept').textContent=`Dept avg: ${deptAvg.toFixed(1)} / 5.0`;
-  if(mcCharts.radar){mcCharts.radar.destroy();}
+ if(mcCharts.radar){mcCharts.radar.destroy();mcCharts.radar=null;}
+  // Force fresh canvas to avoid Chart.js reuse error
+  const radarWrap=document.getElementById('mcRadarChart').parentElement;
+  radarWrap.innerHTML='<canvas id="mcRadarChart"></canvas>';
   const qData=m.qs.map(q=>{const tot=q.y+q.n;return tot>0?(q.y/tot*100):0;});
   mcCharts.radar=new Chart(document.getElementById('mcRadarChart'),{
     type:'radar',
@@ -1512,7 +1516,9 @@ function populateMcComparison(m,chartOnly=false){
     const d=m.rating-deptAvg;
     document.getElementById('compInsightText').textContent=d>0.3?`🎯 ${d.toFixed(1)} pts above dept avg`:d<-0.3?`⚠️ ${Math.abs(d).toFixed(1)} pts below dept avg`:`✅ On par with dept average`;
   }
-  if(mcCharts.comparison){mcCharts.comparison.destroy();}
+  if(mcCharts.comparison){mcCharts.comparison.destroy();mcCharts.comparison=null;}
+  const compWrap=document.getElementById('mcComparisonChart').parentElement;
+  compWrap.innerHTML='<canvas id="mcComparisonChart"></canvas>';
   mcCharts.comparison=new Chart(document.getElementById('mcComparisonChart'),{
     type:'bar',
     data:{labels:['This Mentor',`${m.depts[0]||'Dept'} Avg`,'College Avg'],datasets:[{data:[m.rating,deptAvg,collegeAvg],backgroundColor:['#c48a00','#3b82f6','#f59e0b'],borderRadius:8,borderSkipped:false}]},
@@ -1556,7 +1562,9 @@ function populateMcTrends(m,chartOnly=false){
     }else if(validData.length===1){note=`Only 1 cycle of data available. Rating: ${last.toFixed(1)}/5.0.`;}
     document.getElementById('mcTrendNote').innerHTML=note;
   }
-  if(mcCharts.trend){mcCharts.trend.destroy();}
+ if(mcCharts.trend){mcCharts.trend.destroy();mcCharts.trend=null;}
+  const trendWrap=document.getElementById('mcTrendChart').parentElement;
+  trendWrap.innerHTML='<canvas id="mcTrendChart"></canvas>';
   mcCharts.trend=new Chart(document.getElementById('mcTrendChart'),{
     type:'line',
     data:{labels,datasets:[{label:'Rating',data,borderColor:'#c48a00',backgroundColor:'rgba(196,138,0,0.1)',borderWidth:3,fill:true,tension:0.4,pointBackgroundColor:data.map(v=>v===null?'transparent':'#fff'),pointBorderColor:data.map(v=>v===null?'transparent':'#c48a00'),pointBorderWidth:2,pointRadius:data.map(v=>v===null?0:6),spanGaps:false}]},
