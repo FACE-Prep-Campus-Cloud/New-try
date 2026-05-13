@@ -1386,7 +1386,7 @@ function renderTrendCharts(){
         pointRadius:5,pointHoverRadius:7}]},
       options:{...baseOpts,
         scales:{...baseOpts.scales,
-          y:{...baseOpts.scales.y,min:0,max:100,
+          y:{...baseOpts.scales.y,min:0,max:120,
             ticks:{...baseOpts.scales.y.ticks,stepSize:20,callback:v=>v+'%'}}},
         plugins:{...baseOpts.plugins,
           datalabels:{display:true,anchor:'end',align:'top',
