@@ -906,9 +906,14 @@ function processDedicatedTrendData(rows,collegeName){
   });
 
   /* Sort by fixed window order first, then any extras */
-  const fixedPresent=FIXED_CYCLES.filter(c=>cycles.includes(c));
-  const extra=cycles.filter(c=>!FIXED_CYCLES.includes(c));
-  const sortedCycles=[...fixedPresent,...extra];
+ const MONTH_ORDER={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+  function parseCycleDate(c){
+    const parts=c.split(' ');
+    const mon=MONTH_ORDER[parts[0]]||0;
+    const yr=parseInt(parts[1])||0;
+    return yr*100+mon;
+  }
+  const sortedCycles=[...cycles].sort((a,b)=>parseCycleDate(a)-parseCycleDate(b));
 
   TREND_DATA={cycles:sortedCycles,hasCycleCol:true,hasDedicatedSheet:true,cycleStats,mentorCycleStats:{}};
   buildTrendCycleButtons();
@@ -1020,9 +1025,9 @@ function processTrendData(cycleMap,hasCycle,totalRows){
 
   if(hasCycle){
     const rawCycles=Object.keys(cycleMap).filter(c=>c!=='Unknown'&&c!=='—');
-    const fixedPresent=FIXED_CYCLES.filter(c=>rawCycles.includes(c));
-    const extra=rawCycles.filter(c=>!FIXED_CYCLES.includes(c)).sort();
-    cycles=[...fixedPresent,...extra];
+   const MONTH_ORDER2={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+    function parseCycleDate2(c){const parts=c.split(' ');return(parseInt(parts[1])||0)*100+(MONTH_ORDER2[parts[0]]||0);}
+    cycles=[...rawCycles].sort((a,b)=>parseCycleDate2(a)-parseCycleDate2(b));
     if(cycleMap['Unknown'])cycles.push('Unknown');
 
     cycles.forEach(c=>{
