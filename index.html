@@ -1427,9 +1427,9 @@ trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{type:'line',
 function renderTrendCycleTable(){
   const{cycles,cycleStats}=TREND_DATA;
   if(!cycles.length){document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--ink3);">No data</td></tr>';return;}
-  document.getElementById('trendCycleTableBody').innerHTML=cycles.slice().reverse().map((c,idx)=>{
+  document.getElementById('trendCycleTableBody').innerHTML=cycles.map((c,idx)=>{
     const s=cycleStats[c];
-    const prevKey=cycles[cycles.length-2-idx];
+    const prevKey=idx>0?cycles[idx-1]:null;
     const prev=prevKey?cycleStats[prevKey]:null;
     function deltaPill(curr,prevVal,fmt){
       if(!prev||curr===null||curr===undefined||prevVal===null||prevVal===undefined)return'<span class="delta-pill flat">—</span>';
