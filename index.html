@@ -1369,14 +1369,19 @@ function renderTrendCharts(){
     plugins:[ChartDataLabels]});
 
   if(trendNpsInst){trendNpsInst.destroy();}
+trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{type:'line',
+  data:{labels,datasets:[{label:'NPS',data:npss,borderColor:'#5c3600',backgroundColor:'rgba(92,54,0,0.08)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#5c3600'}]},
   options:{...baseOpts,
-  layout:{padding:{top:24}},
-  plugins:{...baseOpts.plugins,
-    datalabels:{display:true,anchor:'end',align:'top',
-      color:'#5c3600',font:{weight:'bold',size:10},
-      formatter:v=>v!==null?(v>0?'+':'')+v:''},
-    tooltip:{...baseOpts.plugins.tooltip,
-      callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;}}}}},
+    layout:{padding:{top:24}},
+    plugins:{...baseOpts.plugins,
+      datalabels:{display:true,anchor:'end',align:'top',
+        color:'#5c3600',font:{weight:'bold',size:10},
+        formatter:v=>v!==null?(v>0?'+':'')+v:''},
+      tooltip:{...baseOpts.plugins.tooltip,
+        callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;}}}}},
+  plugins:[ChartDataLabels]});
+
+/* ── HIT RATIO CHART ── */
 
   /* ── HIT RATIO CHART ── */
   if(trendHitRatioInst){trendHitRatioInst.destroy();}
