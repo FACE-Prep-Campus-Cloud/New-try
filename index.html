@@ -204,7 +204,6 @@ tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:var(--surface2);}
 tbody tr{transition:background 0.12s;}
 
-/* Summary footer row in mentor table */
 .mentor-summary-row td{
   background:linear-gradient(135deg,#4a2800,#7a4f00) !important;
   color:#fde9a0 !important;
@@ -214,35 +213,70 @@ tbody tr{transition:background 0.12s;}
 }
 .mentor-summary-row td:hover{background:linear-gradient(135deg,#4a2800,#7a4f00) !important;}
 
-/* Formula banner */
+/* ── BAYESIAN FORMULA BANNER ── */
 .bayesian-formula-banner{
   background:var(--surface2);
   border:1px solid var(--border2);
   border-radius:var(--radius-sm);
-  padding:14px 20px;
+  padding:16px 20px;
   display:flex;
   align-items:center;
   gap:16px;
   flex-wrap:wrap;
 }
-.bayesian-formula-text{
-  font-size:12px;
-  color:var(--ink3);
-  font-style:italic;
+.bayesian-formula-label{
+  font-size:13px;
+  font-weight:700;
+  color:var(--gold-dark);
+  white-space:nowrap;
+  flex-shrink:0;
 }
-.bayesian-formula-eq{
+/* Fraction box */
+.bayesian-frac-wrap{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+}
+.bayesian-eq-sign{
+  font-size:18px;
+  font-weight:700;
+  color:var(--gold-dark);
+  padding:0 4px;
+}
+.bayesian-frac{
   display:inline-flex;
   flex-direction:column;
   align-items:center;
-  font-size:12px;
+  gap:0;
+}
+.bayesian-frac-num{
+  font-size:12.5px;
   font-weight:600;
   color:var(--gold-dark);
-  border-left:3px solid var(--gold-mid);
-  padding-left:14px;
-  gap:2px;
+  border-bottom:2px solid var(--gold-dark);
+  padding:3px 10px 5px 10px;
+  white-space:nowrap;
+  text-align:center;
+  background:rgba(196,138,0,0.07);
+  border-radius:4px 4px 0 0;
 }
-.bayesian-formula-eq .numerator{border-bottom:1.5px solid var(--gold-dark);padding-bottom:3px;white-space:nowrap;}
-.bayesian-formula-eq .denominator{padding-top:3px;white-space:nowrap;}
+.bayesian-frac-den{
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--gold-dark);
+  padding:5px 10px 3px 10px;
+  white-space:nowrap;
+  text-align:center;
+  background:rgba(196,138,0,0.05);
+  border-radius:0 0 4px 4px;
+}
+.bayesian-note{
+  font-size:11px;
+  color:var(--ink3);
+  font-style:italic;
+  margin-left:auto;
+}
 
 /* TREND PANEL STYLES */
 .trend-hero-banner{background:linear-gradient(135deg,#4a2800,#7a4f00 60%,#a06e00);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
@@ -316,6 +350,7 @@ tbody tr{transition:background 0.12s;}
   .download-btn span{display:none;}
   .college-select-btn .btn-label{max-width:100px;}
   .trend-chart-card.full-width{grid-column:auto;}
+  .bayesian-frac-wrap{flex-wrap:wrap;}
 }
 @media(max-width:480px){
   .metrics-row,.trend-kpi-row{grid-template-columns:1fr;}
@@ -491,14 +526,21 @@ tbody tr{transition:background 0.12s;}
   <!-- MENTOR PERFORMANCE PANEL -->
   <div class="panel" id="panel-mentors">
 
-    <!-- Formula Banner -->
+    <!-- ── FORMULA BANNER — proper fraction display with brackets ── -->
     <div class="bayesian-formula-banner">
-      <div style="font-size:12px;font-weight:600;color:var(--gold-dark);white-space:nowrap;">Bayesian Method =</div>
-      <div class="bayesian-formula-eq">
-        <div class="numerator">(Global Mean × 50) + (Avg. Rating × Total No. of Responses)</div>
-        <div class="denominator">(50 + Total No. of Responses)</div>
+      <div class="bayesian-formula-label">Bayesian Method</div>
+
+      <div class="bayesian-frac-wrap">
+        <span class="bayesian-eq-sign">=</span>
+        <div class="bayesian-frac">
+          <div class="bayesian-frac-num">[ (Global Mean × 50) + (Avg. Rating × Individual Responses) ]</div>
+          <div class="bayesian-frac-den">( 50 + Individual Responses )</div>
+        </div>
       </div>
-      <div class="bayesian-formula-text" style="margin-left:auto;">* 50 is a fixed constant · Ranking is based on Bayesian Method score</div>
+
+      <div class="bayesian-note">
+        * 50 is a fixed constant &nbsp;·&nbsp; <strong>Individual Responses</strong> = each mentor's own response count &nbsp;·&nbsp; Ranking sorted highest → lowest
+      </div>
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
@@ -531,8 +573,8 @@ tbody tr{transition:background 0.12s;}
               <th>Mentor Name</th>
               <th>Department</th>
               <th style="text-align:center;">Average Rating</th>
-              <th style="text-align:center;">Total No. of Responses</th>
-              <th style="text-align:center;">Avg. Rating × Total No. of Responses</th>
+              <th style="text-align:center;">Individual Responses</th>
+              <th style="text-align:center;">Avg. Rating × Individual Responses</th>
               <th style="text-align:center;">Bayesian Method</th>
               <th style="text-align:center;">Status</th>
             </tr>
@@ -543,7 +585,7 @@ tbody tr{transition:background 0.12s;}
         </table>
       </div>
       <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">
-        * Bayesian Method = (Global Mean × 50 + Avg. Rating × Total No. of Responses) / (50 + Total No. of Responses) · Ranking is sorted by Bayesian Method value (highest = Rank 1)
+        * Bayesian Method = [ (Global Mean × 50) + (Avg. Rating × Individual Responses) ] ÷ (50 + Individual Responses) &nbsp;·&nbsp; Individual Responses = each mentor's own feedback count &nbsp;·&nbsp; Ranked highest → lowest (Rank 1 = best)
       </div>
     </div>
   </div>
@@ -761,7 +803,7 @@ let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
 let trendRatingInst=null,trendNpsInst=null,trendHitRatioInst=null,trendSegInst=null;
 let needleAnimRAF=null;
 
-/* ─── GLOBAL MEAN (computed once over ALL mentors, never changes with dept filter) ─── */
+/* ─── GLOBAL MEAN (computed once from ALL mentors, never changes with dept filter) ─── */
 let GLOBAL_MEAN=0;
 let GLOBAL_SUM_RESPONSES=0;
 let GLOBAL_SUM_AVG_X_RESP=0;
@@ -1005,43 +1047,52 @@ function processSheetData(rows){
   npsScores.forEach(s=>{if(scoreFreq[s]!==undefined)scoreFreq[s]++;});
   NPS_DATA={scores:npsScores,promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq};
 
-  /* ── BUILD MENTOR LIST (pre-Bayesian) ── */
+  /* ── BUILD MENTOR LIST ── */
   const mentorList=Object.values(mentorStats).map(m=>{
-    const avgR=m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length;
-    const totalResponses=m.ratings.length;
-    const avgXResponses=parseFloat((avgR*totalResponses).toFixed(2));
+    /*
+     * m.ratings.length = this mentor's INDIVIDUAL response count only.
+     * avgR             = average of only this mentor's ratings.
+     * avgXResponses    = avgR × individualResponses  (used for global mean + display column)
+     */
+    const individualResponses = m.ratings.length;                              // ← per-mentor count
+    const avgR = m.ratings.reduce((a,b)=>a+b,0) / individualResponses;
+    const avgXResponses = parseFloat((avgR * individualResponses).toFixed(2)); // ← per-mentor product
+
     return{
       name:m.name,
       depts:Array.from(m.depts),
       rating:parseFloat(avgR.toFixed(2)),
       avgXResponses,
-      responses:totalResponses,
+      responses: individualResponses,   // always this mentor's own count
       subjects:m.subjects.size,
       qs:m.qs
     };
   });
 
-  /* ── GLOBAL MEAN — computed ONCE from ALL mentors, stored globally ── */
-  GLOBAL_SUM_AVG_X_RESP = mentorList.reduce((s,m)=>s+m.avgXResponses,0);
-  GLOBAL_SUM_RESPONSES  = mentorList.reduce((s,m)=>s+m.responses,0);
+  /* ── GLOBAL MEAN — computed from ALL mentors using their individual values ── */
+  GLOBAL_SUM_AVG_X_RESP = mentorList.reduce((s,m)=>s + m.avgXResponses, 0);
+  GLOBAL_SUM_RESPONSES  = mentorList.reduce((s,m)=>s + m.responses,     0);
   GLOBAL_MEAN = GLOBAL_SUM_RESPONSES > 0
     ? GLOBAL_SUM_AVG_X_RESP / GLOBAL_SUM_RESPONSES
     : 0;
 
-  /* ── APPLY BAYESIAN — use the fixed GLOBAL_MEAN so value never changes with dept filter ── */
   /*
-     Formula: ( GLOBAL_MEAN × C + AvgRating × TotalResponses )
-              ─────────────────────────────────────────────────
-                         ( C + TotalResponses )
-
-     Note: AvgRating × TotalResponses  ==  m.avgXResponses (already computed above)
-  */
+   * ── BAYESIAN SCORE ──────────────────────────────────────────────────────────
+   *
+   *            [ (Global Mean × 50) + (Avg. Rating × Individual Responses) ]
+   * Score  =  ─────────────────────────────────────────────────────────────────
+   *                         ( 50 + Individual Responses )
+   *
+   * Key point: `m.responses` here is exclusively THIS mentor's own count.
+   * The brackets ensure the entire numerator is divided by the denominator.
+   * ────────────────────────────────────────────────────────────────────────────
+   */
   MENTORS = mentorList.map(m=>{
     const numerator   = (GLOBAL_MEAN * BAYESIAN_C) + (m.rating * m.responses);
     const denominator = BAYESIAN_C + m.responses;
-    const bayesianScore = numerator / denominator;
+    const bayesianScore = numerator / denominator;   // full bracket division
     return {...m, bayesianRating: parseFloat(bayesianScore.toFixed(7))};
-  }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
+  }).sort((a,b)=>b.bayesianRating - a.bayesianRating);
 
   MENTORS.forEach((m,idx)=>{
     m.rank=idx+1;
@@ -1051,7 +1102,6 @@ function processSheetData(rows){
   DEPT_LIST=Array.from(deptSet).sort();
   updateDeptFilters();
 
-  // Update summary metrics
   const tot=TABLE_DATA.length;
   const avgR=tot>0?TABLE_DATA.reduce((s,r)=>s+r.rating,0)/tot:0;
   document.getElementById('avgRating').textContent=avgR>0?`${avgR.toFixed(1)} / 5`:'—';
@@ -1437,11 +1487,7 @@ function renderTrendCycleTable(){
 function renderMentorTable(){
   const list=getFilteredMentors(currentDeptFilter);
 
-  /*
-   * IMPORTANT: The header bar always shows the GLOBAL totals (all mentors),
-   * not just the filtered subset, because the Global Mean used in Bayesian
-   * is computed from ALL mentors and must remain constant.
-   */
+  // Header bar always shows GLOBAL totals — the Global Mean must never change with dept filter
   document.getElementById('mtSumGlobalMean').textContent=GLOBAL_MEAN>0?GLOBAL_MEAN.toFixed(7):'—';
   document.getElementById('mtSumTotalResp').textContent=GLOBAL_SUM_RESPONSES||'—';
   document.getElementById('mtSumAvgXResp').textContent=GLOBAL_SUM_AVG_X_RESP>0?GLOBAL_SUM_AVG_X_RESP.toFixed(2):'—';
@@ -1455,7 +1501,6 @@ function renderMentorTable(){
   const deptLabel=(currentDeptFilter&&currentDeptFilter!=='all')?currentDeptFilter:null;
   const rankColors={1:'#f5c842',2:'#c0c0c0',3:'#cd7f32'};
 
-  /* Data rows */
   const dataRows=list.map(m=>{
     const displayRank=m.filteredRank;
     const rankBg=rankColors[displayRank]||'transparent';
@@ -1465,12 +1510,14 @@ function renderMentorTable(){
     const s=deptStyle(deptLabel||m.depts[0]||'');
 
     /*
-     * Display the Bayesian components clearly so users can verify:
-     *   Numerator   = (GLOBAL_MEAN × 50) + (AvgRating × TotalResponses)
-     *   Denominator = 50 + TotalResponses
-     *   Result      = m.bayesianRating  (already computed once in processSheetData)
+     * Display columns:
+     *   "Individual Responses"             = m.responses  (this mentor's own count only)
+     *   "Avg. Rating × Individual Resp."   = m.avgXResponses
+     *   "Bayesian Method"                  = [ (Global Mean × 50) + (m.rating × m.responses) ]
+     *                                        ──────────────────────────────────────────────────
+     *                                               ( 50 + m.responses )
+     *   Already calculated and stored as m.bayesianRating during processSheetData.
      */
-    const numeratorVal = (GLOBAL_MEAN * BAYESIAN_C) + (m.rating * m.responses);
 
     return`<tr>
       <td style="text-align:center;">
@@ -1492,20 +1539,19 @@ function renderMentorTable(){
     </tr>`;
   }).join('');
 
-  /* Summary footer — always shows global totals */
   const summaryRow=`<tr class="mentor-summary-row">
     <td colspan="2" style="font-size:11px;line-height:1.6;">
-      <span style="opacity:0.65;display:block;">Global Mean = Σ(Avg. Rating × Responses) / Σ Responses</span>
+      <span style="opacity:0.65;display:block;">Global Mean = Σ(Avg. Rating × Individual Responses) / Σ Individual Responses</span>
       <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${GLOBAL_MEAN.toFixed(7)}</span>
     </td>
     <td></td>
     <td></td>
     <td style="text-align:center;">
-      <span style="opacity:0.65;font-size:10px;display:block;">Σ Total No. of Responses</span>
+      <span style="opacity:0.65;font-size:10px;display:block;">Σ Individual Responses</span>
       <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${GLOBAL_SUM_RESPONSES}</span>
     </td>
     <td style="text-align:center;">
-      <span style="opacity:0.65;font-size:10px;display:block;">Σ (Avg. Rating × Responses)</span>
+      <span style="opacity:0.65;font-size:10px;display:block;">Σ (Avg. Rating × Individual Responses)</span>
       <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${GLOBAL_SUM_AVG_X_RESP.toFixed(2)}</span>
     </td>
     <td colspan="2"></td>
@@ -1555,7 +1601,7 @@ function openMentorModal(mentorName){
   const totalYes=m.qs.reduce((s,q)=>s+q.y,0),totalAll=m.qs.reduce((s,q)=>s+q.y+q.n,0);
   document.getElementById('mmStats').innerHTML=`
     <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Avg rating</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.rating.toFixed(2)}</div><div style="font-size:11px;color:var(--ink3);">out of 5</div></div>
-    <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Responses</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.responses}</div><div style="font-size:11px;color:var(--ink3);">total feedback</div></div>
+    <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Responses</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.responses}</div><div style="font-size:11px;color:var(--ink3);">individual feedback</div></div>
     <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Overall yes rate</div><div style="font-family:var(--font-display);font-size:24px;color:var(--green-dark);">${totalAll>0?Math.round(totalYes/totalAll*100):0}%</div><div style="font-size:11px;color:var(--ink3);">across 5 questions</div></div>`;
   document.getElementById('mmQRows').innerHTML=MM_QUESTIONS.map((q,i)=>{
     const d=m.qs[i]||{y:0,n:0};const tot=d.y+d.n;const yp=tot>0?Math.round(d.y/tot*100):0;const np=100-yp;
@@ -1591,12 +1637,12 @@ function downloadReport(){
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);text-align:center;">${statusBadgeInline(m.rating)}</td>
   </tr>`).join('');
   const summaryFooterRow=`<tr style="background:linear-gradient(135deg,#4a2800,#7a4f00);color:#fde9a0;">
-    <td colspan="2" style="padding:10px 14px;font-size:11px;">Global Mean = Σ(Avg.Rating×Resp)/ΣResp = <strong>${GLOBAL_MEAN.toFixed(7)}</strong></td>
+    <td colspan="2" style="padding:10px 14px;font-size:11px;">Global Mean = Σ(Avg.Rating × Individual Resp.) / Σ Individual Resp. = <strong>${GLOBAL_MEAN.toFixed(7)}</strong></td>
     <td style="padding:10px 14px;"></td>
     <td style="padding:10px 14px;"></td>
     <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;">Σ = ${GLOBAL_SUM_RESPONSES}</td>
     <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;">Σ = ${GLOBAL_SUM_AVG_X_RESP.toFixed(2)}</td>
-    <td colspan="2" style="padding:10px 14px;font-size:11px;opacity:0.75;">Bayesian = (GlobalMean×50 + AvgRating×Resp)/(50+Resp)</td>
+    <td colspan="2" style="padding:10px 14px;font-size:11px;opacity:0.75;">Bayesian = [(Global Mean×50) + (Avg.Rating × Individual Resp.)] ÷ (50 + Individual Resp.)</td>
   </tr>`;
   const{cycles,cycleStats}=TREND_DATA;
   const trendRows=cycles.slice().reverse().map((c,i)=>{const s=cycleStats[c];return`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;color:#5c3600">${c}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${s.responses||'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-family:Georgia,serif;font-size:15px;color:#5c3600">${s.ratingAvg!==null&&s.ratingAvg!==undefined?s.ratingAvg.toFixed(2):'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:${getNpsColor(s.npsIndex)};font-family:Georgia,serif;font-size:15px">${s.npsIndex!==null&&s.npsIndex!==undefined?(s.npsIndex>0?'+':'')+s.npsIndex:'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:#065f46;font-weight:600">${s.hitRatio!==null&&s.hitRatio!==undefined?s.hitRatio.toFixed(1)+'%':'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${s.promoterPct!==null?s.promoterPct+'%':'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${s.detractorPct!==null?s.detractorPct+'%':'—'}</td></tr>`;}).join('');
@@ -1607,16 +1653,16 @@ function downloadReport(){
     <div class="sec pb"><div class="st">Trend Over Time · Sep 2025–Apr 2026</div><table>${tableHead(['Month','Responses','Avg Rating','NPS Index','Hit Ratio','Promoters %','Detractors %'])}<tbody>${trendRows}</tbody></table><p style="font-size:11px;color:#c09840;margin-top:10px;">* Hit Ratio = Actual Responses ÷ Expected Responses × 100%</p></div>
     <div class="sec pb">
       <div class="st">Mentor Rankings — Bayesian Method</div>
-      <p style="font-size:12px;color:#5c3600;margin-bottom:12px;">All Bayesian method values are calculated using the formula below:</p>
+      <p style="font-size:12px;color:#5c3600;margin-bottom:12px;">All Bayesian method values are calculated using the formula below. <strong>Individual Responses</strong> = each mentor's own feedback count only.</p>
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
         <strong style="font-size:13px;color:#5c3600;">Bayesian Method =</strong>
         <div class="formula-box">
-          <div class="formula-num">(Global Mean × 50) + (Avg. Rating × Total No. of Responses)</div>
-          <div class="formula-den">(50 + Total No. of Responses)</div>
+          <div class="formula-num">[ (Global Mean × 50) + (Avg. Rating × Individual Responses) ]</div>
+          <div class="formula-den">( 50 + Individual Responses )</div>
         </div>
       </div>
-      <table>${tableHead(['Rank','Mentor Name','Department','Average Rating','Total No. of Responses','Avg. Rating × Total No. of Responses','Bayesian Method','Status'])}<tbody>${mentorRows}${summaryFooterRow}</tbody></table>
-      <div style="font-size:11px;color:#c09840;margin-top:10px">* 50 is a fixed constant · Global Mean computed from ALL mentors · Ranking is sorted highest Bayesian Method first (Rank 1 = best performer)</div>
+      <table>${tableHead(['Rank','Mentor Name','Department','Average Rating','Individual Responses','Avg. Rating × Individual Responses','Bayesian Method','Status'])}<tbody>${mentorRows}${summaryFooterRow}</tbody></table>
+      <div style="font-size:11px;color:#c09840;margin-top:10px">* 50 is a fixed constant · Global Mean computed from ALL mentors · Individual Responses = each mentor's own count · Ranking sorted highest Bayesian Method first (Rank 1 = best)</div>
     </div>
   </div></body></html>`;
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
