@@ -1438,8 +1438,7 @@ function renderTrendKpis(cycle){
   setKpi('tkpiRating','tkpiRatingDelta','tkpiRatingCycle',curr.ratingAvg,prev?.ratingAvg,v=>v.toFixed(2));
   setKpi('tkpiNps','tkpiNpsDelta','tkpiNpsCycle',curr.npsIndex,prev?.npsIndex,v=>(v>0?'+':'')+v);
   setKpi('tkpiHitRatio','tkpiHitRatioDelta','tkpiHitRatioCycle',curr.hitRatio,prev?.hitRatio,v=>v!==null?v.toFixed(1)+'%':'—');
-  setKpi('tkpiPromo','tkpiPromoDelta','tkpiPromoCycle',curr.promoterPct,prev?.promoterPct,v=>v+'%');
-}
+setKpi('tkpiPromo','tkpiPromoDelta','tkpiPromoCycle',curr.promoterPct,prev?.promoterPct,v=>parseFloat(v).toFixed(2)+'%');}
 
 function renderTrendCharts(){
   const{cycles,cycleStats}=TREND_DATA;
