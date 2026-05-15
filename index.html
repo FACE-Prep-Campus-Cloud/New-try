@@ -79,7 +79,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .college-dropdown-item.active{background:var(--gold-light);color:var(--gold-dark);font-weight:500;}
 .college-dropdown-item .item-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:2px;}
 .college-dropdown-item.active .item-dot{background:var(--gold-mid);}
-/* Special dot for colleges with dedicated trend sheets */
 .college-dropdown-item.has-trend .item-dot{background:#10b981;}
 .college-dropdown-item.has-trend.active .item-dot{background:#059669;}
 .download-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--gold-bright);color:var(--gold-dark);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.01em;transition:background 0.2s,transform 0.15s;box-shadow:0 2px 8px rgba(160,110,0,0.35);white-space:nowrap;}
@@ -194,12 +193,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .nps-bar-inner::after{content:'';position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 100%);background-size:200% 100%;animation:shimmer 2.5s infinite;}
 .nps-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
 
-/* MENTOR INSIGHTS */
-.mentor-bubble-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-.bubble-tab{padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
-.bubble-tab:hover{border-color:var(--gold-mid);color:var(--gold-dark);}
-.bubble-tab.active{background:var(--gold-dark);color:#fde9a0;border-color:var(--gold-dark);}
-
 /* TABLE */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -251,10 +244,7 @@ tbody tr{transition:background 0.12s;}
 .delta-pill.down{background:#fee2e2;color:#7f1d1d;}
 .delta-pill.flat{background:var(--bg2);color:var(--ink3);}
 
-/* Hit Ratio Card Special Style */
 .hit-ratio-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;border:1px solid #6ee7b7;}
-
-/* Trend data source badge */
 .trend-source-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#065f46;}
 .trend-source-badge.simulated{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.35);color:#78350f;}
 
@@ -477,29 +467,6 @@ tbody tr{transition:background 0.12s;}
       </div>
       <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)</div>
     </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Mentor Insights — Responses vs. Rating</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <div class="mentor-bubble-tabs" id="insightChartTabs" style="margin-bottom:0;">
-            <button class="bubble-tab active" onclick="setInsightChart('scatter',this)">Scatter Plot</button>
-            <button class="bubble-tab" onclick="setInsightChart('horizontal',this)">Top vs Bottom</button>
-            <button class="bubble-tab" onclick="setInsightChart('responses',this)">Response Volume</button>
-          </div>
-          <span class="badge badge-gold" id="insightChartBadge">—</span>
-        </div>
-      </div>
-      <div id="insightScatterWrap" style="position:relative;width:100%;height:380px;"><canvas id="insightScatterChart"></canvas></div>
-      <div id="insightHorizWrap" style="position:relative;width:100%;height:380px;display:none;"><canvas id="insightHorizChart"></canvas></div>
-      <div id="insightResponseWrap" style="position:relative;width:100%;height:380px;display:none;"><canvas id="insightResponseChart"></canvas></div>
-      <div style="display:flex;gap:20px;margin-top:14px;flex-wrap:wrap;" id="insightScatterLegend">
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#10b981;display:inline-block;opacity:0.85;"></span>Excellent (≥4.3)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#c48a00;display:inline-block;opacity:0.85;"></span>Good (≥4.0)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block;opacity:0.85;"></span>Average (≥3.5)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;opacity:0.85;"></span>Needs Work (&lt;3.5)</div>
-        <div style="margin-left:auto;font-size:11px;color:var(--ink4);">* Bubble size = number of subjects taught</div>
-      </div>
-    </div>
   </div>
 
   <!-- NPS ANALYTICS PANEL -->
@@ -663,109 +630,35 @@ const COLLEGES=[
   {name:"S-VYASA University",gid:"29895230"},{name:"Asian School of Business",gid:"1108050649"}
 ];
 
-/* Main performance sheet */
 const SHEET_ID='19HsWARl8RFNZ6nc-bUCBKKEN39JkQVxCBfbNCUSe2_4';
 
-/* ─── DEDICATED TREND SHEETS ─── 
-   Map college name → { sheetId, gids[] }
-   Multiple GIDs tried in order until one succeeds.
-*/
 const DEDICATED_TREND_SHEETS={
-  'Rathinam College of Arts & Science':{
-    sheetId:'1nDMDazG090HPikkrSohUYXmYfZiO-MaREitGlJHwoKc',
-    gids:['0','1707229573']
-  },
-  'Kamaraj College':{
-    sheetId:'1Km7BgYceWvJB-npvqHQNDZsANDHA3vMx-IQcxwzSHvQ',
-    gids:['0']
-  },
-  // ADD ALL YOUR COLLEGES BELOW:
-  'Kamaraj Women\'s College':{
-    sheetId:'1tm3GP00cWkrttscRBem51yzGvsgwTmAKAUc_hQiOoh4',
-    gids:['0']
-  },
-  'SDNB Vaishnav College for Women':{
-    sheetId:'12wS05DKTaiYpNsVDHGAJ3Um-7UOXtIb-fyTBwzg9hyM',
-    gids:['0']
-  },
-  'Patrician College of Arts & Science':{
-    sheetId:'1zc4BbANC3hz21YkpJAqa6ZM8vayo9s7KA8mHwNJeVZA',
-    gids:['0']
-  },
-  'TERF\'s College of Arts and Science':{
-    sheetId:'1eRqSECQ5GiVIvmnU8LQlWUS086rybYoVkRXfuzSchpU',
-    gids:['0']
-  },
-  'Sree Saraswathi Thyagaraja College':{
-    sheetId:'1fn_nVNHw8WHqjHTiuAp671ckTRwJ6WXXfdI_VsckP9o',
-    gids:['0']
-  },
-  'TJS College of Arts and Science':{
-    sheetId:'1j7JKepMCgyY11wd9w8b86dX8ogeRjkpW51oY1tYItGQ',
-    gids:['0']
-  },
-  'Bharathidasan College of Arts & Science':{
-    sheetId:'1AUBiDoUvE0bNm1sPFHlrZBAm1shMhEiL4D6QPOAbToo',
-    gids:['0']
-  },
-  'Nagarathinam Angalammal Arts & Science College':{
-    sheetId:'13c57XwLAYe8hBIfoGXqsmoQm7ACO1CwxRIcr9SNJA_o',
-    gids:['0']
-  },
-  'Vinayaga Mission\'s Research Foundation School of Arts & Science':{
-    sheetId:'1v9nkuZjzVLBk_avrOKBGrU-dWjfHA47hrXZAfIyy4aw',
-    gids:['0']
-  },
-  'Sri Amaraavathi College of Arts & Science':{
-    sheetId:'1TrSEMdtRXBMmjdTb0lb6E4eRCnKTiBAp3ub_CCFrNxc',
-    gids:['0']
-  },
-  'Takshashila University':{
-    sheetId:'1J8eE1EBGG2Hy3fNjGZd5SBFDaeTYPhc_Ck_GBbmSUwk',
-    gids:['0']
-  },
-  'Study World Group of Institution':{
-    sheetId:'1cEe2tx81xgABLQyspVB2dWAYep7hi_vSUsLJRH0PNFA',
-    gids:['0']
-  },
-  'Noorul Islam Centre for Higher Education (NICHE)':{
-    sheetId:'1USRMJpLmFl_Z7H06e7jpqWi_yWb5Fgk6As0HQcYz11w',
-    gids:['0']
-  },
-  'AMET University':{
-    sheetId:'1SDx1EyxmhhkQ8CK8w0H5W6Y2j2ihFBIGOkDYMWjkSAA',
-    gids:['0']
-  },
-  'Joy University':{
-    sheetId:'1L9D6-AH-kxTqFInHVaHYx4PeXjOZrTXrCCk-tVgtjrM',
-    gids:['0']
-  },
-  'Sasurie College of Arts and Science':{
-    sheetId:'1o6-tnTgHLTYF6xmbsVGaEYKKUubkFnBdfT3dzZZR8C4',
-    gids:['0']
-  },
-  'Alliance University':{
-    sheetId:'1UXmS5pgi7Qi6fgcD73vuBo-IUURegG5lxU8iIhSuI88',
-    gids:['0']
-  },
-  'Kristu Jayanti University':{
-    sheetId:'1eMIS_Tw36VNveDHgeVetxqtOLkxpFnf4MwkvsjImyWU',
-    gids:['0']
-  },
-  'S-VYASA University':{
-    sheetId:'16qL6QKGG48-Bt9r4cHYP9mtpQFQDTH2WfKbdmBk_UiI',
-    gids:['0']
-  },
-  'Asian School of Business':{
-    sheetId:'1vw_fZ_5RkWNLbe0Y5pTdkplwVZYl2TVZ0LvI4ogezK8',
-    gids:['0']
-  }
+  'Rathinam College of Arts & Science':{sheetId:'1nDMDazG090HPikkrSohUYXmYfZiO-MaREitGlJHwoKc',gids:['0','1707229573']},
+  'Kamaraj College':{sheetId:'1Km7BgYceWvJB-npvqHQNDZsANDHA3vMx-IQcxwzSHvQ',gids:['0']},
+  'Kamaraj Women\'s College':{sheetId:'1tm3GP00cWkrttscRBem51yzGvsgwTmAKAUc_hQiOoh4',gids:['0']},
+  'SDNB Vaishnav College for Women':{sheetId:'12wS05DKTaiYpNsVDHGAJ3Um-7UOXtIb-fyTBwzg9hyM',gids:['0']},
+  'Patrician College of Arts & Science':{sheetId:'1zc4BbANC3hz21YkpJAqa6ZM8vayo9s7KA8mHwNJeVZA',gids:['0']},
+  'TERF\'s College of Arts and Science':{sheetId:'1eRqSECQ5GiVIvmnU8LQlWUS086rybYoVkRXfuzSchpU',gids:['0']},
+  'Sree Saraswathi Thyagaraja College':{sheetId:'1fn_nVNHw8WHqjHTiuAp671ckTRwJ6WXXfdI_VsckP9o',gids:['0']},
+  'TJS College of Arts and Science':{sheetId:'1j7JKepMCgyY11wd9w8b86dX8ogeRjkpW51oY1tYItGQ',gids:['0']},
+  'Bharathidasan College of Arts & Science':{sheetId:'1AUBiDoUvE0bNm1sPFHlrZBAm1shMhEiL4D6QPOAbToo',gids:['0']},
+  'Nagarathinam Angalammal Arts & Science College':{sheetId:'13c57XwLAYe8hBIfoGXqsmoQm7ACO1CwxRIcr9SNJA_o',gids:['0']},
+  'Vinayaga Mission\'s Research Foundation School of Arts & Science':{sheetId:'1v9nkuZjzVLBk_avrOKBGrU-dWjfHA47hrXZAfIyy4aw',gids:['0']},
+  'Sri Amaraavathi College of Arts & Science':{sheetId:'1TrSEMdtRXBMmjdTb0lb6E4eRCnKTiBAp3ub_CCFrNxc',gids:['0']},
+  'Takshashila University':{sheetId:'1J8eE1EBGG2Hy3fNjGZd5SBFDaeTYPhc_Ck_GBbmSUwk',gids:['0']},
+  'Study World Group of Institution':{sheetId:'1cEe2tx81xgABLQyspVB2dWAYep7hi_vSUsLJRH0PNFA',gids:['0']},
+  'Noorul Islam Centre for Higher Education (NICHE)':{sheetId:'1USRMJpLmFl_Z7H06e7jpqWi_yWb5Fgk6As0HQcYz11w',gids:['0']},
+  'AMET University':{sheetId:'1SDx1EyxmhhkQ8CK8w0H5W6Y2j2ihFBIGOkDYMWjkSAA',gids:['0']},
+  'Joy University':{sheetId:'1L9D6-AH-kxTqFInHVaHYx4PeXjOZrTXrCCk-tVgtjrM',gids:['0']},
+  'Sasurie College of Arts and Science':{sheetId:'1o6-tnTgHLTYF6xmbsVGaEYKKUubkFnBdfT3dzZZR8C4',gids:['0']},
+  'Alliance University':{sheetId:'1UXmS5pgi7Qi6fgcD73vuBo-IUURegG5lxU8iIhSuI88',gids:['0']},
+  'Kristu Jayanti University':{sheetId:'1eMIS_Tw36VNveDHgeVetxqtOLkxpFnf4MwkvsjImyWU',gids:['0']},
+  'S-VYASA University':{sheetId:'16qL6QKGG48-Bt9r4cHYP9mtpQFQDTH2WfKbdmBk_UiI',gids:['0']},
+  'Asian School of Business':{sheetId:'1vw_fZ_5RkWNLbe0Y5pTdkplwVZYl2TVZ0LvI4ogezK8',gids:['0']}
 };
 
-/* Fixed 8-month window Sep 2025 – Apr 2026 */
 const FIXED_CYCLES=['Sep 2025','Oct 2025','Nov 2025','Dec 2025','Jan 2026','Feb 2026','Mar 2026','Apr 2026'];
 
-/* Month alias normalisation map */
 const MONTH_ALIAS_MAP={
   'sep 2025':'Sep 2025','september 2025':'Sep 2025','sep-2025':'Sep 2025','sep':'Sep 2025',
   'oct 2025':'Oct 2025','october 2025':'Oct 2025','oct-2025':'Oct 2025','oct':'Oct 2025',
@@ -781,9 +674,8 @@ const MONTH_ALIAS_MAP={
 let currentCollege=null,MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
 let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
 let TREND_DATA={cycles:[],hasCycleCol:false,hasDedicatedSheet:false,cycleStats:{},mentorCycleStats:{}};
-let currentPanel='summary',currentDeptFilter='all',currentInsightChart='scatter';
+let currentPanel='summary',currentDeptFilter='all';
 let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
-let insightScatterInst=null,insightHorizInst=null,insightResponseInst=null;
 let trendRatingInst=null,trendNpsInst=null,trendHitRatioInst=null,trendSegInst=null;
 let needleAnimRAF=null;
 
@@ -921,17 +813,17 @@ function processDedicatedTrendData(rows,collegeName){
     return null;
   }
 
- const colMonth=findCol('month','cycle','period','term','batch');
-const colResponses=findCol('no. of responses','no.ofresponses','noofresponses','responses','total_responses','count','actual_responses');
-const colStudents=findCol('no. of students','no.ofstudents','noofstudents','students','total_students');
-const colRating=findCol('average rating','avg rating','avg_rating','averagerating','rating');
-const colNps=findCol('nps score','nps_score','nps index','nps_index','nps','npsscore');
-const colHitRatio=findCol('hit rate','hit_rate','hitrate','hit ratio','hit_ratio','hitratio');
-const colPromoters=findCol('no. of promoters','no.ofpromoters','noofpromoters','promoters','promoter_count');
-const colPassives=findCol('no. of neutral','no.ofneutral','noofneutral','neutral','passives','passive_count');
-const colDetractors=findCol('no. of detractors','no.ofdetractors','noofdetractors','detractors','detractor_count');
-const colMentors=findCol('mentors','mentor_count','mentorcount','mentor count','mentors_count');
-const colExpected=findCol('expected_responses','expectedresponses','expected','target','target_responses');
+  const colMonth=findCol('month','cycle','period','term','batch');
+  const colResponses=findCol('no. of responses','no.ofresponses','noofresponses','responses','total_responses','count','actual_responses');
+  const colStudents=findCol('no. of students','no.ofstudents','noofstudents','students','total_students');
+  const colRating=findCol('average rating','avg rating','avg_rating','averagerating','rating');
+  const colNps=findCol('nps score','nps_score','nps index','nps_index','nps','npsscore');
+  const colHitRatio=findCol('hit rate','hit_rate','hitrate','hit ratio','hit_ratio','hitratio');
+  const colPromoters=findCol('no. of promoters','no.ofpromoters','noofpromoters','promoters','promoter_count');
+  const colPassives=findCol('no. of neutral','no.ofneutral','noofneutral','neutral','passives','passive_count');
+  const colDetractors=findCol('no. of detractors','no.ofdetractors','noofdetractors','detractors','detractor_count');
+  const colMentors=findCol('mentors','mentor_count','mentorcount','mentor count','mentors_count');
+  const colExpected=findCol('expected_responses','expectedresponses','expected','target','target_responses');
 
   console.log(`Trend columns for ${collegeName}:`,{colMonth,colResponses,colRating,colNps,colHitRatio,colPromoters,colPassives,colDetractors,colMentors,colExpected});
 
@@ -959,47 +851,42 @@ const colExpected=findCol('expected_responses','expectedresponses','expected','t
       hitRatio=parseFloat(((responses/expected)*100).toFixed(1));
     }
 
-   const mentorCount=iv(colMentors);
-const students=iv(colStudents);
+    const mentorCount=iv(colMentors);
+    const students=iv(colStudents);
 
-/* Your sheet stores RAW COUNTS not percentages — convert to % */
-const promoterCount=iv(colPromoters);
-const passiveCount=iv(colPassives);
-const detractorCount=iv(colDetractors);
-const totalForPct=(promoterCount||0)+(passiveCount||0)+(detractorCount||0);
+    const promoterCount=iv(colPromoters);
+    const passiveCount=iv(colPassives);
+    const detractorCount=iv(colDetractors);
+    const totalForPct=(promoterCount||0)+(passiveCount||0)+(detractorCount||0);
 
-let promoterPct=totalForPct>0?parseFloat(((promoterCount/totalForPct)*100).toFixed(1)):null;
-let passivePct=totalForPct>0?parseFloat(((passiveCount/totalForPct)*100).toFixed(1)):null;
-let detractorPct=totalForPct>0?parseFloat(((detractorCount/totalForPct)*100).toFixed(1)):null;
+    let promoterPct=totalForPct>0?parseFloat(((promoterCount/totalForPct)*100).toFixed(1)):null;
+    let passivePct=totalForPct>0?parseFloat(((passiveCount/totalForPct)*100).toFixed(1)):null;
+    let detractorPct=totalForPct>0?parseFloat(((detractorCount/totalForPct)*100).toFixed(1)):null;
 
-/* Hit Rate — your sheet may store it as "85%" or "0.85" or "85" */
-if(hitRatio!==null&&hitRatio<=1)hitRatio=parseFloat((hitRatio*100).toFixed(1));
+    if(hitRatio!==null&&hitRatio<=1)hitRatio=parseFloat((hitRatio*100).toFixed(1));
 
-/* NPS Score — your sheet stores the final index directly */
-/* If it's stored as a decimal like 0.35 convert it, otherwise use as-is */
-let finalNps=npsIndex;
-if(finalNps!==null&&Math.abs(finalNps)<=1)finalNps=Math.round(finalNps*100);
+    let finalNps=npsIndex;
+    if(finalNps!==null&&Math.abs(finalNps)<=1)finalNps=Math.round(finalNps*100);
 
-cycleStats[cycleName]={
-  cycle:cycleName,
-  responses:responses||0,
-  students:students||0,
-  ratingAvg,
-  npsIndex:finalNps,
-  hitRatio,
-  promoterPct,
-  passivePct,
-  detractorPct,
-  promoterCount:promoterCount||0,
-  passiveCount:passiveCount||0,
-  detractorCount:detractorCount||0,
-  mentorCount:mentorCount||MENTORS.length,
-  mentorRatings:{}
-};
+    cycleStats[cycleName]={
+      cycle:cycleName,
+      responses:responses||0,
+      students:students||0,
+      ratingAvg,
+      npsIndex:finalNps,
+      hitRatio,
+      promoterPct,
+      passivePct,
+      detractorPct,
+      promoterCount:promoterCount||0,
+      passiveCount:passiveCount||0,
+      detractorCount:detractorCount||0,
+      mentorCount:mentorCount||MENTORS.length,
+      mentorRatings:{}
+    };
   });
 
-  /* Sort by fixed window order first, then any extras */
- const MONTH_ORDER={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+  const MONTH_ORDER={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
   function parseCycleDate(c){
     const parts=c.split(' ');
     const mon=MONTH_ORDER[parts[0]]||0;
@@ -1105,7 +992,6 @@ function processSheetData(rows){
   else{document.getElementById('subjectCount').textContent='—';document.getElementById('subjectSub').textContent='No data';}
   document.getElementById('pageSub').textContent=`${DEPT_LIST.length} departments · ${MENTORS.length} mentors · ${subjectSet.size} subjects`;
 
-  /* Only build simulated trend if no dedicated sheet config */
   if(currentCollege&&!DEDICATED_TREND_SHEETS[currentCollege.name]){
     processTrendData(cycleMap,hasCycle,rows.length);
   }
@@ -1118,7 +1004,7 @@ function processTrendData(cycleMap,hasCycle,totalRows){
 
   if(hasCycle){
     const rawCycles=Object.keys(cycleMap).filter(c=>c!=='Unknown'&&c!=='—');
-   const MONTH_ORDER2={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+    const MONTH_ORDER2={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
     function parseCycleDate2(c){const parts=c.split(' ');return(parseInt(parts[1])||0)*100+(MONTH_ORDER2[parts[0]]||0);}
     cycles=[...rawCycles].sort((a,b)=>parseCycleDate2(a)-parseCycleDate2(b));
     if(cycleMap['Unknown'])cycles.push('Unknown');
@@ -1197,7 +1083,7 @@ function showPanel(id,el){
   document.getElementById('pageEyebrow').textContent=meta[id][0];
   document.getElementById('pageTitle').textContent=meta[id][1];
   document.getElementById('deptFilterRow').style.visibility=id==='mentors'?'visible':'hidden';
-  if(id==='mentors'){renderMentorTable();renderInsightCharts(currentDeptFilter);}
+  if(id==='mentors'){renderMentorTable();}
   if(id==='nps'){renderNPSPanel();}
   if(id==='trends'){renderTrendPanel();}
   closeMobileSidebar();
@@ -1216,7 +1102,7 @@ function setDeptFilter(val,btn){
   currentDeptFilter=val;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  if(currentPanel==='mentors'){renderMentorTable();renderInsightCharts(val);}
+  if(currentPanel==='mentors'){renderMentorTable();}
 }
 function getFilteredMentors(filterDept){
   let list=!filterDept||filterDept==='all'?[...MENTORS]:MENTORS.filter(m=>m.depts.some(d=>d===filterDept));
@@ -1226,7 +1112,7 @@ function getFilteredMentors(filterDept){
 
 /* ─── RENDER ALL ─── */
 function renderAllData(){
-  renderMentorTable();renderInsightCharts(currentDeptFilter);
+  renderMentorTable();
   renderNPSSummary();renderNPSPanel();renderTrendPanel();
   if(!chartInstances._summaryInit){initSummaryCharts();chartInstances._summaryInit=true;}
   else updateSummaryCharts();
@@ -1392,7 +1278,6 @@ function renderTrendPanel(){
   const collegeName=currentCollege?currentCollege.name:'';
   const hasConfig=!!DEDICATED_TREND_SHEETS[collegeName];
 
-  /* Update source indicator */
   const srcIndicator=document.getElementById('trendSourceIndicator');
   if(hasDedicatedSheet){
     srcIndicator.style.display='inline-flex';
@@ -1438,7 +1323,8 @@ function renderTrendKpis(cycle){
   setKpi('tkpiRating','tkpiRatingDelta','tkpiRatingCycle',curr.ratingAvg,prev?.ratingAvg,v=>v.toFixed(2));
   setKpi('tkpiNps','tkpiNpsDelta','tkpiNpsCycle',curr.npsIndex,prev?.npsIndex,v=>(v>0?'+':'')+v);
   setKpi('tkpiHitRatio','tkpiHitRatioDelta','tkpiHitRatioCycle',curr.hitRatio,prev?.hitRatio,v=>v!==null?v.toFixed(1)+'%':'—');
-setKpi('tkpiPromo','tkpiPromoDelta','tkpiPromoCycle',curr.promoterPct,prev?.promoterPct,v=>parseFloat(v).toFixed(2)+'%');}
+  setKpi('tkpiPromo','tkpiPromoDelta','tkpiPromoCycle',curr.promoterPct,prev?.promoterPct,v=>parseFloat(v).toFixed(2)+'%');
+}
 
 function renderTrendCharts(){
   const{cycles,cycleStats}=TREND_DATA;
@@ -1466,21 +1352,18 @@ function renderTrendCharts(){
     plugins:[ChartDataLabels]});
 
   if(trendNpsInst){trendNpsInst.destroy();}
-trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{type:'line',
-  data:{labels,datasets:[{label:'NPS',data:npss,borderColor:'#5c3600',backgroundColor:'rgba(92,54,0,0.08)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#5c3600'}]},
-  options:{...baseOpts,
-    layout:{padding:{top:24}},
-    plugins:{...baseOpts.plugins,
-      datalabels:{display:true,anchor:'end',align:'top',
-        color:'#5c3600',font:{weight:'bold',size:10},
-        formatter:v=>v!==null?(v>0?'+':'')+v:''},
-      tooltip:{...baseOpts.plugins.tooltip,
-        callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;}}}}},
-  plugins:[ChartDataLabels]});
+  trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{type:'line',
+    data:{labels,datasets:[{label:'NPS',data:npss,borderColor:'#5c3600',backgroundColor:'rgba(92,54,0,0.08)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#5c3600'}]},
+    options:{...baseOpts,
+      layout:{padding:{top:24}},
+      plugins:{...baseOpts.plugins,
+        datalabels:{display:true,anchor:'end',align:'top',
+          color:'#5c3600',font:{weight:'bold',size:10},
+          formatter:v=>v!==null?(v>0?'+':'')+v:''},
+        tooltip:{...baseOpts.plugins.tooltip,
+          callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;}}}}},
+    plugins:[ChartDataLabels]});
 
-/* ── HIT RATIO CHART ── */
-
-  /* ── HIT RATIO CHART ── */
   if(trendHitRatioInst){trendHitRatioInst.destroy();}
   const hasHitRatioData=hitRatios.some(v=>v!==null&&v!==undefined);
   if(hasHitRatioData){
@@ -1614,57 +1497,6 @@ function updateSummaryCharts(){
     chartInstances.topMentors.update();
     document.getElementById('topMentorsBadge').textContent=top.length>0?`Top ${top.length}`:'No data';
   }
-}
-
-/* ─── INSIGHT CHARTS ─── */
-function setInsightChart(type,btn){
-  currentInsightChart=type;
-  document.querySelectorAll('.bubble-tab').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  document.getElementById('insightScatterWrap').style.display=type==='scatter'?'block':'none';
-  document.getElementById('insightHorizWrap').style.display=type==='horizontal'?'block':'none';
-  document.getElementById('insightResponseWrap').style.display=type==='responses'?'block':'none';
-  const legend=document.getElementById('insightScatterLegend');
-  legend.style.display=type==='scatter'?'flex':'none';
-  renderInsightCharts(currentDeptFilter);
-}
-function renderInsightCharts(filterDept){
-  const list=getFilteredMentors(filterDept);
-  document.getElementById('insightChartBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-  if(currentInsightChart==='scatter')renderScatterChart(list);
-  else if(currentInsightChart==='horizontal')renderHorizChart(list);
-  else if(currentInsightChart==='responses')renderResponseChart(list);
-}
-function renderScatterChart(list){
-  if(insightScatterInst){insightScatterInst.destroy();insightScatterInst=null;}
-  if(!list.length){document.getElementById('insightScatterWrap').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:380px;color:var(--ink3);font-size:13px;">No mentor data available</div>';return;}
-  if(!document.getElementById('insightScatterChart'))document.getElementById('insightScatterWrap').innerHTML='<canvas id="insightScatterChart"></canvas>';
-  const scatterData=list.map(m=>({x:m.responses,y:m.rating,r:Math.max(6,m.subjects*4),label:m.name,subjects:m.subjects,bayesian:m.bayesianRating,dept:m.depts[0]||''}));
-  insightScatterInst=new Chart(document.getElementById('insightScatterChart'),{type:'bubble',data:{datasets:[{label:'Mentors',data:scatterData,backgroundColor:scatterData.map(d=>getStatusColor(d.y)+'cc'),borderColor:scatterData.map(d=>getStatusColor(d.y)),borderWidth:1.5,hoverBorderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:12,callbacks:{title:ctx=>ctx[0].raw.label,label:ctx=>{const d=ctx.raw;return[` Avg Rating: ${d.y.toFixed(2)} / 5`,` Responses: ${d.x}`,` Subjects: ${d.subjects}`,` Bayesian: ${d.bayesian.toFixed(4)}`,` Dept: ${d.dept}`];}}},datalabels:{display:ctx=>{const d=ctx.dataset.data[ctx.dataIndex];return d.r>=12;},color:'#2a1800',font:{size:9,weight:'600'},formatter:(v,ctx)=>{const name=ctx.dataset.data[ctx.dataIndex].label;return name.length>12?name.slice(0,11)+'…':name;},anchor:'center',align:'center'}},scales:{x:{title:{display:true,text:'Total Responses',font:{size:12},color:'#8a6020'},ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}},y:{min:0,max:5,title:{display:true,text:'Average Rating / 5',font:{size:12},color:'#8a6020'},ticks:{stepSize:0.5,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}}},layout:{padding:{top:20,right:20,bottom:10,left:10}},animation:{duration:700,easing:'easeOutQuart'}},plugins:[ChartDataLabels]});
-}
-function renderHorizChart(list){
-  if(insightHorizInst){insightHorizInst.destroy();insightHorizInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightHorizChart'))document.getElementById('insightHorizWrap').innerHTML='<canvas id="insightHorizChart"></canvas>';
-  const top5=list.slice(0,Math.min(5,list.length));
-  const bottom5=list.slice(-Math.min(5,list.length)).reverse();
-  const combined=[...top5,...bottom5];
-  const labels=combined.map((m,i)=>(i<top5.length?'▲ ':'▼ ')+m.name);
-  const data=combined.map(m=>m.bayesianRating);
-  const colors=combined.map((m,i)=>i<top5.length?'rgba(16,185,129,0.80)':'rgba(239,68,68,0.75)');
-  const borders=combined.map((m,i)=>i<top5.length?'#059669':'#dc2626');
-  document.getElementById('insightHorizWrap').style.height=Math.max(340,combined.length*38+80)+'px';
-  insightHorizInst=new Chart(document.getElementById('insightHorizChart'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderColor:borders,borderWidth:1.5,borderRadius:5,borderSkipped:false,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>combined[ctx[0].dataIndex].name,label:ctx=>{const m=combined[ctx.dataIndex];return[` Bayesian: ${m.bayesianRating.toFixed(4)}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Responses: ${m.responses}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>borders[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v.toFixed(2)}},scales:{x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
-}
-function renderResponseChart(list){
-  if(insightResponseInst){insightResponseInst.destroy();insightResponseInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightResponseChart'))document.getElementById('insightResponseWrap').innerHTML='<canvas id="insightResponseChart"></canvas>';
-  const sorted=[...list].sort((a,b)=>b.responses-a.responses).slice(0,20);
-  const maxR=Math.max(...sorted.map(m=>m.responses),1);
-  const colors=sorted.map(m=>{const ratio=m.responses/maxR;const r=Math.round(92+(196-92)*ratio);const g=Math.round(54+(138-54)*ratio);return`rgba(${r},${g},0,${0.55+0.35*ratio})`;});
-  document.getElementById('insightResponseWrap').style.height=Math.max(320,sorted.length*28+100)+'px';
-  insightResponseInst=new Chart(document.getElementById('insightResponseChart'),{type:'bar',data:{labels:sorted.map(m=>m.name),datasets:[{data:sorted.map(m=>m.responses),backgroundColor:colors,borderColor:sorted.map(()=>'#c48a00'),borderWidth:1,borderRadius:5,borderSkipped:false,barThickness:20}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>sorted[ctx[0].dataIndex].name,label:ctx=>{const m=sorted[ctx.dataIndex];return[` Responses: ${m.responses}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Subjects: ${m.subjects}`];}}},datalabels:{anchor:'end',align:'end',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v}},scales:{x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Total Responses',font:{size:11},color:'#8a6020'}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
 }
 
 /* ─── MENTOR MODAL ─── */
