@@ -1021,7 +1021,7 @@ function processSheetData(rows){
 
   // Apply Bayesian formula with C=50 constant
   MENTORS=mentorList.map(m=>{
-    const bayesianScore=(globalMean*BAYESIAN_C + m.avgXResponses)/(BAYESIAN_C + m.responses);
+    const bayesianScore=((globalMean*BAYESIAN_C + m.avgXResponses))/(BAYESIAN_C + m.responses);
     return{...m,bayesianRating:parseFloat(bayesianScore.toFixed(7))};
   }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
 
