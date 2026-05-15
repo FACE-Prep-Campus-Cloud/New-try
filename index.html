@@ -921,16 +921,17 @@ function processDedicatedTrendData(rows,collegeName){
     return null;
   }
 
-  const colMonth=findCol('month','cycle','period','term','batch');
-  const colResponses=findCol('responses','total_responses','totalresponses','count','actual_responses');
-  const colRating=findCol('avg_rating','average_rating','avgrating','rating','avg rating','averagerating');
-  const colNps=findCol('nps_index','nps','npsindex','nps index','nps score','npsscore');
-  const colHitRatio=findCol('hit_ratio','hitratio','hit ratio','hitrate','hit_rate','hit rate');
-  const colPromoters=findCol('promoters','promoter_pct','promoters%','promoter%','promoter pct','promoterspct');
-  const colPassives=findCol('passives','passive_pct','passives%','passive%','passive pct','passivespct');
-  const colDetractors=findCol('detractors','detractor_pct','detractors%','detractor%','detractor pct','detractorspct');
-  const colMentors=findCol('mentors','mentor_count','mentorcount','mentor count','mentors_count');
-  const colExpected=findCol('expected_responses','expectedresponses','expected','target','target_responses');
+ const colMonth=findCol('month','cycle','period','term','batch');
+const colResponses=findCol('no. of responses','no.ofresponses','noofresponses','responses','total_responses','count','actual_responses');
+const colStudents=findCol('no. of students','no.ofstudents','noofstudents','students','total_students');
+const colRating=findCol('average rating','avg rating','avg_rating','averagerating','rating');
+const colNps=findCol('nps score','nps_score','nps index','nps_index','nps','npsscore');
+const colHitRatio=findCol('hit rate','hit_rate','hitrate','hit ratio','hit_ratio','hitratio');
+const colPromoters=findCol('no. of promoters','no.ofpromoters','noofpromoters','promoters','promoter_count');
+const colPassives=findCol('no. of neutral','no.ofneutral','noofneutral','neutral','passives','passive_count');
+const colDetractors=findCol('no. of detractors','no.ofdetractors','noofdetractors','detractors','detractor_count');
+const colMentors=findCol('mentors','mentor_count','mentorcount','mentor count','mentors_count');
+const colExpected=findCol('expected_responses','expectedresponses','expected','target','target_responses');
 
   console.log(`Trend columns for ${collegeName}:`,{colMonth,colResponses,colRating,colNps,colHitRatio,colPromoters,colPassives,colDetractors,colMentors,colExpected});
 
@@ -958,29 +959,43 @@ function processDedicatedTrendData(rows,collegeName){
       hitRatio=parseFloat(((responses/expected)*100).toFixed(1));
     }
 
-    let promoterPct=pv(colPromoters);
-    let passivePct=pv(colPassives);
-    let detractorPct=pv(colDetractors);
-    const mentorCount=iv(colMentors);
+   const mentorCount=iv(colMentors);
+const students=iv(colStudents);
 
-    /* Normalise percentages stored as decimals (0.45 → 45) */
-    if(promoterPct!==null&&promoterPct<=1)promoterPct=parseFloat((promoterPct*100).toFixed(1));
-    if(passivePct!==null&&passivePct<=1)passivePct=parseFloat((passivePct*100).toFixed(1));
-    if(detractorPct!==null&&detractorPct<=1)detractorPct=parseFloat((detractorPct*100).toFixed(1));
-    if(hitRatio!==null&&hitRatio<=1)hitRatio=parseFloat((hitRatio*100).toFixed(1));
+/* Your sheet stores RAW COUNTS not percentages — convert to % */
+const promoterCount=iv(colPromoters);
+const passiveCount=iv(colPassives);
+const detractorCount=iv(colDetractors);
+const totalForPct=(promoterCount||0)+(passiveCount||0)+(detractorCount||0);
 
-    cycleStats[cycleName]={
-      cycle:cycleName,
-      responses:responses||0,
-      ratingAvg,
-      npsIndex,
-      hitRatio,
-      promoterPct,
-      passivePct,
-      detractorPct,
-      mentorCount:mentorCount||MENTORS.length,
-      mentorRatings:{}
-    };
+let promoterPct=totalForPct>0?parseFloat(((promoterCount/totalForPct)*100).toFixed(1)):null;
+let passivePct=totalForPct>0?parseFloat(((passiveCount/totalForPct)*100).toFixed(1)):null;
+let detractorPct=totalForPct>0?parseFloat(((detractorCount/totalForPct)*100).toFixed(1)):null;
+
+/* Hit Rate — your sheet may store it as "85%" or "0.85" or "85" */
+if(hitRatio!==null&&hitRatio<=1)hitRatio=parseFloat((hitRatio*100).toFixed(1));
+
+/* NPS Score — your sheet stores the final index directly */
+/* If it's stored as a decimal like 0.35 convert it, otherwise use as-is */
+let finalNps=npsIndex;
+if(finalNps!==null&&Math.abs(finalNps)<=1)finalNps=Math.round(finalNps*100);
+
+cycleStats[cycleName]={
+  cycle:cycleName,
+  responses:responses||0,
+  students:students||0,
+  ratingAvg,
+  npsIndex:finalNps,
+  hitRatio,
+  promoterPct,
+  passivePct,
+  detractorPct,
+  promoterCount:promoterCount||0,
+  passiveCount:passiveCount||0,
+  detractorCount:detractorCount||0,
+  mentorCount:mentorCount||MENTORS.length,
+  mentorRatings:{}
+};
   });
 
   /* Sort by fixed window order first, then any extras */
