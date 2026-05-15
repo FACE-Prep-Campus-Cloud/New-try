@@ -522,7 +522,7 @@ tbody tr{transition:background 0.12s;}
         </div>
       </div>
 
-      <!-- Mentor Table — columns match image exactly -->
+      <!-- Mentor Table -->
       <div class="table-wrap">
         <table id="mentorBayesianTable">
           <thead>
@@ -760,6 +760,11 @@ let currentPanel='summary',currentDeptFilter='all';
 let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
 let trendRatingInst=null,trendNpsInst=null,trendHitRatioInst=null,trendSegInst=null;
 let needleAnimRAF=null;
+
+/* ─── GLOBAL MEAN (computed once over ALL mentors, never changes with dept filter) ─── */
+let GLOBAL_MEAN=0;
+let GLOBAL_SUM_RESPONSES=0;
+let GLOBAL_SUM_AVG_X_RESP=0;
 
 /* ─── MOBILE SIDEBAR ─── */
 function toggleMobileSidebar(){
@@ -1000,29 +1005,42 @@ function processSheetData(rows){
   npsScores.forEach(s=>{if(scoreFreq[s]!==undefined)scoreFreq[s]++;});
   NPS_DATA={scores:npsScores,promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq};
 
-  /* ── BAYESIAN — CORRECT FORMULA: (GlobalMean × 50 + AvgRating × TotalResponses) / (50 + TotalResponses) ── */
-  const allRatings=TABLE_DATA.map(r=>r.rating);
-  const totalAllResponses=allRatings.length;
-
-  // Build mentor stats first to compute global mean correctly
+  /* ── BUILD MENTOR LIST (pre-Bayesian) ── */
   const mentorList=Object.values(mentorStats).map(m=>{
     const avgR=m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length;
     const totalResponses=m.ratings.length;
-    const avgXResponses=avgR*totalResponses; // Avg. Rating × Total No. of Responses
-    return{name:m.name,depts:Array.from(m.depts),rating:parseFloat(avgR.toFixed(2)),
-      avgXResponses:parseFloat(avgXResponses.toFixed(2)),
-      responses:totalResponses,subjects:m.subjects.size,qs:m.qs};
+    const avgXResponses=parseFloat((avgR*totalResponses).toFixed(2));
+    return{
+      name:m.name,
+      depts:Array.from(m.depts),
+      rating:parseFloat(avgR.toFixed(2)),
+      avgXResponses,
+      responses:totalResponses,
+      subjects:m.subjects.size,
+      qs:m.qs
+    };
   });
 
-  // Global Mean = Σ(Avg. Rating × Total Responses) / Σ(Total Responses)  — matches image formula
-  const sumAvgXResp=mentorList.reduce((s,m)=>s+m.avgXResponses,0);
-  const sumResponses=mentorList.reduce((s,m)=>s+m.responses,0);
-  const globalMean=sumResponses>0?sumAvgXResp/sumResponses:0;
+  /* ── GLOBAL MEAN — computed ONCE from ALL mentors, stored globally ── */
+  GLOBAL_SUM_AVG_X_RESP = mentorList.reduce((s,m)=>s+m.avgXResponses,0);
+  GLOBAL_SUM_RESPONSES  = mentorList.reduce((s,m)=>s+m.responses,0);
+  GLOBAL_MEAN = GLOBAL_SUM_RESPONSES > 0
+    ? GLOBAL_SUM_AVG_X_RESP / GLOBAL_SUM_RESPONSES
+    : 0;
 
-  // Apply Bayesian formula with C=50 constant
-  MENTORS=mentorList.map(m=>{
-    const bayesianScore=((globalMean*BAYESIAN_C + m.avgXResponses))/(BAYESIAN_C + m.responses);
-    return{...m,bayesianRating:parseFloat(bayesianScore.toFixed(7))};
+  /* ── APPLY BAYESIAN — use the fixed GLOBAL_MEAN so value never changes with dept filter ── */
+  /*
+     Formula: ( GLOBAL_MEAN × C + AvgRating × TotalResponses )
+              ─────────────────────────────────────────────────
+                         ( C + TotalResponses )
+
+     Note: AvgRating × TotalResponses  ==  m.avgXResponses (already computed above)
+  */
+  MENTORS = mentorList.map(m=>{
+    const numerator   = (GLOBAL_MEAN * BAYESIAN_C) + (m.rating * m.responses);
+    const denominator = BAYESIAN_C + m.responses;
+    const bayesianScore = numerator / denominator;
+    return {...m, bayesianRating: parseFloat(bayesianScore.toFixed(7))};
   }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
 
   MENTORS.forEach((m,idx)=>{
@@ -1415,18 +1433,18 @@ function renderTrendCycleTable(){
   }).join('');
 }
 
-/* ─── MENTOR TABLE — matches image columns exactly ─── */
+/* ─── MENTOR TABLE ─── */
 function renderMentorTable(){
   const list=getFilteredMentors(currentDeptFilter);
 
-  // Compute totals for the summary footer row (matches image)
-  const sumResponses=list.reduce((s,m)=>s+m.responses,0);
-  const sumAvgXResp=list.reduce((s,m)=>s+m.avgXResponses,0);
-  const globalMean=sumResponses>0?(sumAvgXResp/sumResponses):0;
-
-  document.getElementById('mtSumGlobalMean').textContent=globalMean>0?globalMean.toFixed(7):'—';
-  document.getElementById('mtSumTotalResp').textContent=sumResponses||'—';
-  document.getElementById('mtSumAvgXResp').textContent=sumAvgXResp>0?sumAvgXResp.toFixed(2):'—';
+  /*
+   * IMPORTANT: The header bar always shows the GLOBAL totals (all mentors),
+   * not just the filtered subset, because the Global Mean used in Bayesian
+   * is computed from ALL mentors and must remain constant.
+   */
+  document.getElementById('mtSumGlobalMean').textContent=GLOBAL_MEAN>0?GLOBAL_MEAN.toFixed(7):'—';
+  document.getElementById('mtSumTotalResp').textContent=GLOBAL_SUM_RESPONSES||'—';
+  document.getElementById('mtSumAvgXResp').textContent=GLOBAL_SUM_AVG_X_RESP>0?GLOBAL_SUM_AVG_X_RESP.toFixed(2):'—';
   document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
 
   if(!list.length){
@@ -1437,7 +1455,7 @@ function renderMentorTable(){
   const deptLabel=(currentDeptFilter&&currentDeptFilter!=='all')?currentDeptFilter:null;
   const rankColors={1:'#f5c842',2:'#c0c0c0',3:'#cd7f32'};
 
-  // Data rows
+  /* Data rows */
   const dataRows=list.map(m=>{
     const displayRank=m.filteredRank;
     const rankBg=rankColors[displayRank]||'transparent';
@@ -1445,6 +1463,15 @@ function renderMentorTable(){
     const rankBorder=displayRank<=3?'none':'1px solid var(--border2)';
     const displayDept=deptLabel||m.depts.join(', ');
     const s=deptStyle(deptLabel||m.depts[0]||'');
+
+    /*
+     * Display the Bayesian components clearly so users can verify:
+     *   Numerator   = (GLOBAL_MEAN × 50) + (AvgRating × TotalResponses)
+     *   Denominator = 50 + TotalResponses
+     *   Result      = m.bayesianRating  (already computed once in processSheetData)
+     */
+    const numeratorVal = (GLOBAL_MEAN * BAYESIAN_C) + (m.rating * m.responses);
+
     return`<tr>
       <td style="text-align:center;">
         <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span>
@@ -1465,21 +1492,21 @@ function renderMentorTable(){
     </tr>`;
   }).join('');
 
-  // Summary footer row — mirrors image's bottom summary row
+  /* Summary footer — always shows global totals */
   const summaryRow=`<tr class="mentor-summary-row">
     <td colspan="2" style="font-size:11px;line-height:1.6;">
       <span style="opacity:0.65;display:block;">Global Mean = Σ(Avg. Rating × Responses) / Σ Responses</span>
-      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${globalMean.toFixed(7)}</span>
+      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${GLOBAL_MEAN.toFixed(7)}</span>
     </td>
     <td></td>
     <td></td>
     <td style="text-align:center;">
       <span style="opacity:0.65;font-size:10px;display:block;">Σ Total No. of Responses</span>
-      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${sumResponses}</span>
+      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${GLOBAL_SUM_RESPONSES}</span>
     </td>
     <td style="text-align:center;">
       <span style="opacity:0.65;font-size:10px;display:block;">Σ (Avg. Rating × Responses)</span>
-      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${sumAvgXResp.toFixed(2)}</span>
+      <span style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;">${GLOBAL_SUM_AVG_X_RESP.toFixed(2)}</span>
     </td>
     <td colspan="2"></td>
   </tr>`;
@@ -1552,11 +1579,6 @@ function downloadReport(){
   const npsDisplay=npsIndex!==null?(npsIndex>0?`+${npsIndex}`:`${npsIndex}`):'N/A';
   const promoPct=npsTotal>0?Math.round(promoters/npsTotal*100):0;const passPct=npsTotal>0?Math.round(passives/npsTotal*100):0;const detrPct=npsTotal>0?Math.round(detractors/npsTotal*100):0;
 
-  // Compute global mean for report
-  const sumR=MENTORS.reduce((s,m)=>s+m.responses,0);
-  const sumAXR=MENTORS.reduce((s,m)=>s+m.avgXResponses,0);
-  const gMean=sumR>0?sumAXR/sumR:0;
-
   const tableHead=cols=>`<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.09em;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;
   const mentorRows=MENTORS.map((m,idx)=>`<tr style="background:${idx%2===0?'#fff':'#fdf8ed'}">
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:700;text-align:center;">${m.rank}</td>
@@ -1569,11 +1591,11 @@ function downloadReport(){
     <td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);text-align:center;">${statusBadgeInline(m.rating)}</td>
   </tr>`).join('');
   const summaryFooterRow=`<tr style="background:linear-gradient(135deg,#4a2800,#7a4f00);color:#fde9a0;">
-    <td colspan="2" style="padding:10px 14px;font-size:11px;">Global Mean = Σ(Avg.Rating×Resp)/ΣResp = <strong>${gMean.toFixed(7)}</strong></td>
+    <td colspan="2" style="padding:10px 14px;font-size:11px;">Global Mean = Σ(Avg.Rating×Resp)/ΣResp = <strong>${GLOBAL_MEAN.toFixed(7)}</strong></td>
     <td style="padding:10px 14px;"></td>
     <td style="padding:10px 14px;"></td>
-    <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;">Σ = ${sumR}</td>
-    <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;">Σ = ${sumAXR.toFixed(2)}</td>
+    <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;">Σ = ${GLOBAL_SUM_RESPONSES}</td>
+    <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;">Σ = ${GLOBAL_SUM_AVG_X_RESP.toFixed(2)}</td>
     <td colspan="2" style="padding:10px 14px;font-size:11px;opacity:0.75;">Bayesian = (GlobalMean×50 + AvgRating×Resp)/(50+Resp)</td>
   </tr>`;
   const{cycles,cycleStats}=TREND_DATA;
@@ -1594,7 +1616,7 @@ function downloadReport(){
         </div>
       </div>
       <table>${tableHead(['Rank','Mentor Name','Department','Average Rating','Total No. of Responses','Avg. Rating × Total No. of Responses','Bayesian Method','Status'])}<tbody>${mentorRows}${summaryFooterRow}</tbody></table>
-      <div style="font-size:11px;color:#c09840;margin-top:10px">* 50 is a fixed constant · Ranking is sorted highest Bayesian Method first (Rank 1 = best performer)</div>
+      <div style="font-size:11px;color:#c09840;margin-top:10px">* 50 is a fixed constant · Global Mean computed from ALL mentors · Ranking is sorted highest Bayesian Method first (Rank 1 = best performer)</div>
     </div>
   </div></body></html>`;
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
