@@ -970,7 +970,7 @@ function processSheetData(rows){
     const avg=m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length;
     const totalResponses=m.ratings.length;
     const avgXResponses=avg*totalResponses;
-    const bayesianScore=((globalMean*totalAllResponses)+(avg*totalResponses))/(totalAllResponses+totalResponses);
+    const bayesianScore = ((globalMean * 50) + (avg * totalResponses)) / (50 + totalResponses)
     return{name:m.name,depts:Array.from(m.depts),rating:parseFloat(avg.toFixed(2)),
       avgXResponses:parseFloat(avgXResponses.toFixed(2)),
       bayesianRating:parseFloat(bayesianScore.toFixed(7)),
