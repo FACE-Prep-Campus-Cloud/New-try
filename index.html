@@ -1348,39 +1348,32 @@ function renderTrendCharts(){
   /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels ─── */
   /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels + CLICK TOGGLE ─── */
 /* ─── FIX 1: NPS Segment Trend — improved label positioning to prevent overlap ─── */
+/* ─── NPS Segment Trend with Click-to-Show Values ─── */
 if(trendSegInst){trendSegInst.destroy();}
 trendSegInst=new Chart(document.getElementById('trendSegChart'),{
   type:'line',
   data:{
     labels,
     datasets:[
-      {label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:5,pointHoverRadius:7,hidden:false},
-      {label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:5,pointHoverRadius:7,hidden:false},
-      {label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:5,pointHoverRadius:7,hidden:false}
+      {label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:5,pointHoverRadius:7,hidden:false,showLabels:false},
+      {label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:5,pointHoverRadius:7,hidden:false,showLabels:false},
+      {label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:5,pointHoverRadius:7,hidden:false,showLabels:false}
     ]
   },
   options:{
     ...baseOpts,
     layout:{padding:{top:32,right:12,bottom:8,left:8}},
-    onClick:(event,activeElements,chart)=>{
-      // Handle legend click on canvas
-      const canvasPosition=Chart.helpers.getRelativePosition(event,chart);
-      // This will be handled by custom legend below
-    },
     plugins:{
       legend:{display:false},
       datalabels:{
-        display:true,
+        display:ctx=>{
+          // Only show labels if this dataset has showLabels=true AND is visible
+          const dataset=ctx.chart.data.datasets[ctx.datasetIndex];
+          const meta=ctx.chart.getDatasetMeta(ctx.datasetIndex);
+          return dataset.showLabels===true&&!meta.hidden;
+        },
         formatter:(v,ctx)=>{
-          // Only show label if the dataset is visible
-          if(ctx.chart.getDatasetMeta(ctx.datasetIndex).hidden){
-            return '';
-          }
-          // Only show labels on first and last data points to reduce clutter
-          if(ctx.dataIndex===0||ctx.dataIndex===ctx.dataset.data.length-1){
-            return v!==null&&v!==undefined?v+'%':'';
-          }
-          return '';
+          return v!==null&&v!==undefined?v+'%':'';
         },
         color:ctx=>{
           const c=['#065f46','#92400e','#7f1d1d'];
@@ -1393,18 +1386,8 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
         borderRadius:4,
         padding:{top:3,bottom:3,left:6,right:6},
         font:{weight:'bold',size:10},
-        align:ctx=>{
-          // Stagger the alignment to prevent overlap
-          if(ctx.datasetIndex===0)return'top';
-          if(ctx.datasetIndex===1)return ctx.dataIndex===0?'bottom':'top';
-          return'bottom';
-        },
-        anchor:ctx=>{
-          // Use different anchors for better spacing
-          if(ctx.datasetIndex===0)return'end';
-          if(ctx.datasetIndex===1)return'center';
-          return'start';
-        },
+        align:'top',
+        anchor:'end',
         offset:6
       },
       tooltip:{
@@ -1434,17 +1417,20 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
 const legendContainer=document.createElement('div');
 legendContainer.style.cssText='display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap;';
 legendContainer.innerHTML=`
-  <div class="legend-item" data-index="0" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;">
-    <span class="legend-line" style="width:12px;height:3px;background:#10b981;display:inline-block;border-radius:2px;"></span>
+  <div class="legend-item" data-index="0" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;transition:all 0.2s;">
+    <span class="legend-line" style="width:12px;height:3px;background:#10b981;display:inline-block;border-radius:2px;transition:all 0.2s;"></span>
     <span class="legend-label">Promoters %</span>
+    <span class="legend-indicator" style="font-size:10px;opacity:0.5;margin-left:2px;">●</span>
   </div>
-  <div class="legend-item" data-index="1" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;">
-    <span class="legend-line" style="width:12px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px;"></span>
+  <div class="legend-item" data-index="1" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;transition:all 0.2s;">
+    <span class="legend-line" style="width:12px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px;transition:all 0.2s;"></span>
     <span class="legend-label">Passives %</span>
+    <span class="legend-indicator" style="font-size:10px;opacity:0.5;margin-left:2px;">●</span>
   </div>
-  <div class="legend-item" data-index="2" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;">
-    <span class="legend-line" style="width:12px;height:3px;background:#ef4444;display:inline-block;border-radius:2px;"></span>
+  <div class="legend-item" data-index="2" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;transition:all 0.2s;">
+    <span class="legend-line" style="width:12px;height:3px;background:#ef4444;display:inline-block;border-radius:2px;transition:all 0.2s;"></span>
     <span class="legend-label">Detractors %</span>
+    <span class="legend-indicator" style="font-size:10px;opacity:0.5;margin-left:2px;">●</span>
   </div>
 `;
 
@@ -1461,27 +1447,41 @@ chartParent.appendChild(legendContainer);
 legendContainer.querySelectorAll('.legend-item').forEach(item=>{
   item.addEventListener('click',function(){
     const index=parseInt(this.getAttribute('data-index'));
+    const dataset=trendSegInst.data.datasets[index];
     const meta=trendSegInst.getDatasetMeta(index);
     
-    // Toggle visibility
-    meta.hidden=!meta.hidden;
+    // Toggle showLabels for this dataset
+    dataset.showLabels=!dataset.showLabels;
     
     // Update legend appearance
     const line=this.querySelector('.legend-line');
     const label=this.querySelector('.legend-label');
-    if(meta.hidden){
-      line.style.opacity='0.3';
-      label.style.opacity='0.5';
-      label.style.textDecoration='line-through';
-    }else{
+    const indicator=this.querySelector('.legend-indicator');
+    
+    if(dataset.showLabels){
+      // Labels are ON - highlight the legend item
       line.style.opacity='1';
+      line.style.height='6px';
       label.style.opacity='1';
-      label.style.textDecoration='none';
+      label.style.fontWeight='600';
+      indicator.textContent='✓';
+      indicator.style.opacity='1';
+      indicator.style.color='#10b981';
+    }else{
+      // Labels are OFF - normal state
+      line.style.opacity='1';
+      line.style.height='3px';
+      label.style.opacity='1';
+      label.style.fontWeight='400';
+      indicator.textContent='●';
+      indicator.style.opacity='0.5';
+      indicator.style.color='var(--ink3)';
     }
     
     trendSegInst.update();
   });
-});}
+});
+}
 function renderTrendCycleTable(){
   const{cycles,cycleStats}=TREND_DATA;
   if(!cycles.length){document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--ink3);">No data</td></tr>';return;}
