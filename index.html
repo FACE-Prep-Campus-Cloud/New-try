@@ -1347,6 +1347,7 @@ function renderTrendCharts(){
 
   /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels ─── */
   /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels + CLICK TOGGLE ─── */
+/* ─── FIX 1: NPS Segment Trend — improved label positioning to prevent overlap ─── */
 if(trendSegInst){trendSegInst.destroy();}
 trendSegInst=new Chart(document.getElementById('trendSegChart'),{
   type:'line',
@@ -1360,7 +1361,7 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
   },
   options:{
     ...baseOpts,
-    layout:{padding:{top:28,right:8}},
+    layout:{padding:{top:32,right:12,bottom:8,left:8}},
     onClick:(event,activeElements,chart)=>{
       // Handle legend click on canvas
       const canvasPosition=Chart.helpers.getRelativePosition(event,chart);
@@ -1370,27 +1371,41 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
       legend:{display:false},
       datalabels:{
         display:true,
-        anchor:'end',
-        align:'top',
-        offset:4,
-        font:{weight:'bold',size:10},
         formatter:(v,ctx)=>{
           // Only show label if the dataset is visible
           if(ctx.chart.getDatasetMeta(ctx.datasetIndex).hidden){
             return '';
           }
-          return v!==null&&v!==undefined?v+'%':'';
+          // Only show labels on first and last data points to reduce clutter
+          if(ctx.dataIndex===0||ctx.dataIndex===ctx.dataset.data.length-1){
+            return v!==null&&v!==undefined?v+'%':'';
+          }
+          return '';
         },
         color:ctx=>{
           const c=['#065f46','#92400e','#7f1d1d'];
           return c[ctx.datasetIndex]||'#2a1800';
         },
         backgroundColor:ctx=>{
-          const bg=['rgba(209,250,229,0.90)','rgba(254,243,199,0.90)','rgba(254,226,226,0.90)'];
+          const bg=['rgba(209,250,229,0.95)','rgba(254,243,199,0.95)','rgba(254,226,226,0.95)'];
           return bg[ctx.datasetIndex];
         },
         borderRadius:4,
-        padding:{top:2,bottom:2,left:5,right:5}
+        padding:{top:3,bottom:3,left:6,right:6},
+        font:{weight:'bold',size:10},
+        align:ctx=>{
+          // Stagger the alignment to prevent overlap
+          if(ctx.datasetIndex===0)return'top';
+          if(ctx.datasetIndex===1)return ctx.dataIndex===0?'bottom':'top';
+          return'bottom';
+        },
+        anchor:ctx=>{
+          // Use different anchors for better spacing
+          if(ctx.datasetIndex===0)return'end';
+          if(ctx.datasetIndex===1)return'center';
+          return'start';
+        },
+        offset:6
       },
       tooltip:{
         backgroundColor:'rgba(42,24,0,0.92)',
@@ -1407,7 +1422,7 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
       y:{
         ...baseOpts.scales.y,
         min:0,
-        max:115,
+        max:120,
         ticks:{...baseOpts.scales.y.ticks,callback:v=>v<=100?v+'%':''}
       }
     }
@@ -1466,8 +1481,7 @@ legendContainer.querySelectorAll('.legend-item').forEach(item=>{
     
     trendSegInst.update();
   });
-});
-}
+});}
 function renderTrendCycleTable(){
   const{cycles,cycleStats}=TREND_DATA;
   if(!cycles.length){document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--ink3);">No data</td></tr>';return;}
