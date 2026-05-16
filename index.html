@@ -729,7 +729,7 @@ function buildDropdown(){
   document.getElementById('collegeDropdown').innerHTML=COLLEGES.map((c,i)=>{
     const hasTrend=!!DEDICATED_TREND_SHEETS[c.name];
     return`<div class="college-dropdown-item${hasTrend?' has-trend':''}" id="dditem-${i}" onclick="selectCollege(${i})" title="${hasTrend?'Live trend data available':''}">`+
-      `<span class="item-dot"></span>${c.name}${hasTrend?' <span style="font-size:9px;color:#065f46;font-weight:600;margin-left:4px;">●LIVE</span>':''}</div>`;
+  `<span class="item-dot"></span>${c.name}</div>`;
   }).join('');
 }
 function toggleDropdown(){
