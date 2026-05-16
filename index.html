@@ -1344,6 +1344,7 @@ function renderTrendCharts(){
   /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels + CLICK TOGGLE ─── */
 /* ─── FIX 1: NPS Segment Trend — improved label positioning to prevent overlap ─── */
 /* ─── NPS Segment Trend with Click-to-Show Values ─── */
+/* ─── NPS Segment Trend with Click-to-Show Values ─── */
 if(trendSegInst){trendSegInst.destroy();}
 trendSegInst=new Chart(document.getElementById('trendSegChart'),{
   type:'line',
@@ -1357,7 +1358,7 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
   },
   options:{
     ...baseOpts,
-    layout:{padding:{top:32,right:12,bottom:8,left:8}},
+    layout:{padding:{top:40,right:12,bottom:8,left:8}},
     plugins:{
       legend:{display:false},
       datalabels:{
@@ -1380,10 +1381,17 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
         },
         borderRadius:4,
         padding:{top:3,bottom:3,left:6,right:6},
-        font:{weight:'bold',size:10},
-        align:'top',
-        anchor:'end',
-        offset:6
+        font:{weight:'bold',size:9},
+        align:ctx=>{
+          // Smart positioning based on value
+          const value=ctx.dataset.data[ctx.dataIndex];
+          // If value is high (>85), position below to avoid overflow
+          if(value>85)return'bottom';
+          // Otherwise position on top
+          return'top';
+        },
+        anchor:'center',
+        offset:8
       },
       tooltip:{
         backgroundColor:'rgba(42,24,0,0.92)',
@@ -1400,7 +1408,7 @@ trendSegInst=new Chart(document.getElementById('trendSegChart'),{
       y:{
         ...baseOpts.scales.y,
         min:0,
-        max:120,
+        max:110,
         ticks:{...baseOpts.scales.y.ticks,callback:v=>v<=100?v+'%':''}
       }
     }
