@@ -1467,6 +1467,7 @@ legendContainer.querySelectorAll('.legend-item').forEach(item=>{
     trendSegInst.update();
   });
 });
+}
 function renderTrendCycleTable(){
   const{cycles,cycleStats}=TREND_DATA;
   if(!cycles.length){document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--ink3);">No data</td></tr>';return;}
