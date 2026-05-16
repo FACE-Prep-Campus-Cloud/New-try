@@ -1346,64 +1346,127 @@ function renderTrendCharts(){
   }
 
   /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels ─── */
-  if(trendSegInst){trendSegInst.destroy();}
-  trendSegInst=new Chart(document.getElementById('trendSegChart'),{
-    type:'line',
-    data:{
-      labels,
-      datasets:[
-        {label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:5,pointHoverRadius:7},
-        {label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:5,pointHoverRadius:7},
-        {label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:5,pointHoverRadius:7}
-      ]
+  /* ─── FIX 1: NPS Segment Trend — datalabels enabled with pill-style labels + CLICK TOGGLE ─── */
+if(trendSegInst){trendSegInst.destroy();}
+trendSegInst=new Chart(document.getElementById('trendSegChart'),{
+  type:'line',
+  data:{
+    labels,
+    datasets:[
+      {label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:5,pointHoverRadius:7,hidden:false},
+      {label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:5,pointHoverRadius:7,hidden:false},
+      {label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2.5,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:5,pointHoverRadius:7,hidden:false}
+    ]
+  },
+  options:{
+    ...baseOpts,
+    layout:{padding:{top:28,right:8}},
+    onClick:(event,activeElements,chart)=>{
+      // Handle legend click on canvas
+      const canvasPosition=Chart.helpers.getRelativePosition(event,chart);
+      // This will be handled by custom legend below
     },
-    options:{
-      ...baseOpts,
-      layout:{padding:{top:28,right:8}},
-      plugins:{
-        legend:{display:false},
-        datalabels:{
-          display:true,
-          anchor:'end',
-          align:'top',
-          offset:4,
-          font:{weight:'bold',size:10},
-          formatter:(v)=>v!==null&&v!==undefined?v+'%':'',
-          color:ctx=>{
-            const c=['#065f46','#92400e','#7f1d1d'];
-            return c[ctx.datasetIndex]||'#2a1800';
-          },
-          backgroundColor:ctx=>{
-            const bg=['rgba(209,250,229,0.90)','rgba(254,243,199,0.90)','rgba(254,226,226,0.90)'];
-            return bg[ctx.datasetIndex];
-          },
-          borderRadius:4,
-          padding:{top:2,bottom:2,left:5,right:5}
+    plugins:{
+      legend:{display:false},
+      datalabels:{
+        display:true,
+        anchor:'end',
+        align:'top',
+        offset:4,
+        font:{weight:'bold',size:10},
+        formatter:(v,ctx)=>{
+          // Only show label if the dataset is visible
+          if(ctx.chart.getDatasetMeta(ctx.datasetIndex).hidden){
+            return '';
+          }
+          return v!==null&&v!==undefined?v+'%':'';
         },
-        tooltip:{
-          backgroundColor:'rgba(42,24,0,0.92)',
-          titleColor:'#fde9a0',
-          bodyColor:'#f5e9c8',
-          borderColor:'#c48a00',
-          borderWidth:1,
-          padding:10,
-          callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y??'—'}%`}
-        }
+        color:ctx=>{
+          const c=['#065f46','#92400e','#7f1d1d'];
+          return c[ctx.datasetIndex]||'#2a1800';
+        },
+        backgroundColor:ctx=>{
+          const bg=['rgba(209,250,229,0.90)','rgba(254,243,199,0.90)','rgba(254,226,226,0.90)'];
+          return bg[ctx.datasetIndex];
+        },
+        borderRadius:4,
+        padding:{top:2,bottom:2,left:5,right:5}
       },
-      scales:{
-        ...baseOpts.scales,
-        y:{
-          ...baseOpts.scales.y,
-          min:0,
-          max:115,
-          ticks:{...baseOpts.scales.y.ticks,callback:v=>v<=100?v+'%':''}
-        }
+      tooltip:{
+        backgroundColor:'rgba(42,24,0,0.92)',
+        titleColor:'#fde9a0',
+        bodyColor:'#f5e9c8',
+        borderColor:'#c48a00',
+        borderWidth:1,
+        padding:10,
+        callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y??'—'}%`}
       }
     },
-    plugins:[ChartDataLabels]
-  });
-}
+    scales:{
+      ...baseOpts.scales,
+      y:{
+        ...baseOpts.scales.y,
+        min:0,
+        max:115,
+        ticks:{...baseOpts.scales.y.ticks,callback:v=>v<=100?v+'%':''}
+      }
+    }
+  },
+  plugins:[ChartDataLabels]
+});
 
+// Add custom legend with click handlers right below the chart
+const legendContainer=document.createElement('div');
+legendContainer.style.cssText='display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap;';
+legendContainer.innerHTML=`
+  <div class="legend-item" data-index="0" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;">
+    <span class="legend-line" style="width:12px;height:3px;background:#10b981;display:inline-block;border-radius:2px;"></span>
+    <span class="legend-label">Promoters %</span>
+  </div>
+  <div class="legend-item" data-index="1" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;">
+    <span class="legend-line" style="width:12px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px;"></span>
+    <span class="legend-label">Passives %</span>
+  </div>
+  <div class="legend-item" data-index="2" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);cursor:pointer;user-select:none;">
+    <span class="legend-line" style="width:12px;height:3px;background:#ef4444;display:inline-block;border-radius:2px;"></span>
+    <span class="legend-label">Detractors %</span>
+  </div>
+`;
+
+// Replace existing legend if any
+const chartParent=document.getElementById('trendSegChart').parentElement;
+const existingLegend=chartParent.querySelector('.custom-trend-legend');
+if(existingLegend){
+  existingLegend.remove();
+}
+legendContainer.className='custom-trend-legend';
+chartParent.appendChild(legendContainer);
+
+// Add click handlers to legend items
+legendContainer.querySelectorAll('.legend-item').forEach(item=>{
+  item.addEventListener('click',function(){
+    const index=parseInt(this.getAttribute('data-index'));
+    const meta=trendSegInst.getDatasetMeta(index);
+    
+    // Toggle visibility
+    meta.hidden=!meta.hidden;
+    
+    // Update legend appearance
+    const line=this.querySelector('.legend-line');
+    const label=this.querySelector('.legend-label');
+    if(meta.hidden){
+      line.style.opacity='0.3';
+      label.style.opacity='0.5';
+      label.style.textDecoration='line-through';
+    }else{
+      line.style.opacity='1';
+      label.style.opacity='1';
+      label.style.textDecoration='none';
+    }
+    
+    trendSegInst.update();
+  });
+});
 function renderTrendCycleTable(){
   const{cycles,cycleStats}=TREND_DATA;
   if(!cycles.length){document.getElementById('trendCycleTableBody').innerHTML='<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--ink3);">No data</td></tr>';return;}
