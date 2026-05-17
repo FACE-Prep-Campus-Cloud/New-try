@@ -6,7 +6,6 @@
 <title>Performance Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 :root {
@@ -17,8 +16,6 @@
   --rose:#7f1d1d;--rose-lt:#fee2e2;--amber:#78350f;--amber-lt:#fef3c7;
   --gold-dark:#5c3600;--gold-mid:#c48a00;--gold-light:#fde9a0;--gold-bright:#f5c842;
   --green-dark:#065f46;--green-light:#d1fae5;--green-mid:#10b981;
-  --amber-dark:#78350f;--amber-light:#fef3c7;--amber-mid:#f59e0b;
-  --red-dark:#7f1d1d;--red-light:#fee2e2;--red-mid:#ef4444;
   --shadow-sm:0 1px 3px rgba(120,80,10,0.08),0 1px 2px rgba(120,80,10,0.04);
   --shadow-md:0 4px 16px rgba(120,80,10,0.12),0 1px 4px rgba(120,80,10,0.07);
   --shadow-lg:0 12px 40px rgba(120,80,10,0.16),0 4px 12px rgba(120,80,10,0.08);
@@ -30,667 +27,701 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden;}
 
-.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000;transition:opacity 0.4s,visibility 0.4s;flex-direction:column;gap:20px;}
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000;transition:opacity 0.5s,visibility 0.5s;flex-direction:column;gap:16px;}
 .loading-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-.spinner{width:48px;height:48px;border:3px solid var(--gold-light);border-top-color:var(--gold-mid);border-radius:50%;animation:spin 0.8s linear infinite;}
+.spinner{width:52px;height:52px;border:3px solid var(--gold-light);border-top-color:var(--gold-mid);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
-@keyframes ringPulse{0%,100%{r:6;opacity:1;}50%{r:10;opacity:0.3;}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes dropDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
+.loading-text{font-size:13px;color:var(--ink3);font-weight:500;text-align:center;max-width:300px;}
+.loading-progress{width:260px;height:4px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+.loading-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold-mid),var(--gold-bright));border-radius:4px;transition:width 0.4s ease;width:0%;}
 
-.loading-text{font-size:13px;color:var(--ink3);font-weight:500;}
-.error-message{max-width:500px;padding:20px;background:var(--rose-lt);border:1px solid var(--rose);border-radius:var(--radius);color:var(--rose);font-size:13px;line-height:1.6;display:none;}
-.error-message.show{display:block;}
-.error-message strong{display:block;margin-bottom:10px;font-size:14px;}
-
+/* SHELL */
 .shell{display:grid;grid-template-columns:240px 1fr;grid-template-rows:64px 1fr;min-height:100vh;}
 
-.hamburger-btn{
-  display:none;flex-direction:column;justify-content:center;gap:5px;
-  width:36px;height:36px;background:rgba(253,233,160,0.12);
-  border:1px solid rgba(253,233,160,0.25);border-radius:var(--radius-sm);
-  cursor:pointer;padding:8px;margin-right:10px;flex-shrink:0;
-}
-.hamburger-btn span{display:block;width:100%;height:2px;background:#fde9a0;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.hamburger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.hamburger-btn.open span:nth-child(2){opacity:0;}
-.hamburger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-.sidebar-overlay{display:none;}
-
+/* TOPBAR */
 .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-bottom:1px solid rgba(245,200,66,0.20);box-shadow:0 2px 16px rgba(90,50,0,0.30);position:sticky;top:0;z-index:100;}
-.logo{display:flex;align-items:center;flex:1;min-width:0;overflow:hidden;}
-.logo-name{font-family:var(--font-display);font-size:22px;font-weight:400;color:#fde9a0;line-height:1.2;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:0;}
+.logo-name{font-family:var(--font-display);font-size:22px;font-weight:400;color:#fde9a0;letter-spacing:-0.01em;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
 .college-dropdown-wrap{position:relative;}
-.college-select-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(253,233,160,0.12);border:1px solid rgba(253,233,160,0.32);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:500;color:#fde9a0;cursor:pointer;transition:all 0.15s;white-space:nowrap;max-width:220px;overflow:hidden;}
+.college-select-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(253,233,160,0.12);border:1px solid rgba(253,233,160,0.32);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:500;color:#fde9a0;cursor:pointer;transition:all 0.15s;max-width:240px;}
 .college-select-btn:hover{background:rgba(253,233,160,0.22);}
 .college-select-btn .btn-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
 .college-select-btn .caret{flex-shrink:0;font-size:9px;transition:transform 0.2s;}
 .college-select-btn.open .caret{transform:rotate(180deg);}
-.college-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:280px;max-width:340px;max-height:380px;overflow-y:auto;z-index:200;display:none;}
+.college-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:300px;max-width:380px;max-height:400px;overflow-y:auto;z-index:200;display:none;}
 .college-dropdown.open{display:block;animation:dropDown 0.18s cubic-bezier(.22,1,.36,1);}
-.college-dropdown-item{padding:10px 16px;font-size:12.5px;color:var(--ink2);cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s;display:flex;align-items:center;gap:8px;line-height:1.4;}
+.college-dropdown-item{padding:10px 16px;font-size:12.5px;color:var(--ink2);cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s;display:flex;align-items:center;gap:8px;}
 .college-dropdown-item:last-child{border-bottom:none;}
 .college-dropdown-item:hover{background:var(--gold-light);color:var(--gold-dark);}
 .college-dropdown-item.active{background:var(--gold-light);color:var(--gold-dark);font-weight:500;}
-.college-dropdown-item .item-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:2px;}
-.college-dropdown-item.active .item-dot{background:var(--gold-mid);}
-.college-dropdown-item.has-trend .item-dot{background:#10b981;}
-.college-dropdown-item.has-trend.active .item-dot{background:#059669;}
-.download-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--gold-bright);color:var(--gold-dark);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.01em;transition:background 0.2s,transform 0.15s;box-shadow:0 2px 8px rgba(160,110,0,0.35);white-space:nowrap;}
-.download-btn:hover{background:#f0be30;transform:translateY(-1px);}
-.download-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-.faceprep-logo{height:42px;width:auto;object-fit:contain;display:block;border-radius:8px;}
+.college-dropdown-item .dot{width:6px;height:6px;border-radius:50%;background:var(--gold-mid);flex-shrink:0;}
+.faceprep-logo{height:40px;width:auto;object-fit:contain;border-radius:8px;}
 
+/* SIDEBAR */
 .sidebar{background:linear-gradient(180deg,#4a2800 0%,#5c3600 100%);border-right:1px solid rgba(245,200,66,0.15);padding:24px 0;display:flex;flex-direction:column;gap:2px;box-shadow:2px 0 16px rgba(90,50,0,0.22);}
 .nav-group-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(253,233,160,0.40);padding:12px 22px 5px;}
 .nav-item{display:flex;align-items:center;gap:11px;padding:10px 22px;color:rgba(253,233,160,0.65);font-size:13.5px;font-weight:400;cursor:pointer;border-left:2.5px solid transparent;transition:all 0.15s;}
 .nav-item:hover{color:#fde9a0;background:rgba(253,233,160,0.07);}
 .nav-item.active{color:#fde9a0;background:rgba(253,233,160,0.13);border-left-color:var(--gold-bright);font-weight:500;}
-.nav-icon{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;background:transparent;transition:background 0.15s;}
-.nav-item.active .nav-icon{background:rgba(253,233,160,0.13);}
+.nav-icon{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;}
 .sidebar-footer{margin-top:auto;padding:16px 22px 0;border-top:1px solid rgba(253,233,160,0.12);}
 .sidebar-footer-label{font-size:11px;color:rgba(253,233,160,0.35);}
 .sidebar-footer-val{font-size:13px;font-weight:500;color:rgba(253,233,160,0.70);margin-top:1px;}
-.refresh-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
-.refresh-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(253,233,160,0.10);border:1px solid rgba(253,233,160,0.25);border-radius:var(--radius-sm);color:rgba(253,233,160,0.75);font-family:var(--font-body);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.15s;}
-.refresh-btn:hover{background:rgba(253,233,160,0.20);color:#fde9a0;}
-.refresh-btn svg{width:12px;height:12px;transition:transform 0.5s;}
-.refresh-btn.spinning svg{transform:rotate(360deg);}
 
+/* MAIN */
 .main{overflow-y:auto;padding:32px 36px;display:flex;flex-direction:column;gap:26px;background:var(--bg);}
-.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .page-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold-mid);margin-bottom:4px;}
 .page-title{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--ink);letter-spacing:-0.01em;line-height:1.1;}
 .page-sub{font-size:13px;color:var(--ink3);margin-top:5px;}
-.filter-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
-.filter-chip{padding:7px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;box-shadow:var(--shadow-sm);}
-.filter-chip:hover{color:var(--gold-dark);border-color:var(--gold-mid);}
-.filter-chip.active{background:var(--gold-dark);color:#fde9a0;border-color:var(--gold-dark);box-shadow:0 2px 8px rgba(120,80,0,0.25);}
 
+/* PANEL */
 .panel{display:none;flex-direction:column;gap:22px;}
 .panel.active{display:flex;}
 .panel.active>*{animation:fadeUp 0.4s cubic-bezier(.22,1,.36,1) both;}
 .panel.active>*:nth-child(1){animation-delay:0.03s;}
 .panel.active>*:nth-child(2){animation-delay:0.08s;}
 .panel.active>*:nth-child(3){animation-delay:0.13s;}
-.panel.active>*:nth-child(4){animation-delay:0.18s;}
-.panel.active>*:nth-child(5){animation-delay:0.23s;}
 
-.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-.metric-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--gold-mid);border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
-.metric-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
-.metric-card::after{content:'';position:absolute;bottom:-18px;right:-18px;width:72px;height:72px;border-radius:50%;background:var(--gold-light);opacity:0.55;}
-.metric-card.green-top{border-top-color:#10b981;}
-.metric-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);}
-.metric-value{font-family:var(--font-display);font-size:34px;font-weight:400;line-height:1.05;letter-spacing:-0.02em;margin-top:3px;color:var(--gold-dark);}
-.metric-sub{font-size:12px;color:var(--ink3);margin-top:5px;display:flex;align-items:center;gap:6px;}
-
+/* CARD */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .card-title{font-family:var(--font-display);font-size:16px;font-weight:400;color:var(--ink);}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
 
+/* BADGE */
 .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
-.badge-primary{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
 .badge-gold{background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);}
 .badge-green{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
-.badge-blue{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
-.badge-amber{background:#fef3c7;color:#78350f;border:1px solid #fcd34d;}
-.badge-rose{background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;}
 
-/* ──  COLLEGE COMPARISON TABLE ── */
+/* COMPARISON TABLE */
 .comparison-table-wrap{overflow-x:auto;width:100%;}
-.comparison-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:auto;}
-.comparison-table th{text-align:left;padding:12px 10px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1.5px solid rgba(253,233,160,0.15);background:linear-gradient(135deg,#4a2800 0%,#7a4f00 100%);white-space:nowrap;}
-.comparison-table th:first-child{border-radius:var(--radius-sm) 0 0 0;position:sticky;left:0;z-index:2;}
-.comparison-table th:last-child{border-radius:0 var(--radius-sm) 0 0;}
-.comparison-table tbody td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;}
-.comparison-table tbody td:first-child{position:sticky;left:0;background:var(--surface);z-index:1;font-weight:600;color:var(--gold-dark);}
+.comparison-table{width:100%;border-collapse:collapse;font-size:13px;}
+.comparison-table thead th{
+  text-align:left;padding:13px 14px;font-size:10px;font-weight:600;color:#fde9a0;
+  text-transform:uppercase;letter-spacing:0.07em;
+  background:linear-gradient(135deg,#4a2800 0%,#7a4f00 100%);
+  border-bottom:1.5px solid rgba(253,233,160,0.15);white-space:nowrap;
+}
+.comparison-table thead th:first-child{border-radius:var(--radius-sm) 0 0 0;}
+.comparison-table thead th:last-child{border-radius:0 var(--radius-sm) 0 0;}
+.comparison-table tbody td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;}
 .comparison-table tbody tr:last-child td{border-bottom:none;}
-.comparison-table tbody tr:hover td{background:var(--surface2);}
 .comparison-table tbody tr{transition:background 0.12s;cursor:pointer;}
+.comparison-table tbody tr:hover td{background:var(--surface2);}
+.comparison-table tbody td:first-child{font-weight:600;color:var(--gold-dark);}
 
-/* NPS */
-.nps-overview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
-.nps-gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:10px 0 18px;}
-.nps-gauge-svg{width:200px;height:115px;overflow:visible;}
-.nps-score-big{font-family:var(--font-display);font-size:42px;font-weight:400;color:var(--gold-dark);line-height:1;margin-top:-8px;}
-.nps-score-label{font-size:11px;color:var(--ink3);margin-top:4px;font-weight:500;}
-.nps-segment-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
-.nps-seg{text-align:center;padding:10px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);}
-.nps-seg-val{font-family:var(--font-display);font-size:22px;color:var(--gold-dark);}
-.nps-seg-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink3);margin-top:2px;}
-.nps-seg-pct{font-size:11px;color:var(--ink3);margin-top:1px;}
-.nps-seg.promoters{background:#d1fae5;border-color:#6ee7b7;}
-.nps-seg.promoters .nps-seg-val{color:#065f46;}.nps-seg.promoters .nps-seg-lbl{color:#065f46;}
-.nps-seg.passives{background:#fef3c7;border-color:#fcd34d;}
-.nps-seg.passives .nps-seg-val{color:#78350f;}.nps-seg.passives .nps-seg-lbl{color:#78350f;}
-.nps-seg.detractors{background:#fee2e2;border-color:#fca5a5;}
-.nps-seg.detractors .nps-seg-val{color:#7f1d1d;}.nps-seg.detractors .nps-seg-lbl{color:#7f1d1d;}
-.nps-hero-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
-.nps-hero-card{border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
-.nps-hero-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
-.nps-hero-card.promoters-card{background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);border:1px solid #6ee7b7;}
-.nps-hero-card.passives-card{background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border:1px solid #fcd34d;}
-.nps-hero-card.detractors-card{background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);border:1px solid #fca5a5;}
-.nps-hero-icon{font-size:28px;margin-bottom:8px;opacity:0.7;}
-.nps-hero-val{font-family:var(--font-display);font-size:48px;font-weight:400;line-height:1;letter-spacing:-0.02em;}
-.nps-hero-card.promoters-card .nps-hero-val{color:#065f46;}.nps-hero-card.promoters-card .nps-hero-lbl{color:#065f46;}
-.nps-hero-card.passives-card .nps-hero-val{color:#78350f;}.nps-hero-card.passives-card .nps-hero-lbl{color:#78350f;}
-.nps-hero-card.detractors-card .nps-hero-val{color:#7f1d1d;}.nps-hero-card.detractors-card .nps-hero-lbl{color:#7f1d1d;}
-.nps-hero-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-top:6px;}
-.nps-hero-pct{font-size:13px;margin-top:4px;opacity:0.75;}
-.nps-hero-range{font-size:11px;opacity:0.55;margin-top:2px;}
-.nps-hero-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.3);}
-.nps-index-banner{background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
-.nps-index-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(253,233,160,0.6);margin-bottom:6px;}
-.nps-index-score{font-family:var(--font-display);font-size:64px;font-weight:400;line-height:1;letter-spacing:-0.03em;color:#f5c842;}
-.nps-index-desc{font-size:13px;color:rgba(253,233,160,0.75);margin-top:6px;}
-.nps-index-right{display:flex;gap:32px;flex-wrap:wrap;}
-.nps-stat-block{text-align:center;}
-.nps-stat-val{font-family:var(--font-display);font-size:28px;color:#fde9a0;line-height:1;}
-.nps-stat-lbl{font-size:11px;color:rgba(253,233,160,0.55);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;}
-.nps-formula{font-size:11px;color:rgba(253,233,160,0.45);margin-top:4px;}
-.nps-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.nps-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);}
-.nps-bar-enhanced{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
-.nps-bar-item{display:grid;grid-template-columns:20px 1fr 36px;gap:10px;align-items:center;}
-.nps-bar-score-num{font-size:11px;font-weight:700;color:var(--ink3);text-align:center;}
-.nps-bar-outer{background:var(--bg2);border-radius:6px;height:22px;overflow:hidden;position:relative;}
-.nps-bar-inner{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden;display:flex;align-items:center;padding-left:8px;}
-.nps-bar-inner::after{content:'';position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 100%);background-size:200% 100%;animation:shimmer 2.5s infinite;}
-.nps-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
+/* RANK BADGE */
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:700;background:var(--bg2);color:var(--ink3);}
+.rank-badge.gold{background:linear-gradient(135deg,#f5c842,#e6a800);color:#3d2000;box-shadow:0 2px 6px rgba(200,140,0,0.4);}
+.rank-badge.silver{background:linear-gradient(135deg,#e8e8e8,#c8c8c8);color:#333;}
+.rank-badge.bronze{background:linear-gradient(135deg,#d4956a,#b5683a);color:#fff;}
 
-/* ── MENTOR TABLE ── */
-.table-wrap{overflow-x:hidden;width:100%;}
-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
-thead th{text-align:left;padding:12px 10px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1.5px solid rgba(253,233,160,0.15);background:linear-gradient(135deg,#4a2800 0%,#7a4f00 100%);white-space:normal;word-break:break-word;line-height:1.3;}
-thead th:first-child{border-radius:var(--radius-sm) 0 0 0;}
-thead th:last-child{border-radius:0 var(--radius-sm) 0 0;}
-tbody td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;word-break:break-word;}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover td{background:var(--surface2);}
-tbody tr{transition:background 0.12s;}
+/* RATING STAR */
+.rating-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.rating-pill.high{background:#d1fae5;color:#065f46;}
+.rating-pill.mid{background:#fef3c7;color:#78350f;}
+.rating-pill.low{background:#fee2e2;color:#7f1d1d;}
 
-#mentorBayesianTable th:nth-child(1),#mentorBayesianTable td:nth-child(1){width:48px;text-align:center;}
-#mentorBayesianTable th:nth-child(2),#mentorBayesianTable td:nth-child(2){width:18%;}
-#mentorBayesianTable th:nth-child(3),#mentorBayesianTable td:nth-child(3){width:14%;}
-#mentorBayesianTable th:nth-child(4),#mentorBayesianTable td:nth-child(4){width:10%;text-align:center;}
-#mentorBayesianTable th:nth-child(5),#mentorBayesianTable td:nth-child(5){width:10%;text-align:center;}
-#mentorBayesianTable th:nth-child(6),#mentorBayesianTable td:nth-child(6){width:13%;text-align:center;}
-#mentorBayesianTable th:nth-child(7),#mentorBayesianTable td:nth-child(7){width:13%;text-align:center;}
-#mentorBayesianTable th:nth-child(8),#mentorBayesianTable td:nth-child(8){width:10%;text-align:center;}
+/* NPS PILL */
+.nps-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.nps-pill.excellent{background:#d1fae5;color:#065f46;}
+.nps-pill.good{background:#dbeafe;color:#1e40af;}
+.nps-pill.ok{background:#fef3c7;color:#78350f;}
+.nps-pill.poor{background:#fee2e2;color:#7f1d1d;}
 
-.trend-cycle-table-wrap{overflow-x:hidden;width:100%;}
-.trend-cycle-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
-.trend-cycle-table th{text-align:left;padding:10px 6px;font-size:9.5px;font-weight:600;color:#fde9a0;text-transform:uppercase;letter-spacing:0.05em;background:linear-gradient(135deg,#4a2800,#7a4f00);white-space:normal;word-break:break-word;line-height:1.25;}
-.trend-cycle-table th:first-child{border-radius:6px 0 0 0;}
-.trend-cycle-table th:last-child{border-radius:0 6px 0 0;}
-.trend-cycle-table td{padding:9px 6px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;word-break:break-word;font-size:11.5px;}
-.trend-cycle-table tr:last-child td{border-bottom:none;}
-.trend-cycle-table tr:hover td{background:var(--surface2);}
-.trend-cycle-table th:nth-child(1),.trend-cycle-table td:nth-child(1){width:13%;}
-.trend-cycle-table th:nth-child(2),.trend-cycle-table td:nth-child(2){width:8%;}
-.trend-cycle-table th:nth-child(3),.trend-cycle-table td:nth-child(3){width:10%;}
-.trend-cycle-table th:nth-child(4),.trend-cycle-table td:nth-child(4){width:8%;}
-.trend-cycle-table th:nth-child(5),.trend-cycle-table td:nth-child(5){width:8%;}
-.trend-cycle-table th:nth-child(6),.trend-cycle-table td:nth-child(6){width:8%;}
-.trend-cycle-table th:nth-child(7),.trend-cycle-table td:nth-child(7){width:10%;}
-.trend-cycle-table th:nth-child(8),.trend-cycle-table td:nth-child(8){width:8%;}
-.trend-cycle-table th:nth-child(9),.trend-cycle-table td:nth-child(9){width:9%;}
-.trend-cycle-table th:nth-child(10),.trend-cycle-table td:nth-child(10){width:9%;}
-.trend-cycle-table th:nth-child(11),.trend-cycle-table td:nth-child(11){width:9%;}
+/* METRICS ROW */
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--gold-mid);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;position:relative;overflow:hidden;}
+.metric-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.metric-card::after{content:'';position:absolute;bottom:-18px;right:-18px;width:72px;height:72px;border-radius:50%;background:var(--gold-light);opacity:0.55;}
+.metric-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);}
+.metric-value{font-family:var(--font-display);font-size:36px;font-weight:400;line-height:1.05;letter-spacing:-0.02em;margin-top:3px;color:var(--gold-dark);}
+.metric-sub{font-size:12px;color:var(--ink3);margin-top:5px;}
 
-/* TREND PANEL */
-.trend-hero-banner{background:linear-gradient(135deg,#4a2800,#7a4f00 60%,#a06e00);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
-.trend-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(253,233,160,0.6);margin-bottom:6px;}
-.trend-hero-title{font-family:var(--font-display);font-size:32px;color:#fde9a0;line-height:1.1;}
-.trend-hero-sub{font-size:13px;color:rgba(253,233,160,0.65);margin-top:6px;}
-.trend-cycle-btn{padding:8px 20px;border-radius:20px;border:1px solid rgba(253,233,160,0.35);background:rgba(253,233,160,0.10);color:#fde9a0;font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;}
-.trend-cycle-btn:hover{background:rgba(253,233,160,0.22);}
-.trend-cycle-btn.active{background:var(--gold-bright);color:var(--gold-dark);border-color:var(--gold-bright);}
-.trend-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-.trend-kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
-.trend-kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
-.trend-kpi-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);}
-.trend-kpi-value{font-family:var(--font-display);font-size:28px;line-height:1.1;margin-top:4px;color:var(--gold-dark);}
-.trend-kpi-delta{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:6px;}
-.trend-kpi-delta.up{background:#d1fae5;color:#065f46;}
-.trend-kpi-delta.down{background:#fee2e2;color:#7f1d1d;}
-.trend-kpi-delta.flat{background:var(--bg2);color:var(--ink3);}
-.trend-kpi-cycle{font-size:11px;color:var(--ink4);margin-top:4px;}
-.trend-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.trend-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);}
-.trend-chart-card.full-width{grid-column:1/-1;}
-.trend-source-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#065f46;}
-.trend-source-badge.simulated{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.35);color:#78350f;}
-.delta-pill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px;}
-.delta-pill.up{background:#d1fae5;color:#065f46;}
-.delta-pill.down{background:#fee2e2;color:#7f1d1d;}
-.delta-pill.flat{background:var(--bg2);color:var(--ink3);}
+/* SKELETON */
+.skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--gold-light) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;}
 
-/* MENTOR MODAL */
-.mentor-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);}
-.mentor-modal-overlay.open{display:flex;animation:fadeUp 0.25s cubic-bezier(.22,1,.36,1);}
-.mentor-modal-box{background:#fff;border-radius:14px;border:1px solid rgba(120,80,10,0.15);width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:28px;box-shadow:0 12px 40px rgba(90,50,0,0.35);}
-.mm-close-btn{border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;background:var(--surface);cursor:pointer;font-size:18px;color:var(--ink3);transition:background 0.15s;display:flex;align-items:center;justify-content:center;}
-.mm-close-btn:hover{background:var(--bg2);}
+/* ERROR TOAST */
+.error-toast{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d;padding:12px 16px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:8px;display:none;}
+.error-toast.show{display:block;}
 
+/* STATUS INDICATOR */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.status-dot.loading{background:var(--gold-mid);animation:pulse 1s infinite;}
+.status-dot.done{background:#10b981;}
+.status-dot.error{background:#ef4444;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* SCROLLBAR */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
 ::-webkit-scrollbar-thumb{background:var(--gold-mid);border-radius:99px;}
-.college-dropdown::-webkit-scrollbar{width:4px;}
-.college-dropdown::-webkit-scrollbar-thumb{background:var(--gold-mid);}
 
 /* MOBILE */
+.hamburger-btn{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:rgba(253,233,160,0.12);border:1px solid rgba(253,233,160,0.25);border-radius:var(--radius-sm);cursor:pointer;padding:8px;}
+.hamburger-btn span{display:block;width:100%;height:2px;background:#fde9a0;border-radius:2px;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:499;}
 @media(max-width:960px){
   .shell{grid-template-columns:1fr;}
-  .main{padding:20px;}
-  .metrics-row,.trend-kpi-row{grid-template-columns:1fr 1fr;}
-  .charts-grid,.nps-charts-row,.trend-charts-grid{grid-template-columns:1fr;}
-  .nps-hero-row{grid-template-columns:1fr;}
-  .logo-name{font-size:18px;}
-  .topbar{padding:0 16px;}
   .hamburger-btn{display:flex;}
-  .sidebar{display:flex;position:fixed;top:0;left:0;height:100vh;width:240px;z-index:500;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(.22,1,.36,1);padding-top:80px;}
+  .sidebar{display:flex;position:fixed;top:0;left:0;height:100vh;width:240px;z-index:500;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(.22,1,.36,1);padding-top:72px;}
   .sidebar.open{transform:translateX(0);}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:499;backdrop-filter:blur(2px);}
   .sidebar-overlay.open{display:block;}
-  .download-btn span{display:none;}
-  .college-select-btn .btn-label{max-width:100px;}
-  .trend-chart-card.full-width{grid-column:auto;}
-  table{font-size:11px;}
-  .trend-cycle-table{font-size:10px;}
+  .main{padding:20px;}
+  .metrics-row{grid-template-columns:1fr 1fr;}
+  .topbar{padding:0 16px;}
 }
 @media(max-width:480px){
-  .metrics-row,.trend-kpi-row{grid-template-columns:1fr;}
-  .nps-segment-row{grid-template-columns:1fr;}
-  .page-title{font-size:22px;}
-  .download-btn{padding:8px 10px;font-size:11px;}
+  .metrics-row{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
+<!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Loading college comparison data...</div>
-  <div class="error-message" id="errorMessage">
-    <strong>⚠ Unable to load data</strong>
-    Make sure the Google Sheet is set to "Anyone with the link can view".
-    <br><br><strong>Steps to fix:</strong><br>
-    1. Open your Google Sheet<br>
-    2. Click "Share" → "Anyone with the link" → "Viewer"<br>
-    3. Refresh this page
-  </div>
+  <div class="loading-text" id="loadingText">Fetching college data...</div>
+  <div class="loading-progress"><div class="loading-progress-bar" id="loadingBar"></div></div>
 </div>
 
-<div class="mentor-modal-overlay" id="mentorModalOverlay" onclick="if(event.target===this)closeMentorModal()">
-  <div class="mentor-modal-box" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-      <div>
-        <div style="font-family:var(--font-display);font-size:22px;color:var(--ink);" id="mmName">—</div>
-        <div style="font-size:12px;color:var(--ink3);margin-top:4px;" id="mmSub">—</div>
-      </div>
-      <button class="mm-close-btn" onclick="closeMentorModal()">×</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="mmStats"></div>
-    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px;">Question-by-question breakdown</div>
-    <div id="mmQRows"></div>
-    <div style="font-size:11px;color:var(--ink4);border-top:1px solid var(--border);padding-top:10px;margin-top:16px;">* Yes/No counts are aggregated across all subjects this mentor teaches.</div>
-  </div>
-</div>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="shell">
-<header class="topbar">
-  <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileSidebar()" aria-label="Open navigation">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="logo">
-    <div class="logo-name" id="logoInstitutionName">Performance Dashboard</div>
-  </div>
-  <div class="topbar-right">
-    <div class="college-dropdown-wrap" id="collegeDropdownWrap">
-      <button class="college-select-btn" id="collegeSelectBtn" onclick="toggleDropdown()">
-        <span class="btn-label" id="collegeBtnLabel">Select College</span>
-        <span class="caret">▼</span>
-      </button>
-      <div class="college-dropdown" id="collegeDropdown"></div>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+    <div style="flex:1;min-width:0;">
+      <div class="logo-name">Performance Dashboard</div>
     </div>
-    <img src="Face prep logo3.png" alt="FacePrep Campus" class="faceprep-logo" onerror="this.style.display='none'">
-    <button class="download-btn" id="downloadBtn" onclick="downloadReport()">↓ <span>Download Report</span></button>
-  </div>
-</header>
+    <div class="topbar-right">
+      <div class="college-dropdown-wrap">
+        <button class="college-select-btn" id="collegeSelectBtn" onclick="toggleDropdown()">
+          <span class="btn-label" id="collegeBtnLabel">All Colleges</span>
+          <span class="caret">▼</span>
+        </button>
+        <div class="college-dropdown" id="collegeDropdown"></div>
+      </div>
+      <img src="Face prep logo3.png" alt="FacePrep" class="faceprep-logo" onerror="this.style.display='none'">
+    </div>
+  </header>
 
-<aside class="sidebar" id="mainSidebar">
-  <div class="nav-group-label">Analytics</div>
-  <div class="nav-item active" onclick="showPanel('summary',this)"><span class="nav-icon">▦</span> Summary</div>
-  <div class="nav-item" onclick="showPanel('mentors',this)"><span class="nav-icon">◉</span> Mentor Performance</div>
-  <div class="nav-item" onclick="showPanel('nps',this)"><span class="nav-icon">◈</span> NPS Analysis</div>
-  <div class="nav-item" onclick="showPanel('trends',this)"><span class="nav-icon">▶︎</span> Trend Over Time</div>
-  <div class="sidebar-footer">
-    <div class="sidebar-footer-label">Data Source</div>
-    <div class="sidebar-footer-val">Google Sheets (Live)</div>
-    <div class="refresh-row">
-      <div>
-        <div class="sidebar-footer-label" style="margin-top:8px">Last Updated</div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="mainSidebar">
+    <div class="nav-group-label">Analytics</div>
+    <div class="nav-item active" onclick="showPanel('summary',this)"><span class="nav-icon">▦</span> Summary</div>
+    <div class="nav-item" onclick="showPanel('mentors',this)"><span class="nav-icon">◉</span> Mentor Performance</div>
+    <div class="nav-item" onclick="showPanel('nps',this)"><span class="nav-icon">◈</span> NPS Analysis</div>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-label">Data Source</div>
+      <div class="sidebar-footer-val">Google Sheets (Live)</div>
+      <div style="margin-top:8px;">
+        <div class="sidebar-footer-label">Last Refreshed</div>
         <div class="sidebar-footer-val" id="lastUpdated">—</div>
       </div>
-      <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13.5 2.5A7 7 0 1 0 14 8"/><path d="M14 2.5V6h-3.5"/>
-        </svg>
-        Refresh
-      </button>
     </div>
-  </div>
-</aside>
+  </aside>
 
-<main class="main">
-  <div class="page-header">
+  <!-- MAIN -->
+  <main class="main">
     <div>
-      <div class="page-eyebrow" id="pageEyebrow">Performance Analytics</div>
-      <div class="page-title" id="pageTitle">All Colleges Comparison</div>
-      <div class="page-sub" id="pageSub">Select a college from the dropdown to view detailed analytics</div>
-    </div>
-    <div class="filter-row" id="deptFilterRow" style="visibility:hidden">
-      <button class="filter-chip active" onclick="setDeptFilter('all',this)">All</button>
-    </div>
-  </div>
-
-  <!-- SUMMARY PANEL (now shows comparison view initially) -->
-  <div class="panel active" id="panel-summary">
-    <!-- College Comparison View (shown on landing) -->
-    <div id="comparisonView">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">College Performance Comparison</div>
-          <span class="badge badge-gold" id="comparisonBadge">Loading...</span>
-        </div>
-        <div class="comparison-table-wrap">
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th>College Name</th>
-                <th style="text-align:center;">Avg Rating</th>
-                <th style="text-align:center;">Hit Ratio</th>
-                <th style="text-align:center;">NPS Score</th>
-                <th style="text-align:center;">NPS Δ (MoM)</th>
-                <th style="text-align:center;">Responses</th>
-                <th style="text-align:center;">Mentors</th>
-              </tr>
-            </thead>
-            <tbody id="comparisonTableBody">
-              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">Loading college data...</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="padding:12px 0;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);margin-top:12px;">
-          * Click on any college row to view detailed analytics · NPS Δ = Month-over-Month change from trend data
-        </div>
-      </div>
+      <div class="page-eyebrow">Performance Analytics</div>
+      <div class="page-title" id="pageTitle">All Colleges Overview</div>
+      <div class="page-sub" id="pageSub">Live data from Google Sheets · Click a college row to filter</div>
     </div>
 
-    <!-- Individual College View (shown after selecting a college) -->
-    <div id="individualView" style="display:none;">
-      <div class="metrics-row">
-        <div class="metric-card">
-          <div class="metric-label">Avg Overall Rating</div>
-          <div class="metric-value" id="avgRating">—</div>
+    <!-- SUMMARY PANEL -->
+    <div class="panel active" id="panel-summary">
+
+      <!-- LANDING: Comparison table -->
+      <div id="comparisonView">
+        <div class="error-toast" id="errorToast"></div>
+
+        <!-- Summary metrics row -->
+        <div class="metrics-row" id="summaryMetrics" style="display:none;">
+          <div class="metric-card">
+            <div class="metric-label">Colleges Loaded</div>
+            <div class="metric-value" id="smColleges">—</div>
+            <div class="metric-sub">out of 22 colleges</div>
+          </div>
+          <div class="metric-card" style="border-top-color:#10b981;">
+            <div class="metric-label" style="color:#065f46;">Avg Rating (All)</div>
+            <div class="metric-value" style="color:#065f46;" id="smAvgRating">—</div>
+            <div class="metric-sub">across all colleges</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg NPS (All)</div>
+            <div class="metric-value" id="smAvgNps">—</div>
+            <div class="metric-sub">Net Promoter Score</div>
+          </div>
         </div>
-        <!-- HIT RATIO CARD (replaces Total Responses) -->
-        <div class="metric-card green-top">
-          <div class="metric-label" style="color:#065f46;">Hit Ratio</div>
-          <div class="metric-value" id="hitRatioValue" style="color:#065f46;">—</div>
-          <div class="metric-sub" id="hitRatioSub">Responses / Students</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Mentors Tracked</div>
-          <div class="metric-value" id="mentorCount">—</div>
-          <div class="metric-sub" id="mentorSub">—</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Top Performer</div>
-          <div class="metric-value" id="subjectCount" style="font-size:20px;">—</div>
-          <div class="metric-sub" id="subjectSub">—</div>
-        </div>
-      </div>
-      <div class="charts-grid">
+
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Mentor Rankings (Bayesian)</div>
-            <span class="badge badge-gold" id="topMentorsBadge">—</span>
+            <div class="card-title">College Performance Comparison</div>
+            <span class="badge badge-gold" id="compBadge">Loading…</span>
           </div>
-          <div id="topMentorsWrap" style="position:relative;"><canvas id="topMentorsChart"></canvas></div>
-        </div>
-        <div class="nps-overview-card">
-          <div class="card-header" style="margin-bottom:8px;">
-            <div class="card-title">Net Promoter Score (NPS)</div>
-            <span class="badge badge-primary" id="npsBadge">—</span>
+          <div class="comparison-table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th style="width:44px;text-align:center;">#</th>
+                  <th>College Name</th>
+                  <th style="text-align:center;">Avg Rating</th>
+                  <th style="text-align:center;">Total Responses</th>
+                  <th style="text-align:center;">NPS Score</th>
+                  <th style="text-align:center;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="comparisonTableBody">
+                <!-- Skeleton rows -->
+                <tr><td colspan="6" style="padding:40px;text-align:center;color:var(--ink3);">
+                  <div class="spinner" style="margin:0 auto 12px;width:32px;height:32px;"></div>
+                  Fetching data from all college sheets…
+                </td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="nps-gauge-wrap">
-            <svg class="nps-gauge-svg" viewBox="0 0 200 115" id="npsGaugeSvg">
-              <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#f5e9c8" stroke-width="18" stroke-linecap="round"/>
-              <path id="npsArcFill" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#c48a00" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-              <circle id="npsPulseRing" cx="100" cy="100" r="6" fill="none" stroke="#c48a00" stroke-width="2" opacity="0"/>
-              <g id="npsNeedleGroup" transform="rotate(-90,100,100)">
-                <line x1="100" y1="100" x2="100" y2="28" stroke="#5c3600" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="100" cy="100" r="6" fill="#5c3600"/>
-              </g>
-              <text x="-8" y="108" font-size="11" fill="#c48a00" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">-100</text>
-              <text x="100" y="-4" font-size="11" fill="#c48a00" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">0</text>
-              <text x="208" y="108" font-size="11" fill="#c48a00" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">+100</text>
-            </svg>
-            <div class="nps-score-big" id="npsScoreBig">—</div>
-            <div class="nps-score-label" id="npsScoreLabel">No data loaded</div>
-          </div>
-          <div class="nps-segment-row">
-            <div class="nps-seg promoters">
-              <div class="nps-seg-val" id="npsPromotersCount">—</div>
-              <div class="nps-seg-lbl">Promoters</div>
-              <div class="nps-seg-pct" id="npsPromotersPct">score 9–10</div>
-            </div>
-            <div class="nps-seg passives">
-              <div class="nps-seg-val" id="npsPassivesCount">—</div>
-              <div class="nps-seg-lbl">Passives</div>
-              <div class="nps-seg-pct" id="npsPassivesPct">score 7–8</div>
-            </div>
-            <div class="nps-seg detractors">
-              <div class="nps-seg-val" id="npsDetractorsCount">—</div>
-              <div class="nps-seg-lbl">Detractors</div>
-              <div class="nps-seg-pct" id="npsDetractorsPct">score 1–6</div>
-            </div>
+          <div style="padding:10px 0 0;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);margin-top:12px;">
+            * Data pulled live from Google Sheets · Rated out of 5 · NPS ranges from −100 to +100
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- MENTOR PERFORMANCE PANEL -->
-  <div class="panel" id="panel-mentors">
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="table-wrap">
-        <table id="mentorBayesianTable">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Mentor Name</th>
-              <th>Department</th>
-              <th>Avg Rating</th>
-              <th>Responses</th>
-              <th>Rating × Responses</th>
-              <th>Bayesian Score</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="mentorTableBody">
-            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">
-        * Bayesian Score = [ (Global Mean × 50) + (Avg. Rating × Responses) ] ÷ (50 + Responses) · Ranked highest → lowest
-      </div>
-    </div>
-  </div>
-
-  <!-- NPS ANALYTICS PANEL -->
-  <div class="panel" id="panel-nps">
-    <div class="nps-index-banner">
-      <div>
-        <div class="nps-index-label">Net Promoter Score Index</div>
-        <div class="nps-index-score" id="npsIndexBig">—</div>
-        <div class="nps-index-desc" id="npsIndexDesc">Select a college to load NPS data</div>
-      </div>
-      <div class="nps-index-right">
-        <div class="nps-stat-block"><div class="nps-stat-val" id="npsTotalBig">—</div><div class="nps-stat-lbl">Total Responses</div></div>
-        <div class="nps-stat-block"><div class="nps-stat-val" id="npsAvgBig">—</div><div class="nps-stat-lbl">Avg Score</div><div class="nps-formula">out of 10</div></div>
-        <div class="nps-stat-block"><div class="nps-stat-val" id="npsMedianBig">—</div><div class="nps-stat-lbl">Median Score</div></div>
-      </div>
-    </div>
-    <div class="nps-hero-row">
-      <div class="nps-hero-card promoters-card"><div class="nps-hero-icon">😊</div><div class="nps-hero-val" id="npsP_count">—</div><div class="nps-hero-lbl">Promoters</div><div class="nps-hero-pct" id="npsP_pct">—</div><div class="nps-hero-range">Score 9 – 10</div></div>
-      <div class="nps-hero-card passives-card"><div class="nps-hero-icon">😐</div><div class="nps-hero-val" id="npsN_count">—</div><div class="nps-hero-lbl">Passives</div><div class="nps-hero-pct" id="npsN_pct">—</div><div class="nps-hero-range">Score 7 – 8</div></div>
-      <div class="nps-hero-card detractors-card"><div class="nps-hero-icon">😞</div><div class="nps-hero-val" id="npsD_count">—</div><div class="nps-hero-lbl">Detractors</div><div class="nps-hero-pct" id="npsD_pct">—</div><div class="nps-hero-range">Score 1 – 6</div></div>
-    </div>
-    <div class="nps-charts-row">
-      <div class="nps-chart-card">
-        <div class="card-header"><div class="card-title">Segment Distribution</div><span class="badge badge-primary" id="npsDonutBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;display:flex;align-items:center;justify-content:center;">
-          <canvas id="npsDonutChart"></canvas>
-          <div id="npsDonutCenter" style="position:absolute;text-align:center;pointer-events:none;">
-            <div style="font-family:var(--font-display);font-size:28px;color:var(--gold-dark);" id="npsDonutScore">—</div>
-            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);">NPS Index</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:18px;margin-top:4px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#10b981;display:inline-block;"></span>Promoters</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block;"></span>Passives</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>Detractors</div>
-        </div>
-      </div>
-      <div class="nps-chart-card">
-        <div class="card-header"><div class="card-title">Score Distribution (1–10)</div><span class="badge badge-primary" id="npsBarBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;"><canvas id="npsBarChart"></canvas></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Score Breakdown — Count per Rating</div><span class="badge badge-gold" id="npsBreakdownBadge">—</span></div>
-      <div class="nps-bar-enhanced" id="npsBarEnhanced"><div style="text-align:center;padding:24px;color:var(--ink3);">Select a college to view NPS breakdown</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Segment Proportion — Visual Breakdown</div><span class="badge badge-primary" id="npsStackedBadge">—</span></div>
-      <div id="npsStackedWrap" style="position:relative;width:100%;height:80px;">
-        <div id="npsStackedBar" style="display:flex;height:48px;border-radius:10px;overflow:hidden;gap:2px;margin-top:10px;">
-          <div id="stkPromoters" style="background:#10b981;height:100%;border-radius:10px 0 0 10px;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-          <div id="stkPassives"  style="background:#f59e0b;height:100%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-          <div id="stkDetractors" style="background:#ef4444;height:100%;border-radius:0 10px 10px 0;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--ink3);">
-          <span id="stkPromLabel">Promoters —%</span><span id="stkPassLabel">Passives —%</span><span id="stkDetrLabel">Detractors —%</span>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--ink4);margin-top:10px;">* NPS = %Promoters − %Detractors · Passives are excluded from the index calculation.</div>
-    </div>
-  </div>
-
-  <!-- TREND OVER TIME PANEL -->
-  <div class="panel" id="panel-trends">
-    <div class="trend-hero-banner">
-      <div>
-        <div class="trend-eyebrow">Historical Analytics · Sep 2025 – Apr 2026</div>
-        <div class="trend-hero-title" id="trendHeroTitle">Trend Over Time</div>
-        <div class="trend-hero-sub" id="trendHeroSub">Track how ratings, NPS, Hit Ratio, and response volume change across months</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;" id="trendCycleBtnsWrap">
-        <div id="trendSourceIndicator" style="display:none;margin-right:8px;"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="trendCycleBtns"></div>
-      </div>
-    </div>
-
-    <div class="trend-kpi-row">
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">Avg Rating</div>
-        <div class="trend-kpi-value" id="tkpiRating">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiRatingDelta">—</div>
-        <div class="trend-kpi-cycle" id="tkpiRatingCycle">—</div>
-      </div>
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">NPS Index</div>
-        <div class="trend-kpi-value" id="tkpiNps">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiNpsDelta">—</div>
-        <div class="trend-kpi-cycle" id="tkpiNpsCycle">—</div>
-      </div>
-      <div class="trend-kpi-card" style="border-top:3px solid #10b981;">
-        <div class="trend-kpi-label" style="color:#065f46;">Hit Ratio</div>
-        <div class="trend-kpi-value" id="tkpiHitRatio" style="color:#065f46;">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiHitRatioDelta">—</div>
-        <div class="trend-kpi-cycle" id="tkpiHitRatioCycle">—</div>
-      </div>
-      <div class="trend-kpi-card">
-        <div class="trend-kpi-label">Promoter %</div>
-        <div class="trend-kpi-value" id="tkpiPromo">—</div>
-        <div class="trend-kpi-delta flat" id="tkpiPromoDelta">—</div>
-        <div class="trend-kpi-cycle" id="tkpiPromoCycle">—</div>
-      </div>
-    </div>
-
-    <div class="trend-charts-grid">
-      <div class="trend-chart-card full-width">
-        <div class="card-header"><div class="card-title">Average Rating Trend · Sep 2025 – Apr 2026</div><span class="badge badge-gold" id="trendRatingBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;"><canvas id="trendRatingChart"></canvas></div>
-      </div>
-      <div class="trend-chart-card">
-        <div class="card-header"><div class="card-title">NPS Index Trend</div><span class="badge badge-primary" id="trendNpsBadge">—</span></div>
-        <div style="position:relative;width:100%;height:240px;"><canvas id="trendNpsChart"></canvas></div>
-      </div>
-      <div class="trend-chart-card">
+    <!-- MENTOR PANEL -->
+    <div class="panel" id="panel-mentors">
+      <div class="card">
         <div class="card-header">
-          <div class="card-title">Hit Ratio Trend</div>
-          <span class="badge badge-green" id="trendHitRatioBadge">—</span>
+          <div class="card-title">Mentor Performance</div>
+          <span class="badge badge-gold">Select a college from dropdown</span>
         </div>
-        <div style="position:relative;width:100%;height:240px;"><canvas id="trendHitRatioChart"></canvas></div>
+        <div style="text-align:center;padding:40px;color:var(--ink3);font-size:13px;">Use the dropdown in the top-right to select a college and view mentor data.</div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header"><div class="card-title">NPS Segment Trend — Promoters / Passives / Detractors (%)</div><span class="badge badge-gold" id="trendSegBadge">—</span></div>
-      <div style="position:relative;width:100%;height:300px;"><canvas id="trendSegChart"></canvas></div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">Month-by-Month Summary Table · Sep 2025 – Apr 2026</div><span class="badge badge-gold" id="trendTableBadge">—</span></div>
-      <div class="trend-cycle-table-wrap">
-        <table class="trend-cycle-table">
-          <thead><tr>
-            <th>Month</th>
-            <th>Resp.</th>
-            <th>Avg Rating</th>
-            <th>Δ Rating</th>
-            <th>NPS</th>
-            <th>Δ NPS</th>
-            <th>Hit Ratio</th>
-            <th>Δ Hit</th>
-            <th>Promo %</th>
-            <th>Detr %</th>
-            <th>Mentors</th>
-          </tr></thead>
-          <tbody id="trendCycleTableBody"></tbody>
-        </table>
+    <!-- NPS PANEL -->
+    <div class="panel" id="panel-nps">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">NPS Analysis</div>
+          <span class="badge badge-gold">Select a college from dropdown</span>
+        </div>
+        <div style="text-align:center;padding:40px;color:var(--ink3);font-size:13px;">Use the dropdown in the top-right to select a college and view NPS analysis.</div>
       </div>
-      <div style="font-size:11px;color:var(--ink4);margin-top:10px;">* Hit Ratio = (Actual Responses ÷ Total Students) × 100% · Resp. = Responses · Promo = Promoters · Detr = Detractors</div>
     </div>
-  </div>
 
-</main>
+  </main>
 </div>
 
 <script>
-/* SCRIPT CONTINUES WITH MODIFICATIONS IN NEXT FILE DUE TO LENGTH... */
+// ═══════════════════════════════════════════════════════════
+// COLLEGE CONFIG — all tabs in one spreadsheet
+// ═══════════════════════════════════════════════════════════
+const SHEET_ID = '19HsWARl8RFNZ6nc-bUCBKKEN39JkQVxCBfbNCUSe2_4';
+
+const COLLEGES = [
+  { name: 'Kamaraj College',                                              gid: '0' },
+  { name: "Kamaraj Women's College",                                      gid: '1140723423' },
+  { name: 'SDNB Vaishnav College for Women',                              gid: '340022065' },
+  { name: 'Patrician College of Arts & Science',                          gid: '1890731138' },
+  { name: "TERF's College of Arts and Science",                           gid: '1010908578' },
+  { name: 'Sree Saraswathi Thyagaraja College',                           gid: '1363163794' },
+  { name: 'TJS College of Arts and Science',                              gid: '1776412956' },
+  { name: 'Bharathidasan College of Arts & Science',                      gid: '2085937367' },
+  { name: 'Nagarathinam Angalammal Arts & Science College',               gid: '407392563' },
+  { name: "Vinayaga Mission's Research Foundation School of Arts & Science", gid: '1231492996' },
+  { name: 'Sri Amaraavathi College of Arts & Science',                    gid: '1223988020' },
+  { name: 'Takshashila University',                                       gid: '1833417744' },
+  { name: 'Study World Group of Institution',                             gid: '1261765001' },
+  { name: 'Rathinam College of Arts & Science',                           gid: '1707229573' },
+  { name: 'Noorul Islam Centre for Higher Education (NICHE)',             gid: '1044442080' },
+  { name: 'AMET University',                                              gid: '1257152100' },
+  { name: 'Joy University',                                               gid: '185512483' },
+  { name: 'Sasurie College of Arts and Science',                          gid: '1553065051' },
+  { name: 'Alliance University',                                          gid: '361218329' },
+  { name: 'Kristu Jayanti (Deemed to be University)',                     gid: '2101380937' },
+  { name: 'S-VYASA University',                                           gid: '29895230' },
+  { name: 'Asian School of Business',                                     gid: '1108050649' },
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let allCollegeData = []; // populated after fetch
+let currentPanel = 'summary';
+
+// ═══════════════════════════════════════════════════════════
+// CSV FETCH
+// ═══════════════════════════════════════════════════════════
+function csvUrl(gid) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+}
+
+async function fetchSheet(gid) {
+  const url = csvUrl(gid);
+  const resp = await fetch(url, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const text = await resp.text();
+  return Papa.parse(text, { skipEmptyLines: true }).data;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PARSE HELPERS
+// ═══════════════════════════════════════════════════════════
+
+// Flatten all cell values from parsed CSV into one array for easy searching
+function allCells(rows) {
+  return rows.flat().map(c => String(c).trim());
+}
+
+// Find a numeric value that appears after a label keyword
+function findValueAfterLabel(rows, ...keywords) {
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < rows[r].length; c++) {
+      const cell = String(rows[r][c]).toLowerCase().trim();
+      if (keywords.some(kw => cell.includes(kw.toLowerCase()))) {
+        // Check same row, next cells
+        for (let nc = c + 1; nc < rows[r].length; nc++) {
+          const val = parseFloat(String(rows[r][nc]).replace(/[^0-9.\-]/g, ''));
+          if (!isNaN(val)) return val;
+        }
+        // Check next row, first numeric cell
+        if (r + 1 < rows.length) {
+          for (let nc = 0; nc < rows[r + 1].length; nc++) {
+            const val = parseFloat(String(rows[r + 1][nc]).replace(/[^0-9.\-]/g, ''));
+            if (!isNaN(val)) return val;
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// Find all numbers in rows that appear to be NPS scores (−100 to 100 range)
+function findNpsScore(rows) {
+  // Strategy 1: look for label "NPS" or "Net Promoter"
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < rows[r].length; c++) {
+      const cell = String(rows[r][c]).toLowerCase().trim();
+      if (cell.includes('net promoter') || cell === 'nps' || cell === 'nps score' || cell === 'nps index') {
+        // search adjacent cells
+        for (let nc = c + 1; nc < rows[r].length; nc++) {
+          const raw = String(rows[r][nc]).replace(/[^0-9.\-]/g, '');
+          const val = parseFloat(raw);
+          if (!isNaN(val) && val >= -100 && val <= 100) return val;
+        }
+        for (let nr = r + 1; nr < Math.min(r + 4, rows.length); nr++) {
+          for (let nc = 0; nc < rows[nr].length; nc++) {
+            const raw = String(rows[nr][nc]).replace(/[^0-9.\-]/g, '');
+            const val = parseFloat(raw);
+            if (!isNaN(val) && val >= -100 && val <= 100) return val;
+          }
+        }
+      }
+    }
+  }
+  // Strategy 2: look for "promoters" and "detractors" rows and compute
+  let promoterPct = null, detractorPct = null;
+  for (let r = 0; r < rows.length; r++) {
+    const rowText = rows[r].join(' ').toLowerCase();
+    if (rowText.includes('promoter')) {
+      const nums = rows[r].map(c => parseFloat(String(c).replace(/[^0-9.]/g, ''))).filter(v => !isNaN(v) && v <= 100);
+      if (nums.length > 0) promoterPct = nums[nums.length - 1];
+    }
+    if (rowText.includes('detractor')) {
+      const nums = rows[r].map(c => parseFloat(String(c).replace(/[^0-9.]/g, ''))).filter(v => !isNaN(v) && v <= 100);
+      if (nums.length > 0) detractorPct = nums[nums.length - 1];
+    }
+  }
+  if (promoterPct !== null && detractorPct !== null) {
+    return Math.round(promoterPct - detractorPct);
+  }
+  return null;
+}
+
+function findAvgRating(rows) {
+  // Strategy 1: look for label "avg" or "average" + "rating"
+  const v1 = findValueAfterLabel(rows, 'avg overall rating', 'average rating', 'avg rating', 'overall rating');
+  if (v1 !== null && v1 >= 1 && v1 <= 5) return v1;
+
+  // Strategy 2: look for label "avg" near a 1-5 number
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < rows[r].length; c++) {
+      const cell = String(rows[r][c]).toLowerCase();
+      if (cell.includes('avg') || cell.includes('average')) {
+        for (let nc = c + 1; nc < rows[r].length; nc++) {
+          const val = parseFloat(String(rows[r][nc]).replace(/[^0-9.]/g, ''));
+          if (!isNaN(val) && val >= 1 && val <= 5) return val;
+        }
+      }
+    }
+  }
+
+  // Strategy 3: find all numbers between 1 and 5 with decimals → most likely to be rating
+  const candidates = [];
+  for (const row of rows) {
+    for (const cell of row) {
+      const val = parseFloat(String(cell).replace(/[^0-9.]/g, ''));
+      if (!isNaN(val) && val >= 1.0 && val <= 5.0 && String(cell).includes('.')) {
+        candidates.push(val);
+      }
+    }
+  }
+  if (candidates.length > 0) {
+    // Return the most commonly occurring value or the first one
+    return candidates[0];
+  }
+  return null;
+}
+
+function findTotalResponses(rows) {
+  const v = findValueAfterLabel(rows, 'total responses', 'total response', 'responses', 'total feedback', 'total');
+  if (v !== null && v > 0) return Math.round(v);
+
+  // Find largest integer in the sheet (likely response count)
+  let maxInt = null;
+  for (const row of rows) {
+    for (const cell of row) {
+      const val = parseFloat(String(cell).replace(/[^0-9]/g, ''));
+      if (!isNaN(val) && Number.isInteger(val) && val > 10 && val < 100000) {
+        if (maxInt === null || val > maxInt) maxInt = val;
+      }
+    }
+  }
+  return maxInt;
+}
+
+// ═══════════════════════════════════════════════════════════
+// FETCH ALL COLLEGES
+// ═══════════════════════════════════════════════════════════
+async function fetchAllColleges() {
+  const total = COLLEGES.length;
+  let done = 0;
+  const bar = document.getElementById('loadingBar');
+  const txt = document.getElementById('loadingText');
+
+  const results = await Promise.allSettled(
+    COLLEGES.map(async (col) => {
+      try {
+        const rows = await fetchSheet(col.gid);
+        const avgRating = findAvgRating(rows);
+        const totalResponses = findTotalResponses(rows);
+        const npsScore = findNpsScore(rows);
+        done++;
+        bar.style.width = `${Math.round((done / total) * 100)}%`;
+        txt.textContent = `Loaded ${done}/${total}: ${col.name}`;
+        return { ...col, avgRating, totalResponses, npsScore, rows, status: 'ok' };
+      } catch (e) {
+        done++;
+        bar.style.width = `${Math.round((done / total) * 100)}%`;
+        txt.textContent = `Error on ${col.name}: ${e.message}`;
+        return { ...col, avgRating: null, totalResponses: null, npsScore: null, rows: [], status: 'error', error: e.message };
+      }
+    })
+  );
+
+  return results.map(r => r.value || r.reason);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER COMPARISON TABLE
+// ═══════════════════════════════════════════════════════════
+function renderComparisonTable(data) {
+  // Sort by avg rating descending (nulls last)
+  const sorted = [...data].sort((a, b) => {
+    if (a.avgRating == null && b.avgRating == null) return 0;
+    if (a.avgRating == null) return 1;
+    if (b.avgRating == null) return -1;
+    return b.avgRating - a.avgRating;
+  });
+
+  const tbody = document.getElementById('comparisonTableBody');
+  tbody.innerHTML = '';
+
+  sorted.forEach((col, idx) => {
+    const rank = idx + 1;
+    const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+
+    // Rating pill
+    let ratingHtml = '<span style="color:var(--ink4);">—</span>';
+    if (col.avgRating !== null) {
+      const r = col.avgRating;
+      const cls = r >= 4.2 ? 'high' : r >= 3.5 ? 'mid' : 'low';
+      ratingHtml = `<span class="rating-pill ${cls}">★ ${r.toFixed(2)}</span>`;
+    }
+
+    // NPS pill
+    let npsHtml = '<span style="color:var(--ink4);">—</span>';
+    if (col.npsScore !== null) {
+      const n = col.npsScore;
+      const cls = n >= 50 ? 'excellent' : n >= 20 ? 'good' : n >= 0 ? 'ok' : 'poor';
+      npsHtml = `<span class="nps-pill ${cls}">${n > 0 ? '+' : ''}${n}</span>`;
+    }
+
+    // Status
+    const statusHtml = col.status === 'ok'
+      ? `<span style="color:#10b981;font-size:11px;font-weight:600;">● Live</span>`
+      : `<span style="color:#ef4444;font-size:11px;font-weight:600;" title="${col.error || ''}">● Error</span>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;"><span class="rank-badge ${rankClass}">${rank}</span></td>
+      <td>${col.name}</td>
+      <td style="text-align:center;">${ratingHtml}</td>
+      <td style="text-align:center;font-weight:600;color:var(--ink2);">${col.totalResponses != null ? col.totalResponses.toLocaleString() : '—'}</td>
+      <td style="text-align:center;">${npsHtml}</td>
+      <td style="text-align:center;">${statusHtml}</td>
+    `;
+    tr.addEventListener('click', () => selectCollege(col));
+    tbody.appendChild(tr);
+  });
+
+  // Update badge
+  const loaded = data.filter(d => d.status === 'ok').length;
+  document.getElementById('compBadge').textContent = `${loaded}/${data.length} Colleges`;
+
+  // Summary metrics
+  const validRatings = data.filter(d => d.avgRating != null).map(d => d.avgRating);
+  const validNps = data.filter(d => d.npsScore != null).map(d => d.npsScore);
+  const avgR = validRatings.length ? (validRatings.reduce((a,b)=>a+b,0)/validRatings.length).toFixed(2) : '—';
+  const avgN = validNps.length ? Math.round(validNps.reduce((a,b)=>a+b,0)/validNps.length) : '—';
+
+  document.getElementById('smColleges').textContent = loaded;
+  document.getElementById('smAvgRating').textContent = avgR;
+  document.getElementById('smAvgNps').textContent = (typeof avgN === 'number' && avgN > 0 ? '+' : '') + avgN;
+  document.getElementById('summaryMetrics').style.display = 'grid';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SELECT COLLEGE (from table row click)
+// ═══════════════════════════════════════════════════════════
+function selectCollege(col) {
+  document.getElementById('collegeBtnLabel').textContent = col.name;
+  document.getElementById('pageTitle').textContent = col.name;
+  document.getElementById('pageSub').textContent = `Avg Rating: ${col.avgRating != null ? col.avgRating.toFixed(2) : '—'} · Responses: ${col.totalResponses != null ? col.totalResponses.toLocaleString() : '—'} · NPS: ${col.npsScore != null ? col.npsScore : '—'}`;
+  // Mark active in dropdown
+  document.querySelectorAll('.college-dropdown-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.gid === col.gid);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// DROPDOWN
+// ═══════════════════════════════════════════════════════════
+function buildDropdown() {
+  const dd = document.getElementById('collegeDropdown');
+  dd.innerHTML = '';
+
+  // All colleges item
+  const allItem = document.createElement('div');
+  allItem.className = 'college-dropdown-item active';
+  allItem.innerHTML = '<span class="dot"></span> All Colleges';
+  allItem.addEventListener('click', () => {
+    document.getElementById('collegeBtnLabel').textContent = 'All Colleges';
+    document.getElementById('pageTitle').textContent = 'All Colleges Overview';
+    document.getElementById('pageSub').textContent = 'Live data from Google Sheets · Click a college row to filter';
+    closeDropdown();
+    document.querySelectorAll('.college-dropdown-item').forEach(el => el.classList.remove('active'));
+    allItem.classList.add('active');
+  });
+  dd.appendChild(allItem);
+
+  COLLEGES.forEach(col => {
+    const item = document.createElement('div');
+    item.className = 'college-dropdown-item';
+    item.dataset.gid = col.gid;
+    item.innerHTML = `<span class="dot"></span> ${col.name}`;
+    item.addEventListener('click', () => {
+      const found = allCollegeData.find(d => d.gid === col.gid);
+      if (found) selectCollege(found);
+      closeDropdown();
+    });
+    dd.appendChild(item);
+  });
+}
+
+function toggleDropdown() {
+  const btn = document.getElementById('collegeSelectBtn');
+  const dd = document.getElementById('collegeDropdown');
+  btn.classList.toggle('open');
+  dd.classList.toggle('open');
+}
+
+function closeDropdown() {
+  document.getElementById('collegeSelectBtn').classList.remove('open');
+  document.getElementById('collegeDropdown').classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('collegeSelectBtn').contains(e.target)) closeDropdown();
+});
+
+// ═══════════════════════════════════════════════════════════
+// PANEL NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showPanel(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  currentPanel = name;
+  if (window.innerWidth <= 960) closeSidebar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR (mobile)
+// ═══════════════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('mainSidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('mainSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  buildDropdown();
+
+  try {
+    allCollegeData = await fetchAllColleges();
+    renderComparisonTable(allCollegeData);
+
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+
+    // Check if sheet is private (all errored)
+    const errors = allCollegeData.filter(d => d.status === 'error');
+    if (errors.length === allCollegeData.length) {
+      const toast = document.getElementById('errorToast');
+      toast.innerHTML = `<strong>⚠ Cannot access Google Sheets.</strong> Please make sure the sheet is shared as "Anyone with the link can view" (Share → General Access → Anyone with the link → Viewer).`;
+      toast.classList.add('show');
+    } else if (errors.length > 0) {
+      const toast = document.getElementById('errorToast');
+      toast.innerHTML = `⚠ ${errors.length} college(s) could not be loaded. Check sheet sharing permissions.`;
+      toast.classList.add('show');
+    }
+  } catch (err) {
+    document.getElementById('loadingText').textContent = 'Failed to load data: ' + err.message;
+    const toast = document.getElementById('errorToast');
+    toast.innerHTML = `<strong>⚠ Error:</strong> ${err.message}. Make sure the Google Sheet is shared publicly.`;
+    toast.classList.add('show');
+  } finally {
+    // Hide loading overlay
+    setTimeout(() => {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }, 400);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
