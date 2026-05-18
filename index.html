@@ -40,6 +40,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes dropDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
 @keyframes countUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
 
 .loading-text{font-size:13px;color:var(--ink3);font-weight:500;}
 .error-message{max-width:500px;padding:20px;background:var(--rose-lt);border:1px solid var(--rose);border-radius:var(--radius);color:var(--rose);font-size:13px;line-height:1.6;display:none;}
@@ -141,6 +142,64 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .badge-amber{background:#fef3c7;color:#78350f;border:1px solid #fcd34d;}
 .badge-rose{background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;}
 
+/* ═══ DEPARTMENT STATS PANEL ═══ */
+.dept-stats-panel{
+  background:linear-gradient(135deg,#fff9ee 0%,#fffdf7 100%);
+  border:1.5px solid var(--accent-md);
+  border-left:4px solid var(--gold-mid);
+  border-radius:var(--radius);
+  padding:0;
+  overflow:hidden;
+  box-shadow:var(--shadow-md);
+  animation:slideIn 0.3s cubic-bezier(.22,1,.36,1);
+}
+.dept-stats-header{
+  background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);
+  padding:14px 22px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.dept-stats-title{
+  font-family:var(--font-display);font-size:17px;color:#fde9a0;
+}
+.dept-stats-subtitle{font-size:11px;color:rgba(253,233,160,0.65);margin-top:2px;}
+.dept-stats-body{padding:18px 22px;display:flex;flex-direction:column;gap:16px;}
+/* Simplified KPI row — only 4 cards now */
+.dept-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.dept-kpi-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-top:3px solid var(--gold-mid);
+  border-radius:var(--radius-sm);
+  padding:14px 16px;
+  text-align:center;
+  transition:box-shadow 0.2s,transform 0.2s;
+}
+.dept-kpi-card:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
+.dept-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);margin-bottom:4px;}
+.dept-kpi-val{font-family:var(--font-display);font-size:26px;color:var(--gold-dark);line-height:1.1;}
+.dept-kpi-sub{font-size:10px;color:var(--ink4);margin-top:3px;}
+.dept-mentor-bars{margin-top:4px;}
+.dept-mentor-bar-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);margin-bottom:10px;}
+.dept-bar-item{display:grid;grid-template-columns:160px 1fr 44px 80px;gap:10px;align-items:center;margin-bottom:8px;}
+.dept-bar-name{font-size:12px;font-weight:500;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dept-bar-outer{height:18px;background:var(--bg2);border-radius:20px;overflow:hidden;}
+.dept-bar-inner{height:100%;border-radius:20px;transition:width 0.9s cubic-bezier(.22,1,.36,1);}
+.dept-bar-score{font-size:12px;font-weight:700;color:var(--gold-dark);text-align:right;}
+.dept-bar-badge{display:inline-flex;align-items:center;justify-content:center;}
+
+/* ─── Dept Q breakdown table ─── */
+.dept-q-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.dept-q-table th{padding:8px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:left;}
+.dept-q-table th:first-child{border-radius:6px 0 0 0;}
+.dept-q-table th:last-child{border-radius:0 6px 0 0;}
+.dept-q-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.dept-q-table tr:last-child td{border-bottom:none;}
+.dept-q-table tr:hover td{background:var(--surface2);}
+.dept-q-bar-wrap{display:flex;align-items:center;gap:6px;}
+.dept-q-bar-outer{flex:1;height:10px;background:var(--bg2);border-radius:6px;overflow:hidden;}
+.dept-q-bar-yes{height:100%;border-radius:6px;background:#10b981;transition:width .8s cubic-bezier(.22,1,.36,1);}
+/* ═══ END DEPT STATS ═══ */
+
 /* NPS */
 .nps-overview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;box-shadow:var(--shadow-sm);}
 .nps-gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:10px 0 18px;}
@@ -191,12 +250,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .nps-bar-inner{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden;display:flex;align-items:center;padding-left:8px;}
 .nps-bar-inner::after{content:'';position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 100%);background-size:200% 100%;animation:shimmer 2.5s infinite;}
 .nps-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
-
-/* MENTOR INSIGHTS */
-.mentor-bubble-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-.bubble-tab{padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;}
-.bubble-tab:hover{border-color:var(--gold-mid);color:var(--gold-dark);}
-.bubble-tab.active{background:var(--gold-dark);color:#fde9a0;border-color:var(--gold-dark);}
 
 /* TABLE */
 .table-wrap{overflow-x:auto;}
@@ -252,9 +305,37 @@ tbody tr{transition:background 0.12s;}
 /* MENTOR MODAL */
 .mentor-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);}
 .mentor-modal-overlay.open{display:flex;animation:fadeUp 0.25s cubic-bezier(.22,1,.36,1);}
-.mentor-modal-box{background:#fff;border-radius:14px;border:1px solid rgba(120,80,10,0.15);width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:28px;box-shadow:0 12px 40px rgba(90,50,0,0.35);}
+.mentor-modal-box{background:#fff;border-radius:14px;border:1px solid rgba(120,80,10,0.15);width:100%;max-width:760px;max-height:92vh;overflow-y:auto;padding:28px;box-shadow:0 12px 40px rgba(90,50,0,0.35);}
 .mm-close-btn{border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;background:var(--surface);cursor:pointer;font-size:18px;color:var(--ink3);transition:background 0.15s;display:flex;align-items:center;justify-content:center;}
 .mm-close-btn:hover{background:var(--bg2);}
+
+/* dept scope banner inside modal */
+.dept-scope-banner{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:#fef3c7;border:1px solid #fcd34d;font-size:12px;color:#78350f;margin-bottom:16px;}
+.dept-scope-banner strong{font-weight:600;}
+
+/* ANALYSIS SECTION */
+.analysis-section{margin-top:20px;border-top:2px solid var(--border2);padding-top:18px;}
+.analysis-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.analysis-title{font-family:var(--font-display);font-size:15px;color:var(--ink);}
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.analysis-box{border-radius:10px;padding:14px 16px;}
+.analysis-box.strengths{background:#d1fae5;border:1px solid #6ee7b7;}
+.analysis-box.weaknesses{background:#fee2e2;border:1px solid #fca5a5;}
+.analysis-box.neutral-wrap{grid-column:1/-1;background:var(--bg2);border:1px solid var(--border2);}
+.analysis-box-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:8px;}
+.analysis-box.strengths .analysis-box-title{color:#065f46;}
+.analysis-box.weaknesses .analysis-box-title{color:#7f1d1d;}
+.analysis-box.neutral-wrap .analysis-box-title{color:var(--ink3);}
+.analysis-list{margin:0;padding-left:15px;font-size:12px;line-height:1.7;}
+.analysis-list.strengths-list{color:#064e3b;}
+.analysis-list.weaknesses-list{color:#7f1d1d;}
+.verdict-banner{border-radius:10px;padding:13px 16px;font-size:12.5px;line-height:1.65;margin-bottom:10px;}
+.recommendation-box{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-top:10px;}
+.recommendation-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);margin-bottom:6px;}
+.recommendation-text{font-size:12px;color:var(--ink2);line-height:1.65;}
+.low-response-note{font-size:11px;color:#78350f;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-top:10px;}
+.neutral-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.neutral-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--surface);border:1px solid var(--border2);font-size:11px;font-weight:500;color:var(--ink3);}
 
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
@@ -278,12 +359,18 @@ tbody tr{transition:background 0.12s;}
   .download-btn span{display:none;}
   .college-select-btn .btn-label{max-width:100px;}
   .trend-chart-card.full-width{grid-column:auto;}
+  .analysis-grid{grid-template-columns:1fr;}
+  .analysis-box.neutral-wrap{grid-column:auto;}
+  .dept-kpi-row{grid-template-columns:1fr 1fr;}
+  .dept-bar-item{grid-template-columns:120px 1fr 40px 70px;}
 }
 @media(max-width:480px){
   .metrics-row,.trend-kpi-row{grid-template-columns:1fr;}
   .nps-segment-row{grid-template-columns:1fr;}
   .page-title{font-size:22px;}
   .download-btn{padding:8px 10px;font-size:11px;}
+  .dept-kpi-row{grid-template-columns:1fr 1fr;}
+  .dept-bar-item{grid-template-columns:90px 1fr 36px;}
 }
 </style>
 </head>
@@ -302,6 +389,7 @@ tbody tr{transition:background 0.12s;}
   </div>
 </div>
 
+<!-- MENTOR MODAL -->
 <div class="mentor-modal-overlay" id="mentorModalOverlay" onclick="if(event.target===this)closeMentorModal()">
   <div class="mentor-modal-box" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
@@ -311,10 +399,20 @@ tbody tr{transition:background 0.12s;}
       </div>
       <button class="mm-close-btn" onclick="closeMentorModal()">×</button>
     </div>
+    <div id="mmDeptScopeBanner" style="display:none;" class="dept-scope-banner"></div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="mmStats"></div>
-    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px;">Question-by-question breakdown</div>
+    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px;" id="mmQTitle">Question-by-question breakdown</div>
     <div id="mmQRows"></div>
-    <div style="font-size:11px;color:var(--ink4);border-top:1px solid var(--border);padding-top:10px;margin-top:16px;">* Yes/No counts are aggregated across all subjects this mentor teaches.</div>
+    <div style="font-size:11px;color:var(--ink4);border-top:1px solid var(--border);padding-top:10px;margin-top:16px;" id="mmFootnote"></div>
+    <div class="analysis-section" id="mmAnalysisSection">
+      <div class="analysis-header">
+        <div class="analysis-title">Descriptive Analysis</div>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--gold-light);color:var(--gold-dark);border:1px solid var(--accent-md);font-weight:600;letter-spacing:0.04em;">Auto-generated</span>
+      </div>
+      <div id="mmAnalysisBody">
+        <div style="font-size:12px;color:var(--ink3);padding:16px;background:var(--bg2);border-radius:8px;text-align:center;">Generating analysis…</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -343,9 +441,7 @@ tbody tr{transition:background 0.12s;}
 
 <aside class="sidebar" id="mainSidebar">
   <div class="nav-group-label">Analytics</div>
-  <!-- Overview nav — visible only in overview mode -->
   <div class="nav-item active" id="navOverview" onclick="selectOverview()"><span class="nav-icon">⊞</span> College Overview</div>
-  <!-- Detail navs — visible only when a college is selected -->
   <div class="nav-item hidden-nav" id="navSummary" onclick="showDetailPanel('summary',this)"><span class="nav-icon">▦</span> Summary</div>
   <div class="nav-item hidden-nav" id="navMentors" onclick="showDetailPanel('mentors',this)"><span class="nav-icon">◉</span> Mentor Performance</div>
   <div class="nav-item hidden-nav" id="navNps" onclick="showDetailPanel('nps',this)"><span class="nav-icon">◈</span> NPS Analysis</div>
@@ -380,7 +476,7 @@ tbody tr{transition:background 0.12s;}
     </div>
   </div>
 
-  <!-- ═══════════════ LANDING PANEL ═══════════════ -->
+  <!-- LANDING PANEL -->
   <div class="panel active" id="panel-landing">
     <div style="background:linear-gradient(135deg,#4a2800 0%,#7a4f00 60%,#a06e00 100%);border-radius:var(--radius);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow-md);">
       <div>
@@ -441,7 +537,7 @@ tbody tr{transition:background 0.12s;}
     </div>
   </div>
 
-  <!-- ═══════════════ SUMMARY PANEL ═══════════════ -->
+  <!-- SUMMARY PANEL -->
   <div class="panel" id="panel-summary">
     <div class="metrics-row">
       <div class="metric-card">
@@ -514,49 +610,40 @@ tbody tr{transition:background 0.12s;}
     </div>
   </div>
 
-  <!-- ═══════════════ MENTOR PERFORMANCE PANEL ═══════════════ -->
+  <!-- MENTOR PERFORMANCE PANEL -->
+  <!-- NOTE: Mentor Insights chart section removed entirely -->
   <div class="panel" id="panel-mentors">
-    <div class="card" style="padding:0;overflow:hidden">
+    <div id="mentorGlobalSummaryBar" class="card" style="padding:0;overflow:hidden;">
       <div id="mentorTableSummaryBar" style="display:flex;align-items:center;gap:24px;padding:14px 22px;background:linear-gradient(135deg,#4a2800,#7a4f00);flex-wrap:wrap;">
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Global Mean</span><span id="mtSumGlobalMean" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Total Responses</span><span id="mtSumTotalResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Avg Rating × Responses</span><span id="mtSumAvgXResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="margin-left:auto;"><span class="badge badge-gold" id="mentorTableCountBadge">—</span></div>
       </div>
+    </div>
+    <div id="deptStatsPanelWrap" style="display:none;"></div>
+    <div class="card" style="padding:0;overflow:hidden">
       <div class="table-wrap">
+        <!-- ▼ TABLE HEADER: when dept filter is active, avg rating & responses show dept-specific values -->
         <table id="mentorBayesianTable">
-          <thead><tr><th>Rank</th><th>Mentor Name</th><th>Department</th><th>Average Rating</th><th>Total Responses</th><th>Avg Rating × Responses</th><th>Bayesian Value</th><th>Status</th></tr></thead>
+          <thead><tr>
+            <th>Rank</th>
+            <th>Mentor Name</th>
+            <th>Department</th>
+            <th id="thAvgRating">Average Rating</th>
+            <th id="thTotalResponses">Total Responses</th>
+            <th>Avg Rating × Responses</th>
+            <th>Bayesian Value</th>
+            <th>Status</th>
+          </tr></thead>
           <tbody id="mentorTableBody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
         </table>
       </div>
-      <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)</div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Mentor Insights — Responses vs. Rating</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <div class="mentor-bubble-tabs" id="insightChartTabs" style="margin-bottom:0;">
-            <button class="bubble-tab active" onclick="setInsightChart('scatter',this)">Scatter Plot</button>
-            <button class="bubble-tab" onclick="setInsightChart('horizontal',this)">Top vs Bottom</button>
-            <button class="bubble-tab" onclick="setInsightChart('responses',this)">Response Volume</button>
-          </div>
-          <span class="badge badge-gold" id="insightChartBadge">—</span>
-        </div>
-      </div>
-      <div id="insightScatterWrap" style="position:relative;width:100%;height:380px;"><canvas id="insightScatterChart"></canvas></div>
-      <div id="insightHorizWrap" style="position:relative;width:100%;height:380px;display:none;"><canvas id="insightHorizChart"></canvas></div>
-      <div id="insightResponseWrap" style="position:relative;width:100%;height:380px;display:none;"><canvas id="insightResponseChart"></canvas></div>
-      <div style="display:flex;gap:20px;margin-top:14px;flex-wrap:wrap;" id="insightScatterLegend">
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#10b981;display:inline-block;opacity:0.85;"></span>Excellent (≥4.3)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#c48a00;display:inline-block;opacity:0.85;"></span>Good (≥4.0)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block;opacity:0.85;"></span>Average (≥3.5)</div>
-        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink3);"><span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;opacity:0.85;"></span>Needs Work (&lt;3.5)</div>
-        <div style="margin-left:auto;font-size:11px;color:var(--ink4);">* Bubble size = number of subjects taught</div>
-      </div>
+      <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);" id="mentorTableFootnote">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)</div>
     </div>
   </div>
 
-  <!-- ═══════════════ NPS ANALYTICS PANEL ═══════════════ -->
+  <!-- NPS ANALYTICS PANEL -->
   <div class="panel" id="panel-nps">
     <div class="nps-index-banner">
       <div>
@@ -616,7 +703,7 @@ tbody tr{transition:background 0.12s;}
     </div>
   </div>
 
-  <!-- ═══════════════ TREND OVER TIME PANEL ═══════════════ -->
+  <!-- TREND OVER TIME PANEL -->
   <div class="panel" id="panel-trends">
     <div class="trend-hero-banner">
       <div>
@@ -752,6 +839,9 @@ const MONTH_ALIAS_MAP={
   'apr 2026':'Apr 2026','april 2026':'Apr 2026','apr-2026':'Apr 2026','apr':'Apr 2026'
 };
 
+const MM_QUESTIONS=['Sessions were clear and well-structured','Professional behavior during sessions','Effective in solving problems with examples','Supported doubt clearing and student queries','Sessions improved understanding and skills'];
+const Q_LABELS=['Session clarity','Professional behavior','Problem-solving with examples','Doubt clearing & support','Skill improvement'];
+
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
@@ -760,9 +850,8 @@ let currentCollege=null;
 let MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
 let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
 let TREND_DATA={cycles:[],hasCycleCol:false,hasDedicatedSheet:false,cycleStats:{},mentorCycleStats:{}};
-let currentDetailPanel='summary',currentDeptFilter='all',currentInsightChart='scatter';
+let currentDetailPanel='summary',currentDeptFilter='all';
 let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
-let insightScatterInst=null,insightHorizInst=null,insightResponseInst=null;
 let trendRatingInst=null,trendNpsInst=null,trendHitRatioInst=null,trendSegInst=null;
 let needleAnimRAF=null;
 let landingData=[],landingSortState={col:'rank',dir:'asc'},landingLoaded=false;
@@ -847,27 +936,20 @@ function selectCollege(idx){
 }
 
 /* ═══════════════════════════════════════════
-   MODE SWITCHING  ← KEY FIX HERE
+   MODE SWITCHING
 ═══════════════════════════════════════════ */
 function switchToOverviewMode(){
   currentMode='overview';
-
-  // Show ONLY the College Overview nav item
   document.getElementById('navOverview').classList.remove('hidden-nav');
   document.getElementById('navOverview').classList.add('active');
-
-  // Hide all detail nav items
   ['navSummary','navMentors','navNps','navTrends'].forEach(id=>{
     document.getElementById(id).classList.add('hidden-nav');
     document.getElementById(id).classList.remove('active');
   });
-
   document.getElementById('deptFilterRow').style.visibility='hidden';
   document.getElementById('pageEyebrow').textContent='Performance Analytics';
   document.getElementById('pageTitle').textContent='College Overview';
   document.getElementById('pageSub').textContent='All colleges · Live data from Google Sheets';
-
-  // Show only landing panel
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-landing').classList.add('active');
   if(!landingLoaded)landingFetchData();
@@ -875,17 +957,11 @@ function switchToOverviewMode(){
 
 function switchToDetailMode(){
   currentMode='detail';
-
-  // Hide the College Overview nav item
   document.getElementById('navOverview').classList.add('hidden-nav');
   document.getElementById('navOverview').classList.remove('active');
-
-  // Show all detail nav items
   ['navSummary','navMentors','navNps','navTrends'].forEach(id=>{
     document.getElementById(id).classList.remove('hidden-nav');
   });
-
-  // Default to summary panel
   showDetailPanel('summary',document.getElementById('navSummary'));
 }
 
@@ -905,7 +981,7 @@ function showDetailPanel(id,el){
   document.getElementById('pageTitle').textContent=meta[id][1];
   document.getElementById('pageSub').textContent=currentCollege?currentCollege.name:'—';
   document.getElementById('deptFilterRow').style.visibility=id==='mentors'?'visible':'hidden';
-  if(id==='mentors'&&MENTORS.length){renderMentorTable();renderInsightCharts(currentDeptFilter);}
+  if(id==='mentors'&&MENTORS.length){renderMentorTable();renderDeptStatsPanel(currentDeptFilter);}
   if(id==='nps'&&NPS_DATA.total)renderNPSPanel();
   if(id==='trends'&&TREND_DATA.cycles.length)renderTrendPanel();
   closeMobileSidebar();
@@ -1035,6 +1111,9 @@ function processDedicatedTrendData(rows,collegeName){
   buildTrendCycleButtons();
 }
 
+/* ═══════════════════════════════════════════
+   PROCESS SHEET DATA
+═══════════════════════════════════════════ */
 function processSheetData(rows){
   TABLE_DATA=[];
   const mentorStats={},deptSet=new Set(),subjectSet=new Set(),npsScores=[];
@@ -1042,28 +1121,63 @@ function processSheetData(rows){
   let cycleCol=null;
   if(rows.length>0){const keys=Object.keys(rows[0]);cycleCol=keys.find(k=>cycleColNames.includes(k.toLowerCase().trim()))||null;}
   const hasCycle=!!cycleCol;const cycleMap={};
+
   rows.forEach(row=>{
-    const dept=row.department||'Unknown';
+    const dept=(row.department||'Unknown').trim();
     if(dept!=='Unknown')deptSet.add(dept);
     let cycleName='—';
     if(hasCycle){const raw=(row[cycleCol]||'').trim();cycleName=raw||'Unknown';const mapped=MONTH_ALIAS_MAP[cycleName.toLowerCase()];if(mapped)cycleName=mapped;}
     if(!cycleMap[cycleName])cycleMap[cycleName]={ratings:[],npsScores:[],mentors:{}};
+
     const npsRaw=row['nps_score']||row['NPS Score']||row['nps score']||row['NPSScore']||'';
     const npsVal=parseInt(npsRaw,10);
     if(!isNaN(npsVal)&&npsVal>=1&&npsVal<=10){npsScores.push(npsVal);cycleMap[cycleName].npsScores.push(npsVal);}
+
     for(let i=1;i<=7;i++){
       const sn=row[`subject${i}_Name`],mn=row[`subject${i}_Mentor`],rt=parseFloat(row[`subject${i}_Rating`]);
       if(sn&&mn&&!isNaN(rt)&&rt>0){
-        subjectSet.add(sn);TABLE_DATA.push({dept,mentor:mn,subject:sn,rating:rt});
+        subjectSet.add(sn);
+        TABLE_DATA.push({dept,mentor:mn,subject:sn,rating:rt});
         cycleMap[cycleName].ratings.push(rt);
         if(!cycleMap[cycleName].mentors[mn])cycleMap[cycleName].mentors[mn]=[];
         cycleMap[cycleName].mentors[mn].push(rt);
-        if(!mentorStats[mn])mentorStats[mn]={name:mn,depts:new Set([dept]),ratings:[],subjects:new Set(),qs:[{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}]};
-        mentorStats[mn].depts.add(dept);mentorStats[mn].ratings.push(rt);mentorStats[mn].subjects.add(sn);
-        for(let q=1;q<=5;q++){const ans=row[`subject${i}_Q${q}`]||'';if(ans==='Yes')mentorStats[mn].qs[q-1].y++;else if(ans==='No')mentorStats[mn].qs[q-1].n++;}
+
+        if(!mentorStats[mn]){
+          mentorStats[mn]={
+            name:mn,
+            depts:new Set([dept]),
+            ratings:[],
+            subjects:new Set(),
+            qs:[{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}],
+            deptQs:{},
+            deptRatings:{}
+          };
+        }
+
+        mentorStats[mn].depts.add(dept);
+        mentorStats[mn].ratings.push(rt);
+        mentorStats[mn].subjects.add(sn);
+
+        if(!mentorStats[mn].deptQs[dept]){
+          mentorStats[mn].deptQs[dept]=[{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}];
+        }
+        if(!mentorStats[mn].deptRatings[dept]) mentorStats[mn].deptRatings[dept]=[];
+        mentorStats[mn].deptRatings[dept].push(rt);
+
+        for(let q=1;q<=5;q++){
+          const ans=row[`subject${i}_Q${q}`]||'';
+          if(ans==='Yes'){
+            mentorStats[mn].qs[q-1].y++;
+            mentorStats[mn].deptQs[dept][q-1].y++;
+          }else if(ans==='No'){
+            mentorStats[mn].qs[q-1].n++;
+            mentorStats[mn].deptQs[dept][q-1].n++;
+          }
+        }
       }
     }
   });
+
   const total=npsScores.length;
   const promoters=npsScores.filter(s=>s>=9).length;
   const passives=npsScores.filter(s=>s>=7&&s<=8).length;
@@ -1075,19 +1189,34 @@ function processSheetData(rows){
   const scoreFreq={};for(let i=1;i<=10;i++)scoreFreq[i]=0;
   npsScores.forEach(s=>{if(scoreFreq[s]!==undefined)scoreFreq[s]++;});
   NPS_DATA={scores:npsScores,promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq};
+
   const allRatings=TABLE_DATA.map(r=>r.rating);
   const globalMean=allRatings.length>0?allRatings.reduce((a,b)=>a+b,0)/allRatings.length:0;
   const totalAllResponses=allRatings.length;
+
   MENTORS=Object.values(mentorStats).map(m=>{
     const avg=m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length;
     const totalResponses=m.ratings.length;
     const avgXResponses=avg*totalResponses;
     const bayesianScore=((globalMean*totalAllResponses)+(avg*totalResponses))/(totalAllResponses+totalResponses);
-    return{name:m.name,depts:Array.from(m.depts),rating:parseFloat(avg.toFixed(2)),avgXResponses:parseFloat(avgXResponses.toFixed(2)),bayesianRating:parseFloat(bayesianScore.toFixed(7)),subjects:m.subjects.size,responses:totalResponses,qs:m.qs};
+    return{
+      name:m.name,
+      depts:Array.from(m.depts),
+      rating:parseFloat(avg.toFixed(2)),
+      avgXResponses:parseFloat(avgXResponses.toFixed(2)),
+      bayesianRating:parseFloat(bayesianScore.toFixed(7)),
+      subjects:m.subjects.size,
+      responses:totalResponses,
+      qs:m.qs,
+      deptQs:m.deptQs,
+      deptRatings:m.deptRatings
+    };
   }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
+
   MENTORS.forEach((m,idx)=>{m.rank=idx+1;m.percentile=MENTORS.length>1?Math.round((1-idx/(MENTORS.length-1))*100):100;});
   DEPT_LIST=Array.from(deptSet).sort();
   updateDeptFilters();
+
   const tot=TABLE_DATA.length;
   const avgR=tot>0?TABLE_DATA.reduce((s,r)=>s+r.rating,0)/tot:0;
   document.getElementById('avgRating').textContent=avgR>0?`${avgR.toFixed(1)} / 5`:'—';
@@ -1155,6 +1284,22 @@ function statusBadge(r){if(r>=4.3)return'<span class="badge badge-gold">Excellen
 function getStatusColor(r){if(r>=4.3)return'#10b981';if(r>=4.0)return'#c48a00';if(r>=3.5)return'#f59e0b';return'#ef4444';}
 function deptStyle(d){if(!d)return{color:'#4a2e00',bg:'#fff3cc',border:'#e6b84a'};if(d.includes('BCA'))return{color:'#5c3600',bg:'#fde9a0',border:'#e6b84a'};if(d.includes('BBA'))return{color:'#3d2200',bg:'#f5c842',border:'#c48a00'};return{color:'#4a2e00',bg:'#fff3cc',border:'#e6b84a'};}
 
+function getMentorDeptQs(mentor, dept){
+  if(!dept || dept==='all') return mentor.qs;
+  return mentor.deptQs[dept] || [{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}];
+}
+function getMentorDeptRating(mentor, dept){
+  if(!dept || dept==='all') return mentor.rating;
+  const rs=mentor.deptRatings[dept];
+  if(!rs||!rs.length) return mentor.rating;
+  return parseFloat((rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(2));
+}
+function getMentorDeptResponses(mentor, dept){
+  if(!dept || dept==='all') return mentor.responses;
+  const rs=mentor.deptRatings[dept];
+  return rs ? rs.length : 0;
+}
+
 /* ═══════════════════════════════════════════
    DEPT FILTER
 ═══════════════════════════════════════════ */
@@ -1166,12 +1311,17 @@ function updateDeptFilters(){
     btn.onclick=function(){setDeptFilter(dept,this);};fr.appendChild(btn);
   });
 }
+
 function setDeptFilter(val,btn){
   currentDeptFilter=val;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  if(currentDetailPanel==='mentors'){renderMentorTable();renderInsightCharts(val);}
+  if(currentDetailPanel==='mentors'){
+    renderMentorTable();
+    renderDeptStatsPanel(val);
+  }
 }
+
 function getFilteredMentors(filterDept){
   let list=!filterDept||filterDept==='all'?[...MENTORS]:MENTORS.filter(m=>m.depts.some(d=>d===filterDept));
   list.forEach((m,idx)=>{m.filteredRank=idx+1;m.filteredPercentile=list.length>1?Math.round((1-idx/(list.length-1))*100):100;});
@@ -1179,11 +1329,182 @@ function getFilteredMentors(filterDept){
 }
 
 /* ═══════════════════════════════════════════
+   DEPARTMENT STATS PANEL
+   SIMPLIFIED: removed vs College Avg KPI, removed dept-comparison-row
+═══════════════════════════════════════════ */
+function renderDeptStatsPanel(dept){
+  const globalBar=document.getElementById('mentorGlobalSummaryBar');
+  const deptWrap=document.getElementById('deptStatsPanelWrap');
+
+  if(!dept||dept==='all'){
+    globalBar.style.display='block';
+    deptWrap.style.display='none';
+    deptWrap.innerHTML='';
+    // Reset table headers to default
+    const thAvg=document.getElementById('thAvgRating');
+    const thResp=document.getElementById('thTotalResponses');
+    const fn=document.getElementById('mentorTableFootnote');
+    if(thAvg) thAvg.textContent='Average Rating';
+    if(thResp) thResp.textContent='Total Responses';
+    if(fn) fn.textContent='* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)';
+    return;
+  }
+
+  globalBar.style.display='none';
+  deptWrap.style.display='block';
+
+  // Update table headers to show dept context
+  const thAvg=document.getElementById('thAvgRating');
+  const thResp=document.getElementById('thTotalResponses');
+  const fn=document.getElementById('mentorTableFootnote');
+  if(thAvg) thAvg.textContent=`Avg Rating (${dept})`;
+  if(thResp) thResp.textContent=`Responses (${dept})`;
+  if(fn) fn.textContent=`* Rating and Responses shown are specific to "${dept}" only. Bayesian value is based on college-wide data.`;
+
+  // Mentors who teach in this dept
+  const deptMentors=MENTORS.filter(m=>m.depts.some(d=>d===dept));
+  if(!deptMentors.length){
+    deptWrap.innerHTML=`<div class="dept-stats-panel"><div class="dept-stats-header"><div><div class="dept-stats-title">${dept}</div><div class="dept-stats-subtitle">No mentor data available</div></div></div></div>`;
+    return;
+  }
+
+  // Dept-specific data only
+  const deptEntries=TABLE_DATA.filter(r=>r.dept===dept);
+  const deptRatings=deptEntries.map(r=>r.rating);
+  const deptAvgRating=deptRatings.length>0?deptRatings.reduce((a,b)=>a+b,0)/deptRatings.length:0;
+  const deptTotalResponses=deptRatings.length;
+  const deptSubjects=new Set(deptEntries.map(r=>r.subject));
+  const deptMentorCount=deptMentors.length;
+
+  // Top mentor by dept-specific rating
+  const sortedByDeptRating=[...deptMentors].map(m=>({
+    ...m,
+    _deptRating: getMentorDeptRating(m, dept),
+    _deptResponses: getMentorDeptResponses(m, dept)
+  })).sort((a,b)=>b._deptRating-a._deptRating);
+
+  const topMentor=sortedByDeptRating[0];
+
+  function barColor(r){if(r>=4.3)return'#10b981';if(r>=4.0)return'#c48a00';if(r>=3.5)return'#f59e0b';return'#ef4444';}
+
+  // Mentor rating bars using dept-specific ratings
+  const mentorBarsHTML=sortedByDeptRating.map(m=>{
+    const w=Math.round((m._deptRating/5)*100);
+    const bc=barColor(m._deptRating);
+    return`<div class="dept-bar-item">
+      <div class="dept-bar-name" title="${m.name}">${m.name}</div>
+      <div class="dept-bar-outer"><div class="dept-bar-inner" style="width:0%;background:${bc};" data-w="${w}"></div></div>
+      <div class="dept-bar-score" style="color:${bc};">${m._deptRating.toFixed(2)}</div>
+      <div class="dept-bar-badge">${statusBadge(m._deptRating)}</div>
+    </div>`;
+  }).join('');
+
+  // Aggregate dept-level Q breakdown from dept-specific counts
+  const deptQTotals=[{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}];
+  deptMentors.forEach(m=>{
+    const dqs=m.deptQs[dept]||[{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0},{y:0,n:0}];
+    dqs.forEach((q,i)=>{deptQTotals[i].y+=q.y;deptQTotals[i].n+=q.n;});
+  });
+
+  const qTableRows=MM_QUESTIONS.map((q,i)=>{
+    const d=deptQTotals[i];const tot=d.y+d.n;
+    const yp=tot>0?Math.round(d.y/tot*100):0;
+    const color=yp>=65?'#065f46':yp>=40?'#78350f':'#7f1d1d';
+    return`<tr>
+      <td style="font-weight:500;color:var(--ink2);">${Q_LABELS[i]}</td>
+      <td style="color:#065f46;font-weight:600;">${d.y}</td>
+      <td style="color:#7f1d1d;font-weight:600;">${d.n}</td>
+      <td style="font-weight:700;color:${color};">${tot>0?yp+'%':'—'}</td>
+      <td style="min-width:120px;">
+        <div class="dept-q-bar-wrap">
+          <div class="dept-q-bar-outer"><div class="dept-q-bar-yes" style="width:0%;" data-w="${yp}"></div></div>
+          <span style="font-size:10px;color:var(--ink3);min-width:28px;">${yp}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  deptWrap.innerHTML=`
+  <div class="dept-stats-panel">
+    <div class="dept-stats-header">
+      <div>
+        <div class="dept-stats-title">${dept}</div>
+        <div class="dept-stats-subtitle">${deptMentorCount} mentor${deptMentorCount!==1?'s':''} · ${deptSubjects.size} subject${deptSubjects.size!==1?'s':''} · ${deptTotalResponses} responses (this dept only)</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(245,200,66,0.2);border:1px solid rgba(245,200,66,0.5);color:#fde9a0;">
+          Dept Filter Active
+        </span>
+      </div>
+    </div>
+    <div class="dept-stats-body">
+
+      <!-- KPI Row — 4 cards only (removed vs College Avg) -->
+      <div class="dept-kpi-row">
+        <div class="dept-kpi-card" style="border-top-color:var(--gold-mid);">
+          <div class="dept-kpi-label">Dept Avg Rating</div>
+          <div class="dept-kpi-val">${deptAvgRating.toFixed(2)}</div>
+          <div class="dept-kpi-sub">dept responses only</div>
+        </div>
+        <div class="dept-kpi-card" style="border-top-color:#10b981;">
+          <div class="dept-kpi-label">Dept Responses</div>
+          <div class="dept-kpi-val" style="color:#065f46;">${deptTotalResponses}</div>
+          <div class="dept-kpi-sub">in ${dept}</div>
+        </div>
+        <div class="dept-kpi-card" style="border-top-color:#c48a00;">
+          <div class="dept-kpi-label">Mentors</div>
+          <div class="dept-kpi-val">${deptMentorCount}</div>
+          <div class="dept-kpi-sub">${deptSubjects.size} subjects</div>
+        </div>
+        <div class="dept-kpi-card" style="border-top-color:#f5c842;">
+          <div class="dept-kpi-label">Top in Dept</div>
+          <div class="dept-kpi-val" style="font-size:14px;color:var(--gold-dark);">${topMentor.name.length>14?topMentor.name.slice(0,13)+'…':topMentor.name}</div>
+          <div class="dept-kpi-sub">${topMentor._deptRating.toFixed(2)} dept avg</div>
+        </div>
+      </div>
+
+      <!-- Dept Q breakdown — dept-specific counts only -->
+      <div>
+        <div class="dept-mentor-bar-title">Qualitative Feedback Breakdown — ${dept} Only</div>
+        <div style="overflow-x:auto;">
+          <table class="dept-q-table">
+            <thead><tr><th>Question</th><th>Yes</th><th>No</th><th>Yes %</th><th style="min-width:160px;">Trend</th></tr></thead>
+            <tbody>${qTableRows}</tbody>
+          </table>
+        </div>
+        <div style="font-size:10.5px;color:var(--ink4);margin-top:6px;">* Counts from feedback rows where department = <strong>${dept}</strong> only.</div>
+      </div>
+
+      <!-- Mentor Rating Bars — using dept-specific ratings -->
+      <div class="dept-mentor-bars">
+        <div class="dept-mentor-bar-title">All Mentors in ${dept} — Sorted by Dept-Specific Rating</div>
+        <div id="deptMentorBarsInner">${mentorBarsHTML}</div>
+        <div style="font-size:10.5px;color:var(--ink4);margin-top:6px;">* Rating shown is each mentor's average from <strong>${dept}</strong> student feedback only.</div>
+      </div>
+
+    </div>
+  </div>`;
+
+  // Animate bars
+  setTimeout(()=>{
+    document.querySelectorAll('.dept-bar-inner').forEach(bar=>{
+      bar.style.transition='width 0.9s cubic-bezier(.22,1,.36,1)';
+      bar.style.width=bar.getAttribute('data-w')+'%';
+    });
+    document.querySelectorAll('.dept-q-bar-yes').forEach(bar=>{
+      bar.style.transition='width 0.8s cubic-bezier(.22,1,.36,1)';
+      bar.style.width=bar.getAttribute('data-w')+'%';
+    });
+  },80);
+}
+
+/* ═══════════════════════════════════════════
    RENDER ALL
 ═══════════════════════════════════════════ */
 function renderAllData(){
-  renderMentorTable();renderInsightCharts(currentDeptFilter);
+  renderMentorTable();
   renderNPSSummary();renderNPSPanel();renderTrendPanel();
+  renderDeptStatsPanel(currentDeptFilter);
   if(!chartInstances._summaryInit){initSummaryCharts();chartInstances._summaryInit=true;}
   else updateSummaryCharts();
 }
@@ -1230,7 +1551,7 @@ function animateCounter(el,target,duration,prefix){
 }
 
 /* ═══════════════════════════════════════════
-   NPS SUMMARY (gauge card)
+   NPS SUMMARY
 ═══════════════════════════════════════════ */
 function renderNPSSummary(){
   const{promoters,passives,detractors,npsIndex,total}=NPS_DATA;
@@ -1269,13 +1590,13 @@ function renderNPSSummary(){
    NPS FULL PANEL
 ═══════════════════════════════════════════ */
 function renderNPSPanel(){
-  const{promoters,passives,detractors,npsIndex,avg,median,total,scoreFreq}=NPS_DATA;
+  const{promoters,passives,detractors,npsIndex,avg:npsAvg,median,total,scoreFreq}=NPS_DATA;
   const promoPct=total>0?Math.round(promoters/total*100):0;const passPct=total>0?Math.round(passives/total*100):0;const detrPct=total>0?Math.round(detractors/total*100):0;
   const idxEl=document.getElementById('npsIndexBig');idxEl.style.color='#f5c842';
   if(npsIndex!==null)animateCounter(idxEl,npsIndex,1400,'');else idxEl.textContent='—';
   document.getElementById('npsIndexDesc').textContent=total>0?getNpsLabel(npsIndex):'No NPS data available in sheet';
   document.getElementById('npsTotalBig').textContent=total>0?total:'—';
-  document.getElementById('npsAvgBig').textContent=total>0?avg.toFixed(1):'—';
+  document.getElementById('npsAvgBig').textContent=total>0?npsAvg.toFixed(1):'—';
   document.getElementById('npsMedianBig').textContent=total>0?median.toFixed(1):'—';
   document.getElementById('npsP_count').textContent=total>0?promoters:'—';
   document.getElementById('npsN_count').textContent=total>0?passives:'—';
@@ -1417,29 +1738,71 @@ function renderTrendCycleTable(){
 
 /* ═══════════════════════════════════════════
    MENTOR TABLE
+   KEY CHANGE: when dept filter is active, show dept-specific
+   avg rating and responses in the table rows
 ═══════════════════════════════════════════ */
 function renderMentorTable(){
   const list=getFilteredMentors(currentDeptFilter);
-  const sumResponses=list.reduce((s,m)=>s+m.responses,0);
-  const sumAvgXResp=list.reduce((s,m)=>s+m.avgXResponses,0);
+  const isDeptActive = currentDeptFilter && currentDeptFilter !== 'all';
+
+  // Summary bar — always shows college-wide stats
+  const sumResponses=MENTORS.reduce((s,m)=>s+m.responses,0);
+  const sumAvgXResp=MENTORS.reduce((s,m)=>s+m.avgXResponses,0);
   const gm=sumResponses>0?(sumAvgXResp/sumResponses):0;
   document.getElementById('mtSumGlobalMean').textContent=gm>0?gm.toFixed(7):'—';
   document.getElementById('mtSumTotalResp').textContent=sumResponses||'—';
   document.getElementById('mtSumAvgXResp').textContent=sumAvgXResp>0?sumAvgXResp.toFixed(2):'—';
   document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-  if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found</td></tr>';return;}
-  const deptLabel=(currentDeptFilter&&currentDeptFilter!=='all')?currentDeptFilter:null;
+
+  if(!list.length){
+    document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found</td></tr>';
+    return;
+  }
+
+  const deptLabel = isDeptActive ? currentDeptFilter : null;
   const rankColors={1:'#f5c842',2:'#e0e0e0',3:'#f0c498'};
+
   document.getElementById('mentorTableBody').innerHTML=list.map(m=>{
     const displayRank=m.filteredRank;
     const rankBg=rankColors[displayRank]||'transparent';
     const rankColor=displayRank<=3?'#3d2200':'var(--ink3)';
     const rankBorder=displayRank<=3?'none':'1px solid var(--border2)';
+
+    // Department display
     const displayDept=deptLabel||m.depts.join(', ');
     const s=deptStyle(deptLabel||m.depts[0]||'');
-    return`<tr><td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td><td><button class="mentor-name-btn" data-mentor="${m.name.replace(/"/g,'&quot;')}" style="background:none;border:none;color:#7a4f00;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:var(--font-body);padding:0;">${m.name}</button></td><td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${displayDept}</span></td><td style="text-align:center;"><span style="font-family:var(--font-display);font-size:18px;color:var(--gold-dark);">${m.rating.toFixed(2)}</span><span style="font-size:11px;color:var(--ink4);">/5</span></td><td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--ink2);">${m.responses}</td><td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.avgXResponses.toFixed(2)}</td><td style="text-align:center;"><span style="font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.bayesianRating.toFixed(7)}</span></td><td>${statusBadge(m.rating)}</td></tr>`;
+
+    // ▼ KEY: use dept-specific rating and responses when filter is active
+    const displayRating = isDeptActive ? getMentorDeptRating(m, currentDeptFilter) : m.rating;
+    const displayResponses = isDeptActive ? getMentorDeptResponses(m, currentDeptFilter) : m.responses;
+    const displayAvgXResp = isDeptActive ? (displayRating * displayResponses) : m.avgXResponses;
+
+    const ratingColor = isDeptActive ? getStatusColor(displayRating) : 'var(--gold-dark)';
+
+    return`<tr>
+      <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td>
+      <td><button class="mentor-name-btn" data-mentor="${m.name.replace(/"/g,'&quot;')}" data-dept="${(deptLabel||'').replace(/"/g,'&quot;')}" style="background:none;border:none;color:#7a4f00;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:var(--font-body);padding:0;">${m.name}</button></td>
+      <td><span class="badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${displayDept}</span></td>
+      <td style="text-align:center;">
+        <span style="font-family:var(--font-display);font-size:18px;color:${ratingColor};">${displayRating.toFixed(2)}</span>
+        <span style="font-size:11px;color:var(--ink4);">/5</span>
+        ${isDeptActive?`<div style="font-size:10px;color:var(--ink4);margin-top:1px;">(${currentDeptFilter})</div>`:''}
+      </td>
+      <td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--ink2);">
+        ${displayResponses}
+        ${isDeptActive?`<div style="font-size:10px;color:var(--ink4);font-family:var(--font-body);">dept only</div>`:''}
+      </td>
+      <td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${isDeptActive ? displayAvgXResp.toFixed(2) : m.avgXResponses.toFixed(2)}</td>
+      <td style="text-align:center;"><span style="font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.bayesianRating.toFixed(7)}</span></td>
+      <td>${statusBadge(displayRating)}</td>
+    </tr>`;
   }).join('');
-  document.querySelectorAll('.mentor-name-btn').forEach(btn=>{btn.addEventListener('click',function(){openMentorModal(this.getAttribute('data-mentor'));});});
+
+  document.querySelectorAll('.mentor-name-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      openMentorModal(this.getAttribute('data-mentor'), this.getAttribute('data-dept')||null);
+    });
+  });
 }
 
 /* ═══════════════════════════════════════════
@@ -1467,72 +1830,124 @@ function updateSummaryCharts(){
 }
 
 /* ═══════════════════════════════════════════
-   INSIGHT CHARTS
-═══════════════════════════════════════════ */
-function setInsightChart(type,btn){
-  currentInsightChart=type;
-  document.querySelectorAll('.bubble-tab').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  document.getElementById('insightScatterWrap').style.display=type==='scatter'?'block':'none';
-  document.getElementById('insightHorizWrap').style.display=type==='horizontal'?'block':'none';
-  document.getElementById('insightResponseWrap').style.display=type==='responses'?'block':'none';
-  document.getElementById('insightScatterLegend').style.display=type==='scatter'?'flex':'none';
-  renderInsightCharts(currentDeptFilter);
-}
-function renderInsightCharts(filterDept){
-  const list=getFilteredMentors(filterDept);
-  document.getElementById('insightChartBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-  if(currentInsightChart==='scatter')renderScatterChart(list);
-  else if(currentInsightChart==='horizontal')renderHorizChart(list);
-  else if(currentInsightChart==='responses')renderResponseChart(list);
-}
-function renderScatterChart(list){
-  if(insightScatterInst){insightScatterInst.destroy();insightScatterInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightScatterChart'))document.getElementById('insightScatterWrap').innerHTML='<canvas id="insightScatterChart"></canvas>';
-  const scatterData=list.map(m=>({x:m.responses,y:m.rating,r:Math.max(6,m.subjects*4),label:m.name,subjects:m.subjects,bayesian:m.bayesianRating,dept:m.depts[0]||''}));
-  insightScatterInst=new Chart(document.getElementById('insightScatterChart'),{type:'bubble',data:{datasets:[{label:'Mentors',data:scatterData,backgroundColor:scatterData.map(d=>getStatusColor(d.y)+'cc'),borderColor:scatterData.map(d=>getStatusColor(d.y)),borderWidth:1.5,hoverBorderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:12,callbacks:{title:ctx=>ctx[0].raw.label,label:ctx=>{const d=ctx.raw;return[` Avg Rating: ${d.y.toFixed(2)} / 5`,` Responses: ${d.x}`,` Subjects: ${d.subjects}`,` Bayesian: ${d.bayesian.toFixed(4)}`,` Dept: ${d.dept}`];}}},datalabels:{display:ctx=>{const d=ctx.dataset.data[ctx.dataIndex];return d.r>=12;},color:'#2a1800',font:{size:9,weight:'600'},formatter:(v,ctx)=>{const name=ctx.dataset.data[ctx.dataIndex].label;return name.length>12?name.slice(0,11)+'…':name;},anchor:'center',align:'center'}},scales:{x:{title:{display:true,text:'Total Responses',font:{size:12},color:'#8a6020'},ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}},y:{min:0,max:5,title:{display:true,text:'Average Rating / 5',font:{size:12},color:'#8a6020'},ticks:{stepSize:0.5,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.06)'},border:{display:false}}},layout:{padding:{top:20,right:20,bottom:10,left:10}},animation:{duration:700,easing:'easeOutQuart'}},plugins:[ChartDataLabels]});
-}
-function renderHorizChart(list){
-  if(insightHorizInst){insightHorizInst.destroy();insightHorizInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightHorizChart'))document.getElementById('insightHorizWrap').innerHTML='<canvas id="insightHorizChart"></canvas>';
-  const top5=list.slice(0,Math.min(5,list.length));const bottom5=list.slice(-Math.min(5,list.length)).reverse();
-  const combined=[...top5,...bottom5];
-  const labels=combined.map((m,i)=>(i<top5.length?'▲ ':'▼ ')+m.name);
-  const data=combined.map(m=>m.bayesianRating);
-  const colors=combined.map((m,i)=>i<top5.length?'rgba(16,185,129,0.80)':'rgba(239,68,68,0.75)');
-  const borders=combined.map((m,i)=>i<top5.length?'#059669':'#dc2626');
-  document.getElementById('insightHorizWrap').style.height=Math.max(340,combined.length*38+80)+'px';
-  insightHorizInst=new Chart(document.getElementById('insightHorizChart'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderColor:borders,borderWidth:1.5,borderRadius:5,borderSkipped:false,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>combined[ctx[0].dataIndex].name,label:ctx=>{const m=combined[ctx.dataIndex];return[` Bayesian: ${m.bayesianRating.toFixed(4)}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Responses: ${m.responses}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>borders[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v.toFixed(2)}},scales:{x:{min:0,max:5,ticks:{stepSize:1,font:{size:10},color:'#8a6020',callback:v=>v.toFixed(1)},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
-}
-function renderResponseChart(list){
-  if(insightResponseInst){insightResponseInst.destroy();insightResponseInst=null;}
-  if(!list.length)return;
-  if(!document.getElementById('insightResponseChart'))document.getElementById('insightResponseWrap').innerHTML='<canvas id="insightResponseChart"></canvas>';
-  const sorted=[...list].sort((a,b)=>b.responses-a.responses).slice(0,20);
-  const maxR=Math.max(...sorted.map(m=>m.responses),1);
-  const colors=sorted.map(m=>{const ratio=m.responses/maxR;const r=Math.round(92+(196-92)*ratio);const g=Math.round(54+(138-54)*ratio);return`rgba(${r},${g},0,${0.55+0.35*ratio})`;});
-  document.getElementById('insightResponseWrap').style.height=Math.max(320,sorted.length*28+100)+'px';
-  insightResponseInst=new Chart(document.getElementById('insightResponseChart'),{type:'bar',data:{labels:sorted.map(m=>m.name),datasets:[{data:sorted.map(m=>m.responses),backgroundColor:colors,borderColor:sorted.map(()=>'#c48a00'),borderWidth:1,borderRadius:5,borderSkipped:false,barThickness:20}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.95)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{title:ctx=>sorted[ctx[0].dataIndex].name,label:ctx=>{const m=sorted[ctx.dataIndex];return[` Responses: ${m.responses}`,` Avg Rating: ${m.rating.toFixed(2)}/5`,` Subjects: ${m.subjects}`];}}},datalabels:{anchor:'end',align:'end',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v}},scales:{x:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false},title:{display:true,text:'Total Responses',font:{size:11},color:'#8a6020'}},y:{ticks:{font:{size:11},color:'#4a2e00',autoSkip:false},grid:{display:false},border:{display:false}}},layout:{padding:{right:50,top:10}}},plugins:[ChartDataLabels]});
-}
-
-/* ═══════════════════════════════════════════
    MENTOR MODAL
 ═══════════════════════════════════════════ */
-const MM_QUESTIONS=['Sessions were clear and well-structured','Professional behavior during sessions','Effective in solving problems with examples','Supported doubt clearing and student queries','Sessions improved understanding and skills'];
-function openMentorModal(mentorName){
+function openMentorModal(mentorName, dept){
   const m=MENTORS.find(x=>x.name===mentorName);if(!m)return;
+
+  const deptCtx = (dept && dept !== 'all' && dept !== '') ? dept : null;
+  const activeQs = deptCtx ? getMentorDeptQs(m, deptCtx) : m.qs;
+  const activeRating = deptCtx ? getMentorDeptRating(m, deptCtx) : m.rating;
+  const activeResponses = deptCtx ? getMentorDeptResponses(m, deptCtx) : m.responses;
+
   document.getElementById('mmName').textContent=m.name;
-  document.getElementById('mmSub').textContent=m.depts.join(', ')+' · '+m.responses+' responses · '+m.subjects+' subject(s)';
-  const totalYes=m.qs.reduce((s,q)=>s+q.y,0),totalAll=m.qs.reduce((s,q)=>s+q.y+q.n,0);
-  document.getElementById('mmStats').innerHTML=`<div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Avg rating</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.rating.toFixed(2)}</div><div style="font-size:11px;color:var(--ink3);">out of 5</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Responses</div><div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${m.responses}</div><div style="font-size:11px;color:var(--ink3);">total feedback</div></div><div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Overall yes rate</div><div style="font-family:var(--font-display);font-size:24px;color:var(--green-dark);">${totalAll>0?Math.round(totalYes/totalAll*100):0}%</div><div style="font-size:11px;color:var(--ink3);">across 5 questions</div></div>`;
+  if(deptCtx){
+    document.getElementById('mmSub').textContent=`${deptCtx} · ${activeResponses} responses in this dept · ${m.subjects} subject(s) total`;
+  }else{
+    document.getElementById('mmSub').textContent=m.depts.join(', ')+' · '+m.responses+' responses (all depts) · '+m.subjects+' subject(s)';
+  }
+
+  const banner=document.getElementById('mmDeptScopeBanner');
+  if(deptCtx){
+    banner.style.display='flex';
+    banner.innerHTML=`<span>🔍</span> <span>Showing data for <strong>${deptCtx}</strong> only — ${activeResponses} responses, ${activeRating.toFixed(2)} avg rating in this dept. <em style="opacity:.7;">(This mentor has ${m.responses} responses total across all depts.)</em></span>`;
+  }else{
+    banner.style.display='none';
+  }
+
+  const totalYes=activeQs.reduce((s,q)=>s+q.y,0),totalAll=activeQs.reduce((s,q)=>s+q.y+q.n,0);
+
+  document.getElementById('mmStats').innerHTML=`
+    <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">${deptCtx?'Dept Avg Rating':'Avg rating'}</div>
+      <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${activeRating.toFixed(2)}</div>
+      <div style="font-size:11px;color:var(--ink3);">${deptCtx?`in ${deptCtx}`:'out of 5'}</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">${deptCtx?'Dept Responses':'Responses'}</div>
+      <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-dark);">${activeResponses}</div>
+      <div style="font-size:11px;color:var(--ink3);">${deptCtx?'in this dept':'total feedback'}</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);">Yes rate${deptCtx?' (dept)':''}</div>
+      <div style="font-family:var(--font-display);font-size:24px;color:var(--green-dark);">${totalAll>0?Math.round(totalYes/totalAll*100):0}%</div>
+      <div style="font-size:11px;color:var(--ink3);">across 5 questions</div>
+    </div>`;
+
+  document.getElementById('mmQTitle').textContent = deptCtx
+    ? `Question-by-question breakdown — ${deptCtx} only`
+    : 'Question-by-question breakdown';
+
   document.getElementById('mmQRows').innerHTML=MM_QUESTIONS.map((q,i)=>{
-    const d=m.qs[i]||{y:0,n:0};const tot=d.y+d.n;const yp=tot>0?Math.round(d.y/tot*100):0;const np=100-yp;
-    return`<div style="display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);"><div><div style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Q${i+1}</div><div style="font-size:13px;color:var(--ink);line-height:1.45;">${q}</div></div><div style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:7px;"><span style="font-size:11px;font-weight:600;color:#065f46;width:22px;">Yes</span><div style="flex:1;height:14px;background:var(--bg2);border-radius:20px;overflow:hidden;"><div style="width:${yp}%;height:100%;background:#10b981;border-radius:20px;"></div></div><span style="font-size:11px;color:var(--ink3);width:56px;text-align:right;">${d.y} (${yp}%)</span></div><div style="display:flex;align-items:center;gap:7px;"><span style="font-size:11px;font-weight:600;color:#7f1d1d;width:22px;">No</span><div style="flex:1;height:14px;background:var(--bg2);border-radius:20px;overflow:hidden;"><div style="width:${np}%;height:100%;background:#ef4444;border-radius:20px;"></div></div><span style="font-size:11px;color:var(--ink3);width:56px;text-align:right;">${d.n} (${np}%)</span></div></div></div>`;
+    const d=activeQs[i]||{y:0,n:0};const tot=d.y+d.n;const yp=tot>0?Math.round(d.y/tot*100):0;const np=100-yp;
+    return`<div style="display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Q${i+1}</div>
+        <div style="font-size:13px;color:var(--ink);line-height:1.45;">${q}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:11px;font-weight:600;color:#065f46;width:22px;">Yes</span>
+          <div style="flex:1;height:14px;background:var(--bg2);border-radius:20px;overflow:hidden;"><div style="width:${yp}%;height:100%;background:#10b981;border-radius:20px;"></div></div>
+          <span style="font-size:11px;color:var(--ink3);width:56px;text-align:right;">${d.y} (${yp}%)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:11px;font-weight:600;color:#7f1d1d;width:22px;">No</span>
+          <div style="flex:1;height:14px;background:var(--bg2);border-radius:20px;overflow:hidden;"><div style="width:${np}%;height:100%;background:#ef4444;border-radius:20px;"></div></div>
+          <span style="font-size:11px;color:var(--ink3);width:56px;text-align:right;">${d.n} (${np}%)</span>
+        </div>
+      </div>
+    </div>`;
   }).join('');
+
+  document.getElementById('mmFootnote').textContent = deptCtx
+    ? `* Yes/No counts are from rows where department = "${deptCtx}" only. All other departments are excluded.`
+    : `* Yes/No counts are aggregated across all subjects and departments this mentor teaches.`;
+
+  generateMentorAnalysis(m, activeQs, activeRating, activeResponses, deptCtx);
   document.getElementById('mentorModalOverlay').classList.add('open');
 }
+
+function generateMentorAnalysis(m, activeQs, activeRating, activeResponses, deptCtx){
+  const strengths=[], weaknesses=[], neutralAreas=[];
+  activeQs.forEach((q,i)=>{
+    const tot=q.y+q.n;const yp=tot>0?Math.round(q.y/tot*100):0;
+    if(yp>=65) strengths.push({label:Q_LABELS[i],pct:yp,question:MM_QUESTIONS[i],yes:q.y,no:q.n});
+    else if(yp<=40) weaknesses.push({label:Q_LABELS[i],pct:yp,question:MM_QUESTIONS[i],yes:q.y,no:q.n});
+    else neutralAreas.push({label:Q_LABELS[i],pct:yp,question:MM_QUESTIONS[i]});
+  });
+  const totalYes=activeQs.reduce((s,q)=>s+q.y,0);
+  const totalAll=activeQs.reduce((s,q)=>s+q.y+q.n,0);
+  const overallPct=totalAll>0?Math.round(totalYes/totalAll*100):0;
+  let verdictText, verdictBg, verdictColor, verdictBorder, verdictIcon;
+  if(activeRating>=4.3&&overallPct>=60){verdictText=`This mentor is a <strong>strong performer</strong>${deptCtx?` in <strong>${deptCtx}</strong>`:''}.`;verdictBg='#d1fae5';verdictColor='#064e3b';verdictBorder='#6ee7b7';verdictIcon='✦';}
+  else if(activeRating>=4.0&&overallPct>=50){verdictText=`This mentor is a <strong>good performer</strong>${deptCtx?` in <strong>${deptCtx}</strong>`:''} with solid ratings.`;verdictBg='#fef3c7';verdictColor='#78350f';verdictBorder='#fcd34d';verdictIcon='◆';}
+  else if(activeRating<3.5||overallPct<40){verdictText=`This mentor <strong>needs focused attention</strong>${deptCtx?` in <strong>${deptCtx}</strong>`:''}.`;verdictBg='#fee2e2';verdictColor='#7f1d1d';verdictBorder='#fca5a5';verdictIcon='▲';}
+  else{verdictText=`This mentor shows <strong>average performance</strong>${deptCtx?` in <strong>${deptCtx}</strong>`:''}.`;verdictBg='#fef3c7';verdictColor='#78350f';verdictBorder='#fcd34d';verdictIcon='◇';}
+  const strengthHTML=strengths.length?strengths.map(s=>`<li style="margin-bottom:8px;"><span style="font-weight:600;color:#065f46;">${s.label}</span> <span style="font-size:11px;background:#d1fae5;color:#065f46;border-radius:20px;padding:1px 8px;margin-left:4px;">${s.pct}% yes</span></li>`).join(''):'<li style="color:#6b7280;font-size:12px;">No standout strengths detected above the 65% threshold.</li>';
+  const weaknessHTML=weaknesses.length?weaknesses.map(w=>`<li style="margin-bottom:8px;"><span style="font-weight:600;color:#7f1d1d;">${w.label}</span> <span style="font-size:11px;background:#fee2e2;color:#7f1d1d;border-radius:20px;padding:1px 8px;margin-left:4px;">${w.pct}% yes</span></li>`).join(''):'<li style="color:#6b7280;font-size:12px;">No critical weaknesses detected below the 40% threshold.</li>';
+  const neutralHTML=neutralAreas.length?neutralAreas.map(n=>`<span class="neutral-pill">${n.label} <strong style="color:var(--ink2);">${n.pct}%</strong></span>`).join(''):'';
+  let recText;
+  const wCount=weaknesses.length;const sCount=strengths.length;
+  if(wCount>=3){recText=`<strong>Priority coaching needed.</strong> More than half the feedback dimensions fall below 40% positive.`;}
+  else if(wCount===2){recText=`Two clear focus areas identified: <strong>${weaknesses.map(w=>w.label).join('</strong> and <strong>')}</strong>.`;}
+  else if(wCount===1){recText=`One improvement area: <strong>${weaknesses[0].label}</strong>.`;}
+  else if(sCount>=4){recText=`<strong>Exceptional performer.</strong> Consider nominating as peer mentor or faculty trainer.`;}
+  else if(sCount>=2){recText=`Strong in several key areas. Encourage continued growth in neutral dimensions.`;}
+  else{recText=`Performance is stable but shows room for growth. Encourage ongoing student interaction.`;}
+  const lowRespNote=activeResponses<20?`<div class="low-response-note">⚠ Low response count (${activeResponses} responses${deptCtx?` in ${deptCtx}`:''}) — interpret with caution.</div>`:'';
+  document.getElementById('mmAnalysisBody').innerHTML=`
+    <div class="verdict-banner" style="background:${verdictBg};border:1px solid ${verdictBorder};color:${verdictColor};"><span style="font-size:13px;margin-right:6px;">${verdictIcon}</span><span style="font-size:12.5px;line-height:1.65;">${verdictText}</span></div>
+    <div class="analysis-grid">
+      <div class="analysis-box strengths"><div class="analysis-box-title">✓ Strengths (≥65%)</div><ul class="analysis-list strengths-list">${strengthHTML}</ul></div>
+      <div class="analysis-box weaknesses"><div class="analysis-box-title">✗ Areas to improve (≤40%)</div><ul class="analysis-list weaknesses-list">${weaknessHTML}</ul></div>
+      ${neutralAreas.length?`<div class="analysis-box neutral-wrap"><div class="analysis-box-title">~ Neutral areas</div><div class="neutral-pills">${neutralHTML}</div></div>`:''}
+    </div>
+    <div class="recommendation-box"><div class="recommendation-title">📋 Recommendation</div><div class="recommendation-text">${recText}</div></div>
+    ${lowRespNote}
+    <div style="font-size:10.5px;color:var(--ink4);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">Based on ${activeResponses} ${deptCtx?`<strong>${deptCtx}</strong> `:''}responses.</div>`;
+}
+
 function closeMentorModal(){document.getElementById('mentorModalOverlay').classList.remove('open');}
 
 /* ═══════════════════════════════════════════
@@ -1650,15 +2065,7 @@ function landingFilterRender(){
     const viewBtn=collegeIdx>=0
       ?`<button onclick="selectCollege(${collegeIdx})" style="padding:5px 14px;background:var(--gold-dark);color:#fde9a0;border:none;border-radius:20px;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#7a4f00'" onmouseout="this.style.background='var(--gold-dark)'">View →</button>`
       :`<span style="font-size:11px;color:var(--ink4);">—</span>`;
-
-    return`<tr>
-      <td style="text-align:center;">${rankBadge}</td>
-      <td style="font-size:13px;font-weight:500;color:#7a4f00;">${r.college}</td>
-      <td style="text-align:center;">${ratingCell}</td>
-      <td style="text-align:center;font-family:var(--font-display);font-size:17px;color:${landingNpsColor(r.nps)};">${npsDisplay}</td>
-      <td>${hitCell}</td>
-      <td style="text-align:center;">${viewBtn}</td>
-    </tr>`;
+    return`<tr><td style="text-align:center;">${rankBadge}</td><td style="font-size:13px;font-weight:500;color:#7a4f00;">${r.college}</td><td style="text-align:center;">${ratingCell}</td><td style="text-align:center;font-family:var(--font-display);font-size:17px;color:${landingNpsColor(r.nps)};">${npsDisplay}</td><td>${hitCell}</td><td style="text-align:center;">${viewBtn}</td></tr>`;
   }).join('');
 }
 
@@ -1669,22 +2076,21 @@ function statusBadgeInline(r){if(r>=4.3)return'<span style="background:#fde9a0;c
 
 function downloadReport(){
   if(currentMode==='overview'){
-    if(!landingData.length){alert('No data to download. Please wait for data to load.');return;}
+    if(!landingData.length){alert('No data to download.');return;}
     const now=new Date().toLocaleString();const rows=landingGetSorted();
-    const tableRows=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:700;text-align:center;">${r.rank}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;">${r.college}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);text-align:center;color:#5c3600;">${r.rating!==null?r.rating.toFixed(1):'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);text-align:center;">${r.nps!==null?(r.nps>0?'+':'')+r.nps:'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);text-align:center;">${r.hit!==null?r.hit.toFixed(1)+'%':'—'}</td></tr>`).join('');
+    const tableRows=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;font-weight:700;text-align:center;">${r.rank}</td><td style="padding:10px 14px;font-weight:600;">${r.college}</td><td style="padding:10px 14px;text-align:center;color:#5c3600;">${r.rating!==null?r.rating.toFixed(1):'—'}</td><td style="padding:10px 14px;text-align:center;">${r.nps!==null?(r.nps>0?'+':'')+r.nps:'—'}</td><td style="padding:10px 14px;text-align:center;">${r.hit!==null?r.hit.toFixed(1)+'%':'—'}</td></tr>`).join('');
     const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>College Overview Report</title></head><body style="font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;margin:0;"><div style="background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:24px 40px;"><div style="font-family:Georgia,serif;font-size:24px">College Overview Report</div><div style="font-size:12px;opacity:0.7;margin-top:4px">FacePrep Campus · ${now}</div></div><div style="padding:36px 40px;"><table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">Rank</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);">College</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">Avg Rating</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">NPS</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">Hit Ratio</th></tr></thead><tbody>${tableRows}</tbody></table></div></body></html>`;
     const blob=new Blob([html],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`College-Overview-${new Date().toISOString().split('T')[0]}.html`;a.click();URL.revokeObjectURL(a.href);
   }else{
-    if(!MENTORS.length&&!NPS_DATA.total){alert('No data to download. Please select a college first.');return;}
+    if(!MENTORS.length&&!NPS_DATA.total){alert('No data to download.');return;}
     const collegeName=currentCollege?.name||'Report';const now=new Date().toLocaleString();
     const{promoters,passives,detractors,npsIndex,avg:npsAvg,total:npsTotal}=NPS_DATA;
     const npsDisplay=npsIndex!==null?(npsIndex>0?`+${npsIndex}`:`${npsIndex}`):'N/A';
-    const promoPct=npsTotal>0?Math.round(promoters/npsTotal*100):0;const passPct=npsTotal>0?Math.round(passives/npsTotal*100):0;const detrPct=npsTotal>0?Math.round(detractors/npsTotal*100):0;
     const tableHead=cols=>`<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;
-    const mentorRows=MENTORS.map((m,idx)=>`<tr style="background:${idx%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600">${m.rank}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600">${m.name}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${m.depts.join(', ')}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:#5c3600">${m.bayesianRating.toFixed(2)}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${m.rating.toFixed(1)}/5</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${m.responses}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${statusBadgeInline(m.rating)}</td></tr>`).join('');
+    const mentorRows=MENTORS.map((m,idx)=>`<tr style="background:${idx%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;font-weight:600">${m.rank}</td><td style="padding:10px 14px;font-weight:600">${m.name}</td><td style="padding:10px 14px">${m.depts.join(', ')}</td><td style="padding:10px 14px;color:#5c3600">${m.bayesianRating.toFixed(2)}</td><td style="padding:10px 14px">${m.rating.toFixed(1)}/5</td><td style="padding:10px 14px">${m.responses}</td><td style="padding:10px 14px">${statusBadgeInline(m.rating)}</td></tr>`).join('');
     const{cycles,cycleStats}=TREND_DATA;
-    const trendRows=cycles.slice().reverse().map((c,i)=>{const s=cycleStats[c];return`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);font-weight:600;color:#5c3600">${c}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${s.responses||'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:#5c3600">${s.ratingAvg!==null&&s.ratingAvg!==undefined?s.ratingAvg.toFixed(2):'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:${getNpsColor(s.npsIndex)}">${s.npsIndex!==null&&s.npsIndex!==undefined?(s.npsIndex>0?'+':'')+s.npsIndex:'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08);color:#065f46">${s.hitRatio!==null&&s.hitRatio!==undefined?s.hitRatio.toFixed(1)+'%':'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${s.promoterPct!==null?s.promoterPct+'%':'—'}</td><td style="padding:10px 14px;border-bottom:1px solid rgba(120,80,10,0.08)">${s.detractorPct!==null?s.detractorPct+'%':'—'}</td></tr>`;}).join('');
-    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title></head><body style="font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;margin:0;"><div style="background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;"><div><div style="font-family:Georgia,serif;font-size:26px">Performance Report</div><div>${collegeName}</div></div><div style="text-align:right;font-size:11px;opacity:0.75"><div>Generated: ${now}</div><div>${MENTORS.length} mentors · ${DEPT_LIST.length} depts</div></div></div><div style="padding:36px 40px;max-width:1100px;margin:0 auto;"><div style="margin-bottom:40px;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">NPS Overview</div><div style="background:linear-gradient(135deg,#4a2800,#7a4f00);border-radius:14px;padding:24px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;"><div><div style="font-family:Georgia,serif;font-size:56px;color:#f5c842;">${npsDisplay}</div><div style="font-size:12px;color:rgba(253,233,160,0.7)">${getNpsLabel(npsIndex)}</div></div></div></div><div style="margin-bottom:40px;page-break-before:always;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">Trend Over Time</div><table style="width:100%;border-collapse:collapse;font-size:13px;">${tableHead(['Month','Responses','Avg Rating','NPS Index','Hit Ratio','Promoters %','Detractors %'])}<tbody>${trendRows}</tbody></table></div><div style="page-break-before:always;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">Mentor Rankings (Bayesian)</div><table style="width:100%;border-collapse:collapse;font-size:13px;">${tableHead(['Rank','Mentor','Department(s)','Bayesian Score','Avg Rating','Responses','Status'])}<tbody>${mentorRows}</tbody></table></div></div></body></html>`;
+    const trendRows=cycles.slice().reverse().map((c,i)=>{const s=cycleStats[c];return`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;font-weight:600;color:#5c3600">${c}</td><td style="padding:10px 14px">${s.responses||'—'}</td><td style="padding:10px 14px;color:#5c3600">${s.ratingAvg!==null?s.ratingAvg.toFixed(2):'—'}</td><td style="padding:10px 14px;color:${getNpsColor(s.npsIndex)}">${s.npsIndex!==null?(s.npsIndex>0?'+':'')+s.npsIndex:'—'}</td><td style="padding:10px 14px;color:#065f46">${s.hitRatio!==null?s.hitRatio.toFixed(1)+'%':'—'}</td><td style="padding:10px 14px">${s.promoterPct!==null?s.promoterPct+'%':'—'}</td><td style="padding:10px 14px">${s.detractorPct!==null?s.detractorPct+'%':'—'}</td></tr>`;}).join('');
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title></head><body style="font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;margin:0;"><div style="background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;"><div style="font-family:Georgia,serif;font-size:26px">Performance Report</div><div>${collegeName}</div><div style="font-size:11px;opacity:0.75;margin-top:4px">Generated: ${now}</div></div><div style="padding:36px 40px;max-width:1100px;margin:0 auto;"><div style="margin-bottom:40px;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">NPS Overview</div><div style="background:linear-gradient(135deg,#4a2800,#7a4f00);border-radius:14px;padding:24px;"><div style="font-family:Georgia,serif;font-size:56px;color:#f5c842;">${npsDisplay}</div><div style="font-size:12px;color:rgba(253,233,160,0.7)">${getNpsLabel(npsIndex)}</div></div></div><div style="margin-bottom:40px;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">Trend Over Time</div><table style="width:100%;border-collapse:collapse;font-size:13px;">${tableHead(['Month','Responses','Avg Rating','NPS Index','Hit Ratio','Promoters %','Detractors %'])}<tbody>${trendRows}</tbody></table></div><div><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">Mentor Rankings (Bayesian)</div><table style="width:100%;border-collapse:collapse;font-size:13px;">${tableHead(['Rank','Mentor','Department(s)','Bayesian Score','Avg Rating','Responses','Status'])}<tbody>${mentorRows}</tbody></table></div></div></body></html>`;
     const blob=new Blob([html],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.html`;a.click();URL.revokeObjectURL(a.href);
   }
 }
