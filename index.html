@@ -343,7 +343,9 @@ tbody tr{transition:background 0.12s;}
 
 <aside class="sidebar" id="mainSidebar">
   <div class="nav-group-label">Analytics</div>
+  <!-- Overview nav — visible only in overview mode -->
   <div class="nav-item active" id="navOverview" onclick="selectOverview()"><span class="nav-icon">⊞</span> College Overview</div>
+  <!-- Detail navs — visible only when a college is selected -->
   <div class="nav-item hidden-nav" id="navSummary" onclick="showDetailPanel('summary',this)"><span class="nav-icon">▦</span> Summary</div>
   <div class="nav-item hidden-nav" id="navMentors" onclick="showDetailPanel('mentors',this)"><span class="nav-icon">◉</span> Mentor Performance</div>
   <div class="nav-item hidden-nav" id="navNps" onclick="showDetailPanel('nps',this)"><span class="nav-icon">◈</span> NPS Analysis</div>
@@ -753,7 +755,7 @@ const MONTH_ALIAS_MAP={
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-let currentMode='overview'; // 'overview' | 'detail'
+let currentMode='overview';
 let currentCollege=null;
 let MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
 let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
@@ -845,21 +847,26 @@ function selectCollege(idx){
 }
 
 /* ═══════════════════════════════════════════
-   MODE SWITCHING
+   MODE SWITCHING  ← KEY FIX HERE
 ═══════════════════════════════════════════ */
 function switchToOverviewMode(){
   currentMode='overview';
-  // Show overview nav, hide detail navs
+
+  // Show ONLY the College Overview nav item
   document.getElementById('navOverview').classList.remove('hidden-nav');
   document.getElementById('navOverview').classList.add('active');
+
+  // Hide all detail nav items
   ['navSummary','navMentors','navNps','navTrends'].forEach(id=>{
     document.getElementById(id).classList.add('hidden-nav');
     document.getElementById(id).classList.remove('active');
   });
+
   document.getElementById('deptFilterRow').style.visibility='hidden';
   document.getElementById('pageEyebrow').textContent='Performance Analytics';
   document.getElementById('pageTitle').textContent='College Overview';
   document.getElementById('pageSub').textContent='All colleges · Live data from Google Sheets';
+
   // Show only landing panel
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-landing').classList.add('active');
@@ -868,10 +875,16 @@ function switchToOverviewMode(){
 
 function switchToDetailMode(){
   currentMode='detail';
+
+  // Hide the College Overview nav item
+  document.getElementById('navOverview').classList.add('hidden-nav');
   document.getElementById('navOverview').classList.remove('active');
+
+  // Show all detail nav items
   ['navSummary','navMentors','navNps','navTrends'].forEach(id=>{
     document.getElementById(id).classList.remove('hidden-nav');
   });
+
   // Default to summary panel
   showDetailPanel('summary',document.getElementById('navSummary'));
 }
@@ -1633,8 +1646,6 @@ function landingFilterRender(){
     const hitW=r.hit!==null?Math.round(Math.min(r.hit,maxHit)/maxHit*100):0;
     const hc=landingHitColor(r.hit);
     const hitCell=`<div style="display:flex;align-items:center;gap:8px;justify-content:center;"><div style="flex:1;max-width:80px;height:6px;background:var(--bg2);border-radius:6px;overflow:hidden;"><div style="width:${hitW}%;height:100%;background:${hc};border-radius:6px;"></div></div><span style="font-size:12px;font-weight:500;color:${hc};min-width:44px;text-align:right;">${r.hit!==null?r.hit.toFixed(1)+'%':'—'}</span></div>`;
-    
-    // Find matching college index for "View" button
     const collegeIdx=COLLEGES.findIndex(c=>c.name===r.college);
     const viewBtn=collegeIdx>=0
       ?`<button onclick="selectCollege(${collegeIdx})" style="padding:5px 14px;background:var(--gold-dark);color:#fde9a0;border:none;border-radius:20px;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#7a4f00'" onmouseout="this.style.background='var(--gold-dark)'">View →</button>`
