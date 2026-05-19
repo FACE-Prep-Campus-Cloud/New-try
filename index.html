@@ -337,6 +337,24 @@ tbody tr{transition:background 0.12s;}
 .neutral-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
 .neutral-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:var(--surface);border:1px solid var(--border2);font-size:11px;font-weight:500;color:var(--ink3);}
 
+/* MENTOR NAME BUTTON STYLE */
+.mentor-name-btn{
+  background:none;
+  border:none;
+  color:#7a4f00;
+  font-size:13.5px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  font-family:var(--font-body);
+  padding:0;
+  text-align:left;
+}
+.mentor-name-btn:hover{
+  color:#5c3600;
+}
+
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
 ::-webkit-scrollbar-thumb{background:var(--gold-mid);border-radius:99px;}
@@ -611,7 +629,6 @@ tbody tr{transition:background 0.12s;}
   </div>
 
   <!-- MENTOR PERFORMANCE PANEL -->
-  <!-- NOTE: Mentor Insights chart section removed entirely -->
   <div class="panel" id="panel-mentors">
     <div id="mentorGlobalSummaryBar" class="card" style="padding:0;overflow:hidden;">
       <div id="mentorTableSummaryBar" style="display:flex;align-items:center;gap:24px;padding:14px 22px;background:linear-gradient(135deg,#4a2800,#7a4f00);flex-wrap:wrap;">
@@ -624,7 +641,6 @@ tbody tr{transition:background 0.12s;}
     <div id="deptStatsPanelWrap" style="display:none;"></div>
     <div class="card" style="padding:0;overflow:hidden">
       <div class="table-wrap">
-        <!-- ▼ TABLE HEADER: when dept filter is active, avg rating & responses show dept-specific values -->
         <table id="mentorBayesianTable">
           <thead><tr>
             <th>Rank</th>
@@ -637,6 +653,7 @@ tbody tr{transition:background 0.12s;}
             <th>Status</th>
           </tr></thead>
           <tbody id="mentorTableBody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
+          <tbody id="mentorTableBody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
         </table>
       </div>
       <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);" id="mentorTableFootnote">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)</div>
@@ -1099,7 +1116,6 @@ function processDedicatedTrendData(rows,collegeName){
     let promoterPct=totalForPct>0?parseFloat(((promoterCount/totalForPct)*100).toFixed(1)):null;
     let passivePct=totalForPct>0?parseFloat(((passiveCount/totalForPct)*100).toFixed(1)):null;
     let detractorPct=totalForPct>0?parseFloat(((detractorCount/totalForPct)*100).toFixed(1)):null;
-    if(hitRatio!==null&&hitRatio<=1)hitRatio=parseFloat((hitRatio*100).toFixed(1));
     let finalNps=npsIndex;
     if(finalNps!==null&&Math.abs(finalNps)<=1)finalNps=Math.round(finalNps*100);
     cycleStats[cycleName]={cycle:cycleName,responses:responses||0,students:students||0,ratingAvg,npsIndex:finalNps,hitRatio,promoterPct,passivePct,detractorPct,promoterCount:promoterCount||0,passiveCount:passiveCount||0,detractorCount:detractorCount||0,mentorCount:mentorCount||MENTORS.length,mentorRatings:{}};
@@ -1999,7 +2015,6 @@ function landingParseCSV(text){
         const rating=colRating?parseFloat((row[colRating]||'').toString().replace(/[^0-9.\-]/g,'')):null;
         let nps=colNps?parseFloat((row[colNps]||'').toString().replace(/[^0-9.\-]/g,'')):null;
         let hit=colHit?parseFloat((row[colHit]||'').toString().replace(/[^0-9.]/g,'')):null;
-        if(hit!==null&&hit>0&&hit<=1)hit=parseFloat((hit*100).toFixed(1));
         if(nps!==null&&Math.abs(nps)<=1)nps=Math.round(nps*100);
         return{college,rating:isNaN(rating)?null:rating,nps:isNaN(nps)?null:nps,hit:isNaN(hit)?null:hit};
       }).filter(r=>r.college);
