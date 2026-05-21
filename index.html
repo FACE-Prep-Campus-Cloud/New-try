@@ -133,16 +133,6 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; gap: 10px; } }
 
-/* ── Override badge shown when mentor is overridden ── */
-.override-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.25);
-  border-radius: 6px; padding: 2px 8px;
-  font-size: 10px; font-weight: 600; color: var(--accent2);
-  margin-left: 8px; vertical-align: middle; letter-spacing: .03em;
-  text-transform: uppercase;
-}
-
 .faculty-header {
   display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px;
   padding-bottom: 18px; border-bottom: 1px solid var(--border);
@@ -158,6 +148,14 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
 .faculty-meta { flex: 1; min-width: 0; }
 .faculty-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
 .faculty-subject { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+.override-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.25);
+  border-radius: 6px; padding: 3px 8px; margin-left: 8px;
+  font-size: 10px; font-weight: 600; color: var(--accent2);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
 
 .yn-list { display: flex; flex-direction: column; gap: 14px; }
 .yn-row {
@@ -288,18 +286,6 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
 }
 .form-section-label::before, .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* Loading skeleton for mentor cards */
-.mentor-skeleton {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 32px; margin-bottom: 20px;
-  display: flex; align-items: center; gap: 16px;
-}
-.skel-avatar { width: 44px; height: 44px; border-radius: 12px; background: var(--surface2); flex-shrink: 0; animation: shimmer 1.2s ease infinite; }
-.skel-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.skel-line { height: 12px; border-radius: 6px; background: var(--surface2); animation: shimmer 1.2s ease infinite; }
-.skel-line.short { width: 55%; }
-@keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:.45} }
-
 .submit-area { text-align: center; margin-top: 36px; animation: fadeUp .5s .6s ease both; opacity: 0; }
 .btn-submit {
   display: inline-flex; align-items: center; gap: 10px;
@@ -391,7 +377,7 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
 
 <div id="loadingOverlay">
   <div class="spinner"></div>
-  <p id="loadingMsg">Checking submission status…</p>
+  <p id="loadingMsg">Loading mentor data…</p>
 </div>
 
 <div class="wrap">
@@ -418,7 +404,7 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
     <h2>Already Submitted!</h2>
     <p>Our records show that you have already submitted the feedback form.</p>
     <p>Each student is allowed only <strong>one submission</strong>. If you believe this is a mistake, please contact your respective Campus Manager.</p>
-    <div class="reg-badge">Register Number: <span id="alreadyRegNo">—</span></div>
+    <div class="reg-badge"> Register Number: <span id="alreadyRegNo">—</span></div>
   </div>
 
   <div id="successScreen">
@@ -457,28 +443,6 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
         <div class="select-wrapper">
           <select id="collegeName" name="collegeName" required>
             <option value="" disabled selected>Select your college</option>
-            <option>Kamaraj College</option>
-            <option>Rathinam College of Arts &amp; Science</option>
-            <option>Kamaraj Women's College</option>
-            <option>Sree Saraswathi Thyagaraja College</option>
-            <option>Nagarathinam Angalammal Arts &amp; Science College</option>
-            <option>Sri Amaraavathi College of Arts &amp; Science</option>
-            <option>Bharathidasan College of Arts &amp; Science</option>
-            <option>SDNB Vaishnav College for Women</option>
-            <option>TERF's College of Arts and Science</option>
-            <option>TJS College of Arts and Science</option>
-            <option>Vinayaga Mission's Research Foundation School of Arts &amp; Science</option>
-            <option>Patrician College of Arts &amp; Science</option>
-            <option>Takshashila University</option>
-            <option>AMET University</option>
-            <option>Joy University</option>
-            <option>Noorul Islam Centre for Higher Education (NICHE)</option>
-            <option>Study World Group of Institution</option>
-            <option>Sasurie College of Arts and Science</option>
-            <option>S-VYASA University</option>
-            <option>Asian School of Business</option>
-            <option>Alliance University</option>
-            <option>Kristu Jayanti (Deemed to be University)</option>
           </select>
         </div>
         <div class="err-msg">Please select your college</div>
@@ -636,26 +600,22 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
 <div id="toast"></div>
 
 <script>
-// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ⚡ SUPABASE CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
 const SUPABASE_URL      = "https://bdgfotzgqwlrqylodydt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZ2ZvdHpncXdscnF5bG9keWR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzNTUsImV4cCI6MjA5NDg0NTM1NX0.xAJnpKDQIfQinWgJ8oEPaD3ELGLY_IiwWrYAFNcCUEo";
 
-// ─── GOOGLE SHEET CONFIG ─────────────────────────────────────────────────────
-const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygpjHGGVcUTJqa9n0g5_SzYgjl9_TMSnp4oTx5gpYu6G93cSsNGNn_s7LJhuyuSE4I/exec";
+// ═══════════════════════════════════════════════════════════════════════════
+// 🔄 DYNAMIC COLLEGE DATA - NOW LOADED FROM SUPABASE
+// ═══════════════════════════════════════════════════════════════════════════
+let COLLEGE_DATA = {}; // Will be populated from database
+let MENTOR_OVERRIDES = {}; // Will store active overrides
 
-const QUESTIONS = [
-  "Were the sessions delivered by the Faculty clear and well-structured?",
-  "Are you convinced with the professional behavior of the Faculty during sessions?",
-  "Was the trainer effective in solving problems and explaining solutions with examples?",
-  "Did the trainer support doubt clearing and student queries?",
-  "Were the sessions useful in improving your understanding and skills?"
-];
-
-const SCALE_WORDS = {1:'Poor', 2:'Below Avg', 3:'Average', 4:'Good', 5:'Excellent'};
-const CHALLENGE_IDS = ['challenge_infra','challenge_teaching','challenge_comm','challenge_curriculum','challenge_materials','challenge_none','challenge_others'];
-
-// ─── COLLEGE DATA ─────────────────────────────────────────────────────────────
-const COLLEGE_DATA = {
+// ═══════════════════════════════════════════════════════════════════════════
+// 📚 FALLBACK COLLEGE DATA (Used if database fails or for new colleges)
+// ═══════════════════════════════════════════════════════════════════════════
+const FALLBACK_COLLEGE_DATA = {
   "Kamaraj College": {
     "I BCA - A": [
       {subject:"Tamil - II",mentor:"Gowrishankar"},{subject:"English - II",mentor:"Vedha"},{subject:"Effective Communication",mentor:"Vedha"},
@@ -686,421 +646,317 @@ const COLLEGE_DATA = {
       {subject:"Monetary Marketing",mentor:"Jane Rhinu"},{subject:"Aptitude",mentor:"Infanta Jasmine Rushmitha"}
     ]
   },
-  "Kamaraj Women's College": {
-    "I BCA - A": [
-      {subject:"Tamil",mentor:"Gowrishankar"},{subject:"English",mentor:"Venkatesh"},{subject:"Effective Communication",mentor:"Venkatesh"},
-      {subject:"Programming in C++",mentor:"Sowmiya"},{subject:"Data Structures",mentor:"Sowmiya"},
-      {subject:"Artificial Intelligence & Knowledge Representation",mentor:"Saral"},{subject:"Aptitude",mentor:"Infanta Jasmine Rushmitha"}
-    ]
-  },
-  "SDNB Vaishnav College for Women": {
-    "II B.Sc. CS with AI": [
-      {subject:"Language - IV",mentor:"Mekala"},{subject:"General English - IV",mentor:"Bowya"},{subject:"Machine Learning",mentor:"Geetha"},
-      {subject:"Computer Vision",mentor:"Geetha"},{subject:"Machine Learning and Computer Vision Lab",mentor:"Geetha"},
-      {subject:"Internet of Things in AI",mentor:"Dharani"},{subject:"Applied Statistics",mentor:"Aabitha"},
-      {subject:"Advanced Web Development (Full stack skill paper)",mentor:"Geetha"},{subject:"Essentials of Effective Communication Skill",mentor:"Bavyashree"},
-      {subject:"Aptitude",mentor:"Aabitha"}
-    ],
-    "I B.Sc. CS with AI (Shift 1)": [
-      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bowya"},{subject:"Java Programming",mentor:"Keerthi"},
-      {subject:"Operating Systems",mentor:"Keerthi"},{subject:"Data Structures and Algorithms",mentor:"Keerthi"},
-      {subject:"Data Structures and Algorithms using Java Lab",mentor:"Keerthi"},{subject:"Numerical Methods",mentor:"Saradha"},
-      {subject:"Effective Communication",mentor:"Bowya"}
-    ],
-    "I B.Sc. CS with AI (Shift 2)": [
-      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bowya"},{subject:"Java Programming",mentor:"Subhashni"},
-      {subject:"Operating Systems",mentor:"Subhashni"},{subject:"Data Structures and Algorithms",mentor:"Subhashni"},
-      {subject:"Data Structures and Algorithms using Java Lab",mentor:"Subhashni"},{subject:"Numerical Methods",mentor:"Aabitha"},
-      {subject:"Effective Communication",mentor:"Bowya"}
-    ],
-    "I B.Sc. DS & AI": [
-      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bavyashree"},{subject:"Programming in Java",mentor:"Dharani"},
-      {subject:"Programming in Java Lab",mentor:"Dharani"},{subject:"Mathematics-II",mentor:"Saradha"},
-      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Saradha"},{subject:"Effective Communication",mentor:"Bavyashree"}
-    ],
-    "I B.Com FinTech with AI": [
-      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bavyashree"},
-      {subject:"Securities Markets Regulations and Practices",mentor:"Astha"},{subject:"Business Law",mentor:"Astha"},
-      {subject:"Financial Data Analysis",mentor:"Malarvizhi"},{subject:"Effective Communication",mentor:"Bowya"},
-      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Saradha"}
-    ],
-    "I BBA DM & BA": [
-      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bavyashree"},
-      {subject:"Social Media Marketing I",mentor:"Priyanka"},{subject:"Managerial Economics",mentor:"Priyanka"},
-      {subject:"E-commerce Strategies",mentor:"Nayeemunnisa"},{subject:"Cloud Based tools for E-commerce",mentor:"Nayeemunnisa"},
-      {subject:"Effective Communication",mentor:"Bavyashree"},{subject:"Problem Solving through Aptitude II",mentor:"Aabitha"}
-    ]
-  },
-  "Patrician College of Arts & Science": {
-    "B.Sc. CS with AI": [
-      {subject:"Introduction to Computer Architecture and Microprocessor Lab",mentor:"Mrs. Keerthika S"},
-      {subject:"Problem Solving Techniques",mentor:"Mrs. Keerthika S"},
-      {subject:"Introduction to Computer Architecture and Microprocessor",mentor:"Mr. Rave Sankar"},
-      {subject:"Quantitative Aptitude",mentor:"Mrs. Keerthika S"}
-    ]
-  },
-  "Sree Saraswathi Thyagaraja College": {
-    "I BBA": [
-      {subject:"Managerial Economics",mentor:"Gayathri"},{subject:"Social Media Marketing",mentor:"Kavipriya"},
-      {subject:"E-commerce and Consumer Behaviour",mentor:"Kavipriya"},{subject:"Business Statistics",mentor:"Indumathi"},
-      {subject:"Effective Communication",mentor:"Bavadharini"},{subject:"Problem Solving through Aptitude",mentor:"Bavadharini"},
-      {subject:"English",mentor:"Bavadharini"}
-    ],
-    "I MCA": [
-      {subject:"Data Structure",mentor:"Sneha"},{subject:"Machine Learning",mentor:"Sneha"},{subject:"Applied Statistics",mentor:"Indumathi"},
-      {subject:"Problem Solving through Aptitude",mentor:"Bavadharini"},{subject:"Java",mentor:"Gokilavaani"},
-      {subject:"DBMS",mentor:"Gokilavaani"},{subject:"Effective Communication",mentor:"Bavadharini"}
-    ]
-  },
-  "TERF's College of Arts and Science": {
-    "III BCA": [
-      {subject:"Effective Communication",mentor:"Kapila"},{subject:"Full Stack Development",mentor:"Vaishnavi"},
-      {subject:"Computer Networks",mentor:"Vaishnavi"},{subject:"Graphics and Multimedia",mentor:"Vaishnavi"},
-      {subject:"Internet of Things",mentor:"Ajeetha"}
-    ],
-    "II B.Sc IT": [
-      {subject:"Tamil",mentor:"Kalaiarasi"},{subject:"English",mentor:"Kapila"},{subject:"Effective Communication",mentor:"Kapila"},
-      {subject:"Full Stack Development",mentor:"Ajeetha"},{subject:"Linux and Shell Programming",mentor:"Vaishnavi"},
-      {subject:"System Software and Operating Systems",mentor:"Ajeetha"},{subject:"Business Accounting",mentor:"Kapila"},
-      {subject:"General Awareness",mentor:"Kapila"}
-    ]
-  },
-  "TJS College of Arts and Science": {
-    "II B.Sc CS with AI": [
-      {subject:"DSA (Technical - FPC)",mentor:"Keerthana"},{subject:"Introduction to Artificial Intelligence",mentor:"Keerthana"},
-      {subject:"General English - IV",mentor:"Aarthi"},{subject:"Communicative English",mentor:"Aarthi"},
-      {subject:"Language Paper - Tamil IV",mentor:"Kalaiarasi"},{subject:"Statistics II",mentor:"Indumathi"}
-    ]
-  },
-  "Bharathidasan College of Arts & Science": {
-    "I B.Sc CT": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"English",mentor:"Priyadharshini"},{subject:"OOPS with Java Programming",mentor:"Dharmaprakash"},
-      {subject:"Office Automation and Internet",mentor:"Anupama"},{subject:"Discrete Mathematics",mentor:"Anuranjana"},
-      {subject:"Effective Communication",mentor:"Priyadharshini"},{subject:"Technical (FOP - Java)",mentor:"Dharmaprakash"},
-      {subject:"Aptitude",mentor:"Karthika"}
-    ],
-    "I BBA CA": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"English",mentor:"Priyadharshini"},
-      {subject:"Quantitative Techniques for Management",mentor:"Anuranjana"},{subject:"Effective Communication",mentor:"Priyadharshini"},
-      {subject:"Aptitude",mentor:"Karthika"},{subject:"Organizational Behavior",mentor:"Bhargavi"},
-      {subject:"Technical (FPC - Social Media Marketing)",mentor:"Bhargavi"},{subject:"Economics for Executives",mentor:"Bhargavi"}
-    ],
-    "II B.Sc CT": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"English",mentor:"Priyadharshini"},{subject:"Effective Communication",mentor:"Priyadharshini"},
-      {subject:"Aptitude",mentor:"Anuranjana"},{subject:"LINUX and Shell Programming",mentor:"Anupama"},
-      {subject:"System Software and Operating Systems",mentor:"Dharmaprakash"},{subject:"Technical (FOP - DSA)",mentor:"Anupama"},
-      {subject:"Business Accounting",mentor:"Bhargavi"}
-    ]
-  },
-  "Nagarathinam Angalammal Arts & Science College": {
-    "II B.Sc AI": [
-      {subject:"Tamil IV",mentor:"Dharshan K"},{subject:"English IV",mentor:"Monica"},{subject:"Java Programming",mentor:"Mohanasree N"},
-      {subject:"Java Programming Lab",mentor:"Mohanasree N"},{subject:"Financial Analytics",mentor:"Anish N"},
-      {subject:"Environmental Studies",mentor:"Mohanasree N"},{subject:"Web Technology",mentor:"Subhashini K.M"},
-      {subject:"PHP Programming Lab",mentor:"Srisaradha S"},{subject:"Quantitative Aptitude",mentor:"Abirami N"}
-    ],
-    "I B.Sc AI": [
-      {subject:"Tamil II",mentor:"Dharshan K"},{subject:"English II",mentor:"Monica"},
-      {subject:"Object Oriented Programming with C++",mentor:"Subhashini K.M"},{subject:"Lab - Object Oriented Programming with C++",mentor:"Subhashini K.M"},
-      {subject:"Numerical Methods I",mentor:"Abirami N"},{subject:"Fundamentals of Information Technology",mentor:"Srisaradha S"},
-      {subject:"Practical - Advanced Excel",mentor:"Mohanasree N"},{subject:"Quantitative Aptitude",mentor:"Abirami N"}
-    ],
-    "I B.Sc CC": [
-      {subject:"Tamil II",mentor:"Dharshan K"},{subject:"English II",mentor:"Monica"},{subject:"Java Programming",mentor:"Srisaradha S"},
-      {subject:"Lab - Java Programming",mentor:"Srisaradha S"},{subject:"Numerical Methods",mentor:"Abirami N"},
-      {subject:"Quantitative Aptitude",mentor:"Abirami N"},{subject:"Practical - Advanced Excel",mentor:"Subhashini K.M"}
-    ],
-    "BBA DM": [
-      {subject:"Tamil II",mentor:"Dharshan K"},{subject:"English II",mentor:"Monica"},{subject:"Accounting For Managers - I",mentor:"Anish N"},
-      {subject:"Search Engine Optimization",mentor:"Sudaleeswari M.L"},{subject:"International Business",mentor:"Sudaleeswari M.L"},
-      {subject:"Managerial Skill Development",mentor:"Sudaleeswari M.L"},{subject:"Business Etiquette & Corporate Grooming",mentor:"Sudaleeswari M.L"},
-      {subject:"Quantitative Aptitude",mentor:"Abirami N"}
-    ],
-    "B.Com BC & FT": [
-      {subject:"Tamil II",mentor:"Dharshan K"},{subject:"English II",mentor:"Monica"},{subject:"Financial Accounting II",mentor:"Anish N"},
-      {subject:"Business Law",mentor:"Sudaleeswari M.L"},{subject:"Data Analysis Using Excel Lab - Practical",mentor:"Mohanasree N"},
-      {subject:"Smart Contract Lab",mentor:"Subhashini K.M"},{subject:"Block Chain Distributed Ledger Technology",mentor:"Anish N"},
-      {subject:"Quantitative Aptitude",mentor:"Abirami N"}
-    ]
-  },
-  "Vinayaga Mission's Research Foundation School of Arts & Science": {
-    "B.Com FinTech with AI": [
-      {subject:"Tamil - II",mentor:"Kayalvizhi"},{subject:"English II",mentor:"Amritha Anbu"},{subject:"Corporate Accounting",mentor:"Edward Linil"},
-      {subject:"Principles of Management",mentor:"Edward Linil"},{subject:"Problem Solving through Aptitude - I",mentor:"Rajeshwari"},
-      {subject:"Business Mathematics and Statistics",mentor:"Edward Linil"},{subject:"Financial Data Analysis using Excel",mentor:"Edward Linil"}
-    ],
-    "B.Sc AI & ML": [
-      {subject:"Language - II",mentor:"Kayalvizhi"},{subject:"English II",mentor:"Amritha Anbu"},
-      {subject:"Personal Development and Soft Skills",mentor:"Amritha Anbu"},{subject:"Object Oriented Programming in Java Programming",mentor:"Bavatharani"},
-      {subject:"Lab - Java Programming",mentor:"Bavatharani"},{subject:"Front-End Web Development",mentor:"Bavatharani"},
-      {subject:"Design for Developers (UI & UX)",mentor:"Bavatharani"},{subject:"Principles of Management",mentor:"Edward Linil"},
-      {subject:"Problem Solving through Aptitude - II",mentor:"Rajeshwari"}
-    ]
-  },
-  "Sri Amaraavathi College of Arts & Science": {
-    "I BCA": [
-      {subject:"Tamil",mentor:"Kalaiselvi V"},{subject:"Effective Communication",mentor:"Sindu N"},{subject:"General English - II",mentor:"Sindu N"},
-      {subject:"Environmental Studies",mentor:"Nivetha R P"},{subject:"Aptitude",mentor:"Anushruthi S"},
-      {subject:"Numerical Analysis and Probability",mentor:"Anushruthi S"},{subject:"Operational Research",mentor:"Anushruthi S"},
-      {subject:"Programming in Java",mentor:"Nivetha R P"}
-    ],
-    "II BCA": [
-      {subject:"Tamil",mentor:"Kalaiselvi V"},{subject:"Effective Communication",mentor:"Shirlyn Shivani"},{subject:"General English - IV",mentor:"Shirlyn Shivani"},
-      {subject:"Functional Skills",mentor:"Shirlyn Shivani"},{subject:"Aptitude",mentor:"Anushruthi S"},{subject:"DBMS Lab",mentor:"Syed Basila S"},
-      {subject:"DBMS",mentor:"Syed Basila S"},{subject:"Full stack Web Development (MERN)",mentor:"Syed Basila S"},
-      {subject:"DSA",mentor:"Hari Ganesh M"},{subject:"Organizational Behaviour",mentor:"Hari Ganesh M"},
-      {subject:"Computer Application in Business",mentor:"Melbi"}
-    ],
-    "I B.Sc AI & ML": [
-      {subject:"Tamil",mentor:"Kalaiselvi V"},{subject:"Effective Communication",mentor:"Sindu N"},{subject:"General English - II",mentor:"Sindu N"},
-      {subject:"Environmental Studies",mentor:"Nivetha R P"},{subject:"Aptitude",mentor:"Anushruthi S"},
-      {subject:"Numerical Analysis and Probability",mentor:"Anushruthi S"},{subject:"Operational Research",mentor:"Anushruthi S"},
-      {subject:"Programming in Python",mentor:"Syed Basila S"}
-    ],
-    "B.Com FinTech": [
-      {subject:"Tamil",mentor:"Kalaiselvi V"},{subject:"General English II",mentor:"Shirlyn Shivani"},{subject:"Effective Communication",mentor:"Shirlyn Shivani"},
-      {subject:"Environmental Studies",mentor:"Nivetha R P"},{subject:"Aptitude",mentor:"Anushruthi S"},
-      {subject:"Business Accounting",mentor:"Melbi"},{subject:"Business Tools for Decision Making",mentor:"Melbi"},
-      {subject:"Business Economics",mentor:"Melbi"}
-    ]
-  },
-  "Takshashila University": {
-    "II B.Sc CS AI & ML": [
-      {subject:"Tamil - IV",mentor:"Mr Anbarasu"},{subject:"Communicative English - IV",mentor:"Mr Joshin"},
-      {subject:"Full-Stack Web Development",mentor:"Mr Nishant"},{subject:"Natural Language Processing and Artificial Intelligence",mentor:"Ms Sakshi"},
-      {subject:"Data Warehousing and Mining",mentor:"Mr Shabeeb"},{subject:"Software Engineering",mentor:"Mr Nishant"},
-      {subject:"Fundamentals of Cloud Technology",mentor:"Mr Shabeeb"},{subject:"Aptitude",mentor:"Ms Ramya"}
-    ],
-    "I B.Sc CS AI & ML": [
-      {subject:"Tamil II",mentor:"Mr Anbarasu"},{subject:"Functional English",mentor:"Mr Joshin"},
-      {subject:"Object Oriented Programming in Java",mentor:"Ms Sakshi"},{subject:"Front-End Web Development",mentor:"Mr Nishant"},
-      {subject:"Python for Data Science Analytics",mentor:"Ms Sakshi"},{subject:"Digital Marketing and E-commerce",mentor:"Ms Ramya"},
-      {subject:"Analytical Reasoning and Problem Solving",mentor:"Ms Ramya"}
-    ],
-    "B.Com FinTech with AI": [
-      {subject:"Tamil II",mentor:"Mr Anbarasu"},{subject:"Functional English",mentor:"Mr Joshin"},
-      {subject:"Management Accounting",mentor:"Ms Nanageshwari"},{subject:"Corporate Laws",mentor:"Ms Nanageshwari"},
-      {subject:"Business Economics",mentor:"Ms Nanageshwari"},{subject:"Python for Business Application",mentor:"Ms Sakshi"},
-      {subject:"Financial Analysis Using Excel",mentor:"Ms Nanageshwari"},{subject:"Aptitude",mentor:"Ms Ramya"}
-    ]
-  },
-  "Study World Group of Institution": {
-    "BCA": [
-      {subject:"General English",mentor:"Shahul"},{subject:"Communicative English",mentor:"Shahul"},
-      {subject:"Java Programming - Core 3",mentor:"Swetha"},{subject:"Programming Lab - Core Lab 2",mentor:"Swetha"},
-      {subject:"Office Automation and Internet - Core Lab 3",mentor:"Swetha"}
-    ]
-  },
-  "Rathinam College of Arts & Science": {
-    "BCA (AI)": [
-      {subject:"English - II",mentor:"Subashini"},{subject:"Communicative English",mentor:"Subashini"},
-      {subject:"Applied Statistics",mentor:"Kirthika"},{subject:"Aptitude",mentor:"Kirthika"},
-      {subject:"OOPS in Java",mentor:"Janani"},
-      {subject:"Elective 1",isElective:true,electiveOptions:[{label:"Python for Data Analytics",mentor:"Janani"}]},
-      {subject:"Elective 2",isElective:true,electiveOptions:[{label:"Fundamentals for Computer Architecture",mentor:"Anto Jegan"}]}
-    ],
-    "B.Sc CT (GenAI)": [
-      {subject:"English - II",mentor:"Subashini"},{subject:"Communicative English",mentor:"Subashini"},
-      {subject:"Applied Statistics",mentor:"Kirthika"},{subject:"Aptitude",mentor:"Kirthika"},
-      {subject:"OOPS in Java",mentor:"Anto Jegan"},
-      {subject:"Elective 1",isElective:true,electiveOptions:[{label:"Python for Data Analytics",mentor:"Janani"}]},
-      {subject:"Elective 2",isElective:true,electiveOptions:[{label:"Fundamentals for Computer Architecture",mentor:"Anto Jegan"}]}
-    ]
-  },
-  "Noorul Islam Centre for Higher Education (NICHE)": {
-    "B.Sc AI & ML": [
-      {subject:"Tamil",mentor:"Kalaiarasi"},{subject:"Communicative English",mentor:"Nishanthini"},
-      {subject:"Mathematics for Computer Science",mentor:"Indhumathi"},{subject:"Aptitude",mentor:"Indhumathi"},
-      {subject:"Python (FOP)",mentor:"Aasik"},{subject:"UI & UX",mentor:"Aasik"}
-    ]
-  },
-  "AMET University": {
-    "II B.Sc AI & ML": [
-      {subject:"Machine Learning",mentor:"Mr. Aakaash M"},{subject:"Full Stack Web Development",mentor:"Ms. Dhachayani"},
-      {subject:"Big Data Analytics",mentor:"Mr. Aakaash M"},{subject:"Networking and Security",mentor:"Ms. Dhachayani"},
-      {subject:"Internet of Things (IoT) Concepts",mentor:"Mr. Tamilarasan D"},{subject:"Digital Marketing and E-Commerce",mentor:"Mrs. Sruthi V"},
-      {subject:"Time Series",mentor:"Mr. Tamilarasan D"},{subject:"Aptitude",mentor:"Dr. Jayashree"},
-      {subject:"Effective Communication Skills",mentor:"Mrs. Catherin"},{subject:"Machine Learning Lab",mentor:"Mr. Aakaash M"}
-    ],
-    "I B.Sc AI & ML": [
-      {subject:"Effective Communication Skills",mentor:"Mrs. Catherin"},{subject:"Personal Development and Soft Skills",mentor:"Mrs. Catherin"},
-      {subject:"Applied Statistics",mentor:"Dr. Jayashree"},{subject:"Object Oriented Programming in Java",mentor:"Mr. Tamilarasan D"},
-      {subject:"Data Science Analytics",mentor:"Mr. Aakaash M"},{subject:"Java Programming - Lab",mentor:"Mr. Tamilarasan D"},
-      {subject:"Front-End Web Development",mentor:"Ms. Dhachayani"},{subject:"Problem Solving through Aptitude - II",mentor:"Dr. Jayashree"}
-    ],
-    "I B.Sc AI & DS": [
-      {subject:"Effective Communication Skills",mentor:"Mrs. Catherin"},{subject:"Personal Development and Soft Skills",mentor:"Mrs. Catherin"},
-      {subject:"Applied Statistics",mentor:"Dr. Jayashree"},{subject:"Object Oriented Programming in Java",mentor:"Mr. Tamilarasan D"},
-      {subject:"Data Science Analytics",mentor:"Mr. Aakaash M"},{subject:"Java Programming - Lab",mentor:"Mr. Tamilarasan D"},
-      {subject:"Front-End Web Development",mentor:"Ms. Dhachayani"},{subject:"Problem Solving through Aptitude - II",mentor:"Dr. Jayashree"}
-    ],
-    "I B.Com Fintech with AI": [
-      {subject:"Corporate Accounting",mentor:"Mr. Santhosh"},{subject:"Securities Markets Regulations and Practices",mentor:"Mr. Santhosh"},
-      {subject:"Managerial Economics",mentor:"Mr. Santhosh"},{subject:"Professional Networking and Presentation Skills",mentor:"Dr. Harisankar"},
-      {subject:"Effective Communication",mentor:"Dr. Harisankar"},{subject:"Problem Solving through Aptitude - II",mentor:"Dr. Jayashree"},
-      {subject:"Financial Data Analysis",mentor:"Mr. Santhosh"},{subject:"Python for Business Applications",mentor:"Mr. Tamilarasan D"}
-    ],
-    "I BBA E-Commerce & Digital Marketing": [
-      {subject:"Personal Development and Soft Skills",mentor:"Dr. Harisankar"},{subject:"Effective Communication",mentor:"Dr. Harisankar"},
-      {subject:"Managerial Economics",mentor:"Mr. Santhosh"},{subject:"E-commerce and Consumer Behaviour",mentor:"Mr. Syed Asrar Ahmed U"},
-      {subject:"Search Engine Optimization (SEO)",mentor:"Mrs. Sruthi V"},{subject:"Problem Solving through Aptitude - II",mentor:"Dr. Jayashree"},
-      {subject:"Social Media Marketing",mentor:"Mrs. Sruthi V"},{subject:"PPC Marketing - I",mentor:"Mrs. Sruthi V"},
-      {subject:"Capstone Projects - I",mentor:"Mrs. Sruthi V"}
-    ]
-  },
-  "Joy University": {
-    "BCA AI": [
-      {subject:"Effective Communication",mentor:"Prasaanth"},{subject:"Applied Statistics",mentor:"Indhumathi"},
-      {subject:"Aptitude",mentor:"Prasaanth"},{subject:"Java (Advanced FOP & OOPS)",mentor:"Preethi"},
-      {subject:"Data Structures",mentor:"Preethi"},{subject:"Python for Data Science",mentor:"Preethi"},
-      {subject:"Front End Development",mentor:"Preethi"}
-    ]
-  },
-  "Sasurie College of Arts and Science": {
-    "B.Sc AI & DS": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"General English",mentor:"Dharshinee"},{subject:"Communicative English",mentor:"Dharshinee"},
-      {subject:"Internet Basics - Lab",mentor:"Jagadeesan"},{subject:"FOP - Python",mentor:"Jagadeesan"},
-      {subject:"FOP - Python - Lab",mentor:"Jagadeesan"},{subject:"Optimization Techniques",mentor:"Anuranjana"},
-      {subject:"Human Rights",mentor:"Jagadeesan"}
-    ],
-    "B.Sc CS": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"General English",mentor:"Dharshinee"},{subject:"Communicative English",mentor:"Dharshinee"},
-      {subject:"OOPS with Java",mentor:"Abirami"},{subject:"Java - Lab",mentor:"Abirami"},
-      {subject:"Internet Basics - Lab",mentor:"Abirami"},{subject:"Discrete Mathematics",mentor:"Anuranjana"},
-      {subject:"Human Rights",mentor:"Abirami"}
-    ],
-    "B.Sc IT": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"General English",mentor:"Dharshinee"},{subject:"Communicative English",mentor:"Dharshinee"},
-      {subject:"OOPS with Java",mentor:"Abirami"},{subject:"Java - Lab",mentor:"Abirami"},
-      {subject:"Office Automation and Internet Lab",mentor:"Abirami"},{subject:"Discrete Mathematics",mentor:"Anuranjana"},
-      {subject:"Human Rights",mentor:"Abirami"}
-    ],
-    "BBA CA": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"General English",mentor:"Dharshinee"},{subject:"Communicative English",mentor:"Dharshinee"},
-      {subject:"Organizational Behaviour",mentor:"Madhumitha"},{subject:"Economics for Executives",mentor:"Madhumitha"},
-      {subject:"Quantitative Techniques for Management",mentor:"Anuranjana"},{subject:"Human Rights",mentor:"Madhumitha"},
-      {subject:"SEO",mentor:"Madhumitha"},{subject:"Aptitude",mentor:"Anuranjana"}
-    ],
-    "B.Com PA": [
-      {subject:"Tamil",mentor:"Sridhar"},{subject:"General English",mentor:"Dharshinee"},{subject:"Communicative English",mentor:"Dharshinee"},
-      {subject:"Financial Accounting II",mentor:"Sarumathi"},{subject:"Commercial Law",mentor:"Sarumathi"},
-      {subject:"Business Economics",mentor:"Sarumathi"},{subject:"Aptitude",mentor:"Anuranjana"},
-      {subject:"Tally",mentor:"Sarumathi"},{subject:"SEBI",mentor:"Sarumathi"}
-    ]
-  },
-  "S-VYASA University": {
-    "II BCA": [
-      {subject:"Full Stack Web Development",mentor:"Mr. Neeraj"},{subject:"Machine Learning",mentor:"Ms. Moushreeta"},
-      {subject:"Big Data Analytics",mentor:"Ms. Darathi"},{subject:"Computer Networks",mentor:"Ms. Rakshitha"},
-      {subject:"Elective I",isElective:true,electiveOptions:[{label:"Introduction to Data Analytics",mentor:"Ms. Darathi"},{label:"Fundamentals of Ethical Hacking",mentor:"Ms. Rakshitha"}]},
-      {subject:"Elective II",isElective:true,electiveOptions:[{label:"Software Architecture and Design",mentor:"Mr. Neeraj"},{label:"Statistics for Machine Learning",mentor:"Ms. Moushreeta"},{label:"Digital Forensics and Incident Response",mentor:"Ms. Darathi"},{label:"Fundamentals of Cloud Computing",mentor:"Ms. Rakshitha"}]},
-      {subject:"Lab - Full Stack Web Development",mentor:"Mr. Neeraj"},{subject:"Lab - Machine Learning",mentor:"Ms. Moushreeta"},
-      {subject:"Aptitude",mentor:"Ms. Ramalakshmi B"},{subject:"Verbal Ability",mentor:"Ms. Harshitha J"}
-    ]
-  },
-  "Alliance University": {
-    "I BCA (DS + AI & ML)": [
-      {subject:"Introduction to Data Science",mentor:"Gomathy V"},{subject:"Data Structures and Algorithms",mentor:"Lakshmi Devi S"},
-      {subject:"Object Oriented Programming Java",mentor:"Renita Joy"},{subject:"Lab - Object Oriented Programming Java",mentor:"Renita Joy"},
-      {subject:"Statistics for Data Science",mentor:"Mahendra Babu"},{subject:"Interpersonal and Essential Skills - II",mentor:"Saviyo Sabu"},
-      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Ajith Pandian"}
-    ],
-    "I BCA (Game Development)": [
-      {subject:"Design for Development",mentor:"Abhishek A"},{subject:"Data Structures and Algorithms",mentor:"Lakshmi Devi S"},
-      {subject:"Object Oriented Programming Java",mentor:"Renita Joy"},{subject:"Lab - Object Oriented Programming Java",mentor:"Renita Joy"},
-      {subject:"Discrete Mathematics",mentor:"Mahendra Babu"},{subject:"Interpersonal and Essential Skills - II",mentor:"Saviyo Sabu"},
-      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Ajith Pandian"}
-    ],
-    "II BCA DS (A+B)": [
-      {subject:"Full Stack Development",mentor:"Raghav Reddy"},{subject:"Data Warehousing and Mining",mentor:"Nagashri"},
-      {subject:"Natural Language Processing",mentor:"Nagashri"},{subject:"Artificial Intelligence",mentor:"Gomathy V"},
-      {subject:"Software Engineering",mentor:"Raghav Reddy"},{subject:"Cloud Computing",mentor:"Lakshmi Devi S"},
-      {subject:"Virtual Internship",mentor:"Abhishek A"}
-    ],
-    "II BCA AI & ML (A+B)": [
-      {subject:"Full Stack Development",mentor:"Raghav Reddy"},{subject:"Data Warehousing and Mining",mentor:"Nagashri"},
-      {subject:"Natural Language Processing",mentor:"Nagashri"},{subject:"Artificial Intelligence",mentor:"Gomathy V"},
-      {subject:"Software Engineering",mentor:"Raghav Reddy"},{subject:"Cloud Computing",mentor:"Lakshmi Devi S"},
-      {subject:"Virtual Internship",mentor:"Abhishek A"}
-    ],
-    "II BCA Game Development (A+B)": [
-      {subject:"Full Stack Development",mentor:"Raghav Reddy"},{subject:"Introduction to Game Development",mentor:"Santosh Goyal"},
-      {subject:"Introduction to Game Engines",mentor:"Santosh Goyal"},{subject:"Fundamentals of Data Science",mentor:"Aman Kumar Sharma"},
-      {subject:"Software Engineering",mentor:"Raghav Reddy"},{subject:"Cloud Computing",mentor:"Lakshmi Devi S"},
-      {subject:"Virtual Internship",mentor:"Abhishek A"}
-    ],
-    "I MCA - A": [
-      {subject:"Applied Statistics",mentor:"Mahendra Babu"},{subject:"Communication and Life Skills - II",mentor:"Saviyo Sabu"},
-      {subject:"Problem Solving through Aptitude - II",mentor:"Ajith Pandian"},{subject:"Advanced Data Structures and Algorithms",mentor:"Lakshmi Devi S"},
-      {subject:"Java Object-Oriented Design and Programming",mentor:"Gomathy V"},{subject:"Database Design and Implementation",mentor:"Aman Kumar Sharma"},
-      {subject:"Machine Learning Theory and Practice",mentor:"Tanisha Das"}
-    ],
-    "I MCA - B": [
-      {subject:"Applied Statistics",mentor:"Mahendra Babu"},{subject:"Communication and Life Skills - II",mentor:"Saviyo Sabu"},
-      {subject:"Problem Solving through Aptitude - II",mentor:"Ajith Pandian"},{subject:"Advanced Data Structures and Algorithms",mentor:"Lakshmi Devi S"},
-      {subject:"Java Object-Oriented Design and Programming",mentor:"Santosh Goyal"},{subject:"Database Design and Implementation",mentor:"Dr Lenin"},
-      {subject:"Machine Learning Theory and Practice",mentor:"Tanisha Das"}
-    ]
-  },
-  "Kristu Jayanti (Deemed to be University)": {
-    "BBA - AI & DS": [
-      {subject:"Optimising User Engagement in Business Systems",mentor:"Ishika Bhattacharjee"},
-      {subject:"Supervised and Unsupervised Learning in Management",mentor:"Anwesha"},{subject:"SQL",mentor:"Anwesha"}
-    ],
-    "BBA - FinTech": [
-      {subject:"Digital Technology in Banks",mentor:"Prarthana"},{subject:"FOP - Python Programming",mentor:"Ishika Bhattacharjee"}
-    ]
-  },
-  "Asian School of Business": {
-    "BCA": [
-      {subject:"Introduction to Data Science",mentor:"Aswanth"},{subject:"Object Oriented Programming in Java",mentor:"Athira"},
-      {subject:"Lab - Object Oriented Programming in Java",mentor:"Athira"},{subject:"Computer Networks",mentor:"Athira"},
-      {subject:"Statistics for Data Science",mentor:"Anjali"},{subject:"Interpersonal and Essential Skills - II",mentor:"Arvind"},
-      {subject:"Environmental Studies",mentor:"Arvind"}
-    ],
-    "BBA": [
-      {subject:"Marketing Management - I",mentor:"Yadhu Krishnan"},{subject:"Business Economics",mentor:"Parvathy"},
-      {subject:"Human Resource Management",mentor:"Parvathy"},{subject:"Financial Markets and Literacy",mentor:"Pooja"},
-      {subject:"Fundamentals of Search Engine Optimization",mentor:"Yadhu Krishnan"},{subject:"Applied English",mentor:"Arvind"},
-      {subject:"Additional Language - Hindi",mentor:"Athulya"},{subject:"Additional Language - Malayalam",mentor:"Athulya"}
-    ],
-    "B.Com": [
-      {subject:"Corporate Laws",mentor:"Lekha"},{subject:"Management Accounting",mentor:"Pooja"},
-      {subject:"Securities Markets Regulations and Practices",mentor:"Lekha"},{subject:"Introduction to Artificial Intelligence",mentor:"Aswanth"},
-      {subject:"Business Economics",mentor:"Parvathy"},{subject:"Python for Business Applications",mentor:"Aswanth"},
-      {subject:"Marketing Management",mentor:"Yadhu Krishnan"},{subject:"Indian Constitution",mentor:"Anjali"}
-    ]
-  }
+  // Add other colleges from original data as needed...
 };
 
-// ─── FETCH MENTOR OVERRIDES FROM SUPABASE ────────────────────────────────────
-async function fetchMentorOverrides(college, department) {
-  try {
-    const url = `${SUPABASE_URL}/rest/v1/subject_mentors`
-      + `?college_name=eq.${encodeURIComponent(college)}`
-      + `&department_name=eq.${encodeURIComponent(department)}`
-      + `&is_active=eq.true`
-      + `&select=subject_name,mentor_name`;
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbygpjHGGVcUTJqa9n0g5_SzYgjl9_TMSnp4oTx5gpYu6G93cSsNGNn_s7LJhuyuSE4I/exec";
 
-    const res = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+const QUESTIONS = [
+  "Were the sessions delivered by the Faculty clear and well-structured?",
+  "Are you convinced with the professional behavior of the Faculty during sessions?",
+  "Was the trainer effective in solving problems and explaining solutions with examples?",
+  "Did the trainer support doubt clearing and student queries?",
+  "Were the sessions useful in improving your understanding and skills?"
+];
+
+const SCALE_WORDS = {1:'Poor', 2:'Below Avg', 3:'Average', 4:'Good', 5:'Excellent'};
+const CHALLENGE_IDS = ['challenge_infra','challenge_teaching','challenge_comm','challenge_curriculum','challenge_materials','challenge_none','challenge_others'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🔥 NEW: FETCH MENTOR OVERRIDES FROM SUPABASE
+// ═══════════════════════════════════════════════════════════════════════════
+async function fetchMentorOverrides() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/subject_mentors?is_active=eq.true&select=*`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
       }
-    });
-    if (!res.ok) return {};
+    );
+    
+    if (!res.ok) throw new Error('Failed to fetch overrides');
+    
     const data = await res.json();
-    // Map: { "Subject Name": "Override Mentor Name" }
-    const map = {};
-    data.forEach(row => { map[row.subject_name] = row.mentor_name; });
-    return map;
+    
+    // Build override lookup: college -> department -> subject -> mentor
+    const overrides = {};
+    data.forEach(row => {
+      if (!overrides[row.college_name]) overrides[row.college_name] = {};
+      if (!overrides[row.college_name][row.department_name]) {
+        overrides[row.college_name][row.department_name] = {};
+      }
+      overrides[row.college_name][row.department_name][row.subject_name] = {
+        mentor: row.mentor_name,
+        isOverride: true
+      };
+    });
+    
+    MENTOR_OVERRIDES = overrides;
+    console.log('✅ Loaded mentor overrides from database:', Object.keys(overrides).length, 'colleges');
+    return overrides;
   } catch (err) {
-    console.warn('Could not fetch mentor overrides:', err);
+    console.warn('⚠️ Could not fetch mentor overrides:', err);
     return {};
   }
 }
 
-// ─── SUPABASE HELPERS ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏗️ BUILD COLLEGE DATA WITH OVERRIDES APPLIED
+// ═══════════════════════════════════════════════════════════════════════════
+function buildCollegeData() {
+  // Start with fallback data
+  const mergedData = JSON.parse(JSON.stringify(FALLBACK_COLLEGE_DATA));
+  
+  // Apply overrides
+  Object.keys(MENTOR_OVERRIDES).forEach(college => {
+    if (!mergedData[college]) mergedData[college] = {};
+    
+    Object.keys(MENTOR_OVERRIDES[college]).forEach(dept => {
+      if (!mergedData[college][dept]) mergedData[college][dept] = [];
+      
+      const overrideSubjects = MENTOR_OVERRIDES[college][dept];
+      
+      // Update existing subjects or add new ones
+      Object.keys(overrideSubjects).forEach(subjectName => {
+        const overrideInfo = overrideSubjects[subjectName];
+        const existing = mergedData[college][dept].find(s => s.subject === subjectName);
+        
+        if (existing) {
+          existing.mentor = overrideInfo.mentor;
+          existing.isOverride = true;
+        } else {
+          mergedData[college][dept].push({
+            subject: subjectName,
+            mentor: overrideInfo.mentor,
+            isOverride: true
+          });
+        }
+      });
+    });
+  });
+  
+  COLLEGE_DATA = mergedData;
+  console.log('✅ College data built with overrides');
+  return mergedData;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🚀 INITIALIZE ON PAGE LOAD
+// ═══════════════════════════════════════════════════════════════════════════
+async function initializeForm() {
+  const overlay = document.getElementById('loadingOverlay');
+  const loadingMsg = document.getElementById('loadingMsg');
+  
+  loadingMsg.textContent = 'Loading mentor data…';
+  overlay.classList.add('show');
+  
+  try {
+    // Fetch overrides from database
+    await fetchMentorOverrides();
+    
+    // Build merged college data
+    buildCollegeData();
+    
+    // Populate college dropdown
+    populateColleges();
+    
+    overlay.classList.remove('show');
+  } catch (err) {
+    console.error('❌ Initialization error:', err);
+    overlay.classList.remove('show');
+    showToast('Error loading form data. Using default mentors.', 'error');
+    
+    // Fallback: use original data
+    COLLEGE_DATA = FALLBACK_COLLEGE_DATA;
+    populateColleges();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 📝 POPULATE COLLEGE DROPDOWN
+// ═══════════════════════════════════════════════════════════════════════════
+function populateColleges() {
+  const select = document.getElementById('collegeName');
+  select.innerHTML = '<option value="" disabled selected>Select your college</option>';
+  
+  const colleges = Object.keys(COLLEGE_DATA).sort();
+  colleges.forEach(college => {
+    const opt = document.createElement('option');
+    opt.value = college;
+    opt.textContent = college;
+    select.appendChild(opt);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎓 COLLEGE SELECTION HANDLER
+// ═══════════════════════════════════════════════════════════════════════════
+document.getElementById('collegeName').addEventListener('change', function() {
+  const college = this.value;
+  const deptSel = document.getElementById('department');
+  deptSel.innerHTML = '<option value="" disabled selected>Select your department</option>';
+  document.getElementById('facultySections').innerHTML = '';
+  document.getElementById('dynamicContent').style.display = 'none';
+  
+  if (COLLEGE_DATA[college]) {
+    deptSel.disabled = false;
+    Object.keys(COLLEGE_DATA[college]).forEach(d => {
+      const o = document.createElement('option');
+      o.value = d;
+      o.textContent = d;
+      deptSel.appendChild(o);
+    });
+  } else {
+    deptSel.disabled = true;
+    deptSel.innerHTML = '<option value="" disabled selected>No departments available</option>';
+  }
+  updateProgress();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏫 DEPARTMENT SELECTION HANDLER - GENERATES FACULTY CARDS
+// ═══════════════════════════════════════════════════════════════════════════
+document.getElementById('department').addEventListener('change', function() {
+  const college = document.getElementById('collegeName').value;
+  const dept = this.value;
+  const container = document.getElementById('facultySections');
+  container.innerHTML = '';
+  
+  if (!COLLEGE_DATA[college] || !COLLEGE_DATA[college][dept]) return;
+  
+  COLLEGE_DATA[college][dept].forEach((sub, idx) => {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.style.animationDelay = `${0.15 + idx * 0.05}s`;
+    sec.innerHTML = sub.isElective ? buildElective(sub, idx) : buildCard(sub, idx);
+    container.appendChild(sec);
+  });
+  
+  document.getElementById('dynamicContent').style.display = 'block';
+  updateProgress();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎨 BUILD RATING SCALE HTML
+// ═══════════════════════════════════════════════════════════════════════════
+function buildScaleHtml(n) {
+  let btns = '';
+  for (let v = 1; v <= 5; v++) {
+    btns += `<div class="scale-circle-wrap">
+      <input type="radio" id="sr${n}v${v}" name="s${n}_rating" value="${v}" ${v===1?'required':''}>
+      <label for="sr${n}v${v}" data-v="${v}"><span class="s-num">${v}</span><span class="s-word">${SCALE_WORDS[v]}</span></label>
+      <div class="s-circle-label">${SCALE_WORDS[v]}</div>
+    </div>`;
+  }
+  return `<div class="rating-block" id="ratingBlock${n}">
+    <div class="rating-block-title">Overall Rating — Rate your faculty based on your learning experience</div>
+    <div class="scale-btns" id="scaleBtns${n}">${btns}</div>
+    <div class="err-msg" style="margin-top:4px;">Please select a rating</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 📇 BUILD FACULTY CARD (REGULAR SUBJECT)
+// ═══════════════════════════════════════════════════════════════════════════
+function buildCard(sub, idx) {
+  const n = idx + 1;
+  const overrideBadge = sub.isOverride ? '<span class="override-badge">🔄 Override</span>' : '';
+  
+  let qs = '';
+  QUESTIONS.forEach((q, qi) => {
+    const yId = `s${n}q${qi}y`, nId = `s${n}q${qi}n`;
+    qs += `<div class="yn-row" id="yn_${n}_${qi}">
+      <span class="yn-qnum">Q${qi+1}</span>
+      <span class="yn-text">${q}</span>
+      <div class="yn-btns">
+        <input type="radio" id="${yId}" name="s${n}_q${qi}" value="Yes" required>
+        <label for="${yId}" class="yes-lbl">Yes</label>
+        <input type="radio" id="${nId}" name="s${n}_q${qi}" value="No">
+        <label for="${nId}" class="no-lbl">No</label>
+      </div>
+    </div>`;
+  });
+  
+  return `
+    <input type="hidden" name="subject${n}_Name" value="${sub.subject}">
+    <input type="hidden" name="subject${n}_Mentor" value="${sub.mentor}">
+    <div class="faculty-header">
+      <div class="faculty-avatar">${n}</div>
+      <div class="faculty-meta">
+        <div class="faculty-name">${sub.mentor} ${overrideBadge}</div>
+        <div class="faculty-subject">${sub.subject}</div>
+      </div>
+    </div>
+    ${buildScaleHtml(n)}
+    <div class="yn-list">${qs}</div>
+    <div class="err-msg" id="err_${n}" style="margin-top:8px;">Please answer all questions for this faculty</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎯 BUILD ELECTIVE CARD
+// ═══════════════════════════════════════════════════════════════════════════
+function buildElective(sub, idx) {
+  const n = idx + 1;
+  const opts = sub.electiveOptions.map((o,oi) =>
+    `<option value="${oi}" data-mentor="${o.mentor}">${o.label}</option>`
+  ).join('');
+  let qs = '';
+  QUESTIONS.forEach((q, qi) => {
+    const yId = `s${n}q${qi}y`, nId = `s${n}q${qi}n`;
+    qs += `<div class="yn-row" id="yn_${n}_${qi}">
+      <span class="yn-qnum">Q${qi+1}</span><span class="yn-text">${q}</span>
+      <div class="yn-btns">
+        <input type="radio" id="${yId}" name="s${n}_q${qi}" value="Yes" class="elective-r-${n}">
+        <label for="${yId}" class="yes-lbl">Yes</label>
+        <input type="radio" id="${nId}" name="s${n}_q${qi}" value="No" class="elective-r-${n}">
+        <label for="${nId}" class="no-lbl">No</label>
+      </div>
+    </div>`;
+  });
+  return `
+    <input type="hidden" name="subject${n}_Name" id="electSubj${n}">
+    <input type="hidden" name="subject${n}_Mentor" id="electMentor${n}">
+    <div class="section-title" style="margin-bottom:16px;">
+      <div class="icon icon-purple">${n}</div>
+      ${sub.subject}
+      <span style="font-size:11px;font-weight:400;color:var(--accent2);margin-left:4px;">(Choose your elective)</span>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>Select Your Elective <span class="req">*</span></label>
+      <div class="select-wrapper">
+        <select id="electSel${n}" required onchange="handleElective(this,${n})">
+          <option value="" disabled selected>— Choose elective subject —</option>
+          ${opts}
+        </select>
+      </div>
+      <div class="err-msg">Please select an elective</div>
+    </div>
+    <div id="electDetail${n}" style="display:none;">
+      <div class="elective-mentor-badge"><span id="electMentorDisplay${n}">—</span></div>
+      ${buildScaleHtml(n)}
+      <div class="yn-list">${qs}</div>
+      <div class="err-msg" id="err_${n}" style="margin-top:8px;">Please answer all questions for this faculty</div>
+    </div>`;
+}
+
+function handleElective(sel, n) {
+  const chosen = sel.options[sel.selectedIndex];
+  const mentor = chosen.getAttribute('data-mentor');
+  document.getElementById(`electMentorDisplay${n}`).textContent = mentor;
+  document.getElementById(`electMentor${n}`).value = mentor;
+  document.getElementById(`electSubj${n}`).value = chosen.textContent;
+  document.getElementById(`electDetail${n}`).style.display = 'block';
+  document.querySelectorAll(`.elective-r-${n}`).forEach(r => r.required = true);
+  document.querySelectorAll(`[name="s${n}_rating"]`).forEach(r => r.required = true);
+  updateProgress();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ✅ SUPABASE HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
 async function checkRegNumber(regNo) {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/submissions?reg_number=eq.${encodeURIComponent(regNo)}&select=reg_number`,
@@ -1188,181 +1044,9 @@ async function saveFullResponse(data) {
   return 'saved';
 }
 
-// ─── COLLEGE → DEPARTMENT ─────────────────────────────────────────────────────
-document.getElementById('collegeName').addEventListener('change', function () {
-  const college = this.value;
-  const deptSel = document.getElementById('department');
-  deptSel.innerHTML = '<option value="" disabled selected>Select your department</option>';
-  document.getElementById('facultySections').innerHTML = '';
-  document.getElementById('dynamicContent').style.display = 'none';
-  if (COLLEGE_DATA[college]) {
-    deptSel.disabled = false;
-    Object.keys(COLLEGE_DATA[college]).forEach(d => {
-      const o = document.createElement('option');
-      o.value = d; o.textContent = d;
-      deptSel.appendChild(o);
-    });
-  } else {
-    deptSel.disabled = true;
-    deptSel.innerHTML = '<option value="" disabled selected>No departments available</option>';
-  }
-  updateProgress();
-});
-
-// ─── DEPARTMENT CHANGE — fetches overrides then builds cards ─────────────────
-document.getElementById('department').addEventListener('change', async function () {
-  const college = document.getElementById('collegeName').value;
-  const dept = this.value;
-  const container = document.getElementById('facultySections');
-
-  if (!COLLEGE_DATA[college] || !COLLEGE_DATA[college][dept]) {
-    container.innerHTML = '';
-    return;
-  }
-
-  // Show loading skeletons while fetching overrides
-  const rawSubjects = COLLEGE_DATA[college][dept];
-  container.innerHTML = rawSubjects.map(() => `
-    <div class="mentor-skeleton">
-      <div class="skel-avatar"></div>
-      <div class="skel-lines">
-        <div class="skel-line" style="width:40%"></div>
-        <div class="skel-line short"></div>
-      </div>
-    </div>
-  `).join('');
-
-  // Fetch active overrides from Supabase
-  const overrides = await fetchMentorOverrides(college, dept);
-
-  // Apply overrides: replace mentor name if subject matches
-  const subjects = rawSubjects.map(sub => {
-    if (!sub.isElective && overrides[sub.subject]) {
-      return { ...sub, mentor: overrides[sub.subject], isOverridden: true };
-    }
-    return sub;
-  });
-
-  container.innerHTML = '';
-  subjects.forEach((sub, idx) => {
-    const sec = document.createElement('div');
-    sec.className = 'section';
-    sec.style.animationDelay = `${0.05 + idx * 0.04}s`;
-    sec.innerHTML = sub.isElective ? buildElective(sub, idx) : buildCard(sub, idx);
-    container.appendChild(sec);
-  });
-
-  document.getElementById('dynamicContent').style.display = 'block';
-  updateProgress();
-});
-
-function buildScaleHtml(n) {
-  let btns = '';
-  for (let v = 1; v <= 5; v++) {
-    btns += `<div class="scale-circle-wrap">
-      <input type="radio" id="sr${n}v${v}" name="s${n}_rating" value="${v}" ${v===1?'required':''}>
-      <label for="sr${n}v${v}" data-v="${v}"><span class="s-num">${v}</span><span class="s-word">${SCALE_WORDS[v]}</span></label>
-      <div class="s-circle-label">${SCALE_WORDS[v]}</div>
-    </div>`;
-  }
-  return `<div class="rating-block" id="ratingBlock${n}">
-    <div class="rating-block-title">Overall Rating — Rate your faculty based on your learning experience</div>
-    <div class="scale-btns" id="scaleBtns${n}">${btns}</div>
-    <div class="err-msg" style="margin-top:4px;">Please select a rating</div>
-  </div>`;
-}
-
-function buildCard(sub, idx) {
-  const n = idx + 1;
-  // Show "Override" badge if mentor was changed via the management system
-  const overrideBadge = sub.isOverridden
-    ? `<span class="override-badge">✦ Updated</span>`
-    : '';
-  let qs = '';
-  QUESTIONS.forEach((q, qi) => {
-    const yId = `s${n}q${qi}y`, nId = `s${n}q${qi}n`;
-    qs += `<div class="yn-row" id="yn_${n}_${qi}">
-      <span class="yn-qnum">Q${qi+1}</span>
-      <span class="yn-text">${q}</span>
-      <div class="yn-btns">
-        <input type="radio" id="${yId}" name="s${n}_q${qi}" value="Yes" required>
-        <label for="${yId}" class="yes-lbl">Yes</label>
-        <input type="radio" id="${nId}" name="s${n}_q${qi}" value="No">
-        <label for="${nId}" class="no-lbl">No</label>
-      </div>
-    </div>`;
-  });
-  return `
-    <input type="hidden" name="subject${n}_Name" value="${sub.subject}">
-    <input type="hidden" name="subject${n}_Mentor" value="${sub.mentor}">
-    <div class="faculty-header">
-      <div class="faculty-avatar">${n}</div>
-      <div class="faculty-meta">
-        <div class="faculty-name">${sub.mentor}${overrideBadge}</div>
-        <div class="faculty-subject">${sub.subject}</div>
-      </div>
-    </div>
-    ${buildScaleHtml(n)}
-    <div class="yn-list">${qs}</div>
-    <div class="err-msg" id="err_${n}" style="margin-top:8px;">Please answer all questions for this faculty</div>`;
-}
-
-function buildElective(sub, idx) {
-  const n = idx + 1;
-  const opts = sub.electiveOptions.map((o,oi) =>
-    `<option value="${oi}" data-mentor="${o.mentor}">${o.label}</option>`
-  ).join('');
-  let qs = '';
-  QUESTIONS.forEach((q, qi) => {
-    const yId = `s${n}q${qi}y`, nId = `s${n}q${qi}n`;
-    qs += `<div class="yn-row" id="yn_${n}_${qi}">
-      <span class="yn-qnum">Q${qi+1}</span><span class="yn-text">${q}</span>
-      <div class="yn-btns">
-        <input type="radio" id="${yId}" name="s${n}_q${qi}" value="Yes" class="elective-r-${n}">
-        <label for="${yId}" class="yes-lbl">Yes</label>
-        <input type="radio" id="${nId}" name="s${n}_q${qi}" value="No" class="elective-r-${n}">
-        <label for="${nId}" class="no-lbl">No</label>
-      </div>
-    </div>`;
-  });
-  return `
-    <input type="hidden" name="subject${n}_Name" id="electSubj${n}">
-    <input type="hidden" name="subject${n}_Mentor" id="electMentor${n}">
-    <div class="section-title" style="margin-bottom:16px;">
-      <div class="icon icon-purple">${n}</div>
-      ${sub.subject}
-      <span style="font-size:11px;font-weight:400;color:var(--accent2);margin-left:4px;">(Choose your elective)</span>
-    </div>
-    <div class="field" style="margin-bottom:16px;">
-      <label>Select Your Elective <span class="req">*</span></label>
-      <div class="select-wrapper">
-        <select id="electSel${n}" required onchange="handleElective(this,${n})">
-          <option value="" disabled selected>— Choose elective subject —</option>
-          ${opts}
-        </select>
-      </div>
-      <div class="err-msg">Please select an elective</div>
-    </div>
-    <div id="electDetail${n}" style="display:none;">
-      <div class="elective-mentor-badge"><span id="electMentorDisplay${n}">—</span></div>
-      ${buildScaleHtml(n)}
-      <div class="yn-list">${qs}</div>
-      <div class="err-msg" id="err_${n}" style="margin-top:8px;">Please answer all questions for this faculty</div>
-    </div>`;
-}
-
-function handleElective(sel, n) {
-  const chosen = sel.options[sel.selectedIndex];
-  const mentor = chosen.getAttribute('data-mentor');
-  document.getElementById(`electMentorDisplay${n}`).textContent = mentor;
-  document.getElementById(`electMentor${n}`).value = mentor;
-  document.getElementById(`electSubj${n}`).value = chosen.textContent;
-  document.getElementById(`electDetail${n}`).style.display = 'block';
-  document.querySelectorAll(`.elective-r-${n}`).forEach(r => r.required = true);
-  document.querySelectorAll(`[name="s${n}_rating"]`).forEach(r => r.required = true);
-  updateProgress();
-}
-
+// ═══════════════════════════════════════════════════════════════════════════
+// 📊 PROGRESS TRACKING
+// ═══════════════════════════════════════════════════════════════════════════
 function toggleCheck(labelEl, id, mode) {
   const cb = document.getElementById(id);
   if (mode === 'exclusive') {
@@ -1433,6 +1117,9 @@ document.addEventListener('input', e => {
   updateProgress();
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ✔️ FORM VALIDATION
+// ═══════════════════════════════════════════════════════════════════════════
 function validateForm() {
   let valid = true, first = null;
   document.querySelectorAll('#feedbackForm .field').forEach(field => {
@@ -1515,7 +1202,9 @@ function resetForm() {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ─── SUBMIT ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// 🚀 FORM SUBMISSION
+// ═══════════════════════════════════════════════════════════════════════════
 document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!validateForm()) return;
@@ -1608,7 +1297,7 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
     loadingMsg.textContent = 'Submitting your feedback…';
     const formPayload = new URLSearchParams();
     formPayload.append('payload', JSON.stringify(data));
-    fetch(SHEET_SCRIPT_URL, {
+    fetch(GOOGLE_SHEET_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1633,6 +1322,11 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
     showToast('Network error. Please check your connection and try again.', 'error');
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎬 START THE APP
+// ═══════════════════════════════════════════════════════════════════════════
+initializeForm();
 </script>
 </body>
 </html>
