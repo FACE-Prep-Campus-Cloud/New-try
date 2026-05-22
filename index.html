@@ -1295,8 +1295,7 @@ function processSheetData(rows){
  const _landingMatch=currentCollege?landingData.find(r=>r.college===currentCollege.name):null;
 const _hitRatio=_landingMatch&&_landingMatch.hit!==null?_landingMatch.hit:null;
 document.getElementById('hitRatioMetric').textContent=_hitRatio!==null?`${_hitRatio.toFixed(1)}%`:'—';
-document.getElementById('hitRatioSub').textContent=_hitRatio!==null?`Actual ÷ Expected · ${tot} total · ${DEPT_LIST.length} depts`:`${tot} rated entries · ${DEPT_LIST.length} depts`;
-
+document.getElementById('hitRatioSub').textContent=`${tot} total responses · ${DEPT_LIST.length} depts`;
   document.getElementById('mentorCount').textContent=MENTORS.length;
   document.getElementById('mentorSub').textContent=`Across ${DEPT_LIST.length} departments`;
   const topMentor=MENTORS[0]||null;
