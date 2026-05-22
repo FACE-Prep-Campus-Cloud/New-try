@@ -1469,7 +1469,39 @@ function renderDeptStatsPanel(dept){
 /* ═══════════════════════════════════════════
    RENDER ALL
 ═══════════════════════════════════════════ */
-function renderAllData(){
+function calcDeptBayesian(mentor, dept) {
+  // Get all mentors active in this dept
+  const deptMentors = MENTORS.filter(m => m.depts.some(d => d === dept));
+  
+  // Dept-level global mean = weighted average of all ratings in this dept
+  let deptTotalWeightedRating = 0;
+  let deptTotalResponses = 0;
+  deptMentors.forEach(m => {
+    const rs = m.deptRatings[dept];
+    if (rs && rs.length) {
+      deptTotalWeightedRating += rs.reduce((a, b) => a + b, 0);
+      deptTotalResponses += rs.length;
+    }
+  });
+  const deptGlobalMean = deptTotalResponses > 0 
+    ? deptTotalWeightedRating / deptTotalResponses 
+    : 0;
+
+  // This mentor's dept-specific stats
+  const mentorDeptRs = mentor.deptRatings[dept] || [];
+  const mentorDeptResponses = mentorDeptRs.length;
+  const mentorDeptAvg = mentorDeptResponses > 0 
+    ? mentorDeptRs.reduce((a, b) => a + b, 0) / mentorDeptResponses 
+    : deptGlobalMean;
+
+  if (deptTotalResponses === 0 || mentorDeptResponses === 0) return mentorDeptAvg;
+
+  // Bayesian = (dept_global_mean × dept_total_responses + mentor_dept_avg × mentor_dept_responses)
+  //           / (dept_total_responses + mentor_dept_responses)
+  return (deptGlobalMean * deptTotalResponses + mentorDeptAvg * mentorDeptResponses) 
+       / (deptTotalResponses + mentorDeptResponses);
+}
+  function renderAllData(){
   renderMentorTable();
   renderNPSSummary();renderNPSPanel();renderTrendPanel();
   renderDeptStatsPanel(currentDeptFilter);
@@ -1711,11 +1743,25 @@ function renderTrendCycleTable(){
 function renderMentorTable(){
   const list=getFilteredMentors(currentDeptFilter);
   const isDeptActive=currentDeptFilter&&currentDeptFilter!=='all';
-  const sumResponses=MENTORS.reduce((s,m)=>s+m.responses,0);
-  const sumAvgXResp=MENTORS.reduce((s,m)=>s+m.avgXResponses,0);
-  const gm=sumResponses>0?(sumAvgXResp/sumResponses):0;
-  document.getElementById('mtSumGlobalMean').textContent=gm>0?gm.toFixed(7):'—';
-  document.getElementById('mtSumTotalResp').textContent=sumResponses||'—';
+ let displayMean, displayTotal;
+if (isDeptActive) {
+  const deptMs = MENTORS.filter(m => m.depts.some(d => d === currentDeptFilter));
+  let tw = 0, tr = 0;
+  deptMs.forEach(m => {
+    const rs = m.deptRatings[currentDeptFilter] || [];
+    tw += rs.reduce((a, b) => a + b, 0);
+    tr += rs.length;
+  });
+  displayMean = tr > 0 ? tw / tr : 0;
+  displayTotal = tr;
+} else {
+  const sumResponses = MENTORS.reduce((s, m) => s + m.responses, 0);
+  const sumAvgXResp  = MENTORS.reduce((s, m) => s + m.avgXResponses, 0);
+  displayMean = sumResponses > 0 ? sumAvgXResp / sumResponses : 0;
+  displayTotal = sumResponses;
+}
+document.getElementById('mtSumGlobalMean').textContent = displayMean > 0 ? displayMean.toFixed(7) : '—';
+document.getElementById('mtSumTotalResp').textContent = displayTotal || '—';
   document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
   if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found</td></tr>';return;}
   const deptLabel=isDeptActive?currentDeptFilter:null;
@@ -1743,7 +1789,12 @@ function renderMentorTable(){
         ${displayResponses}
         ${isDeptActive?`<div style="font-size:10px;color:var(--ink4);font-family:var(--font-body);">dept only</div>`:''}
       </td>
-      <td style="text-align:center;"><span style="font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.bayesianRating.toFixed(7)}</span></td>
+      <td style="text-align:center;">
+  <span style="font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">
+    ${isDeptActive ? calcDeptBayesian(m, currentDeptFilter).toFixed(7) : m.bayesianRating.toFixed(7)}
+  </span>
+  ${isDeptActive ? `<div style="font-size:10px;color:var(--ink4);font-family:var(--font-body);">dept bayesian</div>` : ''}
+</td>
       <td>${statusBadge(displayRating)}</td>
     </tr>`;
   }).join('');
