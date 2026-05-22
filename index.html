@@ -876,11 +876,7 @@ const Q_ANALYSIS_TEXT=[
 ];
 
 function mmClassify(pct){
-  if(pct>=90)return'hp';
-  if(pct>=80)return'mp';
-  if(pct>=70)return'n';
-  if(pct>=60)return'mn';
-  return'hn';
+  if(pct>=90)return'hp';if(pct>=80)return'mp';if(pct>=70)return'n';if(pct>=60)return'mn';return'hn';
 }
 function mmClassLabel(cls){
   return{hp:'High positive',mp:'Moderate positive',n:'Neutral',mn:'Moderate negative',hn:'High negative'}[cls];
@@ -916,24 +912,18 @@ function mmInterpretStrength(s){
   return{level:'concern',label:'Critical',desc:'Critical teaching performance concerns requiring immediate intervention and mentoring support.'};
 }
 function mmInterpretConcern(s){
-  if(s<=10)return{level:'excellent',label:'Minimal'};
-  if(s<=20)return{level:'good',label:'Minor'};
-  if(s<=30)return{level:'average',label:'Noticeable'};
-  if(s<=40)return{level:'average',label:'Significant'};
+  if(s<=10)return{level:'excellent',label:'Minimal'};if(s<=20)return{level:'good',label:'Minor'};
+  if(s<=30)return{level:'average',label:'Noticeable'};if(s<=40)return{level:'average',label:'Significant'};
   return{level:'concern',label:'Critical'};
 }
 function mmInterpretTEI(s){
-  if(s>=90)return{level:'excellent',label:'Exceptional'};
-  if(s>=80)return{level:'excellent',label:'Highly effective'};
-  if(s>=70)return{level:'good',label:'Satisfactory'};
-  if(s>=60)return{level:'average',label:'Needs improvement'};
+  if(s>=90)return{level:'excellent',label:'Exceptional'};if(s>=80)return{level:'excellent',label:'Highly effective'};
+  if(s>=70)return{level:'good',label:'Satisfactory'};if(s>=60)return{level:'average',label:'Needs improvement'};
   return{level:'concern',label:'Major concerns'};
 }
 function mmInterpretSSI(s){
-  if(s>=90)return{level:'excellent',label:'Highly satisfied'};
-  if(s>=80)return{level:'excellent',label:'Strongly satisfied'};
-  if(s>=70)return{level:'good',label:'Moderately satisfied'};
-  if(s>=60)return{level:'average',label:'Below expectations'};
+  if(s>=90)return{level:'excellent',label:'Highly satisfied'};if(s>=80)return{level:'excellent',label:'Strongly satisfied'};
+  if(s>=70)return{level:'good',label:'Moderately satisfied'};if(s>=60)return{level:'average',label:'Below expectations'};
   return{level:'concern',label:'Significantly dissatisfied'};
 }
 function calcMentorKPIs(qs){
@@ -966,7 +956,8 @@ function mmVerdictConfig(strength,tei){
 ═══════════════════════════════════════════ */
 let currentMode='overview';
 let currentCollege=null;
-let MENTORS=[],TABLE_DATA=[],DEPT_LIST=[];
+// ★ ADDED: DEPT_STUDENT_COUNT to track per-dept unique respondents
+let MENTORS=[],TABLE_DATA=[],DEPT_LIST=[],DEPT_STUDENT_COUNT={};
 let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
 let TREND_DATA={cycles:[],hasCycleCol:false,hasDedicatedSheet:false,cycleStats:{},mentorCycleStats:{}};
 let currentDetailPanel='summary',currentDeptFilter='all';
@@ -1225,13 +1216,20 @@ function processDedicatedTrendData(rows,collegeName){
 ═══════════════════════════════════════════ */
 function processSheetData(rows){
   TABLE_DATA=[];
+  // ★ CHANGED: track per-dept student count from raw rows (each row = one person)
+  const deptStudentCount={};
   const mentorStats={},deptSet=new Set(),subjectSet=new Set(),npsScores=[];
   const cycleColNames=['cycle','batch','term','semester','month','period'];
   let cycleCol=null;
   if(rows.length>0){const keys=Object.keys(rows[0]);cycleCol=keys.find(k=>cycleColNames.includes(k.toLowerCase().trim()))||null;}
   const hasCycle=!!cycleCol;const cycleMap={};
+
   rows.forEach(row=>{
     const dept=(row.department||'Unknown').trim();
+    // ★ Count each row as one student response per dept
+    if(dept!=='Unknown'){
+      deptStudentCount[dept]=(deptStudentCount[dept]||0)+1;
+    }
     if(dept!=='Unknown')deptSet.add(dept);
     let cycleName='—';
     if(hasCycle){const raw=(row[cycleCol]||'').trim();cycleName=raw||'Unknown';const mapped=MONTH_ALIAS_MAP[cycleName.toLowerCase()];if(mapped)cycleName=mapped;}
@@ -1264,6 +1262,10 @@ function processSheetData(rows){
       }
     }
   });
+
+  // ★ Store dept student counts globally
+  DEPT_STUDENT_COUNT=deptStudentCount;
+
   const total=npsScores.length;
   const promoters=npsScores.filter(s=>s>=9).length;
   const passives=npsScores.filter(s=>s>=7&&s<=8).length;
@@ -1292,11 +1294,13 @@ function processSheetData(rows){
   const avgR=tot>0?TABLE_DATA.reduce((s,r)=>s+r.rating,0)/tot:0;
   document.getElementById('avgRating').textContent=avgR>0?`${avgR.toFixed(1)} / 5`:'—';
 
- const _landingMatch=currentCollege?landingData.find(r=>r.college===currentCollege.name):null;
-const _hitRatio=_landingMatch&&_landingMatch.hit!==null?_landingMatch.hit:null;
-document.getElementById('hitRatioMetric').textContent=_hitRatio!==null?`${_hitRatio.toFixed(1)}%`:'—';
-const uniqueRespondents=new Set(TABLE_DATA.map(r=>r.mentor+'||'+r.dept)).size;
-document.getElementById('hitRatioSub').textContent=`${uniqueRespondents} unique responses · ${DEPT_LIST.length} depts`;  document.getElementById('mentorCount').textContent=MENTORS.length;
+  const _landingMatch=currentCollege?landingData.find(r=>r.college===currentCollege.name):null;
+  const _hitRatio=_landingMatch&&_landingMatch.hit!==null?_landingMatch.hit:null;
+  document.getElementById('hitRatioMetric').textContent=_hitRatio!==null?`${_hitRatio.toFixed(1)}%`:'—';
+  // ★ CHANGED: show actual number of people who submitted (rows.length = unique form submissions)
+  document.getElementById('hitRatioSub').textContent=`${rows.length} responses · ${DEPT_LIST.length} depts`;
+
+  document.getElementById('mentorCount').textContent=MENTORS.length;
   document.getElementById('mentorSub').textContent=`Across ${DEPT_LIST.length} departments`;
   const topMentor=MENTORS[0]||null;
   if(topMentor){document.getElementById('subjectCount').textContent=topMentor.name;document.getElementById('subjectSub').textContent=`Bayesian: ${topMentor.bayesianRating.toFixed(2)} · Avg: ${topMentor.rating.toFixed(1)}`;}
@@ -1409,9 +1413,10 @@ function renderDeptStatsPanel(dept){
   const deptEntries=TABLE_DATA.filter(r=>r.dept===dept);
   const deptRatings=deptEntries.map(r=>r.rating);
   const deptAvgRating=deptRatings.length>0?deptRatings.reduce((a,b)=>a+b,0)/deptRatings.length:0;
-  const deptTotalResponses=deptRatings.length;
   const deptSubjects=new Set(deptEntries.map(r=>r.subject));
   const deptMentorCount=deptMentors.length;
+  // ★ CHANGED: use DEPT_STUDENT_COUNT for unique student responses per dept
+  const deptStudentResponses=DEPT_STUDENT_COUNT[dept]||0;
   const sortedByDeptRating=[...deptMentors].map(m=>({...m,_deptRating:getMentorDeptRating(m,dept),_deptResponses:getMentorDeptResponses(m,dept)})).sort((a,b)=>b._deptRating-a._deptRating);
   const topMentor=sortedByDeptRating[0];
   function barColor(r){if(r>=4.3)return'#10b981';if(r>=4.0)return'#c48a00';if(r>=3.5)return'#f59e0b';return'#ef4444';}
@@ -1429,13 +1434,17 @@ function renderDeptStatsPanel(dept){
   deptWrap.innerHTML=`
   <div class="dept-stats-panel">
     <div class="dept-stats-header">
-      <div><div class="dept-stats-title">${dept}</div><div class="dept-stats-subtitle">${deptMentorCount} mentor${deptMentorCount!==1?'s':''} · ${deptSubjects.size} subject${deptSubjects.size!==1?'s':''} · ${deptTotalResponses} responses (this dept only)</div></div>
+      <div><div class="dept-stats-title">${dept}</div><div class="dept-stats-subtitle">${deptMentorCount} mentor${deptMentorCount!==1?'s':''} · ${deptSubjects.size} subject${deptSubjects.size!==1?'s':''} · ${deptStudentResponses} students responded</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span style="display:inline-flex;align-items:center;gap:5px;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(245,200,66,0.2);border:1px solid rgba(245,200,66,0.5);color:#fde9a0;">Dept Filter Active</span></div>
     </div>
     <div class="dept-stats-body">
       <div class="dept-kpi-row">
         <div class="dept-kpi-card" style="border-top-color:var(--gold-mid);"><div class="dept-kpi-label">Dept Avg Rating</div><div class="dept-kpi-val">${deptAvgRating.toFixed(2)}</div><div class="dept-kpi-sub">dept responses only</div></div>
-        <div class="dept-kpi-card" style="border-top-color:#10b981;"><div class="dept-kpi-label">Dept Responses</div><div class="dept-kpi-val" style="color:#065f46;">${new Set(deptEntries.map(r=>r.mentor+'||'+r.subject)).size}</div><div class="dept-kpi-sub">unique in ${dept}</div></div>
+        <div class="dept-kpi-card" style="border-top-color:#10b981;">
+          <div class="dept-kpi-label">Dept Responses</div>
+          <div class="dept-kpi-val" style="color:#065f46;">${deptStudentResponses}</div>
+          <div class="dept-kpi-sub">students responded</div>
+        </div>
         <div class="dept-kpi-card" style="border-top-color:#c48a00;"><div class="dept-kpi-label">Mentors</div><div class="dept-kpi-val">${deptMentorCount}</div><div class="dept-kpi-sub">${deptSubjects.size} subjects</div></div>
         <div class="dept-kpi-card" style="border-top-color:#f5c842;"><div class="dept-kpi-label">Top in Dept</div><div class="dept-kpi-val" style="font-size:14px;color:var(--gold-dark);">${topMentor.name.length>14?topMentor.name.slice(0,13)+'…':topMentor.name}</div><div class="dept-kpi-sub">${topMentor._deptRating.toFixed(2)} dept avg</div></div>
       </div>
@@ -1662,144 +1671,23 @@ function renderTrendCharts(){
   const proms=cycles.map(c=>cycleStats[c].promoterPct);
   const passes=cycles.map(c=>cycleStats[c].passivePct);
   const detrs=cycles.map(c=>cycleStats[c].detractorPct);
-
-  const baseOpts={
-    responsive:true,
-    maintainAspectRatio:false,
-    plugins:{
-      legend:{display:false},
-      datalabels:{display:false},
-      tooltip:{
-        backgroundColor:'rgba(42,24,0,0.92)',
-        titleColor:'#fde9a0',
-        bodyColor:'#f5e9c8',
-        borderColor:'#c48a00',
-        borderWidth:1,
-        padding:10
-      }
-    },
-    scales:{
-      x:{
-        ticks:{font:{size:11},color:'#8a6020'},
-        grid:{display:false},
-        border:{display:false}
-      },
-      y:{
-        ticks:{font:{size:10},color:'#8a6020'},
-        grid:{color:'rgba(120,80,10,0.07)'},
-        border:{display:false}
-      }
-    }
-  };
-
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10}},scales:{x:{ticks:{font:{size:11},color:'#8a6020'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}}}};
   if(trendRatingInst){trendRatingInst.destroy();trendRatingInst=null;}
   if(trendNpsInst){trendNpsInst.destroy();trendNpsInst=null;}
   if(trendHitRatioInst){trendHitRatioInst.destroy();trendHitRatioInst=null;}
   if(trendSegInst){trendSegInst.destroy();trendSegInst=null;}
-
-  trendRatingInst=new Chart(document.getElementById('trendRatingChart'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:'Avg Rating',data:ratings,
-      borderColor:'#c48a00',backgroundColor:'rgba(196,138,0,0.10)',
-      borderWidth:2.5,fill:true,tension:0.4,
-      pointBackgroundColor:'#fff',pointBorderColor:'#c48a00',pointRadius:5,pointHoverRadius:7
-    }]},
-    options:{
-      ...baseOpts,
-      layout:{padding:{top:24}},
-      scales:{
-        ...baseOpts.scales,
-        y:{...baseOpts.scales.y,min:0,max:5,ticks:{...baseOpts.scales.y.ticks,stepSize:1,callback:v=>v.toFixed(1)}}
-      },
-      plugins:{
-        ...baseOpts.plugins,
-        datalabels:{display:true,anchor:'end',align:'top',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v!==null?v.toFixed(1):''},
-        tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>`Avg Rating: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(2):'—'}`}}
-      }
-    },
-    plugins:[ChartDataLabels]
-  });
-
-  trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:'NPS',data:npss,
-      borderColor:'#5c3600',backgroundColor:'rgba(92,54,0,0.08)',
-      borderWidth:2.5,fill:true,tension:0.4,
-      pointBackgroundColor:'#fff',pointBorderColor:'#5c3600',pointRadius:5,pointHoverRadius:7
-    }]},
-    options:{
-      ...baseOpts,
-      layout:{padding:{top:24}},
-      plugins:{
-        ...baseOpts.plugins,
-        datalabels:{display:true,anchor:'end',align:'top',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v!==null?(v>0?'+':'')+v:''},
-        tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`;} }}
-      }
-    },
-    plugins:[ChartDataLabels]
-  });
-
+  trendRatingInst=new Chart(document.getElementById('trendRatingChart'),{type:'line',data:{labels,datasets:[{label:'Avg Rating',data:ratings,borderColor:'#c48a00',backgroundColor:'rgba(196,138,0,0.10)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#c48a00',pointRadius:5,pointHoverRadius:7}]},options:{...baseOpts,layout:{padding:{top:24}},scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:5,ticks:{...baseOpts.scales.y.ticks,stepSize:1,callback:v=>v.toFixed(1)}}},plugins:{...baseOpts.plugins,datalabels:{display:true,anchor:'end',align:'top',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v!==null?v.toFixed(1):''},tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>`Avg Rating: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(2):'—'}`}}}},plugins:[ChartDataLabels]});
+  trendNpsInst=new Chart(document.getElementById('trendNpsChart'),{type:'line',data:{labels,datasets:[{label:'NPS',data:npss,borderColor:'#5c3600',backgroundColor:'rgba(92,54,0,0.08)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#5c3600',pointRadius:5,pointHoverRadius:7}]},options:{...baseOpts,layout:{padding:{top:24}},plugins:{...baseOpts.plugins,datalabels:{display:true,anchor:'end',align:'top',color:'#5c3600',font:{weight:'bold',size:10},formatter:v=>v!==null?(v>0?'+':'')+v:''},tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>{const v=ctx.parsed.y;return`NPS: ${v>0?'+':''}${v??'—'}`; }}}}},plugins:[ChartDataLabels]});
   const hasHitRatioData=hitRatios.some(v=>v!==null&&v!==undefined);
   if(hasHitRatioData){
-    trendHitRatioInst=new Chart(document.getElementById('trendHitRatioChart'),{
-      type:'line',
-      data:{labels,datasets:[{
-        label:'Hit Ratio %',data:hitRatios,
-        borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.10)',
-        borderWidth:2.5,fill:true,tension:0.4,
-        pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:5,pointHoverRadius:7
-      }]},
-      options:{
-        ...baseOpts,
-        layout:{padding:{top:24}},
-        scales:{
-          ...baseOpts.scales,
-          y:{...baseOpts.scales.y,min:0,max:120,ticks:{...baseOpts.scales.y.ticks,stepSize:20,callback:v=>v+'%'}}
-        },
-        plugins:{
-          ...baseOpts.plugins,
-          datalabels:{display:true,anchor:'end',align:'top',color:'#065f46',font:{weight:'bold',size:10},formatter:v=>v!==null?v.toFixed(1)+'%':''},
-          tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>`Hit Ratio: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(1)+'%':'—'}`}}
-        }
-      },
-      plugins:[ChartDataLabels]
-    });
+    trendHitRatioInst=new Chart(document.getElementById('trendHitRatioChart'),{type:'line',data:{labels,datasets:[{label:'Hit Ratio %',data:hitRatios,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.10)',borderWidth:2.5,fill:true,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:5,pointHoverRadius:7}]},options:{...baseOpts,layout:{padding:{top:24}},scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:120,ticks:{...baseOpts.scales.y.ticks,stepSize:20,callback:v=>v+'%'}}},plugins:{...baseOpts.plugins,datalabels:{display:true,anchor:'end',align:'top',color:'#065f46',font:{weight:'bold',size:10},formatter:v=>v!==null?v.toFixed(1)+'%':''},tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>`Hit Ratio: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(1)+'%':'—'}`}}}},plugins:[ChartDataLabels]});
   }else{
     const canvas=document.getElementById('trendHitRatioChart');
-    const ctx2d=canvas.getContext('2d');
-    canvas.width=canvas.offsetWidth||400;canvas.height=240;
-    ctx2d.clearRect(0,0,canvas.width,canvas.height);
-    ctx2d.fillStyle='#c09840';ctx2d.font='13px Inter,sans-serif';ctx2d.textAlign='center';
+    const ctx2d=canvas.getContext('2d');canvas.width=canvas.offsetWidth||400;canvas.height=240;
+    ctx2d.clearRect(0,0,canvas.width,canvas.height);ctx2d.fillStyle='#c09840';ctx2d.font='13px Inter,sans-serif';ctx2d.textAlign='center';
     ctx2d.fillText('Add hit_ratio column to trend sheet for real data',canvas.width/2,120);
   }
-
-  trendSegInst=new Chart(document.getElementById('trendSegChart'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:4,pointHoverRadius:6},
-      {label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:4,pointHoverRadius:6},
-      {label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:4,pointHoverRadius:6}
-    ]},
-    options:{
-      ...baseOpts,
-      scales:{
-        ...baseOpts.scales,
-        y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}
-      },
-      plugins:{
-        ...baseOpts.plugins,
-        legend:{display:false},
-        datalabels:{display:false},
-        tooltip:{
-          ...baseOpts.plugins.tooltip,
-          callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y??'—'}%`}
-        }
-      }
-    },
-    plugins:[ChartDataLabels]
-  });
+  trendSegInst=new Chart(document.getElementById('trendSegChart'),{type:'line',data:{labels,datasets:[{label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:4,pointHoverRadius:6},{label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:4,pointHoverRadius:6},{label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:4,pointHoverRadius:6}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}},plugins:{...baseOpts.plugins,legend:{display:false},datalabels:{display:false},tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y??'—'}%`}}}},plugins:[ChartDataLabels]});
 }
 
 function renderTrendCycleTable(){
@@ -1899,149 +1787,50 @@ function openMentorModal(mentorName,dept){
   const activeQs=deptCtx?getMentorDeptQs(m,deptCtx):m.qs;
   const activeRating=deptCtx?getMentorDeptRating(m,deptCtx):m.rating;
   const activeResponses=deptCtx?getMentorDeptResponses(m,deptCtx):m.responses;
-
   document.getElementById('mmName').textContent=m.name;
-  document.getElementById('mmSub').textContent=deptCtx
-    ?`${deptCtx} · ${activeResponses} responses in this dept · ${m.subjects} subject(s) total`
-    :m.depts.join(', ')+' · '+m.responses+' responses (all depts) · '+m.subjects+' subject(s)';
-
+  document.getElementById('mmSub').textContent=deptCtx?`${deptCtx} · ${activeResponses} responses in this dept · ${m.subjects} subject(s) total`:m.depts.join(', ')+' · '+m.responses+' responses (all depts) · '+m.subjects+' subject(s)';
   const banner=document.getElementById('mmDeptScopeBanner');
-  if(deptCtx){
-    banner.style.display='flex';
-    banner.innerHTML=`<span>🔍</span> <span>Showing data for <strong>${deptCtx}</strong> only — ${activeResponses} responses, ${activeRating.toFixed(2)} avg rating in this dept. <em style="opacity:.7;">(Total across all depts: ${m.responses} responses.)</em></span>`;
-  }else{banner.style.display='none';}
-
+  if(deptCtx){banner.style.display='flex';banner.innerHTML=`<span>🔍</span> <span>Showing data for <strong>${deptCtx}</strong> only — ${activeResponses} responses, ${activeRating.toFixed(2)} avg rating in this dept. <em style="opacity:.7;">(Total across all depts: ${m.responses} responses.)</em></span>`;}
+  else{banner.style.display='none';}
   const totalYes=activeQs.reduce((s,q)=>s+q.y,0);
   const totalAll=activeQs.reduce((s,q)=>s+q.y+q.n,0);
   const overallYesPct=totalAll>0?Math.round(totalYes/totalAll*100):0;
   document.getElementById('mmStats').innerHTML=`
-    <div class="mm-qs-card">
-      <div class="mm-qs-label">${deptCtx?'Dept avg rating':'Avg rating'}</div>
-      <div class="mm-qs-val">${activeRating.toFixed(2)}</div>
-      <div class="mm-qs-sub">${deptCtx?`in ${deptCtx}`:'out of 5'}</div>
-    </div>
-    <div class="mm-qs-card">
-      <div class="mm-qs-label">${deptCtx?'Dept responses':'Total responses'}</div>
-      <div class="mm-qs-val">${activeResponses}</div>
-      <div class="mm-qs-sub">${deptCtx?'in this dept':'feedback entries'}</div>
-    </div>
-    <div class="mm-qs-card">
-      <div class="mm-qs-label">Overall yes rate${deptCtx?' (dept)':''}</div>
-      <div class="mm-qs-val" style="color:${overallYesPct>=70?'#065f46':overallYesPct>=50?'#c48a00':'#7f1d1d'};">${overallYesPct}%</div>
-      <div class="mm-qs-sub">across 5 questions</div>
-    </div>`;
-
+    <div class="mm-qs-card"><div class="mm-qs-label">${deptCtx?'Dept avg rating':'Avg rating'}</div><div class="mm-qs-val">${activeRating.toFixed(2)}</div><div class="mm-qs-sub">${deptCtx?`in ${deptCtx}`:'out of 5'}</div></div>
+    <div class="mm-qs-card"><div class="mm-qs-label">${deptCtx?'Dept responses':'Total responses'}</div><div class="mm-qs-val">${activeResponses}</div><div class="mm-qs-sub">${deptCtx?'in this dept':'feedback entries'}</div></div>
+    <div class="mm-qs-card"><div class="mm-qs-label">Overall yes rate${deptCtx?' (dept)':''}</div><div class="mm-qs-val" style="color:${overallYesPct>=70?'#065f46':overallYesPct>=50?'#c48a00':'#7f1d1d'};">${overallYesPct}%</div><div class="mm-qs-sub">across 5 questions</div></div>`;
   const sc=calcMentorKPIs(activeQs);
   const{pcts,strength,concern,tei,ssi}=sc;
-  const si=mmInterpretStrength(strength);
-  const ci=mmInterpretConcern(concern);
-  const ti=mmInterpretTEI(tei);
-  const ssii=mmInterpretSSI(ssi);
-
+  const si=mmInterpretStrength(strength);const ci=mmInterpretConcern(concern);const ti=mmInterpretTEI(tei);const ssii=mmInterpretSSI(ssi);
   const kpiDefs=[
     {label:'Strength score',val:Math.round(strength),sub:'out of 100',interp:si,barColor:mmKpiBarColor(si.level)},
-    {label:'Concern score', val:Math.round(concern), sub:'out of 100',interp:ci,barColor:mmKpiBarColor(ci.level)},
+    {label:'Concern score',val:Math.round(concern),sub:'out of 100',interp:ci,barColor:mmKpiBarColor(ci.level)},
     {label:'Teaching Effectiveness Index',val:Math.round(tei),sub:'teaching effectiveness',interp:ti,barColor:mmKpiBarColor(ti.level)},
     {label:'Student Satisfaction Index',val:Math.round(ssi),sub:'student satisfaction',interp:ssii,barColor:mmKpiBarColor(ssii.level)},
   ];
   document.getElementById('mmKpiGrid').innerHTML=kpiDefs.map(k=>`
-    <div class="mm-kpi-card">
-      <div class="mm-kpi-label">${k.label}</div>
-      <div class="mm-kpi-val">${k.val}</div>
-      <div class="mm-kpi-sub">${k.sub}</div>
-      ${mmKpiBadge(k.interp.level,k.interp.label)}
-      <div class="mm-kpi-bar"><div class="mm-kpi-bar-fill" style="width:0%;background:${k.barColor};" data-w="${k.val}"></div></div>
-    </div>`).join('');
-
+    <div class="mm-kpi-card"><div class="mm-kpi-label">${k.label}</div><div class="mm-kpi-val">${k.val}</div><div class="mm-kpi-sub">${k.sub}</div>${mmKpiBadge(k.interp.level,k.interp.label)}<div class="mm-kpi-bar"><div class="mm-kpi-bar-fill" style="width:0%;background:${k.barColor};" data-w="${k.val}"></div></div></div>`).join('');
   const vc=mmVerdictConfig(strength,tei);
-  document.getElementById('mmVerdict').innerHTML=`
-    <div class="mm-verdict" style="background:${vc.bg};color:${vc.color};border-color:${vc.border};">
-      <span style="font-size:18px;flex-shrink:0;">${vc.icon}</span>
-      <span>${vc.text}</span>
-    </div>
-    <div style="font-size:11px;color:var(--ink3);margin-top:8px;">${si.desc}</div>`;
-
-  document.getElementById('mmQTitle').textContent=deptCtx
-    ?`Question-by-question breakdown — ${deptCtx} only`
-    :'Question-by-question breakdown';
-
+  document.getElementById('mmVerdict').innerHTML=`<div class="mm-verdict" style="background:${vc.bg};color:${vc.color};border-color:${vc.border};"><span style="font-size:18px;flex-shrink:0;">${vc.icon}</span><span>${vc.text}</span></div><div style="font-size:11px;color:var(--ink3);margin-top:8px;">${si.desc}</div>`;
+  document.getElementById('mmQTitle').textContent=deptCtx?`Question-by-question breakdown — ${deptCtx} only`:'Question-by-question breakdown';
   document.getElementById('mmQRows').innerHTML=MM_QUESTIONS.map((q,i)=>{
     const yp=pcts[i];const np=100-yp;const cls=mmClassify(yp);const cs=mmClassStyle(cls);
     const analysisText=Q_ANALYSIS_TEXT[i][cls];
-    return`<div class="mm-q-row">
-      <div>
-        <div class="mm-q-num">Q${i+1} · ${Q_DEFS[i].label}</div>
-        <div class="mm-q-label">${q}</div>
-        <span class="mm-q-class" style="background:${cs.bg};color:${cs.color};border:1px solid ${cs.border};">${mmClassLabel(cls)} · ${yp}% yes</span>
-        <div class="mm-q-analysis">${analysisText}</div>
-      </div>
-      <div>
-        <div class="mm-bar-row">
-          <span class="mm-bar-lbl" style="color:#065f46;">Yes</span>
-          <div class="mm-bar-track"><div class="mm-bar-fill" style="width:${yp}%;background:#10b981;"></div></div>
-          <span class="mm-bar-pct">${activeQs[i].y} (${yp}%)</span>
-        </div>
-        <div class="mm-bar-row">
-          <span class="mm-bar-lbl" style="color:#ef4444;">No</span>
-          <div class="mm-bar-track"><div class="mm-bar-fill" style="width:${np}%;background:#ef4444;"></div></div>
-          <span class="mm-bar-pct">${activeQs[i].n} (${np}%)</span>
-        </div>
-        <div style="font-size:10px;color:var(--ink4);margin-top:4px;">Weight: Strength ${Q_DEFS[i].w_strength}% · TEI ${Q_DEFS[i].w_tei}%</div>
-      </div>
-    </div>`;
+    return`<div class="mm-q-row"><div><div class="mm-q-num">Q${i+1} · ${Q_DEFS[i].label}</div><div class="mm-q-label">${q}</div><span class="mm-q-class" style="background:${cs.bg};color:${cs.color};border:1px solid ${cs.border};">${mmClassLabel(cls)} · ${yp}% yes</span><div class="mm-q-analysis">${analysisText}</div></div><div><div class="mm-bar-row"><span class="mm-bar-lbl" style="color:#065f46;">Yes</span><div class="mm-bar-track"><div class="mm-bar-fill" style="width:${yp}%;background:#10b981;"></div></div><span class="mm-bar-pct">${activeQs[i].y} (${yp}%)</span></div><div class="mm-bar-row"><span class="mm-bar-lbl" style="color:#ef4444;">No</span><div class="mm-bar-track"><div class="mm-bar-fill" style="width:${np}%;background:#ef4444;"></div></div><span class="mm-bar-pct">${activeQs[i].n} (${np}%)</span></div><div style="font-size:10px;color:var(--ink4);margin-top:4px;">Weight: Strength ${Q_DEFS[i].w_strength}% · TEI ${Q_DEFS[i].w_tei}%</div></div></div>`;
   }).join('');
-
   const strengths=[],weaknesses=[],neutrals=[];
-  pcts.forEach((p,i)=>{
-    const cls=mmClassify(p);
-    const item={label:Q_DEFS[i].label,pct:p,cls};
-    if(cls==='hp'||cls==='mp')strengths.push(item);
-    else if(cls==='mn'||cls==='hn')weaknesses.push(item);
-    else neutrals.push(item);
-  });
-
-  function swItem(item){
-    const cs=mmClassStyle(item.cls);
-    return`<div class="mm-sw-item">
-      <span style="color:var(--ink2);">${item.label}</span>
-      <span class="mm-mini-badge" style="background:${cs.bg};color:${cs.color};border:1px solid ${cs.border};">${item.pct}%</span>
-    </div>`;
-  }
-
+  pcts.forEach((p,i)=>{const cls=mmClassify(p);const item={label:Q_DEFS[i].label,pct:p,cls};if(cls==='hp'||cls==='mp')strengths.push(item);else if(cls==='mn'||cls==='hn')weaknesses.push(item);else neutrals.push(item);});
+  function swItem(item){const cs=mmClassStyle(item.cls);return`<div class="mm-sw-item"><span style="color:var(--ink2);">${item.label}</span><span class="mm-mini-badge" style="background:${cs.bg};color:${cs.color};border:1px solid ${cs.border};">${item.pct}%</span></div>`;}
   document.getElementById('mmSwGrid').innerHTML=`
-    <div class="mm-sw-card" style="background:#d1fae5;border-color:#6ee7b7;">
-      <div class="mm-sw-title" style="color:#065f46;">✓ Strengths (≥70% yes)</div>
-      ${strengths.length?strengths.map(swItem).join(''):`<div style="font-size:12px;color:#065f46;opacity:0.7;">No standout strengths above 70% threshold.</div>`}
-    </div>
-    <div class="mm-sw-card" style="background:#fee2e2;border-color:#fca5a5;">
-      <div class="mm-sw-title" style="color:#7f1d1d;">✗ Areas to improve (≤60%)</div>
-      ${weaknesses.length?weaknesses.map(swItem).join(''):`<div style="font-size:12px;color:#7f1d1d;opacity:0.7;">No critical weaknesses below 60% threshold.</div>`}
-    </div>`;
-
+    <div class="mm-sw-card" style="background:#d1fae5;border-color:#6ee7b7;"><div class="mm-sw-title" style="color:#065f46;">✓ Strengths (≥70% yes)</div>${strengths.length?strengths.map(swItem).join(''):`<div style="font-size:12px;color:#065f46;opacity:0.7;">No standout strengths above 70% threshold.</div>`}</div>
+    <div class="mm-sw-card" style="background:#fee2e2;border-color:#fca5a5;"><div class="mm-sw-title" style="color:#7f1d1d;">✗ Areas to improve (≤60%)</div>${weaknesses.length?weaknesses.map(swItem).join(''):`<div style="font-size:12px;color:#7f1d1d;opacity:0.7;">No critical weaknesses below 60% threshold.</div>`}</div>`;
   const neutralWrap=document.getElementById('mmNeutralWrap');
-  if(neutrals.length){
-    neutralWrap.innerHTML=`<div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;">
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink3);margin-bottom:8px;">~ Neutral areas (60–69%)</div>
-      <div class="mm-neutral-pills">
-        ${neutrals.map(n=>{const cs=mmClassStyle(n.cls);return`<span class="mm-neutral-pill" style="background:${cs.bg};color:${cs.color};border-color:${cs.border};">${n.label} <strong>${n.pct}%</strong></span>`;}).join('')}
-      </div>
-    </div>`;
-  }else{neutralWrap.innerHTML='';}
-
+  if(neutrals.length){neutralWrap.innerHTML=`<div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink3);margin-bottom:8px;">~ Neutral areas (60–69%)</div><div class="mm-neutral-pills">${neutrals.map(n=>{const cs=mmClassStyle(n.cls);return`<span class="mm-neutral-pill" style="background:${cs.bg};color:${cs.color};border-color:${cs.border};">${n.label} <strong>${n.pct}%</strong></span>`;}).join('')}</div></div>`;}
+  else{neutralWrap.innerHTML='';}
   document.getElementById('mmRecText').innerHTML=mmBuildRec(strengths,weaknesses);
-
   document.getElementById('mentorModalOverlay').classList.add('open');
-
-  requestAnimationFrame(()=>{
-    setTimeout(()=>{
-      document.querySelectorAll('.mm-kpi-bar-fill').forEach(bar=>{
-        bar.style.transition='width 0.9s cubic-bezier(.22,1,.36,1)';
-        bar.style.width=bar.getAttribute('data-w')+'%';
-      });
-    },80);
-  });
+  requestAnimationFrame(()=>{setTimeout(()=>{document.querySelectorAll('.mm-kpi-bar-fill').forEach(bar=>{bar.style.transition='width 0.9s cubic-bezier(.22,1,.36,1)';bar.style.width=bar.getAttribute('data-w')+'%';});},80);});
 }
-
 function closeMentorModal(){document.getElementById('mentorModalOverlay').classList.remove('open');}
 
 /* ═══════════════════════════════════════════
@@ -2150,9 +1939,7 @@ function landingFilterRender(){
     const hc=landingHitColor(r.hit);
     const hitCell=`<div style="display:flex;align-items:center;gap:8px;justify-content:center;"><div style="flex:1;max-width:80px;height:6px;background:var(--bg2);border-radius:6px;overflow:hidden;"><div style="width:${hitW}%;height:100%;background:${hc};border-radius:6px;"></div></div><span style="font-size:12px;font-weight:500;color:${hc};min-width:44px;text-align:right;">${r.hit!==null?r.hit.toFixed(1)+'%':'—'}</span></div>`;
     const collegeIdx=COLLEGES.findIndex(c=>c.name===r.college);
-    const viewBtn=collegeIdx>=0
-      ?`<button onclick="selectCollege(${collegeIdx})" style="padding:5px 14px;background:var(--gold-dark);color:#fde9a0;border:none;border-radius:20px;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#7a4f00'" onmouseout="this.style.background='var(--gold-dark)'">View →</button>`
-      :`<span style="font-size:11px;color:var(--ink4);">—</span>`;
+    const viewBtn=collegeIdx>=0?`<button onclick="selectCollege(${collegeIdx})" style="padding:5px 14px;background:var(--gold-dark);color:#fde9a0;border:none;border-radius:20px;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#7a4f00'" onmouseout="this.style.background='var(--gold-dark)'">View →</button>`:`<span style="font-size:11px;color:var(--ink4);">—</span>`;
     return`<tr><td style="text-align:center;">${rankBadge}</td><td style="font-size:13px;font-weight:500;color:#7a4f00;">${r.college}</td><td style="text-align:center;">${ratingCell}</td><td style="text-align:center;font-family:var(--font-display);font-size:17px;color:${landingNpsColor(r.nps)};">${npsDisplay}</td><td>${hitCell}</td><td style="text-align:center;">${viewBtn}</td></tr>`;
   }).join('');
 }
@@ -2161,7 +1948,6 @@ function landingFilterRender(){
    DOWNLOAD
 ═══════════════════════════════════════════ */
 function statusBadgeInline(r){if(r>=4.3)return'<span style="background:#fde9a0;color:#5c3600;border:1px solid #e6b84a;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Excellent</span>';if(r>=4.0)return'<span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Good</span>';if(r>=3.5)return'<span style="background:#fef3c7;color:#78350f;border:1px solid #fcd34d;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Average</span>';return'<span style="background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Needs work</span>';}
-
 function downloadReport(){
   if(currentMode==='overview'){
     if(!landingData.length){alert('No data to download.');return;}
