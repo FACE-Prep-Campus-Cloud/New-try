@@ -656,44 +656,18 @@ tbody tr{transition:background 0.12s;}
       <div class="nps-hero-card passives-card"><div class="nps-hero-icon">😐</div><div class="nps-hero-val" id="npsN_count">—</div><div class="nps-hero-lbl">Passives</div><div class="nps-hero-pct" id="npsN_pct">—</div><div class="nps-hero-range">Score 7 – 8</div></div>
       <div class="nps-hero-card detractors-card"><div class="nps-hero-icon">😞</div><div class="nps-hero-val" id="npsD_count">—</div><div class="nps-hero-lbl">Detractors</div><div class="nps-hero-pct" id="npsD_pct">—</div><div class="nps-hero-range">Score 1 – 6</div></div>
     </div>
-    <div class="nps-charts-row">
-      <div class="nps-chart-card">
-        <div class="card-header"><div class="card-title">Segment Distribution</div><span class="badge badge-primary" id="npsDonutBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;display:flex;align-items:center;justify-content:center;">
-          <canvas id="npsDonutChart"></canvas>
-          <div id="npsDonutCenter" style="position:absolute;text-align:center;pointer-events:none;">
-            <div style="font-family:var(--font-display);font-size:28px;color:var(--gold-dark);" id="npsDonutScore">—</div>
-            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);">NPS Index</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:18px;margin-top:4px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#10b981;display:inline-block;"></span>Promoters</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block;"></span>Passives</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>Detractors</div>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Follow-up Question Analysis</div>
+        <span class="badge badge-gold" id="npsFollowupBadge">—</span>
       </div>
-      <div class="nps-chart-card">
-        <div class="card-header"><div class="card-title">Score Distribution (1–10)</div><span class="badge badge-primary" id="npsBarBadge">—</span></div>
-        <div style="position:relative;width:100%;height:260px;"><canvas id="npsBarChart"></canvas></div>
+      <div id="npsFollowupGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
+        <div style="text-align:center;padding:32px;color:var(--ink3);grid-column:1/-1;">Select a college to view follow-up data</div>
       </div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Score Breakdown — Count per Rating</div><span class="badge badge-gold" id="npsBreakdownBadge">—</span></div>
-      <div class="nps-bar-enhanced" id="npsBarEnhanced"><div style="text-align:center;padding:24px;color:var(--ink3);">Select a college to view NPS breakdown</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Segment Proportion — Visual Breakdown</div><span class="badge badge-primary" id="npsStackedBadge">—</span></div>
-      <div id="npsStackedWrap" style="position:relative;width:100%;height:80px;">
-        <div id="npsStackedBar" style="display:flex;height:48px;border-radius:10px;overflow:hidden;gap:2px;margin-top:10px;">
-          <div id="stkPromoters" style="background:#10b981;height:100%;border-radius:10px 0 0 10px;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-          <div id="stkPassives"  style="background:#f59e0b;height:100%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-          <div id="stkDetractors" style="background:#ef4444;height:100%;border-radius:0 10px 10px 0;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--ink3);">
-          <span id="stkPromLabel">Promoters —%</span><span id="stkPassLabel">Passives —%</span><span id="stkDetrLabel">Detractors —%</span>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--ink4);margin-top:10px;">* NPS = %Promoters − %Detractors · Passives are excluded from the index calculation.</div>
+      <div class="card-header"><div class="card-title">Follow-up Responses — Overall Summary</div><span class="badge badge-primary" id="npsFollowupSummaryBadge">—</span></div>
+      <div id="npsFollowupTable" style="overflow-x:auto;margin-top:4px;"></div>
     </div>
   </div>
 
@@ -773,6 +747,7 @@ tbody tr{transition:background 0.12s;}
 
 </main>
 </div>
+
 
 <script>
 /* ═══════════════════════════════════════════
