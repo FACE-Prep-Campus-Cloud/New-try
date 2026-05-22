@@ -297,7 +297,6 @@ tbody tr{transition:background 0.12s;}
 .mm-kpi-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;margin-top:6px;}
 .mm-kpi-bar{height:3px;border-radius:2px;background:var(--bg2);margin-top:8px;overflow:hidden;}
 .mm-kpi-bar-fill{height:100%;border-radius:2px;transition:width 0.9s cubic-bezier(.22,1,.36,1);}
-.mm-formula-note{font-size:10.5px;color:var(--ink4);background:var(--bg2);border-radius:6px;padding:8px 12px;margin-top:10px;line-height:1.6;}
 .mm-verdict{border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;font-size:12.5px;line-height:1.65;border:1px solid;}
 .mm-q-grid{display:flex;flex-direction:column;gap:8px;}
 .mm-q-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:1fr 190px;gap:12px;align-items:start;}
@@ -321,7 +320,6 @@ tbody tr{transition:background 0.12s;}
 .mm-rec-box{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;}
 .mm-rec-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:6px;}
 .mm-rec-text{font-size:12.5px;color:var(--ink2);line-height:1.65;}
-.mm-low-resp{font-size:11px;color:#78350f;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-top:10px;display:flex;align-items:center;gap:6px;}
 
 .mentor-name-btn{background:none;border:none;color:#7a4f00;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:var(--font-body);padding:0;text-align:left;}
 .mentor-name-btn:hover{color:#5c3600;}
@@ -397,7 +395,6 @@ tbody tr{transition:background 0.12s;}
     <div class="mm-section">
       <div class="mm-section-title">Performance KPIs</div>
       <div class="mm-kpi-grid" id="mmKpiGrid"></div>
-      <div class="mm-formula-note" id="mmFormulaNote"></div>
     </div>
     <div class="mm-section">
       <div class="mm-section-title">Overall Assessment</div>
@@ -417,8 +414,6 @@ tbody tr{transition:background 0.12s;}
         <div class="mm-rec-title">📋 Recommendation</div>
         <div class="mm-rec-text" id="mmRecText">—</div>
       </div>
-      <div id="mmLowResp" style="display:none;" class="mm-low-resp"></div>
-      <div style="font-size:10.5px;color:var(--ink4);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);" id="mmFootnote"></div>
     </div>
   </div>
 </div>
@@ -547,13 +542,11 @@ tbody tr{transition:background 0.12s;}
         <div class="metric-label">Avg Overall Rating</div>
         <div class="metric-value" id="avgRating">—</div>
       </div>
-      <!-- ★ CHANGED: was "Total Responses" — now shows Hit Ratio from college overview sheet -->
-    <!-- ★ CHANGED: was "Total Responses" — now shows Hit Ratio from college overview sheet -->
-<div class="metric-card">
-  <div class="metric-label">Hit Ratio</div>
-  <div class="metric-value" id="hitRatioMetric">—</div>
-  <div class="metric-sub" id="hitRatioSub">—</div>
-</div>
+      <div class="metric-card">
+        <div class="metric-label">Hit Ratio</div>
+        <div class="metric-value" id="hitRatioMetric">—</div>
+        <div class="metric-sub" id="hitRatioSub">—</div>
+      </div>
       <div class="metric-card">
         <div class="metric-label">Mentors Tracked</div>
         <div class="metric-value" id="mentorCount">—</div>
@@ -621,7 +614,6 @@ tbody tr{transition:background 0.12s;}
       <div id="mentorTableSummaryBar" style="display:flex;align-items:center;gap:24px;padding:14px 22px;background:linear-gradient(135deg,#4a2800,#7a4f00);flex-wrap:wrap;">
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Global Mean</span><span id="mtSumGlobalMean" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Total Responses</span><span id="mtSumTotalResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
-        <div style="color:#fde9a0;font-size:12px;"><span style="opacity:0.6;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:2px;">Σ Avg Rating × Responses</span><span id="mtSumAvgXResp" style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;">—</span></div>
         <div style="margin-left:auto;"><span class="badge badge-gold" id="mentorTableCountBadge">—</span></div>
       </div>
     </div>
@@ -635,11 +627,10 @@ tbody tr{transition:background 0.12s;}
             <th>Department</th>
             <th id="thAvgRating">Average Rating</th>
             <th id="thTotalResponses">Total Responses</th>
-            <th>Avg Rating × Responses</th>
             <th>Bayesian Value</th>
             <th>Status</th>
           </tr></thead>
-          <tbody id="mentorTableBody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
+          <tbody id="mentorTableBody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">Select a college to view mentor data</td></tr></tbody>
         </table>
       </div>
       <div style="padding:12px 22px;font-size:11px;color:var(--ink4);border-top:1px solid var(--border);" id="mentorTableFootnote">* Bayesian = (Global Mean × Σ Responses + Avg Rating × Mentor Responses) / (Σ Responses + Mentor Responses)</div>
@@ -1301,7 +1292,6 @@ function processSheetData(rows){
   const avgR=tot>0?TABLE_DATA.reduce((s,r)=>s+r.rating,0)/tot:0;
   document.getElementById('avgRating').textContent=avgR>0?`${avgR.toFixed(1)} / 5`:'—';
 
-  // ★ CHANGED: Show Hit Ratio from landing overview data instead of Total Responses
   const _landingMatch=currentCollege?landingData.find(r=>r.college===currentCollege.name):null;
   const _hitRatio=_landingMatch&&_landingMatch.hit!==null?_landingMatch.hit:null;
   document.getElementById('hitRatioMetric').textContent=_hitRatio!==null?`${_hitRatio.toFixed(1)}%`:'—';
@@ -1839,9 +1829,8 @@ function renderMentorTable(){
   const gm=sumResponses>0?(sumAvgXResp/sumResponses):0;
   document.getElementById('mtSumGlobalMean').textContent=gm>0?gm.toFixed(7):'—';
   document.getElementById('mtSumTotalResp').textContent=sumResponses||'—';
-  document.getElementById('mtSumAvgXResp').textContent=sumAvgXResp>0?sumAvgXResp.toFixed(2):'—';
   document.getElementById('mentorTableCountBadge').textContent=list.length>0?`${list.length} mentors`:'No data';
-  if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found</td></tr>';return;}
+  if(!list.length){document.getElementById('mentorTableBody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">No mentors found</td></tr>';return;}
   const deptLabel=isDeptActive?currentDeptFilter:null;
   const rankColors={1:'#f5c842',2:'#e0e0e0',3:'#f0c498'};
   document.getElementById('mentorTableBody').innerHTML=list.map(m=>{
@@ -1853,7 +1842,6 @@ function renderMentorTable(){
     const s=deptStyle(deptLabel||m.depts[0]||'');
     const displayRating=isDeptActive?getMentorDeptRating(m,currentDeptFilter):m.rating;
     const displayResponses=isDeptActive?getMentorDeptResponses(m,currentDeptFilter):m.responses;
-    const displayAvgXResp=isDeptActive?(displayRating*displayResponses):m.avgXResponses;
     const ratingColor=isDeptActive?getStatusColor(displayRating):'var(--gold-dark)';
     return`<tr>
       <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${rankBg};border:${rankBorder};font-size:11px;font-weight:700;color:${rankColor};">${displayRank}</span></td>
@@ -1868,7 +1856,6 @@ function renderMentorTable(){
         ${displayResponses}
         ${isDeptActive?`<div style="font-size:10px;color:var(--ink4);font-family:var(--font-body);">dept only</div>`:''}
       </td>
-      <td style="text-align:center;font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${isDeptActive?displayAvgXResp.toFixed(2):m.avgXResponses.toFixed(2)}</td>
       <td style="text-align:center;"><span style="font-family:var(--font-display);font-size:16px;color:var(--gold-dark);">${m.bayesianRating.toFixed(7)}</span></td>
       <td>${statusBadge(displayRating)}</td>
     </tr>`;
@@ -1967,12 +1954,6 @@ function openMentorModal(mentorName,dept){
       <div class="mm-kpi-bar"><div class="mm-kpi-bar-fill" style="width:0%;background:${k.barColor};" data-w="${k.val}"></div></div>
     </div>`).join('');
 
-  document.getElementById('mmFormulaNote').innerHTML=`
-    <strong>Strength</strong> = Q1×25 + Q2×10 + Q3×30 + Q4×20 + Q5×15 / 100 &nbsp;·&nbsp;
-    <strong>TEI</strong> = Q1×30 + Q3×35 + Q4×25 + Q5×10 / 100 &nbsp;·&nbsp;
-    <strong>SSI</strong> = avg(Q1–Q5) &nbsp;·&nbsp;
-    <strong>Concern</strong> = weighted No%`;
-
   const vc=mmVerdictConfig(strength,tei);
   document.getElementById('mmVerdict').innerHTML=`
     <div class="mm-verdict" style="background:${vc.bg};color:${vc.color};border-color:${vc.border};">
@@ -2049,14 +2030,6 @@ function openMentorModal(mentorName,dept){
   }else{neutralWrap.innerHTML='';}
 
   document.getElementById('mmRecText').innerHTML=mmBuildRec(strengths,weaknesses);
-
-  const lrEl=document.getElementById('mmLowResp');
-  if(activeResponses<20){lrEl.style.display='flex';lrEl.innerHTML=`⚠ Low response count (${activeResponses}${deptCtx?` in ${deptCtx}`:''}) — interpret scores with caution.`;}
-  else{lrEl.style.display='none';}
-
-  document.getElementById('mmFootnote').textContent=deptCtx
-    ?`* Yes/No counts are from rows where department = "${deptCtx}" only. Classification: High Positive ≥90% · Moderate Positive 80–89% · Neutral 70–79% · Moderate Negative 60–69% · High Negative <60%.`
-    :`* Yes/No counts are aggregated across all subjects and departments this mentor teaches. Classification: High Positive ≥90% · Moderate Positive 80–89% · Neutral 70–79% · Moderate Negative 60–69% · High Negative <60%.`;
 
   document.getElementById('mentorModalOverlay').classList.add('open');
 
