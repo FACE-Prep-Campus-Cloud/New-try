@@ -1737,8 +1737,23 @@ function renderTrendCharts(){
     ctx2d.clearRect(0,0,canvas.width,canvas.height);ctx2d.fillStyle='#c09840';ctx2d.font='13px Inter,sans-serif';ctx2d.textAlign='center';
     ctx2d.fillText('Add hit_ratio column to trend sheet for real data',canvas.width/2,120);
   }
-trendSegInst=new Chart(document.getElementById('trendSegChart'),{type:'line',data:{labels,datasets:[{label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:4,pointHoverRadius:6},{label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:4,pointHoverRadius:6},{label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:4,pointHoverRadius:6}]},options:{...baseOpts,interaction:{mode:'dataset',intersect:false},scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}},plugins:{...baseOpts.plugins,legend:{display:false},datalabels:{display:ctx=>ctx.chart._hoveredDatasetIndex===ctx.datasetIndex,anchor:'top',align:'top',color:ctx=>['#065f46','#78350f','#7f1d1d'][ctx.datasetIndex],font:{weight:'bold',size:10},formatter:v=>v!==null?v+'%':null},tooltip:{...baseOpts.plugins.tooltip,mode:'dataset',intersect:false,callbacks:{title:ctx=>`${ctx[0].dataset.label} — all months`,label:ctx=>`${ctx.label}: ${ctx.parsed.y??'—'}%`}}}},plugins:[ChartDataLabels]});
+trendSegInst=new Chart(document.getElementById('trendSegChart'),{type:'line',data:{labels,datasets:[{label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:4,pointHoverRadius:6},{label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:4,pointHoverRadius:6},{label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:4,pointHoverRadius:6}]},options:{...baseOpts,interaction:{mode:'index',intersect:false},scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}},plugins:{...baseOpts.plugins,legend:{display:false},datalabels:{display:ctx=>ctx.chart._hoveredDatasetIndex===ctx.datasetIndex,anchor:'top',align:'top',color:ctx=>['#065f46','#78350f','#7f1d1d'][ctx.datasetIndex],font:{weight:'bold',size:10},formatter:v=>v!==null?v+'%':null},tooltip:{...baseOpts.plugins.tooltip,mode:'index',intersect:false,filter:item=>item.datasetIndex===trendSegInst?._hoveredDatasetIndex??-1,callbacks:{title:ctx=>ctx.length?`${ctx[0].dataset.label}`:'' ,label:ctx=>`${ctx.label}: ${ctx.parsed.y??'—'}%`}}}},plugins:[ChartDataLabels]});
 
+const _segCanvas=document.getElementById('trendSegChart');
+if(_segCanvas._segMoveHandler){_segCanvas.removeEventListener('mousemove',_segCanvas._segMoveHandler);_segCanvas.removeEventListener('mouseleave',_segCanvas._segLeaveHandler);}
+_segCanvas._segMoveHandler=function(e){
+  const chart=trendSegInst;if(!chart)return;
+  const pts=chart.getElementsAtEventForMode(e,'nearest',{intersect:false},true);
+  const newIdx=pts.length>0?pts[0].datasetIndex:-1;
+  if(chart._hoveredDatasetIndex!==newIdx){chart._hoveredDatasetIndex=newIdx;chart.update('none');}
+};
+_segCanvas._segLeaveHandler=function(){
+  if(!trendSegInst)return;
+  trendSegInst._hoveredDatasetIndex=-1;
+  trendSegInst.update('none');
+};
+_segCanvas.addEventListener('mousemove',_segCanvas._segMoveHandler);
+_segCanvas.addEventListener('mouseleave',_segCanvas._segLeaveHandler);
 document.getElementById('trendSegChart').addEventListener('mousemove',function(e){
   const chart=trendSegInst;if(!chart)return;
   const points=chart.getElementsAtEventForMode(e,'dataset',{intersect:false},true);
