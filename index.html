@@ -1295,8 +1295,8 @@ function processSheetData(rows){
  const _landingMatch=currentCollege?landingData.find(r=>r.college===currentCollege.name):null;
 const _hitRatio=_landingMatch&&_landingMatch.hit!==null?_landingMatch.hit:null;
 document.getElementById('hitRatioMetric').textContent=_hitRatio!==null?`${_hitRatio.toFixed(1)}%`:'—';
-document.getElementById('hitRatioSub').textContent=`${tot} total responses · ${DEPT_LIST.length} depts`;
-  document.getElementById('mentorCount').textContent=MENTORS.length;
+const uniqueRespondents=new Set(TABLE_DATA.map(r=>r.mentor+'||'+r.dept)).size;
+document.getElementById('hitRatioSub').textContent=`${uniqueRespondents} unique responses · ${DEPT_LIST.length} depts`;  document.getElementById('mentorCount').textContent=MENTORS.length;
   document.getElementById('mentorSub').textContent=`Across ${DEPT_LIST.length} departments`;
   const topMentor=MENTORS[0]||null;
   if(topMentor){document.getElementById('subjectCount').textContent=topMentor.name;document.getElementById('subjectSub').textContent=`Bayesian: ${topMentor.bayesianRating.toFixed(2)} · Avg: ${topMentor.rating.toFixed(1)}`;}
@@ -1435,7 +1435,7 @@ function renderDeptStatsPanel(dept){
     <div class="dept-stats-body">
       <div class="dept-kpi-row">
         <div class="dept-kpi-card" style="border-top-color:var(--gold-mid);"><div class="dept-kpi-label">Dept Avg Rating</div><div class="dept-kpi-val">${deptAvgRating.toFixed(2)}</div><div class="dept-kpi-sub">dept responses only</div></div>
-        <div class="dept-kpi-card" style="border-top-color:#10b981;"><div class="dept-kpi-label">Dept Responses</div><div class="dept-kpi-val" style="color:#065f46;">${deptTotalResponses}</div><div class="dept-kpi-sub">in ${dept}</div></div>
+        <div class="dept-kpi-card" style="border-top-color:#10b981;"><div class="dept-kpi-label">Dept Responses</div><div class="dept-kpi-val" style="color:#065f46;">${new Set(deptEntries.map(r=>r.mentor+'||'+r.subject)).size}</div><div class="dept-kpi-sub">unique in ${dept}</div></div>
         <div class="dept-kpi-card" style="border-top-color:#c48a00;"><div class="dept-kpi-label">Mentors</div><div class="dept-kpi-val">${deptMentorCount}</div><div class="dept-kpi-sub">${deptSubjects.size} subjects</div></div>
         <div class="dept-kpi-card" style="border-top-color:#f5c842;"><div class="dept-kpi-label">Top in Dept</div><div class="dept-kpi-val" style="font-size:14px;color:var(--gold-dark);">${topMentor.name.length>14?topMentor.name.slice(0,13)+'…':topMentor.name}</div><div class="dept-kpi-sub">${topMentor._deptRating.toFixed(2)} dept avg</div></div>
       </div>
