@@ -1287,7 +1287,16 @@ function processSheetData(rows){
     const bayesianScore=((globalMean*totalAllResponses)+(avg*totalResponses))/(totalAllResponses+totalResponses);
     return{name:m.name,depts:Array.from(m.depts),rating:parseFloat(avg.toFixed(2)),avgXResponses:parseFloat(avgXResponses.toFixed(2)),bayesianRating:parseFloat(bayesianScore.toFixed(7)),subjects:m.subjects.size,responses:totalResponses,qs:m.qs,deptQs:m.deptQs,deptRatings:m.deptRatings};
   }).sort((a,b)=>b.bayesianRating-a.bayesianRating);
-  MENTORS.forEach((m,idx)=>{m.rank=idx+1;m.percentile=MENTORS.length>1?Math.round((1-idx/(MENTORS.length-1))*100):100;});
+MENTORS.forEach((m, idx, arr) => {
+  if (idx === 0) {
+    m.rank = 1;
+  } else if (m.bayesianRating === arr[idx - 1].bayesianRating) {
+    m.rank = arr[idx - 1].rank;
+  } else {
+    m.rank = idx + 1;
+  }
+  m.percentile = MENTORS.length > 1 ? Math.round((1 - idx / (MENTORS.length - 1)) * 100) : 100;
+});
   DEPT_LIST=Array.from(deptSet).sort();
   updateDeptFilters();
   const tot=TABLE_DATA.length;
@@ -1384,7 +1393,16 @@ function setDeptFilter(val,btn){
 }
 function getFilteredMentors(filterDept){
   let list=!filterDept||filterDept==='all'?[...MENTORS]:MENTORS.filter(m=>m.depts.some(d=>d===filterDept));
-  list.forEach((m,idx)=>{m.filteredRank=idx+1;m.filteredPercentile=list.length>1?Math.round((1-idx/(list.length-1))*100):100;});
+list.forEach((m, idx, arr) => {
+  if (idx === 0) {
+    m.filteredRank = 1;
+  } else if (m.bayesianRating === arr[idx - 1].bayesianRating) {
+    m.filteredRank = arr[idx - 1].filteredRank;
+  } else {
+    m.filteredRank = idx + 1;
+  }
+  m.filteredPercentile = list.length > 1 ? Math.round((1 - idx / (list.length - 1)) * 100) : 100;
+});
   return list;
 }
 
