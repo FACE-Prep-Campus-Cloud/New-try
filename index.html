@@ -1737,8 +1737,22 @@ function renderTrendCharts(){
     ctx2d.clearRect(0,0,canvas.width,canvas.height);ctx2d.fillStyle='#c09840';ctx2d.font='13px Inter,sans-serif';ctx2d.textAlign='center';
     ctx2d.fillText('Add hit_ratio column to trend sheet for real data',canvas.width/2,120);
   }
-trendSegInst=new Chart(document.getElementById('trendSegChart'),{type:'line',data:{labels,datasets:[{label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:4,pointHoverRadius:6},{label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:4,pointHoverRadius:6},{label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:4,pointHoverRadius:6}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}},plugins:{...baseOpts.plugins,legend:{display:false},datalabels:{display:true,anchor:'center',align:'center',color:ctx=>['#065f46','#78350f','#7f1d1d'][ctx.datasetIndex],font:{weight:'bold',size:10},formatter:(v,ctx)=>{const seg=['P','N','D'][ctx.datasetIndex];return v!==null?`${seg}: ${v}%`:null;},opacity:0},tooltip:{...baseOpts.plugins.tooltip,callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y??'—'}%`}}}},plugins:[ChartDataLabels]});
+trendSegInst=new Chart(document.getElementById('trendSegChart'),{type:'line',data:{labels,datasets:[{label:'Promoters %',data:proms,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#10b981',pointRadius:4,pointHoverRadius:6},{label:'Passives %',data:passes,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointRadius:4,pointHoverRadius:6},{label:'Detractors %',data:detrs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',borderWidth:2,fill:false,tension:0.4,pointBackgroundColor:'#fff',pointBorderColor:'#ef4444',pointRadius:4,pointHoverRadius:6}]},options:{...baseOpts,interaction:{mode:'dataset',intersect:false},scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}},plugins:{...baseOpts.plugins,legend:{display:false},datalabels:{display:ctx=>ctx.chart._hoveredDatasetIndex===ctx.datasetIndex,anchor:'top',align:'top',color:ctx=>['#065f46','#78350f','#7f1d1d'][ctx.datasetIndex],font:{weight:'bold',size:10},formatter:v=>v!==null?v+'%':null},tooltip:{...baseOpts.plugins.tooltip,mode:'dataset',intersect:false,callbacks:{title:ctx=>`${ctx[0].dataset.label} — all months`,label:ctx=>`${ctx.label}: ${ctx.parsed.y??'—'}%`}}}},plugins:[ChartDataLabels]});
 
+document.getElementById('trendSegChart').addEventListener('mousemove',function(e){
+  const chart=trendSegInst;if(!chart)return;
+  const points=chart.getElementsAtEventForMode(e,'dataset',{intersect:false},true);
+  const newIdx=points.length>0?points[0].datasetIndex:-1;
+  if(chart._hoveredDatasetIndex!==newIdx){
+    chart._hoveredDatasetIndex=newIdx;
+    chart.update('none');
+  }
+});
+document.getElementById('trendSegChart').addEventListener('mouseleave',function(){
+  if(!trendSegInst)return;
+  trendSegInst._hoveredDatasetIndex=-1;
+  trendSegInst.update('none');
+});
 let _segLabelVisible=false;
 if(window._segLabelTimer)clearInterval(window._segLabelTimer);
 window._segLabelTimer=setInterval(()=>{
