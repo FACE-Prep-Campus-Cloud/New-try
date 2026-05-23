@@ -1295,7 +1295,7 @@ const GROQ_KEY='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';
         'Authorization':`Bearer ${GROQ_KEY}`
       },
       body:JSON.stringify({
-        model:'llama3-8b-8192',
+        model:'llama-3.3-70b-versatile',
         messages:[{role:'user',content:prompt}],
         max_tokens:1000,
         temperature:0.4
