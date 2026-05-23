@@ -1691,10 +1691,10 @@ function renderNPSPanel(){
     return;
   }
  const followupQuestions = [
-    {id:'Q2',question:'Are you satisfied with the overall campus experience (Classroom, Campus Infrastructure, Network / Wi-Fi)?',icon:'🏫',shortLabel:'Campus Experience'},
-    {id:'Q3',question:'Are you satisfied with the classroom engagement and experience (Quality of Faculty, Relevance of content delivered)?',icon:'👨‍🏫',shortLabel:'Classroom Engagement'},
-    {id:'Q4',question:'Are you happy with the Skill Development progress?',icon:'📈',shortLabel:'Skill Development'},
-    {id:'Q5',question:'Are you happy with Placement opportunities?',icon:'💼',shortLabel:'Placement Opportunities'}
+    {id:'1',question:'Are you satisfied with the overall campus experience (Classroom, Campus Infrastructure, Network / Wi-Fi)?',icon:'🏫',shortLabel:'Campus Experience'},
+    {id:'2',question:'Are you satisfied with the classroom engagement and experience (Quality of Faculty, Relevance of content delivered)?',icon:'👨‍🏫',shortLabel:'Classroom Engagement'},
+    {id:'3',question:'Are you happy with the Skill Development progress?',icon:'📈',shortLabel:'Skill Development'},
+    {id:'4',question:'Are you happy with Placement opportunities?',icon:'💼',shortLabel:'Placement Opportunities'}
   ];
   const questionStats = {};
   followupQuestions.forEach(q => { questionStats[q.id] = { yes:0, no:0, total:0 }; });
