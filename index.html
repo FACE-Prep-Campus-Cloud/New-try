@@ -657,6 +657,40 @@ tbody tr{transition:background 0.12s;}
 
     <!-- Hero cards -->
     <div class="nps-hero-row">
+      <div class="nps-hero-card promoters-card"><div class="nps-hero-icon">😊</div><div class="nps-hero-val" id="npsP_count">—</div><div class="nps-hero-lbl">Promoters</div><div class="nps-hero-pct" id="npsP_pct">—</div><div class="nps-hero-range">Score 9 – 10</div></div>
+      <div class="nps-hero-card passives-card"><div class="nps-hero-icon">😐</div><div class="nps-hero-val" id="npsN_count">—</div><div class="nps-hero-lbl">Passives</div><div class="nps-hero-pct" id="npsN_pct">—</div><div class="nps-hero-range">Score 7 – 8</div></div>
+      <div class="nps-hero-card detractors-card"><div class="nps-hero-icon">😞</div><div class="nps-hero-val" id="npsD_count">—</div><div class="nps-hero-lbl">Detractors</div><div class="nps-hero-pct" id="npsD_pct">—</div><div class="nps-hero-range">Score 1 – 6</div></div>
+    </div>
+
+    <!-- ★ FIX: Donut + Bar charts (previously missing canvases) -->
+    <div class="nps-charts-row">
+      <div class="nps-chart-card">
+        <div class="card-header">
+          <div class="card-title">NPS Segment Distribution</div>
+          <span class="badge badge-primary" id="npsDonutBadge">—</span>
+        </div>
+        <div style="position:relative;height:220px;display:flex;align-items:center;justify-content:center;">
+          <canvas id="npsDonutChart" style="max-height:220px;"></canvas>
+          <div style="position:absolute;text-align:center;pointer-events:none;">
+            <div style="font-family:var(--font-display);font-size:32px;color:var(--gold-dark);" id="npsDonutScore">—</div>
+            <div style="font-size:11px;color:var(--ink3);">NPS Index</div>
+          </div>
+        </div>
+        <!-- ★ FIX: Legend for donut -->
+        <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#065f46;"><span style="width:10px;height:10px;background:#10b981;border-radius:2px;display:inline-block;"></span>Promoters</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#78350f;"><span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>Passives</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#7f1d1d;"><span style="width:10px;height:10px;background:#ef4444;border-radius:2px;display:inline-block;"></span>Detractors</span>
+        </div>
+      </div>
+      <div class="nps-chart-card">
+        <div class="card-header">
+          <div class="card-title">Score Frequency (1–10)</div>
+          <span class="badge badge-primary" id="npsBarBadge">—</span>
+        </div>
+        <div style="position:relative;height:220px;">
+          <canvas id="npsBarChart"></canvas>
+        </div>
       <div class="nps-hero-card promoters-card">
         <div class="nps-hero-icon">😊</div>
         <div class="nps-hero-val" id="npsP_count">—</div>
@@ -664,6 +698,41 @@ tbody tr{transition:background 0.12s;}
         <div class="nps-hero-pct" id="npsP_pct">—</div>
         <div class="nps-hero-range">Score 9 – 10</div>
       </div>
+    </div>
+
+    <!-- ★ FIX: Stacked breakdown bar (previously missing stkPromoters/stkPassives/stkDetractors) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Promoter / Passive / Detractor Breakdown</div>
+        <span class="badge badge-gold" id="npsBreakdownBadge">—</span>
+      </div>
+      <div style="height:36px;border-radius:8px;overflow:hidden;display:flex;margin:8px 0 4px;">
+        <div id="stkPromoters" style="background:#10b981;height:100%;width:0%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
+        <div id="stkPassives"  style="background:#f59e0b;height:100%;width:0%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
+        <div id="stkDetractors" style="background:#ef4444;height:100%;width:0%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
+      </div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px;align-items:center;">
+        <span style="font-size:12px;color:#065f46;display:flex;align-items:center;gap:5px;">
+          <span style="width:10px;height:10px;background:#10b981;border-radius:2px;display:inline-block;"></span>
+          <span id="stkPromLabel">Promoters</span>
+        </span>
+        <span style="font-size:12px;color:#78350f;display:flex;align-items:center;gap:5px;">
+          <span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
+          <span id="stkPassLabel">Passives</span>
+        </span>
+        <span style="font-size:12px;color:#7f1d1d;display:flex;align-items:center;gap:5px;">
+          <span style="width:10px;height:10px;background:#ef4444;border-radius:2px;display:inline-block;"></span>
+          <span id="stkDetrLabel">Detractors</span>
+        </span>
+        <span class="badge badge-gold" id="npsStackedBadge" style="margin-left:auto;">—</span>
+      </div>
+    </div>
+
+    <!-- ★ FIX: Score-by-score enhanced bar list (previously missing npsBarEnhanced) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Response Count by Score (1–10)</div>
+        <span class="badge badge-primary" id="npsBarEnhancedBadge">—</span>
       <div class="nps-hero-card passives-card">
         <div class="nps-hero-icon">😐</div>
         <div class="nps-hero-val" id="npsN_count">—</div>
@@ -671,6 +740,8 @@ tbody tr{transition:background 0.12s;}
         <div class="nps-hero-pct" id="npsN_pct">—</div>
         <div class="nps-hero-range">Score 7 – 8</div>
       </div>
+      <div class="nps-bar-enhanced" id="npsBarEnhanced">
+        <div style="text-align:center;padding:24px;color:var(--ink3);">No data loaded</div>
       <div class="nps-hero-card detractors-card">
         <div class="nps-hero-icon">😞</div>
         <div class="nps-hero-val" id="npsD_count">—</div>
@@ -680,18 +751,29 @@ tbody tr{transition:background 0.12s;}
       </div>
     </div>
 
+    <!-- Follow-up question analysis -->
     <!-- Follow-up Yes/No Questions -->
     <div class="card">
       <div class="card-header">
+        <div class="card-title">Follow-up Question Analysis</div>
+        <span class="badge badge-gold" id="npsFollowupBadge">—</span>
         <div class="card-title">Follow-up Questions — Yes/No Analysis</div>
         <span class="badge badge-gold" id="npsFollowupYesNoBadge">—</span>
       </div>
+      <div id="npsFollowupGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
+        <div style="text-align:center;padding:32px;color:var(--ink3);grid-column:1/-1;">Select a college to view follow-up data</div>
       <div id="npsFollowupYesNoGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
         <div style="text-align:center;padding:32px;color:var(--ink3);grid-column:1/-1;">Select a college to view follow-up question data</div>
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-header"><div class="card-title">Follow-up Responses — Overall Summary</div><span class="badge badge-primary" id="npsFollowupSummaryBadge">—</span></div>
+      <div id="npsFollowupTable" style="overflow-x:auto;margin-top:4px;"></div>
+    </div>
+
   </div><!-- end panel-nps -->
+
   <!-- TREND OVER TIME PANEL -->
   <div class="panel" id="panel-trends">
     <div class="trend-hero-banner">
@@ -1690,11 +1772,11 @@ function renderNPSPanel(){
     if (badge) badge.textContent = 'No data';
     return;
   }
- const followupQuestions = [
-    {id:'Q1',question:'Are you satisfied with the overall campus experience (Classroom, Campus Infrastructure, Network / Wi-Fi)?',icon:'🏫',shortLabel:'Campus Experience'},
-    {id:'Q2',question:'Are you satisfied with the classroom engagement and experience (Quality of Faculty, Relevance of content delivered)?',icon:'👨‍🏫',shortLabel:'Classroom Engagement'},
-    {id:'Q3',question:'Are you happy with the Skill Development progress?',icon:'📈',shortLabel:'Skill Development'},
-    {id:'Q4',question:'Are you happy with Placement opportunities?',icon:'💼',shortLabel:'Placement Opportunities'}
+  const followupQuestions = [
+    {id:'Q2',question:'Are you satisfied with the overall campus experience (Classroom, Campus Infrastructure, Network / Wi-Fi)?',icon:'🏫',shortLabel:'Campus Experience'},
+    {id:'Q3',question:'Are you satisfied with the classroom engagement and experience (Quality of Faculty, Relevance of content delivered)?',icon:'👨‍🏫',shortLabel:'Classroom Engagement'},
+    {id:'Q4',question:'Are you happy with the Skill Development progress?',icon:'📈',shortLabel:'Skill Development'},
+    {id:'Q5',question:'Are you happy with Placement opportunities?',icon:'💼',shortLabel:'Placement Opportunities'}
   ];
   const questionStats = {};
   followupQuestions.forEach(q => { questionStats[q.id] = { yes:0, no:0, total:0 }; });
