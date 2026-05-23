@@ -1587,23 +1587,36 @@ function renderNPSFollowupYesNo() {
     {id:'Q4',question:'Are you happy with the Skill Development progress?',icon:'📈',shortLabel:'Skill Development'},
     {id:'Q5',question:'Are you happy with Placement opportunities?',icon:'💼',shortLabel:'Placement Opportunities'}
   ];
+
+  // Q2–Q5 are row-level (student-level) questions, NOT per-subject.
+  // Count them once per row regardless of how many subjects the row has.
   const questionStats = {};
   followupQuestions.forEach(q => { questionStats[q.id] = { yes:0, no:0, total:0 }; });
+
   window.RAW_SHEET_ROWS.forEach(row => {
-    for (let i = 1; i <= 7; i++) {
-      const subjectName = row[`subject${i}_Name`];
-      if (subjectName && subjectName.trim() !== '') {
-        [2,3,4,5].forEach(qNum => {
-          const answer = row[`subject${i}_Q${qNum}`];
-          const qKey = `Q${qNum}`;
-          if (answer === 'Yes') { questionStats[qKey].yes++; questionStats[qKey].total++; }
-          else if (answer === 'No') { questionStats[qKey].no++; questionStats[qKey].total++; }
-        });
-      }
-    }
+    // Only count rows that have at least one subject entry (i.e. valid student rows)
+    const hasSubject = [1,2,3,4,5,6,7].some(i => (row[`subject${i}_Name`]||'').trim() !== '');
+    if (!hasSubject) return;
+
+    [2, 3, 4, 5].forEach(qNum => {
+      const qKey = `Q${qNum}`;
+      // Try both column name formats: subject1_Q2 and standalone Q2
+      // First check if there's a direct row-level column
+      let answer = row[`Q${qNum}`] || row[`q${qNum}`] || '';
+      // If not found at row level, fall back to subject1's answer (they're the same per student)
+      if (!answer) answer = row[`subject1_Q${qNum}`] || '';
+      answer = answer.trim();
+      if (answer === 'Yes') { questionStats[qKey].yes++; questionStats[qKey].total++; }
+      else if (answer === 'No') { questionStats[qKey].no++; questionStats[qKey].total++; }
+    });
   });
-  const totalResponses = Object.values(questionStats).reduce((sum, q) => sum + q.total, 0);
+
+  const totalResponses = window.RAW_SHEET_ROWS.filter(row =>
+    [1,2,3,4,5,6,7].some(i => (row[`subject${i}_Name`]||'').trim() !== '')
+  ).length;
+
   if (badge) badge.textContent = totalResponses > 0 ? `${totalResponses} total responses` : 'No data';
+
   wrap.innerHTML = followupQuestions.map(q => {
     const stats = questionStats[q.id];
     const yesPercent = stats.total > 0 ? Math.round((stats.yes / stats.total) * 100) : 0;
@@ -1640,10 +1653,11 @@ function renderNPSFollowupYesNo() {
           <div style="flex:1;height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;">
             <div style="width:0%;height:100%;background:#10b981;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1);" data-width="${yesPercent}" class="nps-yesno-bar"></div>
           </div>
-          <span style="font-size:11px;font-weight:600;color:var(--ink3);min-width:60px;text-align:right;">${stats.total} responses</span>
+          <span style="font-size:11px;font-weight:600;color:var(--ink3);min-width:60px;text-align:right;">${stats.total} of ${totalResponses}</span>
         </div>
       </div>`;
   }).join('');
+
   setTimeout(() => {
     document.querySelectorAll('.nps-yesno-bar').forEach(bar => { bar.style.width = bar.getAttribute('data-width') + '%'; });
   }, 100);
