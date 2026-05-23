@@ -212,15 +212,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .nps-stat-val{font-family:var(--font-display);font-size:28px;color:#fde9a0;line-height:1;}
 .nps-stat-lbl{font-size:11px;color:rgba(253,233,160,0.55);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;}
 .nps-formula{font-size:11px;color:rgba(253,233,160,0.45);margin-top:4px;}
-.nps-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.nps-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);}
-.nps-bar-enhanced{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
-.nps-bar-item{display:grid;grid-template-columns:20px 1fr 36px;gap:10px;align-items:center;}
-.nps-bar-score-num{font-size:11px;font-weight:700;color:var(--ink3);text-align:center;}
-.nps-bar-outer{background:var(--bg2);border-radius:6px;height:22px;overflow:hidden;position:relative;}
-.nps-bar-inner{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden;display:flex;align-items:center;padding-left:8px;}
-.nps-bar-inner::after{content:'';position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 100%);background-size:200% 100%;animation:shimmer 2.5s infinite;}
-.nps-bar-count{font-size:11px;font-weight:600;color:var(--ink3);text-align:right;}
 
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -334,7 +325,7 @@ tbody tr{transition:background 0.12s;}
   .shell{grid-template-columns:1fr;}
   .main{padding:20px;}
   .metrics-row,.trend-kpi-row{grid-template-columns:1fr 1fr;}
-  .charts-grid,.nps-charts-row,.trend-charts-grid{grid-template-columns:1fr;}
+  .charts-grid{grid-template-columns:1fr;}
   .nps-hero-row{grid-template-columns:1fr;}
   .logo-name{font-size:18px;}
   .topbar{padding:0 16px;}
@@ -637,8 +628,7 @@ tbody tr{transition:background 0.12s;}
     </div>
   </div>
 
-  <!-- NPS ANALYTICS PANEL — FIXED: all missing IDs added -->
- <!-- NPS ANALYTICS PANEL -->
+  <!-- NPS ANALYTICS PANEL -->
   <div class="panel" id="panel-nps">
 
     <!-- Banner -->
@@ -662,106 +652,12 @@ tbody tr{transition:background 0.12s;}
       <div class="nps-hero-card detractors-card"><div class="nps-hero-icon">😞</div><div class="nps-hero-val" id="npsD_count">—</div><div class="nps-hero-lbl">Detractors</div><div class="nps-hero-pct" id="npsD_pct">—</div><div class="nps-hero-range">Score 1 – 6</div></div>
     </div>
 
-    <!-- ★ FIX: Donut + Bar charts (previously missing canvases) -->
-    <div class="nps-charts-row">
-      <div class="nps-chart-card">
-        <div class="card-header">
-          <div class="card-title">NPS Segment Distribution</div>
-          <span class="badge badge-primary" id="npsDonutBadge">—</span>
-        </div>
-        <div style="position:relative;height:220px;display:flex;align-items:center;justify-content:center;">
-          <canvas id="npsDonutChart" style="max-height:220px;"></canvas>
-          <div style="position:absolute;text-align:center;pointer-events:none;">
-            <div style="font-family:var(--font-display);font-size:32px;color:var(--gold-dark);" id="npsDonutScore">—</div>
-            <div style="font-size:11px;color:var(--ink3);">NPS Index</div>
-          </div>
-        </div>
-        <!-- ★ FIX: Legend for donut -->
-        <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#065f46;"><span style="width:10px;height:10px;background:#10b981;border-radius:2px;display:inline-block;"></span>Promoters</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#78350f;"><span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>Passives</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#7f1d1d;"><span style="width:10px;height:10px;background:#ef4444;border-radius:2px;display:inline-block;"></span>Detractors</span>
-        </div>
-      </div>
-      <div class="nps-chart-card">
-        <div class="card-header">
-          <div class="card-title">Score Frequency (1–10)</div>
-          <span class="badge badge-primary" id="npsBarBadge">—</span>
-        </div>
-        <div style="position:relative;height:220px;">
-          <canvas id="npsBarChart"></canvas>
-        </div>
-      <div class="nps-hero-card promoters-card">
-        <div class="nps-hero-icon">😊</div>
-        <div class="nps-hero-val" id="npsP_count">—</div>
-        <div class="nps-hero-lbl">Promoters</div>
-        <div class="nps-hero-pct" id="npsP_pct">—</div>
-        <div class="nps-hero-range">Score 9 – 10</div>
-      </div>
-    </div>
-
-    <!-- ★ FIX: Stacked breakdown bar (previously missing stkPromoters/stkPassives/stkDetractors) -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Promoter / Passive / Detractor Breakdown</div>
-        <span class="badge badge-gold" id="npsBreakdownBadge">—</span>
-      </div>
-      <div style="height:36px;border-radius:8px;overflow:hidden;display:flex;margin:8px 0 4px;">
-        <div id="stkPromoters" style="background:#10b981;height:100%;width:0%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-        <div id="stkPassives"  style="background:#f59e0b;height:100%;width:0%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-        <div id="stkDetractors" style="background:#ef4444;height:100%;width:0%;transition:width 1s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;justify-content:center;"></div>
-      </div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px;align-items:center;">
-        <span style="font-size:12px;color:#065f46;display:flex;align-items:center;gap:5px;">
-          <span style="width:10px;height:10px;background:#10b981;border-radius:2px;display:inline-block;"></span>
-          <span id="stkPromLabel">Promoters</span>
-        </span>
-        <span style="font-size:12px;color:#78350f;display:flex;align-items:center;gap:5px;">
-          <span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
-          <span id="stkPassLabel">Passives</span>
-        </span>
-        <span style="font-size:12px;color:#7f1d1d;display:flex;align-items:center;gap:5px;">
-          <span style="width:10px;height:10px;background:#ef4444;border-radius:2px;display:inline-block;"></span>
-          <span id="stkDetrLabel">Detractors</span>
-        </span>
-        <span class="badge badge-gold" id="npsStackedBadge" style="margin-left:auto;">—</span>
-      </div>
-    </div>
-
-    <!-- ★ FIX: Score-by-score enhanced bar list (previously missing npsBarEnhanced) -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Response Count by Score (1–10)</div>
-        <span class="badge badge-primary" id="npsBarEnhancedBadge">—</span>
-      <div class="nps-hero-card passives-card">
-        <div class="nps-hero-icon">😐</div>
-        <div class="nps-hero-val" id="npsN_count">—</div>
-        <div class="nps-hero-lbl">Passives</div>
-        <div class="nps-hero-pct" id="npsN_pct">—</div>
-        <div class="nps-hero-range">Score 7 – 8</div>
-      </div>
-      <div class="nps-bar-enhanced" id="npsBarEnhanced">
-        <div style="text-align:center;padding:24px;color:var(--ink3);">No data loaded</div>
-      <div class="nps-hero-card detractors-card">
-        <div class="nps-hero-icon">😞</div>
-        <div class="nps-hero-val" id="npsD_count">—</div>
-        <div class="nps-hero-lbl">Detractors</div>
-        <div class="nps-hero-pct" id="npsD_pct">—</div>
-        <div class="nps-hero-range">Score 1 – 6</div>
-      </div>
-    </div>
-
-    <!-- Follow-up question analysis -->
     <!-- Follow-up Yes/No Questions -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Follow-up Question Analysis</div>
-        <span class="badge badge-gold" id="npsFollowupBadge">—</span>
         <div class="card-title">Follow-up Questions — Yes/No Analysis</div>
         <span class="badge badge-gold" id="npsFollowupYesNoBadge">—</span>
       </div>
-      <div id="npsFollowupGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
-        <div style="text-align:center;padding:32px;color:var(--ink3);grid-column:1/-1;">Select a college to view follow-up data</div>
       <div id="npsFollowupYesNoGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
         <div style="text-align:center;padding:32px;color:var(--ink3);grid-column:1/-1;">Select a college to view follow-up question data</div>
       </div>
@@ -1038,7 +934,7 @@ let MENTORS=[],TABLE_DATA=[],DEPT_LIST=[],DEPT_STUDENT_COUNT={};
 let NPS_DATA={scores:[],promoters:0,passives:0,detractors:0,npsIndex:null,avg:0,total:0,scoreFreq:{}};
 let TREND_DATA={cycles:[],hasCycleCol:false,hasDedicatedSheet:false,cycleStats:{},mentorCycleStats:{}};
 let currentDetailPanel='summary',currentDeptFilter='all';
-let chartInstances={},npsDonutInst=null,npsBarChartInst=null;
+let chartInstances={};
 let trendRatingInst=null,trendNpsInst=null,trendHitRatioInst=null,trendSegInst=null;
 let needleAnimRAF=null;
 let landingData=[],landingSortState={col:'rank',dir:'asc'},landingLoaded=false;
@@ -1648,10 +1544,10 @@ function renderNPSSummary(){
 }
 
 /* ═══════════════════════════════════════════
-   NPS FULL PANEL — FIXED
+   NPS FULL PANEL
 ═══════════════════════════════════════════ */
 function renderNPSPanel(){
-  const{promoters,passives,detractors,npsIndex,avg:npsAvg,median,total,scoreFreq}=NPS_DATA;
+  const{promoters,passives,detractors,npsIndex,avg:npsAvg,median,total}=NPS_DATA;
   const promoPct=total>0?Math.round(promoters/total*100):0;
   const passPct=total>0?Math.round(passives/total*100):0;
   const detrPct=total>0?Math.round(detractors/total*100):0;
@@ -1673,97 +1569,10 @@ function renderNPSPanel(){
   document.getElementById('npsN_pct').textContent=total>0?`${passPct}% of respondents`:'—';
   document.getElementById('npsD_pct').textContent=total>0?`${detrPct}% of respondents`:'—';
 
-  // Donut badge + center score
-  const npsDonutScoreEl=document.getElementById('npsDonutScore');
-  if(npsDonutScoreEl){
-    if(npsIndex!==null){npsDonutScoreEl.textContent=(npsIndex>0?'+':'')+npsIndex;npsDonutScoreEl.style.color=getNpsColor(npsIndex);}
-    else npsDonutScoreEl.textContent='—';
-  }
-  const npsDonutBadgeEl=document.getElementById('npsDonutBadge');
-  if(npsDonutBadgeEl)npsDonutBadgeEl.textContent=total>0?`${total} responses`:'No data';
-
-  // Bar badge
-  const npsBarBadgeEl=document.getElementById('npsBarBadge');
-  if(npsBarBadgeEl)npsBarBadgeEl.textContent=total>0?'Scores 1–10':'No data';
-
-  // Breakdown badge
-  const npsBreakdownBadgeEl=document.getElementById('npsBreakdownBadge');
-  if(npsBreakdownBadgeEl)npsBreakdownBadgeEl.textContent=total>0?`${total} total`:'No data';
-
-  // Stacked bar
-  const stkP=document.getElementById('stkPromoters');
-  const stkN=document.getElementById('stkPassives');
-  const stkD=document.getElementById('stkDetractors');
-  const npsStackedBadgeEl=document.getElementById('npsStackedBadge');
-  const stkPromLabelEl=document.getElementById('stkPromLabel');
-  const stkPassLabelEl=document.getElementById('stkPassLabel');
-  const stkDetrLabelEl=document.getElementById('stkDetrLabel');
-
-  if(total>0){
-    if(stkP)stkP.style.width=promoPct+'%';
-    if(stkN)stkN.style.width=passPct+'%';
-    if(stkD)stkD.style.width=detrPct+'%';
-    if(stkP)stkP.innerHTML=promoPct>8?`<span style="color:white;font-size:11px;font-weight:600;">${promoPct}%</span>`:'';
-    if(stkN)stkN.innerHTML=passPct>8?`<span style="color:white;font-size:11px;font-weight:600;">${passPct}%</span>`:'';
-    if(stkD)stkD.innerHTML=detrPct>8?`<span style="color:white;font-size:11px;font-weight:600;">${detrPct}%</span>`:'';
-    if(stkPromLabelEl)stkPromLabelEl.textContent=`Promoters ${promoPct}%`;
-    if(stkPassLabelEl)stkPassLabelEl.textContent=`Passives ${passPct}%`;
-    if(stkDetrLabelEl)stkDetrLabelEl.textContent=`Detractors ${detrPct}%`;
-    if(npsStackedBadgeEl)npsStackedBadgeEl.textContent=`NPS = ${npsIndex!==null?(npsIndex>0?'+'+npsIndex:npsIndex):'—'}`;
-  }
-
-  // Enhanced score bar list
-  const npsBarEnhancedEl=document.getElementById('npsBarEnhanced');
-  if(total>0&&scoreFreq&&npsBarEnhancedEl){
-    const maxCount=Math.max(...Object.values(scoreFreq),1);
-    const barColors={1:'#ef4444',2:'#ef4444',3:'#f97316',4:'#f97316',5:'#f97316',6:'#f59e0b',7:'#eab308',8:'#84cc16',9:'#10b981',10:'#059669'};
-    const labels={1:'Extremely Unlikely',5:'Neutral',10:'Extremely Likely'};
-    npsBarEnhancedEl.innerHTML=Object.entries(scoreFreq).map(([score,count])=>{
-      const pct=total>0?Math.round(count/total*100):0;const w=Math.round(count/maxCount*100);
-      const seg=parseInt(score)>=9?'Promoter':parseInt(score)>=7?'Passive':'Detractor';
-      const segColor=parseInt(score)>=9?'#065f46':parseInt(score)>=7?'#78350f':'#7f1d1d';
-      const segBg=parseInt(score)>=9?'#d1fae5':parseInt(score)>=7?'#fef3c7':'#fee2e2';
-      return`<div class="nps-bar-item"><div class="nps-bar-score-num">${score}</div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="font-size:10px;color:var(--ink3);min-width:110px;">${labels[score]||''}</span><span style="font-size:10px;background:${segBg};color:${segColor};padding:1px 7px;border-radius:20px;font-weight:500;">${seg}</span></div><div class="nps-bar-outer"><div class="nps-bar-inner" style="width:0%;background:${barColors[score]};" data-width="${w}">${count>0&&w>15?`<span style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.9)">${count}</span>`:''}</div></div></div><div class="nps-bar-count">${pct}%</div></div>`;
-    }).join('');
-    setTimeout(()=>{document.querySelectorAll('.nps-bar-inner').forEach(bar=>{bar.style.width=bar.getAttribute('data-width')+'%';});},300);
-  }else if(npsBarEnhancedEl){
-    npsBarEnhancedEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--ink3);">No NPS data. Ensure a column named <code>nps_score</code> exists in the sheet.</div>';
-  }
-
-  // Destroy old chart instances
-  if(npsDonutInst){npsDonutInst.destroy();npsDonutInst=null;}
-  if(npsBarChartInst){npsBarChartInst.destroy();npsBarChartInst=null;}
-
-  if(total>0){
-    // Donut chart
-    const donutCanvas=document.getElementById('npsDonutChart');
-    if(donutCanvas){
-      npsDonutInst=new Chart(donutCanvas,{
-        type:'doughnut',
-        data:{labels:['Promoters','Passives','Detractors'],datasets:[{data:[promoters,passives,detractors],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderColor:['#d1fae5','#fef3c7','#fee2e2'],borderWidth:3,hoverOffset:8}]},
-        options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',borderColor:'#c48a00',borderWidth:1,padding:10,callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/total*100);return` ${ctx.label}: ${ctx.parsed} (${pct}%)`; }}},datalabels:{color:'#fff',font:{weight:'bold',size:12},formatter:(v)=>{const pct=Math.round(v/total*100);return pct>8?pct+'%':'';}}}}
-        ,plugins:[ChartDataLabels]
-      });
-    }
-
-    // Bar chart
-    const barCanvas=document.getElementById('npsBarChart');
-    if(barCanvas){
-      const scoreLabels=Object.keys(scoreFreq),scoreData=Object.values(scoreFreq);
-      const barBgColors=scoreLabels.map(s=>{const n=parseInt(s);if(n>=9)return'rgba(16,185,129,0.85)';if(n>=7)return'rgba(245,158,11,0.85)';return'rgba(239,68,68,0.80)';});
-      const barBorderColors=scoreLabels.map(s=>{const n=parseInt(s);if(n>=9)return'#059669';if(n>=7)return'#d97706';return'#dc2626';});
-      npsBarChartInst=new Chart(barCanvas,{
-        type:'bar',
-        data:{labels:scoreLabels,datasets:[{label:'Responses',data:scoreData,backgroundColor:barBgColors,borderColor:barBorderColors,borderWidth:1.5,borderRadius:5,borderSkipped:false}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(42,24,0,0.92)',titleColor:'#fde9a0',bodyColor:'#f5e9c8',callbacks:{title:ctx=>`Score ${ctx[0].label}`,label:ctx=>{const pct=total>0?Math.round(ctx.parsed.y/total*100):0;const seg=parseInt(ctx.label)>=9?'Promoter':parseInt(ctx.label)>=7?'Passive':'Detractor';return[` Count: ${ctx.parsed.y} (${pct}%)`,` Segment: ${seg}`];}}},datalabels:{anchor:'end',align:'end',color:ctx=>barBorderColors[ctx.dataIndex],font:{weight:'bold',size:10},formatter:v=>v>0?v:''}},scales:{x:{ticks:{font:{size:11},color:'#8a6020'},grid:{display:false},border:{display:false}},y:{ticks:{stepSize:1,font:{size:10},color:'#8a6020'},grid:{color:'rgba(120,80,10,0.07)'},border:{display:false}}},animation:{duration:800,easing:'easeOutQuart'}}
-        ,plugins:[ChartDataLabels]
-      });
-    }
-  }
-    renderNPSFollowupYesNo();
-
+  renderNPSFollowupYesNo();
 }
-  function renderNPSFollowupYesNo() {
+
+function renderNPSFollowupYesNo() {
   const wrap = document.getElementById('npsFollowupYesNoGrid');
   const badge = document.getElementById('npsFollowupYesNoBadge');
   if (!wrap) return;
