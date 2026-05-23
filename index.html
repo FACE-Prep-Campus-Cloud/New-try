@@ -1217,9 +1217,9 @@ async function runStudentVoice(){
 
   // Collect Q6 and Q7 responses
   const q6Responses=[];const q7Responses=[];
-  window.RAW_SHEET_ROWS.forEach(row=>{
-    const q6=(row['Q6']||row['q6']||row['Q6_response']||row['q6_response']||row['What do you like about FACE Prep']||row['Q6 - What do you like about the FACE Prep program?']||'').trim();
-    const q7=(row['Q7']||row['q7']||row['Q7_response']||row['q7_response']||row['What would you like FACE Prep to improve']||row['Q7 - What is one thing you would like FACE Prep to improve in next year?']||'').trim();
+ window.RAW_SHEET_ROWS.forEach(row=>{
+    const q6=(row['nps_likes']||row['Q6']||row['q6']||row['Q6_response']||row['q6_response']||row['What do you like about FACE Prep']||row['Q6 - What do you like about the FACE Prep program?']||'').trim();
+    const q7=(row['nps_improve']||row['Q7']||row['q7']||row['Q7_response']||row['q7_response']||row['What would you like FACE Prep to improve']||row['Q7 - What is one thing you would like FACE Prep to improve in next year?']||'').trim();
     // Also try to find columns by partial key match
     if(!q6){
       const k=Object.keys(row).find(k=>k.toLowerCase().includes('q6')||k.toLowerCase().includes('like about'));
@@ -1238,8 +1238,8 @@ async function runStudentVoice(){
     // Try to find Q6/Q7 columns by scanning first row keys
     const firstRow=window.RAW_SHEET_ROWS[0]||{};
     const allKeys=Object.keys(firstRow);
-    const q6Key=allKeys.find(k=>/q6|like about|what.*like/i.test(k));
-    const q7Key=allKeys.find(k=>/q7|improve|what.*would|one thing/i.test(k));
+    const q6Key=allKeys.find(k=>/nps_likes|q6|like about|what.*like/i.test(k));
+    const q7Key=allKeys.find(k=>/nps_improve|q7|improve|what.*would|one thing/i.test(k));
     if(q6Key)window.RAW_SHEET_ROWS.forEach(r=>{if(r[q6Key]&&r[q6Key].trim().length>2)validQ6.push(r[q6Key].trim());});
     if(q7Key)window.RAW_SHEET_ROWS.forEach(r=>{if(r[q7Key]&&r[q7Key].trim().length>2)validQ7.push(r[q7Key].trim());});
   }
