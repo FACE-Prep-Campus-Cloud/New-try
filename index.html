@@ -713,7 +713,7 @@ tbody tr{transition:background 0.12s;}
     <div class="trend-hero-banner">
       <div>
         <div class="trend-eyebrow" id="trendEyebrow">Historical Analytics · Sep 2025 – Apr 2026</div>
-        <div class="trend-hero-title" id="trendHeroTitle">Trend Over Time</div>
+        <div class="trend-hero-title" id="trendHeroTitle">Trend Over Time · Sep 2025 – Apr 2026</div>
         <div class="trend-hero-sub" id="trendHeroSub">Track how ratings, NPS, Hit Ratio, and response volume change across months</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;" id="trendCycleBtnsWrap">
@@ -1385,6 +1385,8 @@ else{srcIndicator.style.display='none';document.getElementById('trendHeroSub').t
   const _tdr=getTrendDateRange();
   const _eyebrow=document.getElementById('trendEyebrow');
   if(_eyebrow)_eyebrow.textContent=`Historical Analytics · ${_tdr}`;
+  const _heroTitle=document.getElementById('trendHeroTitle');
+  if(_heroTitle)_heroTitle.textContent=`Trend Over Time · ${_tdr}`;
   const _rct=document.getElementById('trendRatingCardTitle');
   if(_rct)_rct.textContent=`Average Rating Trend · ${_tdr}`;
   const _tct=document.getElementById('trendTableCardTitle');
