@@ -712,7 +712,7 @@ tbody tr{transition:background 0.12s;}
   <div class="panel" id="panel-trends">
     <div class="trend-hero-banner">
       <div>
-        <div class="trend-eyebrow">Historical Analytics · Sep 2025 – Apr 2026</div>
+        <div class="trend-eyebrow" id="trendEyebrow">Historical Analytics · Sep 2025 – Apr 2026</div>
         <div class="trend-hero-title" id="trendHeroTitle">Trend Over Time</div>
         <div class="trend-hero-sub" id="trendHeroSub">Track how ratings, NPS, Hit Ratio, and response volume change across months</div>
       </div>
@@ -749,7 +749,9 @@ tbody tr{transition:background 0.12s;}
     </div>
     <div class="trend-charts-grid">
       <div class="trend-chart-card full-width">
-        <div class="card-header"><div class="card-title">Average Rating Trend · Sep 2025 – Apr 2026</div><span class="badge badge-gold" id="trendRatingBadge">—</span></div>
+        <div class="card-header">
+          <div class="card-title" id="trendRatingCardTitle">Average Rating Trend · Sep 2025 – Apr 2026</div>
+          <span class="badge badge-gold" id="trendRatingBadge">—</span></div>
         <div style="position:relative;width:100%;height:260px;"><canvas id="trendRatingChart"></canvas></div>
       </div>
       <div class="trend-chart-card">
@@ -771,7 +773,9 @@ tbody tr{transition:background 0.12s;}
       </div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">Month-by-Month Summary Table · Sep 2025 – Apr 2026</div><span class="badge badge-gold" id="trendTableBadge">—</span></div>
+      <div class="card-header">
+        <div class="card-title" id="trendTableCardTitle">Month-by-Month Summary Table · Sep 2025 – Apr 2026</div>
+        <span class="badge badge-gold" id="trendTableBadge">—</span></div>
       <div class="trend-cycle-table-wrap">
         <table class="trend-cycle-table">
           <thead><tr><th>Month</th><th>Responses</th><th>Avg Rating</th><th>Δ Rating</th><th>NPS Index</th><th>Δ NPS</th><th>Hit Ratio</th><th>Δ Hit Ratio</th><th>Promoters %</th><th>Detractors %</th><th>Mentors</th></tr></thead>
@@ -1363,13 +1367,28 @@ function renderStudentVoiceResult(likes,improvements,q6Count,q7Count){
 ═══════════════════════════════════════════ */
 function buildTrendCycleButtons(){const{cycles}=TREND_DATA;const wrap=document.getElementById('trendCycleBtns');if(!cycles.length){wrap.innerHTML='';return;}wrap.innerHTML=cycles.map((c,i)=>`<button class="trend-cycle-btn${i===cycles.length-1?' active':''}" onclick="selectTrendCycle('${c}',this)">${c}</button>`).join('');}
 function selectTrendCycle(cycle,btn){document.querySelectorAll('.trend-cycle-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderTrendKpis(cycle);}
+function getTrendDateRange(){
+  const{cycles}=TREND_DATA;
+  if(!cycles||!cycles.length)return'Sep 2025 – Apr 2026';
+  const first=cycles[0];
+  const last=cycles[cycles.length-1];
+  return first===last?first:`${first} – ${last}`;
+}
 function renderTrendPanel(){
   const{cycles,hasCycleCol,hasDedicatedSheet,cycleStats}=TREND_DATA;const collegeName=currentCollege?currentCollege.name:'';const hasConfig=!!DEDICATED_TREND_SHEETS[collegeName];
   const srcIndicator=document.getElementById('trendSourceIndicator');
   if(hasDedicatedSheet){srcIndicator.style.display='inline-flex';srcIndicator.innerHTML=`<span class="trend-source-badge">● Live Sheet Data</span>`;document.getElementById('trendHeroSub').textContent=`Live trend data from dedicated sheet · ${cycles.length} months tracked`;}
   else if(hasConfig){srcIndicator.style.display='inline-flex';srcIndicator.innerHTML=`<span class="trend-source-badge simulated">Sheet load failed — showing simulated</span>`;document.getElementById('trendHeroSub').textContent=`Could not load dedicated trend sheet — showing simulated preview data`;}
   else if(hasCycleCol){srcIndicator.style.display='none';document.getElementById('trendHeroSub').textContent=`Tracking ${cycles.length} months with real cycle data from your sheet`;}
-  else{srcIndicator.style.display='none';document.getElementById('trendHeroSub').textContent=`Preview mode — simulated trend for Sep 2025–Apr 2026.`;}
+// REPLACE WITH:
+else{srcIndicator.style.display='none';document.getElementById('trendHeroSub').textContent=`Preview mode — simulated trend for Sep 2025–Apr 2026.`;}
+  const _tdr=getTrendDateRange();
+  const _eyebrow=document.getElementById('trendEyebrow');
+  if(_eyebrow)_eyebrow.textContent=`Historical Analytics · ${_tdr}`;
+  const _rct=document.getElementById('trendRatingCardTitle');
+  if(_rct)_rct.textContent=`Average Rating Trend · ${_tdr}`;
+  const _tct=document.getElementById('trendTableCardTitle');
+  if(_tct)_tct.textContent=`Month-by-Month Summary Table · ${_tdr}`;
   document.getElementById('trendRatingBadge').textContent=`${cycles.length} months`;document.getElementById('trendNpsBadge').textContent=`${cycles.length} months`;document.getElementById('trendHitRatioBadge').textContent=`${cycles.length} months`;document.getElementById('trendSegBadge').textContent=`${cycles.length} months`;document.getElementById('trendTableBadge').textContent=`${cycles.length} months`;
   if(!cycles.length)return;
   renderTrendKpis(cycles[cycles.length-1]);renderTrendCharts();renderTrendCycleTable();
