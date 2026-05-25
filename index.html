@@ -947,10 +947,11 @@ function showDetailPanel(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el)el.classList.add('active');
   currentDetailPanel=id;
-  const meta={summary:['Performance Analytics','Overview'],mentors:['Mentor Analytics','Performance'],nps:['NPS Analytics','NPS Score Distribution'],trends:['Historical Analytics','Trend Over Time · Sep 2025 – Apr 2026']};
+const meta={summary:['Performance Analytics','Overview'],mentors:['Mentor Analytics','Performance'],nps:['NPS Analytics','NPS Score Distribution'],trends:['','']};
   document.getElementById('pageEyebrow').textContent=meta[id][0];
   document.getElementById('pageTitle').textContent=meta[id][1];
   document.getElementById('pageSub').textContent=currentCollege?currentCollege.name:'—';
+  document.querySelector('.page-header').style.display=id==='trends'?'none':'flex';
   document.getElementById('deptFilterRow').style.visibility=id==='mentors'?'visible':'hidden';
   if(id==='mentors'&&MENTORS.length){renderMentorTable();renderDeptStatsPanel(currentDeptFilter);}
   if(id==='nps'&&NPS_DATA.total){renderNPSPanel();}
