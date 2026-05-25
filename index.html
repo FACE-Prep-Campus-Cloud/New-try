@@ -1172,8 +1172,6 @@ function renderNPSPanel(){
   if(npsIndex!==null)animateCounter(idxEl,npsIndex,1400,'');else idxEl.textContent='—';
   document.getElementById('npsIndexDesc').textContent=total>0?getNpsLabel(npsIndex):'No NPS data available in sheet';
   document.getElementById('npsTotalBig').textContent=total>0?total:'—';
-  document.getElementById('npsAvgBig').textContent=total>0?npsAvg.toFixed(1):'—';
-  document.getElementById('npsMedianBig').textContent=total>0?median.toFixed(1):'—';
   document.getElementById('npsP_count').textContent=total>0?promoters:'—';document.getElementById('npsN_count').textContent=total>0?passives:'—';document.getElementById('npsD_count').textContent=total>0?detractors:'—';
   document.getElementById('npsP_pct').textContent=total>0?`${promoPct}% of respondents`:'—';document.getElementById('npsN_pct').textContent=total>0?`${passPct}% of respondents`:'—';document.getElementById('npsD_pct').textContent=total>0?`${detrPct}% of respondents`:'—';
   renderNPSFollowupYesNo();
