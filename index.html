@@ -1188,52 +1188,97 @@ function renderNPSFollowupYesNo(){
   const wrap=document.getElementById('npsFollowupYesNoGrid');const badge=document.getElementById('npsFollowupYesNoBadge');
   if(!wrap)return;
   if(!window.RAW_SHEET_ROWS||window.RAW_SHEET_ROWS.length===0){wrap.innerHTML='<div style="text-align:center;padding:32px;color:var(--ink3);grid-column:1/-1;">No data available.</div>';if(badge)badge.textContent='No data';return;}
+
   const followupQuestions=[
-    {id:'Q2',question:'Are you satisfied with the overall campus experience (Classroom, Campus Infrastructure, Network / Wi-Fi)?',shortLabel:'Campus Experience'},
-    {id:'Q3',question:'Are you satisfied with the classroom engagement and experience (Quality of Faculty, Relevance of content delivered)?',shortLabel:'Classroom Engagement'},
-    {id:'Q4',question:'Are you happy with the Skill Development progress?',shortLabel:'Skill Development'},
-    {id:'Q5',question:'Are you happy with Placement opportunities?',shortLabel:'Placement Opportunities'}
+    {id:'Q2',label:'Campus experience',question:'Satisfied with overall campus experience — classroom, infrastructure & Wi-Fi?',icon:'ti-building'},
+    {id:'Q3',label:'Classroom engagement',question:'Satisfied with classroom engagement — faculty quality & content relevance?',icon:'ti-books'},
+    {id:'Q4',label:'Skill development',question:'Happy with skill development progress so far?',icon:'ti-trending-up'},
+    {id:'Q5',label:'Placement opportunities',question:'Happy with placement opportunities available?',icon:'ti-briefcase'}
   ];
-  const questionStats={};followupQuestions.forEach(q=>{questionStats[q.id]={yes:0,no:0,total:0};});
-  window.RAW_SHEET_ROWS.forEach(row=>{const hasSubject=[1,2,3,4,5,6,7].some(i=>(row[`subject${i}_Name`]||'').trim()!=='');if(!hasSubject)return;[2,3,4,5].forEach(qNum=>{const qKey=`Q${qNum}`;let answer=row[`Q${qNum}`]||row[`q${qNum}`]||'';if(!answer)answer=row[`subject1_Q${qNum}`]||'';answer=answer.trim();if(answer==='Yes'){questionStats[qKey].yes++;questionStats[qKey].total++;}else if(answer==='No'){questionStats[qKey].no++;questionStats[qKey].total++;}});});
+
+  const questionStats={};
+  followupQuestions.forEach(q=>{questionStats[q.id]={yes:0,no:0,total:0};});
+
+  window.RAW_SHEET_ROWS.forEach(row=>{
+    const hasSubject=[1,2,3,4,5,6,7].some(i=>(row[`subject${i}_Name`]||'').trim()!=='');
+    if(!hasSubject)return;
+    [2,3,4,5].forEach(qNum=>{
+      const qKey=`Q${qNum}`;
+      let answer=row[`Q${qNum}`]||row[`q${qNum}`]||'';
+      if(!answer)answer=row[`subject1_Q${qNum}`]||'';
+      answer=answer.trim();
+      if(answer==='Yes'){questionStats[qKey].yes++;questionStats[qKey].total++;}
+      else if(answer==='No'){questionStats[qKey].no++;questionStats[qKey].total++;}
+    });
+  });
+
   const totalResponses=window.RAW_SHEET_ROWS.filter(row=>[1,2,3,4,5,6,7].some(i=>(row[`subject${i}_Name`]||'').trim()!=='')).length;
   if(badge)badge.textContent=totalResponses>0?`${totalResponses} total responses`:'No data';
+
+  function palette(p){
+    if(p>=70)return{bar:'#1D9E75',iconBg:'#EAF3DE',iconColor:'#3B6D11',statusBg:'#EAF3DE',statusColor:'#3B6D11',statusLabel:'Excellent',pctColor:'#1D9E75'};
+    if(p>=50)return{bar:'#BA7517',iconBg:'#FAEEDA',iconColor:'#633806',statusBg:'#FAEEDA',statusColor:'#633806',statusLabel:'Good',pctColor:'#BA7517'};
+    return{bar:'#E24B4A',iconBg:'#FCEBEB',iconColor:'#791F1F',statusBg:'#FCEBEB',statusColor:'#791F1F',statusLabel:'Needs improvement',pctColor:'#E24B4A'};
+  }
+
+  function donut(yesPct,color){
+    const r=18,cx=24,cy=24,circ=2*Math.PI*r;
+    const filled=(yesPct/100)*circ;
+    return `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="transform:rotate(-90deg)">
+      <circle cx="${cx}" cy="${cy}" r="${r}" stroke="#f5e9c8" stroke-width="5" fill="none"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" stroke="${color}" stroke-width="5" fill="none"
+        stroke-dasharray="${filled.toFixed(1)} ${(circ-filled).toFixed(1)}" stroke-linecap="round"/>
+    </svg>`;
+  }
+
+wrap.style.gridTemplateColumns='repeat(2,1fr)';
+  wrap.style.gap='10px';
+  wrap.style.marginTop='4px';
+
   wrap.innerHTML=followupQuestions.map(q=>{
     const stats=questionStats[q.id];
-    const yesPercent=stats.total>0?Math.round((stats.yes/stats.total)*100):0;
-    const noPercent=stats.total>0?Math.round((stats.no/stats.total)*100):0;
-    const statusColor=yesPercent>=70?'#065f46':yesPercent>=50?'#78350f':'#7f1d1d';
-    const statusBg=yesPercent>=70?'#d1fae5':yesPercent>=50?'#fef3c7':'#fee2e2';
-    const statusBorder=yesPercent>=70?'#6ee7b7':yesPercent>=50?'#fcd34d':'#fca5a5';
-    const statusLabel=yesPercent>=70?'Excellent':yesPercent>=50?'Good':'Needs Improvement';
-    const barAccent=yesPercent>=70?'#10b981':yesPercent>=50?'#f59e0b':'#ef4444';
-    return`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm);">
-      <div style="margin-bottom:14px;">
-        <div style="font-size:15px;font-family:var(--font-display);font-weight:500;color:var(--ink);margin-bottom:6px;">${q.shortLabel}</div>
-        <div style="font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:8px;">${q.question}</div>
-        <span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${statusBg};color:${statusColor};border:1px solid ${statusBorder};">${statusLabel} · ${yesPercent}% positive</span>
+    const total=stats.yes+stats.no;
+    const yesPct=total>0?Math.round(stats.yes/total*100):0;
+    const noPct=100-yesPct;
+    const pal=palette(yesPct);
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:3px;">${q.label}</div>
+          <div style="font-size:12px;color:var(--ink3);line-height:1.45;">${q.question}</div>
+        </div>
+        <span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:${pal.statusBg};color:${pal.statusColor};">${pal.statusLabel}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-        <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 12px;text-align:center;">
-          <div style="font-family:var(--font-display);font-size:24px;color:#065f46;line-height:1;">${stats.yes}</div>
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#065f46;margin-top:2px;">Yes</div>
-          <div style="font-size:11px;color:#065f46;opacity:0.75;">${yesPercent}%</div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:var(--ink3);width:26px;flex-shrink:0;">Yes</span>
+          <div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;">
+            <div style="width:0%;height:100%;border-radius:4px;background:${pal.bar};transition:width 0.9s cubic-bezier(.22,1,.36,1);" data-w="${yesPct}" class="nfq-bar-fill"></div>
+          </div>
+          <span style="font-size:12px;font-weight:500;color:var(--ink);min-width:20px;text-align:right;">${stats.yes}</span>
         </div>
-        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;text-align:center;">
-          <div style="font-family:var(--font-display);font-size:24px;color:#7f1d1d;line-height:1;">${stats.no}</div>
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#7f1d1d;margin-top:2px;">No</div>
-          <div style="font-size:11px;color:#7f1d1d;opacity:0.75;">${noPercent}%</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:var(--ink3);width:26px;flex-shrink:0;">No</span>
+          <div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;">
+            <div style="width:0%;height:100%;border-radius:4px;background:var(--border2);transition:width 0.9s cubic-bezier(.22,1,.36,1);" data-w="${noPct}" class="nfq-bar-fill"></div>
+          </div>
+          <span style="font-size:12px;font-weight:500;color:var(--ink);min-width:20px;text-align:right;">${stats.no}</span>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="flex:1;max-width:80px;height:6px;background:var(--bg2);border-radius:6px;overflow:hidden;">
-          <div style="width:0%;height:100%;background:${barAccent};border-radius:6px;" data-width="${yesPercent}" class="nps-yesno-bar"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);">
+        <div>
+          <div style="font-size:24px;font-weight:600;line-height:1;color:${pal.pctColor};">${yesPct}%</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:3px;">positive response</div>
         </div>
-        <span style="font-size:12px;font-weight:500;color:${statusColor};min-width:44px;text-align:right;">${stats.total} of ${totalResponses}</span>
       </div>
     </div>`;
   }).join('');
-  setTimeout(()=>{document.querySelectorAll('.nps-yesno-bar').forEach(bar=>{bar.style.transition='width 1s cubic-bezier(.22,1,.36,1)';bar.style.width=bar.getAttribute('data-width')+'%';});},100);
+
+  setTimeout(()=>{
+    document.querySelectorAll('.nfq-bar-fill').forEach(el=>{
+      el.style.width=el.getAttribute('data-w')+'%';
+    });
+  },100);
 }
 
 /* ═══════════════════════════════════════════
