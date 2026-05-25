@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>  
 <style>
 :root {
   --bg:#fdf8ed;--bg2:#f5e9c8;--surface:#ffffff;--surface2:#fdf4e0;
@@ -1519,11 +1521,133 @@ function landingFilterRender(){
    DOWNLOAD
 ═══════════════════════════════════════════ */
 function statusBadgeInline(r){if(r>=4.3)return'<span style="background:#fde9a0;color:#5c3600;border:1px solid #e6b84a;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Excellent</span>';if(r>=4.0)return'<span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Good</span>';if(r>=3.5)return'<span style="background:#fef3c7;color:#78350f;border:1px solid #fcd34d;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Average</span>';return'<span style="background:#fee2e2;color:#7f1d1d;border:1px solid #fca5a5;border-radius:20px;font-size:11px;padding:2px 9px;font-weight:500">Needs work</span>';}
-function downloadReport(){
-  if(currentMode==='overview'){if(!landingData.length){alert('No data to download.');return;}const now=new Date().toLocaleString();const rows=landingGetSorted();const tableRows=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;font-weight:700;text-align:center;">${r.rank}</td><td style="padding:10px 14px;font-weight:600;">${r.college}</td><td style="padding:10px 14px;text-align:center;color:#5c3600;">${r.rating!==null?r.rating.toFixed(1):'—'}</td><td style="padding:10px 14px;text-align:center;">${r.nps!==null?(r.nps>0?'+':'')+r.nps:'—'}</td><td style="padding:10px 14px;text-align:center;">${r.hit!==null?r.hit.toFixed(1)+'%':'—'}</td></tr>`).join('');const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>College Overview Report</title></head><body style="font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;margin:0;"><div style="background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:24px 40px;"><div style="font-family:Georgia,serif;font-size:24px">College Overview Report</div><div style="font-size:12px;opacity:0.7;margin-top:4px">FacePrep Campus · ${now}</div></div><div style="padding:36px 40px;"><table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">Rank</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);">College</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">Avg Rating</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">NPS</th><th style="padding:11px 14px;color:#fde9a0;background:linear-gradient(135deg,#4a2800,#7a4f00);text-align:center;">Hit Ratio</th></tr></thead><tbody>${tableRows}</tbody></table></div></body></html>`;const blob=new Blob([html],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`College-Overview-${new Date().toISOString().split('T')[0]}.html`;a.click();URL.revokeObjectURL(a.href);}
-  else{if(!MENTORS.length&&!NPS_DATA.total){alert('No data to download.');return;}const collegeName=currentCollege?.name||'Report';const now=new Date().toLocaleString();const{promoters,passives,detractors,npsIndex,avg:npsAvg,total:npsTotal}=NPS_DATA;const npsDisplay=npsIndex!==null?(npsIndex>0?`+${npsIndex}`:`${npsIndex}`):'N/A';const tableHead=cols=>`<thead><tr>${cols.map(c=>`<th style="text-align:left;padding:11px 14px;font-size:10px;font-weight:600;color:#fde9a0;text-transform:uppercase;background:linear-gradient(135deg,#4a2800,#7a4f00)">${c}</th>`).join('')}</tr></thead>`;const mentorRows=MENTORS.map((m,idx)=>`<tr style="background:${idx%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;font-weight:600">${m.rank}</td><td style="padding:10px 14px;font-weight:600">${m.name}</td><td style="padding:10px 14px">${m.depts.join(', ')}</td><td style="padding:10px 14px;color:#5c3600">${m.bayesianRating.toFixed(2)}</td><td style="padding:10px 14px">${m.rating.toFixed(1)}/5</td><td style="padding:10px 14px">${m.responses}</td><td style="padding:10px 14px">${statusBadgeInline(m.rating)}</td></tr>`).join('');const{cycles,cycleStats}=TREND_DATA;const trendRows=cycles.slice().reverse().map((c,i)=>{const s=cycleStats[c];return`<tr style="background:${i%2===0?'#fff':'#fdf8ed'}"><td style="padding:10px 14px;font-weight:600;color:#5c3600">${c}</td><td style="padding:10px 14px">${s.responses||'—'}</td><td style="padding:10px 14px;color:#5c3600">${s.ratingAvg!==null?s.ratingAvg.toFixed(2):'—'}</td><td style="padding:10px 14px;color:${getNpsColor(s.npsIndex)}">${s.npsIndex!==null?(s.npsIndex>0?'+':'')+s.npsIndex:'—'}</td><td style="padding:10px 14px;color:#065f46">${s.hitRatio!==null?s.hitRatio.toFixed(1)+'%':'—'}</td><td style="padding:10px 14px">${s.promoterPct!==null?s.promoterPct+'%':'—'}</td><td style="padding:10px 14px">${s.detractorPct!==null?s.detractorPct+'%':'—'}</td></tr>`;}).join('');const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Performance Report — ${collegeName}</title></head><body style="font-family:Arial,sans-serif;background:#fdf8ed;color:#2a1800;margin:0;"><div style="background:linear-gradient(135deg,#4a2800,#7a4f00,#a06e00);color:#fde9a0;padding:28px 40px;"><div style="font-family:Georgia,serif;font-size:26px">Performance Report</div><div>${collegeName}</div><div style="font-size:11px;opacity:0.75;margin-top:4px">Generated: ${now}</div></div><div style="padding:36px 40px;max-width:1100px;margin:0 auto;"><div style="margin-bottom:40px;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">NPS Overview</div><div style="background:linear-gradient(135deg,#4a2800,#7a4f00);border-radius:14px;padding:24px;"><div style="font-family:Georgia,serif;font-size:56px;color:#f5c842;">${npsDisplay}</div><div style="font-size:12px;color:rgba(253,233,160,0.7)">${getNpsLabel(npsIndex)}</div></div></div><div style="margin-bottom:40px;"><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">Trend Over Time</div><table style="width:100%;border-collapse:collapse;font-size:13px;">${tableHead(['Month','Responses','Avg Rating','NPS Index','Hit Ratio','Promoters %','Detractors %'])}<tbody>${trendRows}</tbody></table></div><div><div style="font-family:Georgia,serif;font-size:20px;color:#5c3600;border-bottom:2px solid #e6b84a;padding-bottom:10px;margin-bottom:18px;">Mentor Rankings (Bayesian)</div><table style="width:100%;border-collapse:collapse;font-size:13px;">${tableHead(['Rank','Mentor','Department(s)','Bayesian Score','Avg Rating','Responses','Status'])}<tbody>${mentorRows}</tbody></table></div></div></body></html>`;const blob=new Blob([html],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.html`;a.click();URL.revokeObjectURL(a.href);}
-}
+async function downloadReport(){
+  const btn=document.getElementById('downloadBtn');
+  btn.disabled=true;btn.textContent='⏳ Generating PDF…';
 
+  const collegeName=currentCollege?.name||'College Overview';
+  const now=new Date().toLocaleString();
+
+  try{
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const margin=10;
+
+    // Panels to capture based on current mode
+    let panelIds=[];
+    if(currentMode==='overview'){
+      panelIds=['panel-landing'];
+    } else {
+      panelIds=['panel-summary','panel-mentors','panel-nps','panel-trends'];
+    }
+
+    // Temporarily show all detail panels for capture
+    const allPanels=document.querySelectorAll('.panel');
+    const prevStates=[];
+    allPanels.forEach(p=>{
+      prevStates.push({el:p,display:p.style.display,cls:p.className});
+    });
+
+    let isFirst=true;
+
+    for(const pid of panelIds){
+      const panel=document.getElementById(pid);
+      if(!panel)continue;
+
+      // Show only this panel temporarily
+      allPanels.forEach(p=>p.style.display='none');
+      panel.style.display='flex';
+      panel.style.opacity='1';
+
+      // Wait for render
+      await new Promise(r=>setTimeout(r,300));
+
+      const canvas=await html2canvas(panel,{
+        scale:1.5,
+        useCORS:true,
+        allowTaint:true,
+        backgroundColor:'#fdf8ed',
+        logging:false,
+        windowWidth:1200,
+      });
+
+      const imgData=canvas.toDataURL('image/jpeg',0.92);
+      const imgW=pageW-margin*2;
+      const imgH=(canvas.height*imgW)/canvas.width;
+
+      if(!isFirst)pdf.addPage();
+      isFirst=false;
+
+      // Add header bar
+      pdf.setFillColor(74,40,0);
+      pdf.rect(0,0,pageW,14,'F');
+      pdf.setFontSize(9);
+      pdf.setTextColor(253,233,160);
+      pdf.text('FacePrep Campus · Performance Dashboard',margin,9);
+      pdf.text(collegeName,pageW/2,9,{align:'center'});
+      pdf.text(now,pageW-margin,9,{align:'right'});
+
+      // If content fits in one page
+      if(imgH<=pageH-20){
+        pdf.addImage(imgData,'JPEG',margin,16,imgW,imgH);
+      } else {
+        // Split tall content across pages
+        const ratio=canvas.width/imgW;
+        let yOffset=0;
+        const sliceH=Math.floor((pageH-20)*ratio);
+
+        while(yOffset<canvas.height){
+          const sliceCanvas=document.createElement('canvas');
+          sliceCanvas.width=canvas.width;
+          sliceCanvas.height=Math.min(sliceH,canvas.height-yOffset);
+          const ctx=sliceCanvas.getContext('2d');
+          ctx.drawImage(canvas,0,-yOffset);
+          const sliceData=sliceCanvas.toDataURL('image/jpeg',0.92);
+          const sliceImgH=(sliceCanvas.height*imgW)/canvas.width;
+
+          if(yOffset>0){
+            pdf.addPage();
+            pdf.setFillColor(74,40,0);
+            pdf.rect(0,0,pageW,14,'F');
+            pdf.setFontSize(9);
+            pdf.setTextColor(253,233,160);
+            pdf.text('FacePrep Campus · Performance Dashboard',margin,9);
+            pdf.text(collegeName,pageW/2,9,{align:'center'});
+            pdf.text(now,pageW-margin,9,{align:'right'});
+          }
+          pdf.addImage(sliceData,'JPEG',margin,16,imgW,sliceImgH);
+          yOffset+=sliceH;
+          if(yOffset<canvas.height)pdf.addPage();
+        }
+      }
+    }
+
+    // Restore panel states
+    allPanels.forEach((p,i)=>{
+      p.style.display=prevStates[i].display;
+      p.className=prevStates[i].cls;
+    });
+    // Re-show current active panel
+    const activePanelId=currentMode==='overview'?'panel-landing':'panel-'+currentDetailPanel;
+    document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+    const ap=document.getElementById(activePanelId);
+    if(ap){ap.style.display='flex';ap.classList.add('active');}
+
+    const filename=currentMode==='overview'
+      ?`College-Overview-${new Date().toISOString().split('T')[0]}.pdf`
+      :`Report-${collegeName.replace(/[^a-z0-9]/gi,'-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+    pdf.save(filename);
+  }catch(err){
+    console.error('PDF error:',err);
+    alert('PDF generation failed: '+err.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='↓ <span>Download Report</span>';
+  }
+}
 /* ═══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
