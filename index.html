@@ -107,7 +107,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-siz
 .page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .page-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold-mid);margin-bottom:4px;}
 .page-title{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--ink);letter-spacing:-0.01em;line-height:1.1;}
-.page-sub{font-size:13px;color:var(--ink3);margin-top:5px;}
+.page-sub{font-size:17px;font-weight:500;color:var(--ink2);margin-top:6px;}
 .filter-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
 .filter-chip{padding:7px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:all 0.15s;box-shadow:var(--shadow-sm);}
 .filter-chip:hover{color:var(--gold-dark);border-color:var(--gold-mid);}
@@ -1385,8 +1385,6 @@ else{srcIndicator.style.display='none';document.getElementById('trendHeroSub').t
   const _tdr=getTrendDateRange();
   const _eyebrow=document.getElementById('trendEyebrow');
   if(_eyebrow)_eyebrow.textContent=`Historical Analytics · ${_tdr}`;
-  const _heroTitle=document.getElementById('trendHeroTitle');
-  if(_heroTitle)_heroTitle.textContent=`Trend Over Time · ${_tdr}`;
   const _rct=document.getElementById('trendRatingCardTitle');
   if(_rct)_rct.textContent=`Average Rating Trend · ${_tdr}`;
   const _tct=document.getElementById('trendTableCardTitle');
