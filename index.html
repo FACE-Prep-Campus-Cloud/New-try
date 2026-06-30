@@ -1,752 +1,1186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Peer Review System — I BCA</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:        #f8fafc;
-      --surface:   #ffffff;
-      --surface2:  #f1f5f9;
-      --border:    #e2e8f0;
-      --border2:   #cbd5e1;
-      --accent:    #3b82f6;
-      --accent2:   #8b5cf6;
-      --green:     #10b981;
-      --amber:     #f59e0b;
-      --rose:      #ef4444;
-      --text:      #0f172a;
-      --muted:     #64748b;
-      --muted2:    #475569;
-      --shadow:    rgba(0,0,0,0.08);
-      --shadow2:   rgba(0,0,0,0.12);
-    }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FACE Prep Campus — Faculty Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface2: #f1f5f9;
+  --border: #e2e8f0;
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  --text: #1e293b;
+  --muted: #64748b;
+  --error: #ef4444;
+  --success: #10b981;
+  --radius: 14px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(59,130,246,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(139,92,246,0.06) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 780px; margin: 0 auto;
+  padding: 60px 20px 100px;
+}
+@media (max-width: 640px) { .wrap { padding: 36px 16px 80px; } }
 
-    body {
-      font-family:'Instrument Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
+.header { text-align: center; margin-bottom: 52px; animation: fadeUp .7s ease both; }
+.logo-area { display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+.logo-img-wrap {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 10px 24px 10px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.logo-img { height: 80px; width: auto; object-fit: contain; display: block; }
+.logo-text-block { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.logo-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: .01em; }
+.logo-badge-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: .04em; }
+.logo-badge-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px rgba(16,185,129,0.4); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 
-    /* ── Subtle gradient background ── */
-    body::before {
-      content:'';
-      position:fixed; inset:0; z-index:0; pointer-events:none;
-      background-image:
-        radial-gradient(ellipse 70% 40% at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 30% at 80% 100%, rgba(139,92,246,0.05) 0%, transparent 50%);
-    }
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  font-weight: 800; line-height: 1.15;
+  background: linear-gradient(135deg, #1e293b 30%, #3b82f6 70%, #8b5cf6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 12px;
+}
+.subtitle { color: var(--muted); font-size: 14px; max-width: 500px; margin: 0 auto; font-weight: 300; line-height: 1.7; }
 
-    .container { max-width:480px; margin:0 auto; padding:1rem; position:relative; z-index:1; }
+.progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; animation: fadeUp .7s .1s ease both; }
+.progress-bar-outer { background: var(--surface2); border-radius: 100px; height: 4px; margin-bottom: 44px; overflow: hidden; animation: fadeUp .7s .1s ease both; }
+.progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 100px; transition: width .4s ease; width: 0%; }
 
-    /* ── HEADER ── */
-    header {
-      text-align:center;
-      padding: 2rem 0 1.5rem;
-    }
-    h1 {
-      font-family:'Syne', sans-serif;
-      font-size:clamp(1.8rem,8vw,2.4rem);
-      font-weight:800;
-      letter-spacing:-1.5px;
-      line-height:1.1;
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-      margin-bottom:.6rem;
-    }
-    .subtitle {
-      font-size:.9rem;
-      color:var(--muted);
-      font-weight:400;
-      letter-spacing:.01em;
-    }
+.section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px; margin-bottom: 20px;
+  opacity: 0; animation: fadeUp .5s ease both;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+@media (max-width: 640px) { .section { padding: 22px 18px; } }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+.section:nth-child(1){animation-delay:.1s;} .section:nth-child(2){animation-delay:.15s;}
+.section:nth-child(3){animation-delay:.2s;} .section:nth-child(4){animation-delay:.25s;}
+.section:nth-child(5){animation-delay:.3s;} .section:nth-child(6){animation-delay:.35s;}
+.section:nth-child(7){animation-delay:.4s;} .section:nth-child(8){animation-delay:.45s;}
+.section:nth-child(9){animation-delay:.5s;} .section:nth-child(10){animation-delay:.55s;}
+.section:nth-child(11){animation-delay:.6s;} .section:nth-child(12){animation-delay:.65s;}
 
-    /* ── CARD SURFACE ── */
-    .card {
-      background: var(--surface);
-      border-radius:16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 16px var(--shadow);
-      overflow: hidden;
-    }
+.section-title {
+  font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+  color: var(--text); margin-bottom: 22px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.icon-blue   { background: rgba(59,130,246,.1);  color: var(--accent); }
+.icon-purple { background: rgba(139,92,246,.1);  color: var(--accent2); }
+.icon-green  { background: rgba(16,185,129,.1);  color: var(--success); }
+.icon-orange { background: rgba(249,115,22,.1);  color: #f97316; }
 
-    /* ── LOGIN ── */
-    .login-wrap { padding:1.8rem 1.4rem; }
-    .login-wrap h2 {
-      font-family:'Syne', sans-serif;
-      font-size:1.5rem; font-weight:700;
-      text-align:center; margin-bottom:.3rem;
-      letter-spacing:-.5px; color:var(--text);
-    }
-    .login-sub {
-      text-align:center; color:var(--muted); font-size:.85rem; margin-bottom:1.5rem;
-    }
-    .step-indicator { display:flex; justify-content:center; gap:.5rem; margin-bottom:1.5rem; }
-    .step-dot {
-      width:24px; height:3px; border-radius:3px;
-      background:var(--border2); transition:all .3s;
-    }
-    .step-dot.active { background:var(--accent); }
-    .step-dot.done   { background:var(--green); }
+.field { margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 7px; letter-spacing: .04em; text-transform: uppercase; }
+label .req { color: var(--accent); margin-left: 2px; }
 
-    .form-group { margin-bottom:1.2rem; }
-    label {
-      display:block; margin-bottom:.45rem;
-      font-size:.75rem; font-weight:600;
-      letter-spacing:.04em; text-transform:uppercase;
-      color:var(--muted2);
-    }
-    input, textarea, select {
-      width:100%; padding:.8rem 1rem;
-      background:var(--surface2);
-      border:1.5px solid var(--border);
-      border-radius:10px; color:var(--text);
-      font-size:.9rem; font-family:'Instrument Sans', sans-serif;
-      transition:all .2s;
-    }
-    input:focus, textarea:focus, select:focus {
-      outline:none;
-      border-color: var(--accent);
-      background:var(--surface);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
-    input::placeholder { color:var(--muted); }
-    textarea { resize:vertical; min-height:90px; }
-    select {
-      cursor:pointer;
-      -webkit-appearance:none; appearance:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:calc(100% - .9rem) center;
-      padding-right:2.5rem;
-    }
-    select option { background:var(--surface); color:var(--text); }
+input[type="text"], input[type="email"], select, textarea {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  padding: 11px 15px; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  appearance: none; -webkit-appearance: none;
+}
+textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+@media (max-width: 640px) { input[type="text"], input[type="email"], select, textarea { font-size: 16px; } }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+input::placeholder, textarea::placeholder { color: #94a3b8; }
 
-    .selected-college-pill {
-      display:flex; align-items:center; gap:.6rem;
-      background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.25);
-      border-radius:10px; padding:.7rem .9rem; margin-bottom:1.2rem;
-    }
-    .selected-college-pill .pill-label { font-size:.7rem; color:var(--muted); display:block; margin-bottom:.05rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
-    .selected-college-pill .pill-val   { font-size:.88rem; font-weight:600; color:var(--green); }
+.field.error input, .field.error select, .field.error textarea { border-color: var(--error); box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
+.field.error > label { color: var(--error); }
+.err-msg { display: none; font-size: 11px; color: var(--error); margin-top: 5px; font-weight: 500; }
+.field.error .err-msg { display: block; }
 
-    /* ── BUTTONS ── */
-    button {
-      width:100%; padding:.85rem 1.4rem;
-      border:none; border-radius:10px;
-      font-size:.9rem; font-weight:600;
-      cursor:pointer; transition:all .2s;
-      font-family:'Instrument Sans', sans-serif;
-      letter-spacing:.01em;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color:#fff;
-      box-shadow: 0 4px 12px rgba(59,130,246,0.25);
-    }
-    .btn-primary:active { transform:scale(0.98); }
-    .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
-    .btn-ghost {
-      background:var(--surface2); color:var(--text);
-      border:1.5px solid var(--border);
-    }
-    .btn-ghost:active { background:var(--border); }
-    .btn-sm { width:auto; padding:.5rem 1rem; font-size:.8rem; border-radius:8px; }
-    .btn-row { display:flex; gap:.7rem; }
-    .btn-row .btn-ghost { flex:0 0 auto; width:auto; }
-    .btn-row .btn-primary { flex:1; }
+.select-wrapper { position: relative; }
+.select-wrapper::after { content:''; position:absolute; right:14px; top:50%; transform:translateY(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--muted); pointer-events:none; }
+.select-wrapper select { padding-right: 38px; cursor: pointer; }
 
-    /* ── ALERTS ── */
-    .alert {
-      padding:.8rem 1rem; border-radius:8px;
-      margin-bottom:1rem; font-size:.85rem; font-weight:500;
-    }
-    .alert-error   { background:rgba(239,68,68,.08); border:1.5px solid rgba(239,68,68,.2); color:#dc2626; }
-    .alert-success { background:rgba(16,185,129,.08);  border:1.5px solid rgba(16,185,129,.2);  color:#059669; }
-    .alert-info    { background:rgba(245,158,11,.08);  border:1.5px solid rgba(245,158,11,.2);  color:#d97706; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 540px) { .field-row { grid-template-columns: 1fr; gap: 10px; } }
 
-    /* ── DASHBOARD ── */
-    .dashboard { display:none; }
+.faculty-header {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px;
+  padding-bottom: 18px; border-bottom: 1px solid var(--border);
+}
+.faculty-avatar {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(139,92,246,.15));
+  border: 1px solid rgba(139,92,246,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; flex-shrink: 0;
+  font-family: 'Syne', sans-serif; color: var(--accent);
+}
+.faculty-meta { flex: 1; min-width: 0; }
+.faculty-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.faculty-subject { font-size: 12px; color: var(--muted); font-weight: 400; }
 
-    .user-bar {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:1.2rem; margin-bottom:1.2rem; gap:.8rem; flex-wrap:wrap;
-    }
-    .user-avatar {
-      width:36px; height:36px; border-radius:50%;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Syne',sans-serif; font-weight:800; font-size:.9rem;
-      color:#fff; flex-shrink:0;
-    }
-    .user-info { display:flex; align-items:center; gap:.8rem; }
-    .user-name  { font-family:'Syne',sans-serif; font-size:.95rem; font-weight:700; color:var(--text); }
-    .user-meta  { font-size:.75rem; color:var(--muted); margin-top:.1rem; }
-    .college-badge {
-      display:inline-flex; align-items:center; gap:.3rem;
-      background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2);
-      border-radius:100px; padding:.2rem .7rem;
-      font-size:.7rem; font-weight:600; color:var(--accent); margin-top:.25rem;
-    }
+.yn-list { display: flex; flex-direction: column; gap: 14px; }
+.yn-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+}
+.yn-row.error-row { border-color: var(--error); background: rgba(239,68,68,.04); }
+.yn-qnum {
+  font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+  color: var(--accent); background: rgba(59,130,246,.1);
+  border-radius: 6px; padding: 2px 7px; flex-shrink: 0;
+}
+.yn-text { flex: 1; font-size: 13px; color: var(--text); line-height: 1.4; }
+.yn-btns { display: flex; gap: 6px; flex-shrink: 0; }
+.yn-btns input[type="radio"] { display: none; }
+.yn-btns label {
+  text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 7px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); transition: all .15s; margin: 0;
+}
+.yn-btns input[type="radio"]:checked + label.yes-lbl { background: rgba(16,185,129,.12); border-color: var(--success); color: var(--success); }
+.yn-btns input[type="radio"]:checked + label.no-lbl  { background: rgba(239,68,68,.12); border-color: var(--error); color: var(--error); }
+.yn-btns label:hover { border-color: var(--accent); color: var(--text); }
 
-    /* ── TABS ── */
-    .tabs {
-      display:flex; gap:0; margin-bottom:1.2rem;
-      background:var(--surface2); padding:.3rem; border-radius:10px;
-      border:1px solid var(--border);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .tab {
-      padding:.6rem 1rem; flex:1; text-align:center;
-      border-radius:7px; cursor:pointer;
-      transition:all .2s; font-weight:600; font-size:.8rem;
-      color:var(--muted2); white-space:nowrap;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .tab.active { background:var(--surface); color:var(--accent); box-shadow:0 2px 8px var(--shadow); }
-    .tab-content { display:none; }
-    .tab-content.active { display:block; }
+.rating-block {
+  background: rgba(59,130,246,.04);
+  border: 1px solid rgba(59,130,246,.15);
+  border-radius: 10px; padding: 14px 18px 18px; margin-bottom: 16px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.rating-block-title { font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: .01em; text-transform: uppercase; }
+.scale-btns { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; padding-bottom: 4px; }
+.scale-btns input[type="radio"] { display: none; }
+.scale-circle-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.scale-btns label {
+  width: 44px; height: 44px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  border-radius: 50%; border: 2.5px solid transparent;
+  cursor: pointer; transition: all 0.22s cubic-bezier(.34,1.56,.64,1); margin: 0;
+  text-transform: none; letter-spacing: 0; position: relative;
+}
+.scale-btns label .s-num { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; line-height: 1; color: #fff; transition: font-size 0.2s; }
+.scale-btns label .s-word { font-family: 'DM Sans', sans-serif; font-size: 0px; font-weight: 600; color: #fff; line-height: 1; white-space: nowrap; overflow: hidden; transition: font-size 0.18s ease; }
+.scale-btns label[data-v="1"] { background: #e53935; }
+.scale-btns label[data-v="2"] { background: #f57c00; }
+.scale-btns label[data-v="3"] { background: #fdd835; }
+.scale-btns label[data-v="3"] .s-num  { color: #555; }
+.scale-btns label[data-v="3"] .s-word { color: #555; }
+.scale-btns label[data-v="4"] { background: #43a047; }
+.scale-btns label[data-v="5"] { background: #2e7d32; }
+.s-circle-label { font-size: 10px; font-weight: 500; color: var(--muted); text-align: center; line-height: 1.2; transition: opacity 0.2s, font-weight 0.2s, color 0.2s; white-space: nowrap; }
+.scale-btns:not(.has-selection) label:hover { opacity: 0.78; transform: scale(0.92) translateY(-3px); }
+.scale-btns.has-selection label { width: 30px; height: 30px; opacity: 0.32; }
+.scale-btns.has-selection label .s-num { font-size: 12px; }
+.scale-btns.has-selection .s-circle-label { opacity: 0.28; }
+.scale-btns.has-selection input[type="radio"]:checked + label { width: 70px; height: 70px; opacity: 1; border-color: rgba(255,255,255,0.88); box-shadow: 0 8px 28px rgba(0,0,0,0.22); transform: translateY(-10px); }
+.scale-btns.has-selection input[type="radio"]:checked + label .s-num { font-size: 24px; }
+.scale-btns.has-selection input[type="radio"]:checked + label .s-word { font-size: 10px; }
+.scale-btns.has-selection input[type="radio"]:checked ~ .s-circle-label { opacity: 1 !important; font-weight: 600; color: var(--text); }
+.rating-block.error-rating { border-color: var(--error); background: rgba(239,68,68,.04); }
+@media (max-width: 640px) {
+  .rating-block { padding: 10px 14px 14px; gap: 10px; }
+  .scale-btns { gap: 10px; }
+  .scale-btns label { width: 36px; height: 36px; }
+  .scale-btns label .s-num { font-size: 14px; }
+  .s-circle-label { font-size: 9px; }
+  .scale-btns.has-selection input[type="radio"]:checked + label { width: 58px; height: 58px; }
+  .scale-btns.has-selection input[type="radio"]:checked + label .s-num { font-size: 20px; }
+  .scale-btns.has-selection input[type="radio"]:checked + label .s-word { font-size: 9px; }
+}
 
-    /* ── PROGRESS ── */
-    .prog-strip {
-      display:flex; justify-content:space-between; align-items:center;
-      background:var(--surface2); border:1px solid var(--border);
-      border-radius:10px; padding:1rem; margin-bottom:1.2rem; gap:.8rem;
-    }
-    .prog-strip .label { font-size:.8rem; color:var(--muted2); }
-    .prog-strip .count { font-family:'Syne',sans-serif; font-size:.9rem; font-weight:700; color:var(--text); }
-    .prog-strip .pct   { font-size:.8rem; color:var(--accent); font-weight:700; white-space:nowrap; }
-    .prog-bar-wrap { height:5px; border-radius:5px; background:var(--border); overflow:hidden; margin-top:.5rem; }
-    .prog-bar      { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .8s cubic-bezier(.16,1,.3,1); }
+.nps-block {
+  background: rgba(139,92,246,.04);
+  border: 1px solid rgba(139,92,246,.15);
+  border-radius: 10px; padding: 18px 20px; margin-bottom: 16px;
+}
+.nps-block-title { font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: .01em; text-transform: uppercase; margin-bottom: 18px; }
+.nps-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.nps-btns input[type="radio"] { display: none; }
+.nps-btns label {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all .18s; margin: 0; text-transform: none; letter-spacing: 0;
+  border: 2px solid var(--border); background: var(--surface2); color: var(--muted);
+}
+.nps-btns input[type="radio"]:checked + label { border-color: var(--accent2); background: var(--accent2); color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,.3); transform: translateY(-3px); }
+.nps-btns label:hover { border-color: var(--accent2); color: var(--accent2); }
+.nps-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: var(--muted); font-weight: 500; }
+.nps-block.error-nps { border-color: var(--error); background: rgba(239,68,68,.04); }
 
-    /* ── PROJECT GRID ── */
-    .projects-grid { display:flex; flex-direction:column; gap:1rem; margin-top:1.2rem; }
-    .project-card {
-      background:var(--surface);
-      border-radius:12px; padding:1.3rem;
-      border:1.5px solid var(--border);
-      transition:all .2s; position:relative;
-      box-shadow:0 2px 8px var(--shadow);
-    }
-    .project-card:active { 
-      transform:scale(0.98);
-      box-shadow:0 4px 16px var(--shadow2);
-    }
+.check-list { display: flex; flex-direction: column; gap: 10px; }
+.check-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.check-item:hover { border-color: var(--accent); background: rgba(59,130,246,.04); }
+.check-item input[type="checkbox"] { display: none; }
+.check-box {
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 2px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s;
+}
+.check-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
+.check-tick { display: none; color: #fff; font-size: 12px; font-weight: 700; }
+.check-item.checked .check-box .check-tick { display: block; }
+.check-label { font-size: 13px; color: var(--text); font-weight: 500; }
 
-    .type-chip {
-      display:inline-block;
-      background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.2);
-      color:#7c3aed; border-radius:6px; padding:.15rem .55rem;
-      font-size:.68rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
-      margin-bottom:.7rem;
-    }
-    .project-title  { font-family:'Syne',sans-serif; font-size:.98rem; font-weight:700; margin-bottom:.5rem; line-height:1.3; color:var(--text); }
-    .project-detail { font-size:.8rem; color:var(--muted2); margin-bottom:.3rem; }
-    .project-detail strong { color:var(--text); font-weight:600; }
+.conditional-field { display: none; margin-top: 12px; }
+.conditional-field.visible { display: block; }
 
-    .review-btn {
-      margin-top:1rem; padding:.7rem; font-size:.82rem; font-weight:700;
-      border-radius:8px; width:100%; cursor:pointer; border:none;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#fff; transition:all .2s;
-      box-shadow:0 3px 10px rgba(59,130,246,0.2);
-      font-family:'Instrument Sans',sans-serif; letter-spacing:.01em;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .review-btn:active { transform:scale(0.98); }
-    .review-btn.reviewed {
-      background:rgba(16,185,129,0.1); color:var(--green);
-      border:1.5px solid rgba(16,185,129,0.25); box-shadow:none; cursor:default;
-    }
-    .review-btn.reviewed:active { transform:none; }
+.elective-mentor-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.25);
+  border-radius: 8px; padding: 7px 14px; margin-bottom: 18px;
+  font-size: 13px; font-weight: 500; color: var(--accent2);
+}
 
-    /* ── MODAL ── */
-    .modal {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,.5); backdrop-filter:blur(4px);
-      z-index:1000; overflow-y:auto; padding:1rem;
-    }
-    .modal-content {
-      max-width:480px; margin:1rem auto;
-      background:var(--surface);
-      border-radius:16px; padding:1.5rem;
-      border:1px solid var(--border);
-      box-shadow:0 20px 60px rgba(0,0,0,.2);
-      position:relative;
-    }
-    .modal-title { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:.2rem; line-height:1.3; color:var(--text); }
-    .modal-sub   { color:var(--muted); font-size:.8rem; margin-bottom:1.5rem; }
+.form-section-label {
+  font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  margin: 32px 0 12px; display: flex; align-items: center; gap: 10px;
+}
+.form-section-label::before, .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    .criteria-group {
-      background:var(--surface2);
-      border:1px solid var(--border); border-radius:10px;
-      padding:1rem; margin-bottom:.9rem;
-    }
-    .criteria-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:.8rem; font-size:.85rem; font-weight:600; color:var(--text); }
-    .score-display  { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; color:var(--accent); }
+.submit-area { text-align: center; margin-top: 36px; animation: fadeUp .5s .6s ease both; opacity: 0; }
+.btn-submit {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  color: #fff; font-family: 'Syne', sans-serif; font-size: 16px;
+  font-weight: 700; letter-spacing: .04em; border: none;
+  border-radius: 12px; padding: 15px 44px; cursor: pointer;
+  transition: all .2s; box-shadow: 0 4px 14px rgba(59,130,246,.25);
+}
+@media (max-width: 640px) { .btn-submit { width: 100%; justify-content: center; } }
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,.3); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.note { color: var(--muted); font-size: 12px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-    .slider {
-      width:100%; height:5px; border-radius:5px;
-      background:var(--border2); outline:none; -webkit-appearance:none; cursor:pointer;
-    }
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
-      background:var(--accent); cursor:pointer;
-      box-shadow:0 0 0 3px rgba(59,130,246,0.2);
-      transition:box-shadow .2s;
-    }
-    .slider::-webkit-slider-thumb:active { box-shadow:0 0 0 6px rgba(59,130,246,0.15); }
-    .slider::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:var(--accent); cursor:pointer; border:none; }
+#alreadyScreen {
+  display: none; text-align: center; padding: 80px 20px;
+  animation: fadeUp .6s ease both;
+}
+#alreadyScreen .already-icon { font-size: 72px; margin-bottom: 24px; display: block; }
+#alreadyScreen h2 {
+  font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 14px;
+}
+#alreadyScreen p { color: var(--muted); font-size: 15px; max-width: 440px; margin: 0 auto 10px; line-height: 1.7; }
+#alreadyScreen .reg-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+  border-radius: 10px; padding: 10px 20px; margin: 20px auto 0;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--error);
+}
 
-    .modal-btns { display:flex; gap:.7rem; margin-top:1.3rem; }
+#successScreen {
+  display: none; text-align: center; padding: 60px 20px;
+  animation: fadeUp .6s ease both;
+}
+#successScreen .success-icon { font-size: 64px; margin-bottom: 20px; display: block; }
+#successScreen h2 {
+  font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--success), #059669);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 12px;
+}
+#successScreen p { color: var(--muted); font-size: 15px; max-width: 400px; margin: 0 auto 28px; }
+#successScreen .btn-new {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px;
+  font-weight: 600; border-radius: 10px; padding: 12px 28px;
+  cursor: pointer; transition: all .2s; text-decoration: none;
+}
+#successScreen .btn-new:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── TABLE ── */
-    .tbl-wrap { 
-      border-radius:10px; 
-      overflow:hidden; 
-      border:1px solid var(--border); 
-      overflow-x:auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    table { width:100%; border-collapse:collapse; min-width:600px; }
-    th, td { padding:.75rem .8rem; text-align:left; border-bottom:1px solid var(--border); font-size:.78rem; }
-    th { background:var(--surface2); font-family:'Syne',sans-serif; font-weight:700; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted2); white-space:nowrap; }
-    tr:last-child td { border-bottom:none; }
-    tr:active td { background:var(--surface2); }
+#toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 22px; font-size: 14px; color: var(--text);
+  box-shadow: 0 10px 40px rgba(0,0,0,.15); opacity: 0; transition: all .3s;
+  z-index: 9999; display: flex; align-items: center; gap: 10px;
+  white-space: nowrap; max-width: calc(100vw - 32px);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.05); }
+#toast.error   { border-color: rgba(239,68,68,.3);  background: rgba(239,68,68,.05); }
 
-    /* ── STATS ── */
-    .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; margin-bottom:1.5rem; }
-    .stat-card { padding:1.2rem; border-radius:10px; text-align:center; border:1.5px solid var(--border); background:var(--surface); box-shadow:0 2px 8px var(--shadow); }
-    .stat-val  { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800; }
-    .stat-lbl  { font-size:.7rem; color:var(--muted); margin-top:.25rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+#loadingOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(248,250,252,0.85); backdrop-filter: blur(4px);
+  z-index: 9000; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+#loadingOverlay.show { display: flex; }
+.spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent); animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loadingOverlay p { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--muted); }
 
-    /* ── MISC ── */
-    .loading    { text-align:center; padding:2.5rem; color:var(--muted); font-size:.88rem; }
-    .empty-state { text-align:center; padding:3rem 1.5rem; color:var(--muted); }
-    .empty-icon { font-size:2.5rem; margin-bottom:.8rem; }
-    .empty-state h3 { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; color:var(--muted2); margin-bottom:.3rem; }
-    .empty-state p { font-size:.85rem; }
-
-    .toast {
-      position:fixed; bottom:1.5rem; left:1rem; right:1rem; z-index:9999;
-      background:var(--surface); border:1.5px solid rgba(16,185,129,0.3);
-      color:var(--green); padding:.85rem 1.2rem; border-radius:10px;
-      font-weight:600; font-size:.85rem; text-align:center;
-      animation:slideIn .3s cubic-bezier(.16,1,.3,1);
-      box-shadow:0 8px 24px var(--shadow2);
-    }
-    @keyframes slideIn { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
-
-    .divider { height:1px; background:var(--border); margin:1.2rem 0; }
-
-    .section-title {
-      font-family:'Syne',sans-serif; font-size:1rem; font-weight:700;
-      margin-bottom:.9rem; color:var(--text);
-    }
-
-    /* Mobile optimizations */
-    @media(max-width:480px){
-      .container { padding:.8rem; }
-      header { padding:1.5rem 0 1rem; }
-      h1 { font-size:1.8rem; }
-      .login-wrap { padding:1.4rem 1.1rem; }
-      .user-bar { padding:1rem; }
-      .stats-grid { grid-template-columns:1fr; }
-      .project-card { padding:1.1rem; }
-      .modal-content { padding:1.2rem; margin:.5rem auto; }
-      .criteria-group { padding:.9rem; }
-    }
-  </style>
+@keyframes shake { 0%,100%{transform:translateX(0);} 10%,30%,50%,70%,90%{transform:translateX(-4px);} 20%,40%,60%,80%{transform:translateX(4px);} }
+.shake { animation: shake 0.5s; }
+</style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Peer Review System</h1>
-    <p class="subtitle">Project Evaluation & Feedback Portal</p>
-  </header>
 
-  <!-- LOGIN -->
-  <div id="loginScreen" class="login-wrap card">
-    <h2>Welcome Back</h2>
-    <p class="login-sub">Sign in with your registered email to continue</p>
-    <div class="step-indicator">
-      <div class="step-dot active" id="dot1"></div>
-      <div class="step-dot"        id="dot2"></div>
-    </div>
-    <div id="loginAlert"></div>
-
-    <!-- STEP 1 -->
-    <div id="step1">
-      <div class="form-group">
-        <label>Your College</label>
-        <select id="collegeSelect">
-          <option value="">— Select your institution —</option>
-          <option>Kamaraj College</option>
-          <option>Kamaraj Women's College</option>
-          <option>SDNB Vaishnav College for Women</option>
-          <option>Patrician College of Arts & Science</option>
-          <option>TERF's College of Arts and Science</option>
-          <option>Sree Saraswathi Thyagaraja College</option>
-          <option>TJS College of Arts and Science</option>
-          <option>Bharathidasan College of Arts & Science</option>
-          <option>Nagarathinam Angalammal Arts & Science College</option>
-          <option>Vinayaga Mission's Research Foundation School of Arts & Science</option>
-          <option>Sri Amaraavathi College of Arts & Science</option>
-          <option>Takshashila University</option>
-          <option>Study World Group of Institution</option>
-          <option>Rathinam College of Arts & Science</option>
-          <option>Noorul Islam Centre for Higher Education (NICHE)</option>
-          <option>AMET University</option>
-          <option>Joy University</option>
-          <option>Sasurie College of Arts and Science</option>
-          <option>Alliance University</option>
-          <option>Kristu Jayanti (Deemed to be University)</option>
-          <option>S-VYASA University</option>
-          <option>Asian School of Business</option>
-        </select>
-      </div>
-      <button class="btn-primary" onclick="goToStep2()">Continue →</button>
-    </div>
-
-    <!-- STEP 2 -->
-    <div id="step2" style="display:none">
-      <div class="selected-college-pill">
-        <span></span>
-        <div>
-          <span class="pill-label">Selected College</span>
-          <span class="pill-val" id="selectedCollegeDisplay"></span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Registered Email</label>
-        <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" />
-      </div>
-      <div class="btn-row">
-        <button class="btn-ghost" onclick="backToStep1()">← Back</button>
-        <button id="loginBtn" class="btn-primary" onclick="emailLogin()">Sign In</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="dashboard">
-    <div class="user-bar card">
-      <div class="user-info">
-        <div class="user-avatar" id="userAvatar"></div>
-        <div>
-          <div class="user-name" id="userName"></div>
-          <div class="user-meta">Reg: <span id="userReg"></span> · <span id="userCourse"></span></div>
-          <div class="college-badge">🏫 <span id="userCollegeBadge"></span></div>
-        </div>
-      </div>
-      <button class="btn-ghost btn-sm" onclick="logout()">Sign Out</button>
-    </div>
-
-    <div class="tabs">
-      <div class="tab active" id="tab-projects"  onclick="switchTab('projects')">📋 Projects</div>
-      <div class="tab"        id="tab-myReviews" onclick="switchTab('myReviews')">✍️ Reviews</div>
-      <div class="tab"        id="tab-myProject" onclick="switchTab('myProject')">📊 Stats</div>
-    </div>
-
-    <div id="projectsTab"  class="tab-content active"><div id="projectsContent"></div></div>
-    <div id="myReviewsTab" class="tab-content"><div id="myReviewsContent"></div></div>
-    <div id="myProjectTab" class="tab-content"><div id="myProjectContent"></div></div>
-  </div>
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p id="loadingMsg">Checking submission status…</p>
 </div>
 
-<!-- REVIEW MODAL -->
-<div id="reviewModal" class="modal">
-  <div class="modal-content">
-    <h2 class="modal-title" id="modalTitle"></h2>
-    <div class="modal-sub"  id="modalSub"></div>
+<div class="wrap">
 
-    <div class="criteria-group">
-      <div class="criteria-label"><span>Problem Clarity</span><span class="score-display"><span id="clarity-display">5</span>/10</span></div>
-      <input type="range" class="slider" id="clarity" min="0" max="10" value="5" oninput="updateScore('clarity')">
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-img-wrap">
+        <img src="Face prep logo3.png" alt="FACE Prep Campus Logo" class="logo-img" onerror="this.style.display='none'">
+        <div class="logo-text-block">
+          <div class="logo-title">FACE Prep Campus</div>
+          <div class="logo-badge-pill"><span class="dot"></span>Faculty Feedback</div>
+        </div>
+      </div>
     </div>
-    <div class="criteria-group">
-      <div class="criteria-label"><span>Innovation</span><span class="score-display"><span id="innovation-display">5</span>/10</span></div>
-      <input type="range" class="slider" id="innovation" min="0" max="10" value="5" oninput="updateScore('innovation')">
-    </div>
-    <div class="criteria-group">
-      <div class="criteria-label"><span>Execution</span><span class="score-display"><span id="execution-display">5</span>/10</span></div>
-      <input type="range" class="slider" id="execution" min="0" max="10" value="5" oninput="updateScore('execution')">
-    </div>
-    <div class="criteria-group">
-      <div class="criteria-label"><span>Usability</span><span class="score-display"><span id="usability-display">5</span>/10</span></div>
-      <input type="range" class="slider" id="usability" min="0" max="10" value="5" oninput="updateScore('usability')">
-    </div>
-    <div class="criteria-group">
-      <div class="criteria-label"><span>Overall Impression</span><span class="score-display"><span id="overall-display">5</span>/10</span></div>
-      <input type="range" class="slider" id="overall" min="0" max="10" value="5" oninput="updateScore('overall')">
-    </div>
-
-    <div class="form-group" style="margin-top:1rem;">
-      <label>Comments <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <textarea id="comments" placeholder="Share your honest feedback…"></textarea>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-      <button id="submitReviewBtn" class="btn-primary" onclick="submitReview()">Submit Review</button>
-    </div>
+    <h1>Mentor Feedback Form</h1>
+    <p class="subtitle">Rate each mentor based on your learning experience. Your responses are confidential.</p>
   </div>
+
+  <div class="progress-label"><span>Progress</span><span id="pct">0%</span></div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+
+  <div id="alreadyScreen">
+    <span class="already-icon">🚫</span>
+    <h2>Already Submitted!</h2>
+    <p>Our records show that you have already submitted the feedback form.</p>
+    <p>Each student is allowed only <strong>one submission</strong>. If you believe this is a mistake, please contact your respective Campus Manager.</p>
+    <div class="reg-badge"> Register Number: <span id="alreadyRegNo">—</span></div>
+  </div>
+
+  <div id="successScreen">
+    <span class="success-icon">🎉</span>
+    <h2 id="successTitle">Thank you!</h2>
+    <p>Your feedback has been recorded successfully. We appreciate your time.</p>
+    <a href="javascript:void(0)" class="btn-new" onclick="resetForm()">Submit Another Response</a>
+  </div>
+
+  <form id="feedbackForm" novalidate>
+
+    <input type="hidden" name="payload" id="payloadField">
+
+    <div class="form-section-label">Personal Information</div>
+    <div class="section">
+      <div class="section-title"><div class="icon icon-blue">👤</div>Personal Information</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="studentName">Student Name <span class="req">*</span></label>
+          <input type="text" id="studentName" name="studentName" placeholder="Your full name" required>
+          <div class="err-msg">Please enter your name</div>
+        </div>
+        <div class="field">
+          <label for="regNumber">Register Number <span class="req">*</span></label>
+          <input type="text" id="regNumber" name="regNumber" placeholder="e.g. 22CS001" required>
+          <div class="err-msg">Please enter your register number</div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="studentEmail">Email ID <span class="req">*</span></label>
+        <input type="email" id="studentEmail" name="studentEmail" placeholder="yourname@college.edu" required>
+        <div class="err-msg">Please enter a valid email address</div>
+      </div>
+      <div class="field">
+        <label for="collegeName">College <span class="req">*</span></label>
+        <div class="select-wrapper">
+          <select id="collegeName" name="collegeName" required>
+            <option value="" disabled selected>Select your college</option>
+            <option>SDNB Vaishnav College for Women</option>
+            <option>TJS College of Arts and Science</option>
+            <option>Noorul Islam Centre for Higher Education (NICHE)</option>
+            <option>Alliance University</option>
+          </select>
+        </div>
+        <div class="err-msg">Please select your college</div>
+      </div>
+      <div class="field">
+        <label for="department">Department <span class="req">*</span></label>
+        <div class="select-wrapper">
+          <select id="department" name="department" required disabled>
+            <option value="" disabled selected>First select your college</option>
+          </select>
+        </div>
+        <div class="err-msg">Please select your department</div>
+      </div>
+    </div>
+
+    <div id="dynamicContent" style="display:none;">
+
+      <div class="form-section-label">Academic &amp; Program Effectiveness</div>
+      <div class="section">
+        <div class="section-title">Academic &amp; Program Effectiveness</div>
+        <div class="yn-list" style="margin-bottom:18px;">
+          <div class="yn-row" id="ape_q1_row">
+            <span class="yn-qnum">Q1</span>
+            <span class="yn-text">Did you have regular assessments and assignments as part of your academic curriculum?</span>
+            <div class="yn-btns">
+              <input type="radio" id="ape_q1_y" name="ape_q1" value="Yes" required>
+              <label for="ape_q1_y" class="yes-lbl">Yes</label>
+              <input type="radio" id="ape_q1_n" name="ape_q1" value="No">
+              <label for="ape_q1_n" class="no-lbl">No</label>
+            </div>
+          </div>
+          <div class="yn-row" id="ape_q2_row">
+            <span class="yn-qnum">Q2</span>
+            <span class="yn-text">Did you receive study materials for all the course papers?</span>
+            <div class="yn-btns">
+              <input type="radio" id="ape_q2_y" name="ape_q2" value="Yes" required>
+              <label for="ape_q2_y" class="yes-lbl">Yes</label>
+              <input type="radio" id="ape_q2_n" name="ape_q2" value="No">
+              <label for="ape_q2_n" class="no-lbl">No</label>
+            </div>
+          </div>
+        </div>
+        <div class="conditional-field" id="ape_q2_detail_wrap">
+          <div class="field">
+            <label for="ape_q2_detail">Please mention the course papers you didn't receive study materials for <span class="req">*</span></label>
+            <textarea id="ape_q2_detail" name="ape_q2_detail" placeholder="List the course papers here…" rows="3"></textarea>
+            <div class="err-msg">Please mention the course papers</div>
+          </div>
+        </div>
+        <div class="rating-block" id="ape_q3_block">
+          <div class="rating-block-title">Q3 — How effective and industry-relevant are the program's hands-on learning and curriculum?</div>
+          <div class="scale-btns" id="apeScaleBtns3">
+            <div class="scale-circle-wrap"><input type="radio" id="ape3v1" name="ape_q3_rating" value="1" required><label for="ape3v1" data-v="1"><span class="s-num">1</span><span class="s-word">Poor</span></label><div class="s-circle-label">Poor</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape3v2" name="ape_q3_rating" value="2"><label for="ape3v2" data-v="2"><span class="s-num">2</span><span class="s-word">Below Avg</span></label><div class="s-circle-label">Below Avg</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape3v3" name="ape_q3_rating" value="3"><label for="ape3v3" data-v="3"><span class="s-num">3</span><span class="s-word">Average</span></label><div class="s-circle-label">Average</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape3v4" name="ape_q3_rating" value="4"><label for="ape3v4" data-v="4"><span class="s-num">4</span><span class="s-word">Good</span></label><div class="s-circle-label">Good</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape3v5" name="ape_q3_rating" value="5"><label for="ape3v5" data-v="5"><span class="s-num">5</span><span class="s-word">Excellent</span></label><div class="s-circle-label">Excellent</div></div>
+          </div>
+          <div class="err-msg" style="margin-top:4px;">Please select a rating</div>
+        </div>
+        <div class="rating-block" id="ape_q4_block">
+          <div class="rating-block-title">Q4 — How effectively has the program improved your confidence and prepared you for industry expectations and future job roles?</div>
+          <div class="scale-btns" id="apeScaleBtns4">
+            <div class="scale-circle-wrap"><input type="radio" id="ape4v1" name="ape_q4_rating" value="1" required><label for="ape4v1" data-v="1"><span class="s-num">1</span><span class="s-word">Poor</span></label><div class="s-circle-label">Poor</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape4v2" name="ape_q4_rating" value="2"><label for="ape4v2" data-v="2"><span class="s-num">2</span><span class="s-word">Below Avg</span></label><div class="s-circle-label">Below Avg</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape4v3" name="ape_q4_rating" value="3"><label for="ape4v3" data-v="3"><span class="s-num">3</span><span class="s-word">Average</span></label><div class="s-circle-label">Average</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape4v4" name="ape_q4_rating" value="4"><label for="ape4v4" data-v="4"><span class="s-num">4</span><span class="s-word">Good</span></label><div class="s-circle-label">Good</div></div>
+            <div class="scale-circle-wrap"><input type="radio" id="ape4v5" name="ape_q4_rating" value="5"><label for="ape4v5" data-v="5"><span class="s-num">5</span><span class="s-word">Excellent</span></label><div class="s-circle-label">Excellent</div></div>
+          </div>
+          <div class="err-msg" style="margin-top:4px;">Please select a rating</div>
+        </div>
+      </div>
+
+      <div class="form-section-label">Mentor Performance Rating</div>
+      <div id="facultySections"></div>
+
+      <div class="form-section-label">Challenges Faced</div>
+      <div class="section">
+        <div class="section-title"><div class="icon icon-orange">⚠️</div>Challenges Faced </div>
+        <div class="field" style="margin-bottom:20px;">
+          <label>Q1. What challenges are you currently facing? <span class="req">*</span> <span style="text-transform:none;letter-spacing:0;font-weight:400;font-size:11px;">(Select all that apply)</span></label>
+          <div class="check-list" id="challengeList">
+            <label class="check-item" onclick="toggleCheck(this,'challenge_infra')"><input type="checkbox" id="challenge_infra" value="Infrastructure & Facilities"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">Infrastructure &amp; Facilities</span></label>
+            <label class="check-item" onclick="toggleCheck(this,'challenge_teaching')"><input type="checkbox" id="challenge_teaching" value="Teaching Quality & Delivery"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">Teaching Quality &amp; Delivery</span></label>
+            <label class="check-item" onclick="toggleCheck(this,'challenge_comm')"><input type="checkbox" id="challenge_comm" value="Communication & Language Issues"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">Communication &amp; Language Issues</span></label>
+            <label class="check-item" onclick="toggleCheck(this,'challenge_curriculum')"><input type="checkbox" id="challenge_curriculum" value="Curriculum & Academic Concerns"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">Curriculum &amp; Academic Concerns</span></label>
+            <label class="check-item" onclick="toggleCheck(this,'challenge_materials')"><input type="checkbox" id="challenge_materials" value="Study Materials & Resources"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">Study Materials &amp; Resources</span></label>
+            <label class="check-item" onclick="toggleCheck(this,'challenge_none','exclusive')"><input type="checkbox" id="challenge_none" value="No Challenges"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">No Challenges</span></label>
+            <label class="check-item" onclick="toggleCheck(this,'challenge_others')"><input type="checkbox" id="challenge_others" value="Others"><span class="check-box"><span class="check-tick">✓</span></span><span class="check-label">Others</span></label>
+          </div>
+          <div class="err-msg" id="challengeErr" style="display:none;margin-top:6px;">Please select at least one option</div>
+        </div>
+        <div class="field">
+          <label for="challengeDetail">Q2. Please describe the challenges you are facing in detail <span class="req">*</span></label>
+          <textarea id="challengeDetail" name="challengeDetail" placeholder="Describe your challenges…" required></textarea>
+          <div class="err-msg">Please describe your challenges</div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="challengeSuggestions">Q3. Please share your suggestions where we can improve <span class="req">*</span></label>
+          <textarea id="challengeSuggestions" name="challengeSuggestions" placeholder="Your suggestions…" required></textarea>
+          <div class="err-msg">Please share your suggestions</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span>Submit Feedback</span><span>→</span>
+      </button>
+      <p class="note">🔒 All responses will be kept confidential and will be used only to enhance the quality of our training, support, and overall campus experience.</p>
+    </div>
+
+  </form>
 </div>
+
+<div id="toast"></div>
 
 <script>
-const SUPABASE_URL      = 'https://zykmcumlzhucnvxqhpgm.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5a21jdW1semh1Y252eHFocGdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzE5MDYsImV4cCI6MjA5NTM0NzkwNn0.kqUgSpGFSwMXpHkWRihhVJXDtVfl0tGdU24POxmXHWc';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
+const SUPABASE_URL      = "https://bdgfotzgqwlrqylodydt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZ2ZvdHpncXdscnF5bG9keWR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzNTUsImV4cCI6MjA5NDg0NTM1NX0.xAJnpKDQIfQinWgJ8oEPaD3ELGLY_IiwWrYAFNcCUEo";
 
-let currentUser = null, reviewedSet = new Set(), currentProject = null, selectedCollege = '';
-
-function goToStep2() {
-  const c = document.getElementById('collegeSelect').value;
-  if (!c) return showAlert('loginAlert','❌ Please select your college first.','error');
-  selectedCollege = c;
-  document.getElementById('selectedCollegeDisplay').textContent = c;
-  document.getElementById('step1').style.display = 'none';
-  document.getElementById('step2').style.display = 'block';
-  document.getElementById('dot1').classList.replace('active','done');
-  document.getElementById('dot2').classList.add('active');
-  document.getElementById('emailInput').focus();
-}
-function backToStep1() {
-  document.getElementById('step2').style.display = 'none';
-  document.getElementById('step1').style.display = 'block';
-  document.getElementById('dot2').classList.remove('active');
-  document.getElementById('dot1').classList.remove('done');
-  document.getElementById('dot1').classList.add('active');
-  document.getElementById('loginAlert').innerHTML = '';
+// ─── SUPABASE HELPERS ─────────────────────────────────────────────────────────
+async function checkRegNumber(regNo) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/submissions?reg_number=eq.${encodeURIComponent(regNo)}&select=reg_number`,
+    { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+  );
+  if (!res.ok) throw new Error('Supabase check failed');
+  const data = await res.json();
+  return data.length > 0;
 }
 
-async function emailLogin() {
-  const email = document.getElementById('emailInput').value.trim().toLowerCase();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return showAlert('loginAlert','❌ Please enter a valid email address.','error');
-  setLoading('loginBtn', true, 'Signing in…');
-  const { data: student, error } = await sb.from('students').select('*').eq('email', email).single();
-  setLoading('loginBtn', false, 'Sign In');
-  if (error || !student) return showAlert('loginAlert','❌ Email not found. Please check and try again.','error');
-  loginSuccess(student);
-}
-document.getElementById('emailInput').addEventListener('keydown', e => { if(e.key==='Enter') emailLogin(); });
-
-function loginSuccess(student) {
-  currentUser = student;
-  currentUser._college = selectedCollege;
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('dashboard').style.display   = 'block';
-  const initials = student.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('userAvatar').textContent       = initials;
-  document.getElementById('userName').textContent         = student.name;
-  document.getElementById('userReg').textContent          = student.register_number;
-  document.getElementById('userCourse').textContent       = student.course;
-  document.getElementById('userCollegeBadge').textContent = selectedCollege;
-  loadReviewedSet().then(() => loadProjects());
-}
-
-function logout() {
-  currentUser = null; selectedCollege = ''; reviewedSet.clear();
-  document.getElementById('loginScreen').style.display = 'block';
-  document.getElementById('dashboard').style.display   = 'none';
-  document.getElementById('emailInput').value = '';
-  document.getElementById('loginAlert').innerHTML = '';
-  document.getElementById('collegeSelect').value = '';
-  backToStep1();
-}
-
-async function loadReviewedSet() {
-  const { data } = await sb.from('reviews').select('project_reg').eq('reviewer_reg', currentUser.register_number);
-  reviewedSet.clear();
-  (data||[]).forEach(r => reviewedSet.add(r.project_reg));
-}
-
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  document.getElementById(name+'Tab').classList.add('active');
-  if(name==='projects')  loadProjects();
-  if(name==='myReviews') loadMyReviews();
-  if(name==='myProject') loadMyProjectStats();
-}
-
-async function loadProjects() {
-  const c = document.getElementById('projectsContent');
-  c.innerHTML = '<div class="loading">⏳ Loading projects…</div>';
-  const { data: projects, error } = await sb
-    .from('projects').select('*, students(name,course)')
-    .neq('register_number', currentUser.register_number).order('register_number');
-  if (error) { c.innerHTML=`<div class="alert alert-error">${error.message}</div>`; return; }
-  await loadReviewedSet();
-  const done=reviewedSet.size, total=projects.length, pct=total?Math.round(done/total*100):0;
-  let html = `
-    <div class="prog-strip">
-      <div>
-        <div class="count">Reviewed <strong>${done}</strong> of <strong>${total}</strong></div>
-        <div class="prog-bar-wrap" style="width:100%;max-width:180px"><div class="prog-bar" style="width:${pct}%"></div></div>
-      </div>
-      <div class="pct">${pct}%</div>
-    </div>
-    <div class="projects-grid">`;
-  projects.forEach(p => {
-    const rev = reviewedSet.has(p.register_number);
-    html += `<div class="project-card">
-      <div class="type-chip">${escHtml(p.project_type||'Project')}</div>
-      <div class="project-title">${escHtml(p.title)}</div>
-      <div class="project-detail"><strong>Student:</strong> ${escHtml(p.students?.name||'—')}</div>
-      <div class="project-detail"><strong>Course:</strong> ${escHtml(p.students?.course||'—')}</div>
-      ${p.problem?`<div class="project-detail" style="margin-top:.4rem;color:var(--muted);font-size:.78rem">${escHtml(p.problem.slice(0,70))}${p.problem.length>70?'…':''}</div>`:''}
-      <button class="review-btn ${rev?'reviewed':''}" ${rev?'disabled':`onclick="openModal('${p.register_number}')"`}>
-        ${rev?'✓ Reviewed':'Review Project'}
-      </button></div>`;
+async function saveRegNumber(regNo) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ reg_number: regNo })
   });
-  html += '</div>';
-  c.innerHTML = html;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    if (err.code === '23505') return 'duplicate';
+    throw new Error('Supabase insert failed');
+  }
+  return 'saved';
 }
 
-async function openModal(reg) {
-  const { data: p } = await sb.from('projects').select('*,students(name)').eq('register_number',reg).single();
-  if (!p) return alert('Could not load project.');
-  currentProject = p;
-  document.getElementById('modalTitle').textContent = p.title;
-  document.getElementById('modalSub').textContent   = `${p.project_type||'Project'} · ${p.students?.name||reg}`;
-  document.getElementById('reviewModal').style.display = 'block';
-  ['clarity','innovation','execution','usability','overall'].forEach(id=>{document.getElementById(id).value=5;updateScore(id);});
-  document.getElementById('comments').value = '';
-}
-function closeModal() { document.getElementById('reviewModal').style.display='none'; currentProject=null; }
-function updateScore(id) { document.getElementById(id+'-display').textContent = document.getElementById(id).value; }
-document.getElementById('reviewModal').addEventListener('click', e => { if(e.target===document.getElementById('reviewModal')) closeModal(); });
+// ─── Save full feedback response to Supabase ─────────────────────────────
+async function saveFullResponse(data) {
+  const payload = {
+    timestamp:                   data.timestamp,
+    student_name:                data.studentName,
+    register_number:             data.registerNumber,
+    student_email:               data.studentEmail,
+    college_name:                data.collegeName,
+    department:                  data.department,
 
-async function submitReview() {
-  if (!currentProject) return;
-  if (reviewedSet.has(currentProject.register_number)) { alert('Already reviewed.'); closeModal(); return; }
-  setLoading('submitReviewBtn',true,'Submitting…');
-  const { error } = await sb.from('reviews').insert({
-    reviewer_reg:     currentUser.register_number,
-    project_reg:      currentProject.register_number,
-    reviewer_college: currentUser._college||null,
-    clarity:    +document.getElementById('clarity').value,
-    innovation: +document.getElementById('innovation').value,
-    execution:  +document.getElementById('execution').value,
-    usability:  +document.getElementById('usability').value,
-    overall:    +document.getElementById('overall').value,
-    comments:   document.getElementById('comments').value.trim()||null
-  });
-  setLoading('submitReviewBtn',false,'Submit Review');
-  if (error) { alert(error.code==='23505'?'Already reviewed.':'Error: '+error.message); closeModal(); return; }
-  reviewedSet.add(currentProject.register_number);
-  closeModal(); await loadProjects(); showToast('✓ Review submitted successfully!');
-}
+    ape_q1_assessments:          data.ape_q1_assessments          || null,
+    ape_q2_study_materials:      data.ape_q2_studyMaterials        || null,
+    ape_q2_missing_papers:       data.ape_q2_missingPapers         || null,
+    ape_q3_hands_on_rating:      data.ape_q3_handsOnRating         ? parseInt(data.ape_q3_handsOnRating)   : null,
+    ape_q4_confidence_rating:    data.ape_q4_confidenceRating      ? parseInt(data.ape_q4_confidenceRating) : null,
 
-async function loadMyReviews() {
-  const c = document.getElementById('myReviewsContent');
-  c.innerHTML = '<div class="loading">⏳ Loading…</div>';
-  const { data, error } = await sb.from('reviews')
-    .select('*,projects!reviews_project_reg_fkey(title,project_type)')
-    .eq('reviewer_reg',currentUser.register_number).order('created_at',{ascending:false});
-  if (error) { c.innerHTML=`<div class="alert alert-error">${error.message}</div>`; return; }
-  if (!data?.length) { c.innerHTML=`<div class="empty-state"><div class="empty-icon">📝</div><h3>No reviews submitted yet</h3><p>Head over to the Projects tab to start reviewing.</p></div>`; return; }
-  let html = `<p class="section-title" style="color:var(--muted2);font-size:.82rem;font-weight:500;font-family:inherit;margin-bottom:1rem">You have submitted <strong style="color:var(--text)">${data.length}</strong> review(s)</p>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Project</th><th>Type</th><th>College</th>
-      <th>Clarity</th><th>Innovation</th><th>Execution</th><th>Usability</th><th>Overall</th><th>Avg</th><th>Date</th>
-    </tr></thead><tbody>`;
-  data.forEach(r => {
-    const avg=((r.clarity+r.innovation+r.execution+r.usability+r.overall)/5).toFixed(1);
-    html+=`<tr>
-      <td><strong>${escHtml(r.projects?.title||'—')}</strong></td>
-      <td><span class="type-chip" style="font-size:.65rem">${escHtml(r.projects?.project_type||'—')}</span></td>
-      <td style="color:var(--muted);font-size:.75rem">${escHtml(r.reviewer_college||'—')}</td>
-      <td>${r.clarity}/10</td><td>${r.innovation}/10</td><td>${r.execution}/10</td>
-      <td>${r.usability}/10</td><td>${r.overall}/10</td>
-      <td><strong style="color:var(--green)">${avg}</strong></td>
-      <td style="color:var(--muted);font-size:.75rem">${new Date(r.created_at).toLocaleDateString('en-IN')}</td></tr>`;
-  });
-  html+='</tbody></table></div>';
-  c.innerHTML=html;
-}
+    challenges_selected:         data.challenges_selected          || null,
+    challenges_detail:           data.challenges_detail            || null,
+    challenges_suggestions:      data.challenges_suggestions       || null,
+  };
 
-async function loadMyProjectStats() {
-  const c = document.getElementById('myProjectContent');
-  c.innerHTML = '<div class="loading">⏳ Loading…</div>';
-  const { data: myProject } = await sb.from('projects').select('*').eq('register_number',currentUser.register_number).single();
-  if (!myProject) { c.innerHTML='<div class="empty-state"><h3>No project found.</h3></div>'; return; }
-  const { data: reviews, error } = await sb.from('reviews').select('*').eq('project_reg',currentUser.register_number).order('created_at');
-  if (error) { c.innerHTML=`<div class="alert alert-error">${error.message}</div>`; return; }
-
-  let html = `<div class="card" style="padding:1.5rem;margin-bottom:1.2rem;">
-    <div class="type-chip">${escHtml(myProject.project_type||'Project')}</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin:0.5rem 0 .7rem;line-height:1.3;color:var(--text)">${escHtml(myProject.title)}</h2>
-    ${myProject.problem?`<div class="project-detail" style="font-size:.82rem">${escHtml(myProject.problem)}</div>`:''}
-  </div>`;
-
-  if (!reviews?.length) {
-    html+=`<div class="empty-state"><div class="empty-icon">⏳</div><h3>No reviews yet</h3><p style="color:var(--muted);font-size:.85rem;margin-top:.4rem">Your peers haven't reviewed your project yet.</p></div>`;
-    c.innerHTML=html; return;
+  // Subject 1–7 dynamic fields
+  for (let i = 1; i <= 7; i++) {
+    payload[`subject${i}_name`]   = data[`subject${i}_Name`]   || null;
+    payload[`subject${i}_mentor`] = data[`subject${i}_Mentor`] || null;
+    const raw = data[`subject${i}_Rating`];
+    payload[`subject${i}_rating`] = raw ? parseFloat(raw) : null;
+    for (let q = 1; q <= 5; q++) {
+      payload[`subject${i}_q${q}`] = data[`subject${i}_Q${q}`] || null;
+    }
   }
 
-  const n=reviews.length, avg=f=>(reviews.reduce((s,r)=>s+r[f],0)/n).toFixed(1);
-  const avgs={clarity:avg('clarity'),innovation:avg('innovation'),execution:avg('execution'),usability:avg('usability'),overall:avg('overall')};
-  const grand=(Object.values(avgs).reduce((s,v)=>s+(+v),0)/5).toFixed(1);
-
-  const cards=[
-    {label:'Clarity',     val:avgs.clarity,    c:'var(--accent)'},
-    {label:'Innovation',  val:avgs.innovation, c:'#8b5cf6'},
-    {label:'Execution',   val:avgs.execution,  c:'var(--amber)'},
-    {label:'Usability',   val:avgs.usability,  c:'#06b6d4'},
-    {label:'Overall',     val:avgs.overall,    c:'var(--green)'},
-    {label:'Grand Avg',   val:grand,           c:'var(--text)'},
-  ];
-  html+=`<div class="stats-grid">${cards.map(card=>`
-    <div class="stat-card">
-      <div class="stat-val" style="color:${card.c}">${card.val}</div>
-      <div class="stat-lbl">${card.label}</div>
-      <div class="prog-bar-wrap" style="margin-top:.6rem"><div class="prog-bar" style="width:${card.val*10}%;background:${card.c}"></div></div>
-    </div>`).join('')}</div>
-  <p style="color:var(--muted);font-size:.82rem;margin-bottom:1.2rem">Based on <strong style="color:var(--text)">${n}</strong> review(s)</p>
-  <div class="section-title">Individual Reviews</div>
-  <div class="tbl-wrap"><table>
-    <thead><tr><th>#</th><th>College</th><th>Clarity</th><th>Innovation</th><th>Execution</th><th>Usability</th><th>Overall</th><th>Avg</th><th>Comments</th><th>Date</th></tr></thead>
-    <tbody>`;
-  reviews.forEach((r,i)=>{
-    const ra=((r.clarity+r.innovation+r.execution+r.usability+r.overall)/5).toFixed(1);
-    html+=`<tr>
-      <td style="color:var(--muted);font-size:.75rem">Peer ${i+1}</td>
-      <td style="color:var(--muted2);font-size:.75rem">${escHtml(r.reviewer_college||'—')}</td>
-      <td>${r.clarity}/10</td><td>${r.innovation}/10</td><td>${r.execution}/10</td>
-      <td>${r.usability}/10</td><td>${r.overall}/10</td>
-      <td><strong style="color:var(--green)">${ra}</strong></td>
-      <td style="color:var(--muted2);font-size:.75rem">${escHtml(r.comments||'—')}</td>
-      <td style="color:var(--muted);font-size:.75rem">${new Date(r.created_at).toLocaleDateString('en-IN')}</td></tr>`;
+  // Strip out null/empty keys so Postgres uses column defaults cleanly
+  Object.keys(payload).forEach(k => {
+    if (payload[k] === null || payload[k] === '' || payload[k] === undefined) delete payload[k];
   });
-  html+='</tbody></table></div>';
-  c.innerHTML=html;
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_responses`, {
+    method: 'POST',
+    headers: {
+      'apikey':        SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type':  'application/json',
+      'Prefer':        'return=minimal'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.warn('saveFullResponse warning:', err.message || res.status);
+    return 'warn';
+  }
+  return 'saved';
 }
 
-function showAlert(id,msg,type) {
-  document.getElementById(id).innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
-  setTimeout(()=>document.getElementById(id).innerHTML='',7000);
+// ─── GOOGLE SHEET CONFIG ─────────────────────────────────────────────────────
+const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygpjHGGVcUTJqa9n0g5_SzYgjl9_TMSnp4oTx5gpYu6G93cSsNGNn_s7LJhuyuSE4I/exec";
+
+// All 4 colleges write into the SAME spreadsheet, each to its own tab (gid).
+const JUNE_SHEET_ID = "1UtqX7zThVik6t-XItTAbBMtFcIATBGPyytpOV4_swLc";
+const JUNE_SHEET_ROUTES = {
+  "SDNB Vaishnav College for Women":                  { sheetId: JUNE_SHEET_ID, gid: "0",          tabName: "SDNB" },
+  "TJS College of Arts and Science":                   { sheetId: JUNE_SHEET_ID, gid: "1872802365", tabName: "TJS" },
+  "Noorul Islam Centre for Higher Education (NICHE)":  { sheetId: JUNE_SHEET_ID, gid: "679717801",  tabName: "NICHE" },
+  "Alliance University":                               { sheetId: JUNE_SHEET_ID, gid: "2143757213", tabName: "Alliance" }
+};
+
+const QUESTIONS = [
+  "Were the sessions delivered by the Faculty clear and well-structured?",
+  "Are you convinced with the professional behavior of the Faculty during sessions?",
+  "Was the trainer effective in solving problems and explaining solutions with examples?",
+  "Did the trainer support doubt clearing and student queries?",
+  "Were the sessions useful in improving your understanding and skills?"
+];
+
+const SCALE_WORDS = {1:'Poor', 2:'Below Avg', 3:'Average', 4:'Good', 5:'Excellent'};
+const CHALLENGE_IDS = ['challenge_infra','challenge_teaching','challenge_comm','challenge_curriculum','challenge_materials','challenge_none','challenge_others'];
+
+// ─── COLLEGE DATA (SDNB, TJS, NICHE, Alliance only) ───────────────────────────
+const COLLEGE_DATA = {
+  "SDNB Vaishnav College for Women": {
+    "II B.Sc. CS with AI": [
+      {subject:"Language - IV",mentor:"Mekala"},{subject:"General English - IV",mentor:"Bavyashree"},{subject:"Machine Learning",mentor:"Geetha"},
+      {subject:"Computer Vision",mentor:"Geetha"},{subject:"Machine Learning and Computer Vision Lab",mentor:"Geetha"},
+      {subject:"Internet of Things in AI",mentor:"Dharani"},{subject:"Applied Statistics",mentor:"Lydia"},
+      {subject:"Essentials of Effective Communication Skill",mentor:"Bavyashree"},
+      {subject:"Aptitude",mentor:"Aabitha"}
+    ],
+    "I B.Sc. CS with AI (Shift 1)": [
+      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bowya"},{subject:"Java Programming",mentor:"Keerthi"},
+      {subject:"Operating Systems",mentor:"Keerthi"},{subject:"Data Structures and Algorithms",mentor:"Keerthi"},
+      {subject:"Data Structures and Algorithms using Java Lab",mentor:"Keerthi"},{subject:"Numerical Methods",mentor:"Saradha"},
+      {subject:"Effective Communication",mentor:"Bowya"}
+    ],
+    "I B.Sc. CS with AI (Shift 2)": [
+      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bowya"},{subject:"Java Programming",mentor:"Subhashni"},
+      {subject:"Operating Systems",mentor:"Subhashni"},{subject:"Data Structures and Algorithms",mentor:"Subhashni"},
+      {subject:"Data Structures and Algorithms using Java Lab",mentor:"Subhashni"},{subject:"Numerical Methods",mentor:"Aabitha"},
+      {subject:"Effective Communication",mentor:"Bowya"}
+    ],
+    "I B.Sc. DS & AI": [
+      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bavyashree"},{subject:"Programming in Java",mentor:"Dharani"},
+      {subject:"Programming in Java Lab",mentor:"Dharani"},{subject:"Mathematics-II",mentor:"Saradha"},
+      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Saradha"},{subject:"Effective Communication",mentor:"Bavyashree"}
+    ],
+    "I B.Com FinTech with AI": [
+      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bavyashree"},
+      {subject:"Securities Markets Regulations and Practices",mentor:"Astha"},{subject:"Business Law",mentor:"Astha"},
+      {subject:"Financial Data Analysis",mentor:"Malarvizhi"},{subject:"Effective Communication",mentor:"Bowya"},
+      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Saradha"}
+    ],
+    "I BBA DM & BA": [
+      {subject:"Language - II",mentor:"Mekala"},{subject:"General English - II",mentor:"Bavyashree"},
+      {subject:"Social Media Marketing I",mentor:"Priyanka"},{subject:"Managerial Economics",mentor:"Priyanka"},
+      {subject:"E-commerce Strategies",mentor:"Nayeemunnisa"},{subject:"Cloud Based tools for E-commerce",mentor:"Nayeemunnisa"},
+      {subject:"Effective Communication",mentor:"Bavyashree"},{subject:"Problem Solving through Aptitude II",mentor:"Aabitha"}
+    ]
+  },
+  "TJS College of Arts and Science": {
+    "III B.Sc CS with AI": [
+      {subject:"Technical - FPC",mentor:"Subhashini KM"},{subject:"Computer Vision",mentor:"Subhashini K M"},
+      {subject:"Natural Language Processing",mentor:"Aarthi R"},{subject:"Communicative English",mentor:"Aarthi R"},
+      {subject:"Software engineering",mentor:"Aarthi R"},{subject:"Cloud computing",mentor:"Subhashini K M"}
+    ]
+  },
+  "Noorul Islam Centre for Higher Education (NICHE)": {
+   "B.Sc AI & ML": [
+  {subject:"Tamil II / Malayalam II / Hindi II", mentor:"Kalaiarasi"},
+  {subject:"English II",                         mentor:"Nishanthini"},
+  {subject:"Communicative English",              mentor:"Nishanthini"},
+  {subject:"Aptitude",                           mentor:"Nishanthini"},
+  {subject:"Professional Ethics",                mentor:"Nishanthini"},
+  {subject:"Numerical Techniques",              mentor:"Indhumathi"},
+  {subject:"Front-End Web Development",         mentor:"Aasik"},
+  {subject:"Object Oriented Programming in Java", mentor:"Aasik"}
+]
+  },
+  "Alliance University": {
+    "I BCA (DS + AI & ML)": [
+      {subject:"Introduction to Data Science",mentor:"Gomathy V"},{subject:"Data Structures and Algorithms",mentor:"Lakshmi Devi S"},
+      {subject:"Object Oriented Programming Java",mentor:"Renita Joy"},{subject:"Lab - Object Oriented Programming Java",mentor:"Renita Joy"},
+      {subject:"Statistics for Data Science",mentor:"Mahendra Babu"},{subject:"Interpersonal and Essential Skills - II",mentor:"Saviyo Sabu"},
+      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Ajith Pandian"}
+    ],
+    "I BCA (Game Development)": [
+      {subject:"Design for Development",mentor:"Abhishek A"},{subject:"Data Structures and Algorithms",mentor:"Lakshmi Devi S"},
+      {subject:"Object Oriented Programming Java",mentor:"Renita Joy"},{subject:"Lab - Object Oriented Programming Java",mentor:"Renita Joy"},
+      {subject:"Discrete Mathematics",mentor:"Mahendra Babu"},{subject:"Interpersonal and Essential Skills - II",mentor:"Saviyo Sabu"},
+      {subject:"Analytical Reasoning and Problem Solving - II",mentor:"Ajith Pandian"}
+    ],
+    "II BCA DS (A+B)": [
+      {subject:"Full Stack Development",mentor:"Raghav Reddy"},{subject:"Data Warehousing and Mining",mentor:"Nagashri"},
+      {subject:"Natural Language Processing",mentor:"Nagashri"},{subject:"Artificial Intelligence",mentor:"Gomathy V"},
+      {subject:"Software Engineering",mentor:"Raghav Reddy"},{subject:"Cloud Computing",mentor:"Lakshmi Devi S"},
+      {subject:"Virtual Internship",mentor:"Abhishek A"}
+    ],
+    "II BCA AI & ML (A+B)": [
+      {subject:"Full Stack Development",mentor:"Raghav Reddy"},{subject:"Data Warehousing and Mining",mentor:"Nagashri"},
+      {subject:"Natural Language Processing",mentor:"Nagashri"},{subject:"Artificial Intelligence",mentor:"Gomathy V"},
+      {subject:"Software Engineering",mentor:"Raghav Reddy"},{subject:"Cloud Computing",mentor:"Lakshmi Devi S"},
+      {subject:"Virtual Internship",mentor:"Abhishek A"}
+    ],
+    "II BCA Game Development (A+B)": [
+      {subject:"Full Stack Development",mentor:"Raghav Reddy"},{subject:"Introduction to Game Development",mentor:"Santosh Goyal"},
+      {subject:"Introduction to Game Engines",mentor:"Santosh Goyal"},{subject:"Fundamentals of Data Science",mentor:"Aman Kumar Sharma"},
+      {subject:"Software Engineering",mentor:"Raghav Reddy"},{subject:"Cloud Computing",mentor:"Lakshmi Devi S"},
+      {subject:"Virtual Internship",mentor:"Abhishek A"}
+    ],
+    "I MCA - A": [
+      {subject:"Data Analytics for Business",mentor:"Aman"},{subject:"Data Mining and Big Data Analytics",mentor:"Nagasri"},
+      {subject:"Deep Learning Models and Applications",mentor:"Tanisha"},{subject:"Engineering Principles of Software",mentor:"Gomathy"},
+      {subject:"NLP Algorithms and Applications",mentor:"Nagasri"},{subject:"Professional Skill Development",mentor:"Dharshinee"}
+    ],
+    "I MCA - B": [
+      {subject:"Data Analytics for Business",mentor:"Aman"},{subject:"Data Mining and Big Data Analytics",mentor:"Nagasri"},
+      {subject:"Deep Learning Models and Applications",mentor:"Tanisha"},{subject:"Engineering Principles of Software",mentor:"Gomathy"},
+      {subject:"NLP Algorithms and Applications",mentor:"Nagasri"},{subject:"Professional Skill Development",mentor:"Dharshinee"}
+    ]
+  }
+};
+
+// ─── COLLEGE → DEPARTMENT ─────────────────────────────────────────────────────
+document.getElementById('collegeName').addEventListener('change', function () {
+  const college = this.value;
+  const deptSel = document.getElementById('department');
+  deptSel.innerHTML = '<option value="" disabled selected>Select your department</option>';
+  document.getElementById('facultySections').innerHTML = '';
+  document.getElementById('dynamicContent').style.display = 'none';
+  if (COLLEGE_DATA[college]) {
+    deptSel.disabled = false;
+    Object.keys(COLLEGE_DATA[college]).forEach(d => {
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d;
+      deptSel.appendChild(o);
+    });
+  } else {
+    deptSel.disabled = true;
+    deptSel.innerHTML = '<option value="" disabled selected>No departments available</option>';
+  }
+  updateProgress();
+});
+
+document.getElementById('department').addEventListener('change', function () {
+  const college = document.getElementById('collegeName').value;
+  const dept = this.value;
+  const container = document.getElementById('facultySections');
+  container.innerHTML = '';
+  if (!COLLEGE_DATA[college] || !COLLEGE_DATA[college][dept]) return;
+  COLLEGE_DATA[college][dept].forEach((sub, idx) => {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.style.animationDelay = `${0.15 + idx * 0.05}s`;
+    sec.innerHTML = sub.isElective ? buildElective(sub, idx) : buildCard(sub, idx);
+    container.appendChild(sec);
+  });
+  document.getElementById('dynamicContent').style.display = 'block';
+  updateProgress();
+});
+
+function buildScaleHtml(n) {
+  let btns = '';
+  for (let v = 1; v <= 5; v++) {
+    btns += `<div class="scale-circle-wrap">
+      <input type="radio" id="sr${n}v${v}" name="s${n}_rating" value="${v}" ${v===1?'required':''}>
+      <label for="sr${n}v${v}" data-v="${v}"><span class="s-num">${v}</span><span class="s-word">${SCALE_WORDS[v]}</span></label>
+      <div class="s-circle-label">${SCALE_WORDS[v]}</div>
+    </div>`;
+  }
+  return `<div class="rating-block" id="ratingBlock${n}">
+    <div class="rating-block-title">Overall Rating — Rate your faculty based on your learning experience</div>
+    <div class="scale-btns" id="scaleBtns${n}">${btns}</div>
+    <div class="err-msg" style="margin-top:4px;">Please select a rating</div>
+  </div>`;
 }
-function showToast(msg) {
-  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
-  document.body.appendChild(t); setTimeout(()=>t.remove(),4000);
+
+function buildCard(sub, idx) {
+  const n = idx + 1;
+  let qs = '';
+  QUESTIONS.forEach((q, qi) => {
+    const yId = `s${n}q${qi}y`, nId = `s${n}q${qi}n`;
+    qs += `<div class="yn-row" id="yn_${n}_${qi}">
+      <span class="yn-qnum">Q${qi+1}</span>
+      <span class="yn-text">${q}</span>
+      <div class="yn-btns">
+        <input type="radio" id="${yId}" name="s${n}_q${qi}" value="Yes" required>
+        <label for="${yId}" class="yes-lbl">Yes</label>
+        <input type="radio" id="${nId}" name="s${n}_q${qi}" value="No">
+        <label for="${nId}" class="no-lbl">No</label>
+      </div>
+    </div>`;
+  });
+  return `
+    <input type="hidden" name="subject${n}_Name" value="${sub.subject}">
+    <input type="hidden" name="subject${n}_Mentor" value="${sub.mentor}">
+    <div class="faculty-header">
+      <div class="faculty-avatar">${n}</div>
+      <div class="faculty-meta">
+        <div class="faculty-name">${sub.mentor}</div>
+        <div class="faculty-subject">${sub.subject}</div>
+      </div>
+    </div>
+    ${buildScaleHtml(n)}
+    <div class="yn-list">${qs}</div>
+    <div class="err-msg" id="err_${n}" style="margin-top:8px;">Please answer all questions for this faculty</div>`;
 }
-function setLoading(id,on,label) { const b=document.getElementById(id); b.disabled=on; b.textContent=label; }
-function escHtml(s) {
-  if(!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function buildElective(sub, idx) {
+  const n = idx + 1;
+  const opts = sub.electiveOptions.map((o,oi) =>
+    `<option value="${oi}" data-mentor="${o.mentor}">${o.label}</option>`
+  ).join('');
+  let qs = '';
+  QUESTIONS.forEach((q, qi) => {
+    const yId = `s${n}q${qi}y`, nId = `s${n}q${qi}n`;
+    qs += `<div class="yn-row" id="yn_${n}_${qi}">
+      <span class="yn-qnum">Q${qi+1}</span><span class="yn-text">${q}</span>
+      <div class="yn-btns">
+        <input type="radio" id="${yId}" name="s${n}_q${qi}" value="Yes" class="elective-r-${n}">
+        <label for="${yId}" class="yes-lbl">Yes</label>
+        <input type="radio" id="${nId}" name="s${n}_q${qi}" value="No" class="elective-r-${n}">
+        <label for="${nId}" class="no-lbl">No</label>
+      </div>
+    </div>`;
+  });
+  return `
+    <input type="hidden" name="subject${n}_Name" id="electSubj${n}">
+    <input type="hidden" name="subject${n}_Mentor" id="electMentor${n}">
+    <div class="section-title" style="margin-bottom:16px;">
+      <div class="icon icon-purple">${n}</div>
+      ${sub.subject}
+      <span style="font-size:11px;font-weight:400;color:var(--accent2);margin-left:4px;">(Choose your elective)</span>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>Select Your Elective <span class="req">*</span></label>
+      <div class="select-wrapper">
+        <select id="electSel${n}" required onchange="handleElective(this,${n})">
+          <option value="" disabled selected>— Choose elective subject —</option>
+          ${opts}
+        </select>
+      </div>
+      <div class="err-msg">Please select an elective</div>
+    </div>
+    <div id="electDetail${n}" style="display:none;">
+      <div class="elective-mentor-badge"><span id="electMentorDisplay${n}">—</span></div>
+      ${buildScaleHtml(n)}
+      <div class="yn-list">${qs}</div>
+      <div class="err-msg" id="err_${n}" style="margin-top:8px;">Please answer all questions for this faculty</div>
+    </div>`;
 }
+
+function handleElective(sel, n) {
+  const chosen = sel.options[sel.selectedIndex];
+  const mentor = chosen.getAttribute('data-mentor');
+  document.getElementById(`electMentorDisplay${n}`).textContent = mentor;
+  document.getElementById(`electMentor${n}`).value = mentor;
+  document.getElementById(`electSubj${n}`).value = chosen.textContent;
+  document.getElementById(`electDetail${n}`).style.display = 'block';
+  document.querySelectorAll(`.elective-r-${n}`).forEach(r => r.required = true);
+  document.querySelectorAll(`[name="s${n}_rating"]`).forEach(r => r.required = true);
+  updateProgress();
+}
+
+function toggleCheck(labelEl, id, mode) {
+  const cb = document.getElementById(id);
+  if (mode === 'exclusive') {
+    const wasChecked = cb.checked;
+    CHALLENGE_IDS.forEach(cid => {
+      const el = document.getElementById(cid);
+      if (el) { el.checked = false; el.closest('.check-item').classList.remove('checked'); }
+    });
+    if (!wasChecked) { cb.checked = true; labelEl.classList.add('checked'); }
+  } else {
+    const noneEl = document.getElementById('challenge_none');
+    if (noneEl) { noneEl.checked = false; noneEl.closest('.check-item').classList.remove('checked'); }
+    cb.checked = !cb.checked;
+    labelEl.classList.toggle('checked', cb.checked);
+  }
+  document.getElementById('challengeErr').style.display = 'none';
+  updateProgress();
+}
+
+function atLeastOneChallengeSelected() {
+  return CHALLENGE_IDS.some(id => { const el = document.getElementById(id); return el && el.checked; });
+}
+
+function updateProgress() {
+  let req = 0, done = 0;
+  const groups = new Set();
+  document.querySelectorAll('[required]').forEach(el => {
+    if (el.offsetParent === null) return;
+    if (el.type === 'radio') { groups.add(el.name); return; }
+    if (el.type === 'hidden') return;
+    req++;
+    if (el.tagName === 'SELECT') { if (el.value) done++; }
+    else { if (el.value.trim()) done++; }
+  });
+  groups.forEach(name => {
+    req++;
+    if (document.querySelector(`[name="${name}"]:checked`)) done++;
+  });
+  req++;
+  if (atLeastOneChallengeSelected()) done++;
+  const pct = Math.min(100, Math.round((done / Math.max(req, 1)) * 100));
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+}
+
+document.addEventListener('change', e => {
+  if (e.target.name === 'ape_q2') {
+    const wrap = document.getElementById('ape_q2_detail_wrap');
+    const ta = document.getElementById('ape_q2_detail');
+    if (e.target.value === 'No') { wrap.classList.add('visible'); ta.required = true; }
+    else { wrap.classList.remove('visible'); ta.required = false; ta.value = ''; const f = ta.closest('.field'); if(f) f.classList.remove('error'); }
+  }
+  if (e.target.type === 'radio' && e.target.name && e.target.name.endsWith('_rating')) {
+    const sb = e.target.closest('.scale-btns'); if(sb) sb.classList.add('has-selection');
+    const rb = e.target.closest('.rating-block'); if(rb) rb.classList.remove('error-rating');
+  }
+  if (e.target.name === 'ape_q3_rating') { document.getElementById('apeScaleBtns3').classList.add('has-selection'); document.getElementById('ape_q3_block').classList.remove('error-rating'); }
+  if (e.target.name === 'ape_q4_rating') { document.getElementById('apeScaleBtns4').classList.add('has-selection'); document.getElementById('ape_q4_block').classList.remove('error-rating'); }
+  if (e.target.type === 'radio') { const row = e.target.closest('.yn-row'); if(row) row.classList.remove('error-row'); }
+  const field = e.target.closest('.field');
+  if (field && field.classList.contains('error')) field.classList.remove('error');
+  updateProgress();
+});
+document.addEventListener('input', e => {
+  const field = e.target.closest('.field');
+  if (field && field.classList.contains('error')) field.classList.remove('error');
+  updateProgress();
+});
+
+function validateForm() {
+  let valid = true, first = null;
+  document.querySelectorAll('#feedbackForm .field').forEach(field => {
+    const inp = field.querySelector('input:not([type="radio"]):not([type="hidden"]):not([type="checkbox"]), select, textarea');
+    if (!inp || inp.offsetParent === null) return;
+    let ok = true;
+    if (inp.type === 'email') ok = inp.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value);
+    else if (inp.tagName === 'SELECT') ok = !!inp.value;
+    else if (inp.required) ok = !!inp.value.trim();
+    if (!ok) { field.classList.add('error'); valid = false; if (!first) first = field; }
+    else field.classList.remove('error');
+  });
+  if (!atLeastOneChallengeSelected()) {
+    document.getElementById('challengeErr').style.display = 'block'; valid = false;
+    if (!first) first = document.getElementById('challengeList');
+  }
+  ['ape_q3_rating','ape_q4_rating'].forEach((name,i) => {
+    const blockId = `ape_q${i+3}_block`, block = document.getElementById(blockId);
+    if (!document.querySelector(`[name="${name}"]:checked`)) { block.classList.add('error-rating'); valid = false; if(!first) first=block; }
+    else block.classList.remove('error-rating');
+  });
+  ['ape_q1','ape_q2'].forEach((name,qi) => {
+    const row = document.getElementById(`ape_q${qi+1}_row`);
+    if (!document.querySelector(`[name="${name}"]:checked`)) { row.classList.add('error-row'); valid = false; if(!first) first=row; }
+    else row.classList.remove('error-row');
+  });
+  const college = document.getElementById('collegeName').value;
+  const dept = document.getElementById('department').value;
+  if (college && dept && COLLEGE_DATA[college] && COLLEGE_DATA[college][dept]) {
+    COLLEGE_DATA[college][dept].forEach((sub, idx) => {
+      const n = idx + 1;
+      const ratingBlock = document.getElementById(`ratingBlock${n}`);
+      if (ratingBlock && ratingBlock.offsetParent !== null) {
+        if (!document.querySelector(`[name="s${n}_rating"]:checked`)) { ratingBlock.classList.add('error-rating'); valid = false; if(!first) first=ratingBlock; }
+        else ratingBlock.classList.remove('error-rating');
+      }
+      QUESTIONS.forEach((_,qi) => {
+        const row = document.getElementById(`yn_${n}_${qi}`);
+        if (!document.querySelector(`[name="s${n}_q${qi}"]:checked`) && row && row.offsetParent !== null) {
+          row.classList.add('error-row'); valid = false; if(!first) first=row;
+        } else if (row) row.classList.remove('error-row');
+      });
+    });
+  }
+  if (!valid && first) { first.scrollIntoView({behavior:'smooth',block:'center'}); showToast('Please answer all required questions','error'); }
+  return valid;
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✅ ':'❌ ') + msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 4000);
+}
+
+function resetForm() {
+  document.getElementById('feedbackForm').reset();
+  document.getElementById('successScreen').style.display = 'none';
+  document.getElementById('feedbackForm').style.display = 'block';
+  CHALLENGE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.checked = false; el.closest('.check-item').classList.remove('checked'); }
+  });
+  document.getElementById('ape_q2_detail_wrap').classList.remove('visible');
+  document.getElementById('department').disabled = true;
+  document.getElementById('department').innerHTML = '<option value="" disabled selected>First select your college</option>';
+  document.getElementById('facultySections').innerHTML = '';
+  document.getElementById('dynamicContent').style.display = 'none';
+  document.querySelectorAll('.scale-btns').forEach(sb => sb.classList.remove('has-selection'));
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── SUBMIT — Supabase duplicate check + full save + Google Sheets backup ─────
+document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  const regNo = document.getElementById('regNumber').value.trim().toUpperCase();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>Checking…</span><span>⏳</span>';
+
+  const overlay = document.getElementById('loadingOverlay');
+  const loadingMsg = document.getElementById('loadingMsg');
+
+  // ── Step 1: Check for duplicate reg number ────────────────────────────────
+  loadingMsg.textContent = 'Checking if already submitted…';
+  overlay.classList.add('show');
+
+  try {
+    const alreadySubmitted = await checkRegNumber(regNo);
+    if (alreadySubmitted) {
+      overlay.classList.remove('show');
+      btn.disabled = false;
+      btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
+      document.getElementById('feedbackForm').style.display = 'none';
+      document.getElementById('alreadyRegNo').textContent = regNo;
+      document.getElementById('alreadyScreen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // ── Step 2: Reserve the slot in submissions table ─────────────────────
+    loadingMsg.textContent = 'Saving your submission…';
+    const saveResult = await saveRegNumber(regNo);
+    if (saveResult === 'duplicate') {
+      overlay.classList.remove('show');
+      btn.disabled = false;
+      btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
+      document.getElementById('feedbackForm').style.display = 'none';
+      document.getElementById('alreadyRegNo').textContent = regNo;
+      document.getElementById('alreadyScreen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // ── Step 3: Build the full data object ────────────────────────────────
+    const fd = new FormData(this);
+    const college = fd.get('collegeName');
+    const dept    = fd.get('department');
+
+    const selectedChallenges = CHALLENGE_IDS
+      .filter(id => document.getElementById(id)?.checked)
+      .map(id => document.getElementById(id).value)
+      .join(', ');
+
+    const data = {
+      timestamp:                  new Date().toISOString(),
+      studentName:                fd.get('studentName')          || '',
+      registerNumber:             regNo,
+      studentEmail:                fd.get('studentEmail')         || '',
+      collegeName:                college                        || '',
+      department:                 dept                           || '',
+      ape_q1_assessments:         fd.get('ape_q1')               || '',
+      ape_q2_studyMaterials:      fd.get('ape_q2')               || '',
+      ape_q2_missingPapers:       fd.get('ape_q2_detail')        || '',
+      ape_q3_handsOnRating:       fd.get('ape_q3_rating')        || '',
+      ape_q4_confidenceRating:    fd.get('ape_q4_rating')        || '',
+      challenges_selected:        selectedChallenges,
+      challenges_detail:          fd.get('challengeDetail')      || '',
+      challenges_suggestions:     fd.get('challengeSuggestions') || '',
+    };
+
+    if (COLLEGE_DATA[college] && COLLEGE_DATA[college][dept]) {
+      COLLEGE_DATA[college][dept].forEach((sub, idx) => {
+        const n = idx + 1;
+        data[`subject${n}_Name`]   = fd.get(`subject${n}_Name`)   || sub.subject;
+        data[`subject${n}_Mentor`] = fd.get(`subject${n}_Mentor`) || (sub.mentor || '');
+        data[`subject${n}_Rating`] = fd.get(`s${n}_rating`)       || '';
+        QUESTIONS.forEach((_, qi) => {
+          data[`subject${n}_Q${qi+1}`] = fd.get(`s${n}_q${qi}`) || '';
+        });
+      });
+    }
+
+    // ── Step 4: Save full response to Supabase (PRIMARY store) ────────────
+    loadingMsg.textContent = 'Saving to database…';
+    await saveFullResponse(data);   // soft-fail: won't block success screen
+
+    // ── Step 5: Route to the correct Google Sheet tab for this college ────
+    const route = JUNE_SHEET_ROUTES[college];
+    if (route) {
+      data.target_sheet_id   = route.sheetId;
+      data.target_sheet_gid  = route.gid;
+      data.target_sheet_name = route.tabName;
+    }
+
+    loadingMsg.textContent = 'Submitting your feedback…';
+    const formPayload = new URLSearchParams();
+    formPayload.append('payload', JSON.stringify(data));
+    fetch(SHEET_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formPayload.toString()
+    }).catch(() => {}); // fire-and-forget
+
+    // ── Step 6: Show success ──────────────────────────────────────────────
+    overlay.classList.remove('show');
+    btn.disabled = false;
+    btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
+    document.getElementById('feedbackForm').style.display = 'none';
+    const studentName = (fd.get('studentName') || '').trim();
+    const title = studentName ? `Thank you, ${studentName}! 🎉` : 'Feedback Submitted! 🎉';
+    document.getElementById('successTitle').textContent = title;
+    document.getElementById('successScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (err) {
+    console.error('Submission error:', err);
+    overlay.classList.remove('show');
+    btn.disabled = false;
+    btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
+    showToast('Network error. Please check your connection and try again.', 'error');
+  }
+});
 </script>
 </body>
 </html>
