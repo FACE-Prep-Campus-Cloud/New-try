@@ -558,106 +558,18 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
 <div id="toast"></div>
 
 <script>
-// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
-const SUPABASE_URL      = "https://bdgfotzgqwlrqylodydt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZ2ZvdHpncXdscnF5bG9keWR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjkzNTUsImV4cCI6MjA5NDg0NTM1NX0.xAJnpKDQIfQinWgJ8oEPaD3ELGLY_IiwWrYAFNcCUEo";
-
-// ─── SUPABASE HELPERS ─────────────────────────────────────────────────────────
-async function checkRegNumber(regNo) {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/submissions?reg_number=eq.${encodeURIComponent(regNo)}&select=reg_number`,
-    { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-  );
-  if (!res.ok) throw new Error('Supabase check failed');
-  const data = await res.json();
-  return data.length > 0;
-}
-
-async function saveRegNumber(regNo) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({ reg_number: regNo })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    if (err.code === '23505') return 'duplicate';
-    throw new Error('Supabase insert failed');
-  }
-  return 'saved';
-}
-
-// ─── Save full feedback response to Supabase ─────────────────────────────
-async function saveFullResponse(data) {
-  const payload = {
-    timestamp:                   data.timestamp,
-    student_name:                data.studentName,
-    register_number:             data.registerNumber,
-    student_email:               data.studentEmail,
-    college_name:                data.collegeName,
-    department:                  data.department,
-
-    ape_q1_assessments:          data.ape_q1_assessments          || null,
-    ape_q2_study_materials:      data.ape_q2_studyMaterials        || null,
-    ape_q2_missing_papers:       data.ape_q2_missingPapers         || null,
-    ape_q3_hands_on_rating:      data.ape_q3_handsOnRating         ? parseInt(data.ape_q3_handsOnRating)   : null,
-    ape_q4_confidence_rating:    data.ape_q4_confidenceRating      ? parseInt(data.ape_q4_confidenceRating) : null,
-
-    challenges_selected:         data.challenges_selected          || null,
-    challenges_detail:           data.challenges_detail            || null,
-    challenges_suggestions:      data.challenges_suggestions       || null,
-  };
-
-  // Subject 1–7 dynamic fields
-  for (let i = 1; i <= 7; i++) {
-    payload[`subject${i}_name`]   = data[`subject${i}_Name`]   || null;
-    payload[`subject${i}_mentor`] = data[`subject${i}_Mentor`] || null;
-    const raw = data[`subject${i}_Rating`];
-    payload[`subject${i}_rating`] = raw ? parseFloat(raw) : null;
-    for (let q = 1; q <= 5; q++) {
-      payload[`subject${i}_q${q}`] = data[`subject${i}_Q${q}`] || null;
-    }
-  }
-
-  // Strip out null/empty keys so Postgres uses column defaults cleanly
-  Object.keys(payload).forEach(k => {
-    if (payload[k] === null || payload[k] === '' || payload[k] === undefined) delete payload[k];
-  });
-
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_responses`, {
-    method: 'POST',
-    headers: {
-      'apikey':        SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type':  'application/json',
-      'Prefer':        'return=minimal'
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.warn('saveFullResponse warning:', err.message || res.status);
-    return 'warn';
-  }
-  return 'saved';
-}
-
 // ─── GOOGLE SHEET CONFIG ─────────────────────────────────────────────────────
+// This Apps Script endpoint is the ONLY storage layer now (Supabase removed).
+// It both checks for duplicate register numbers and appends the response row.
 const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz62BqSF6qkF8-0q9W7EwuV1cBc7br7p8eFQtFngi_84cDz5B4t-OuQ_tG-ReAUlKcQQQ/exec";
 
 // All 4 colleges write into the SAME spreadsheet, each to its own tab (gid).
-const JUNE_SHEET_ID = "1UtqX7zThVik6t-XItTAbBMtFcIATBGPyytpOV4_swLc";
-const JUNE_SHEET_ROUTES = {
-  "SDNB Vaishnav College for Women":                  { sheetId: JUNE_SHEET_ID, gid: "0",          tabName: "SDNB" },
-  "TJS College of Arts and Science":                   { sheetId: JUNE_SHEET_ID, gid: "1872802365", tabName: "TJS" },
-  "Noorul Islam Centre for Higher Education (NICHE)":  { sheetId: JUNE_SHEET_ID, gid: "679717801",  tabName: "NICHE" },
-  "Alliance University":                               { sheetId: JUNE_SHEET_ID, gid: "2143757213", tabName: "Alliance" }
+const SHEET_ID = "1UtqX7zThVik6t-XItTAbBMtFcIATBGPyytpOV4_swLc";
+const SHEET_ROUTES = {
+  "SDNB Vaishnav College for Women":                  { sheetId: SHEET_ID, gid: "0",          tabName: "SDNB" },
+  "TJS College of Arts and Science":                   { sheetId: SHEET_ID, gid: "1872802365", tabName: "TJS" },
+  "Noorul Islam Centre for Higher Education (NICHE)":  { sheetId: SHEET_ID, gid: "679717801",  tabName: "NICHE" },
+  "Alliance University":                               { sheetId: SHEET_ID, gid: "2143757213", tabName: "Alliance" }
 };
 
 const QUESTIONS = [
@@ -1057,7 +969,10 @@ function resetForm() {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ─── SUBMIT — Supabase duplicate check + full save + Google Sheets backup ─────
+// ─── SUBMIT — Google Sheets is the single source of truth ─────────────────────
+// The Apps Script (doPost) checks the target tab for a matching Register
+// Number, and either returns {result:"duplicate"} or appends the row and
+// returns {result:"success"}.
 document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!validateForm()) return;
@@ -1065,43 +980,15 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
   const regNo = document.getElementById('regNumber').value.trim().toUpperCase();
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span>Checking…</span><span>⏳</span>';
+  btn.innerHTML = '<span>Submitting…</span><span>⏳</span>';
 
   const overlay = document.getElementById('loadingOverlay');
   const loadingMsg = document.getElementById('loadingMsg');
-
-  // ── Step 1: Check for duplicate reg number ────────────────────────────────
-  loadingMsg.textContent = 'Checking if already submitted…';
+  loadingMsg.textContent = 'Submitting your feedback…';
   overlay.classList.add('show');
 
   try {
-    const alreadySubmitted = await checkRegNumber(regNo);
-    if (alreadySubmitted) {
-      overlay.classList.remove('show');
-      btn.disabled = false;
-      btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
-      document.getElementById('feedbackForm').style.display = 'none';
-      document.getElementById('alreadyRegNo').textContent = regNo;
-      document.getElementById('alreadyScreen').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    // ── Step 2: Reserve the slot in submissions table ─────────────────────
-    loadingMsg.textContent = 'Saving your submission…';
-    const saveResult = await saveRegNumber(regNo);
-    if (saveResult === 'duplicate') {
-      overlay.classList.remove('show');
-      btn.disabled = false;
-      btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
-      document.getElementById('feedbackForm').style.display = 'none';
-      document.getElementById('alreadyRegNo').textContent = regNo;
-      document.getElementById('alreadyScreen').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    // ── Step 3: Build the full data object ────────────────────────────────
+    // ── Build the full data object ─────────────────────────────────────────
     const fd = new FormData(this);
     const college = fd.get('collegeName');
     const dept    = fd.get('department');
@@ -1140,32 +1027,48 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
       });
     }
 
-    // ── Step 4: Save full response to Supabase (PRIMARY store) ────────────
-    loadingMsg.textContent = 'Saving to database…';
-    await saveFullResponse(data);   // soft-fail: won't block success screen
-
-    // ── Step 5: Route to the correct Google Sheet tab for this college ────
-    const route = JUNE_SHEET_ROUTES[college];
+    // Tag which sheet tab this submission belongs to
+    const route = SHEET_ROUTES[college];
     if (route) {
       data.target_sheet_id   = route.sheetId;
       data.target_sheet_gid  = route.gid;
       data.target_sheet_name = route.tabName;
     }
 
-    loadingMsg.textContent = 'Submitting your feedback…';
+    // ── POST to Apps Script and wait for its response ──────────────────────
     const formPayload = new URLSearchParams();
     formPayload.append('payload', JSON.stringify(data));
-    fetch(SHEET_SCRIPT_URL, {
+
+    const res = await fetch(SHEET_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formPayload.toString()
-    }).catch(() => {}); // fire-and-forget
+    });
 
-    // ── Step 6: Show success ──────────────────────────────────────────────
+    let result;
+    try {
+      result = await res.json();
+    } catch (parseErr) {
+      throw new Error('Unexpected response from server');
+    }
+
     overlay.classList.remove('show');
     btn.disabled = false;
     btn.innerHTML = '<span>Submit Feedback</span><span>→</span>';
+
+    if (result.result === 'duplicate') {
+      document.getElementById('feedbackForm').style.display = 'none';
+      document.getElementById('alreadyRegNo').textContent = regNo;
+      document.getElementById('alreadyScreen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (result.result !== 'success') {
+      throw new Error(result.message || 'Submission failed');
+    }
+
+    // ── Show success ─────────────────────────────────────────────────────
     document.getElementById('feedbackForm').style.display = 'none';
     const studentName = (fd.get('studentName') || '').trim();
     const title = studentName ? `Thank you, ${studentName}! 🎉` : 'Feedback Submitted! 🎉';
