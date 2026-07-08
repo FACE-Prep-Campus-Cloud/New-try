@@ -1411,21 +1411,34 @@ function setAuthRole(role){
   hide('pin-error');
 }
 
-/* Loads college_contacts (college + login_pin) so the manager dropdown + PIN check work before login. */
+/* Builds the college <select> from the known college list, always — so the dropdown
+   is never empty even before loadCollegeContactsForLogin() has finished (or if it fails). */
+function populateCollegeDropdown(){
+  const sel = $('manager-college-select');
+  if(!sel) return;
+  const names = collegeContacts.length
+    ? collegeContacts.map(c => c.college)
+    : COLLEGE_REGION_MAP.map(c => c.college);
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = uniqueSorted.length
+    ? uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
+    : '<option value="">No colleges configured yet</option>';
+}
+
+/* Loads college_contacts (college + login_pin) so the PIN check works after login screen shows.
+   Falls back to the built-in COLLEGE_REGION_MAP list for the dropdown itself if this fails
+   (e.g. the login_pin column/migration hasn't been added to the database yet). */
 async function loadCollegeContactsForLogin(){
+  populateCollegeDropdown(); // show something immediately, don't wait on the network
   try{
     const { data, error } = await sb.from('college_contacts').select('college, login_pin, senior_manager_name, campus_manager_name');
     if(error) throw error;
     collegeContacts = data || [];
-    const sel = $('manager-college-select');
-    if(sel){
-      sel.innerHTML = collegeContacts.slice()
-        .sort((a,b) => (a.college||'').localeCompare(b.college||''))
-        .map(c => `<option value="${escHTML(c.college)}">${escHTML(c.college)}</option>`).join('')
-        || '<option value="">No colleges configured yet</option>';
-    }
+    populateCollegeDropdown();
   }catch(e){
-    console.error(e);
+    console.error('Could not load college_contacts (has the login_pin migration been run?):', e);
+    // dropdown still shows the full college list from COLLEGE_REGION_MAP; PIN check will
+    // fail gracefully with "Incorrect PIN" until the migration is run and PINs are set.
   }
 }
 loadCollegeContactsForLogin();
