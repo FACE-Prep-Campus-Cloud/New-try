@@ -11,6 +11,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
+    --ui-scale: 1;
     --bg: #F4F5F7;
     --card: #FFFFFF;
     --border: #E7E9EC;
@@ -34,6 +35,17 @@
     --shadow-sm: 0 1px 2px rgba(20,21,26,0.04);
     --shadow-md: 0 4px 16px -6px rgba(20,21,26,0.10);
     --shadow-lg: 0 16px 40px -12px rgba(20,21,26,0.18);
+  }
+
+  /* ── RESPONSIVE UI SCALING ──
+     Keeps the whole dashboard visually proportional across different
+     screen resolutions / OS display-scaling settings. --ui-scale is
+     computed in JS (applyUIScale) based on window.innerWidth. */
+  #scale-root {
+    transform: scale(var(--ui-scale));
+    transform-origin: top left;
+    width: calc(100% / var(--ui-scale));
+    height: calc(100vh / var(--ui-scale));
   }
 
   body[data-theme="dark"] {
@@ -120,7 +132,7 @@
      ── AUTH (Glass-on-blur style) ──
      ══════════════════════════════════════════════════════════ */
   .auth-wrap {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+    min-height: calc(100vh / var(--ui-scale)); display: flex; align-items: center; justify-content: center; padding: 24px;
     position: relative; overflow: hidden;
     background: #EDEBF7;
   }
@@ -308,12 +320,12 @@
   body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 
   /* ── SHELL ── */
-  .shell { display: flex; min-height: 100vh; }
+  .shell { display: flex; min-height: calc(100vh / var(--ui-scale)); }
 
   /* ── SIDEBAR ── */
   .sidebar {
     width: 244px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: width .18s ease, background .25s ease;
+    display: flex; flex-direction: column; position: sticky; top: 0; height: calc(100vh / var(--ui-scale)); overflow-y: auto; transition: width .18s ease, background .25s ease;
   }
   .sidebar.collapsed { width: 76px; }
   .sidebar.collapsed .brand-text, .sidebar.collapsed .sec-label, .sidebar.collapsed .nav-label,
@@ -387,7 +399,7 @@
   .theme-row svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   /* ── MAIN ── */
-  .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: calc(100vh / var(--ui-scale)); overflow: hidden; }
 
   .topbar {
     display: flex; align-items: center; justify-content: space-between; padding: 14px 30px 10px;
@@ -733,6 +745,7 @@
     .main-content { height: auto !important; overflow: visible !important; }
     .ticket-grid { grid-template-columns: 1fr 1fr !important; }
     .ticket-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ccc !important; }
+    #scale-root { transform: none !important; width: 100% !important; height: auto !important; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -743,7 +756,7 @@
 </style>
 </head>
 <body>
-
+<div id="scale-root">
 <div class="toast-stack" id="toast-stack"></div>
 
 <!-- ── AUTH (Glass on blur) ── -->
@@ -1158,6 +1171,7 @@
     </div>
   </div>
 </div>
+</div><!-- /#scale-root -->
 
 <script>
 /* ── Supabase ── */
@@ -1166,6 +1180,18 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ADMIN_PIN = '5050';
+
+/* ── Responsive UI scaling ──
+   Keeps the dashboard's visual proportions consistent across
+   different screen resolutions / OS display-scaling settings. */
+function applyUIScale(){
+  const baseWidth = 1536; // reference design width
+  let scale = window.innerWidth / baseWidth;
+  scale = Math.min(Math.max(scale, 0.72), 1.05);
+  document.documentElement.style.setProperty('--ui-scale', scale);
+}
+window.addEventListener('resize', applyUIScale);
+applyUIScale();
 
 /* ── Follow-up Due configuration ── */
 const FOLLOWUP_WORKING_DAYS_7D = 7;
