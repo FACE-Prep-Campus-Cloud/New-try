@@ -37,10 +37,6 @@
     --shadow-lg: 0 16px 40px -12px rgba(20,21,26,0.18);
   }
 
-  /* ── RESPONSIVE UI SCALING ──
-     Keeps the whole dashboard visually proportional across different
-     screen resolutions / OS display-scaling settings. --ui-scale is
-     computed in JS (applyUIScale) based on window.innerWidth. */
   #scale-root {
     transform: scale(var(--ui-scale));
     transform-origin: top left;
@@ -80,7 +76,6 @@
   :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
   ul { list-style: none; }
 
-  /* ── STATUS / PRIORITY DOTS ── */
   .dot-row { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; white-space: nowrap; }
   .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .dot-red    { background: var(--red); }
@@ -128,9 +123,6 @@
     100% { transform: scale(1.35); opacity: 0; }
   }
 
-  /* ══════════════════════════════════════════════════════════
-     ── AUTH (Glass-on-blur style) ──
-     ══════════════════════════════════════════════════════════ */
   .auth-wrap {
     min-height: calc(100vh / var(--ui-scale)); display: flex; align-items: center; justify-content: center; padding: 24px;
     position: relative; overflow: hidden;
@@ -187,7 +179,6 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* glass avatar badge that overlaps the top edge of the card */
   .auth-avatar {
     width: 68px; height: 68px; border-radius: 50%; background: rgba(20,21,26,0.10); backdrop-filter: blur(8px);
     border: 1px solid rgba(20,21,26,0.12); display: flex; align-items: center; justify-content: center;
@@ -244,7 +235,6 @@
   input::placeholder { color: var(--text-faint); }
   input:disabled, select:disabled { background: var(--slate-soft); color: var(--text-faint); cursor: not-allowed; }
 
-  /* OTP-style PIN boxes — glass style */
   .otp-row { display: flex; gap: 9px; justify-content: center; }
   .otp-box {
     width: 48px; height: 54px; text-align: center; font-size: 20px; font-weight: 700;
@@ -270,7 +260,6 @@
   .auth-remember input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--blue); }
   body[data-theme="dark"] .auth-remember { color: rgba(255,255,255,0.65); }
 
-  /* ── ROLE TABS (added) ── */
   .auth-role-toggle { display: flex; gap: 8px; margin-bottom: 18px; }
   .role-tab {
     flex: 1; padding: 9px 8px; border-radius: 10px; border: 1px solid rgba(20,21,26,0.15);
@@ -288,7 +277,6 @@
   #session-tag b { color: var(--text); font-weight: 700; }
   .sidebar.collapsed #session-tag { display: none; }
 
-  /* ── BUTTONS ── */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -319,10 +307,8 @@
   .auth-footnote { text-align: center; font-size: 11.5px; color: var(--text-faint); margin-top: 18px; }
   body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 
-  /* ── SHELL ── */
   .shell { display: flex; min-height: calc(100vh / var(--ui-scale)); }
 
-  /* ── SIDEBAR ── */
   .sidebar {
     width: 244px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--border);
     display: flex; flex-direction: column; position: sticky; top: 0; height: calc(100vh / var(--ui-scale)); overflow-y: auto; transition: width .18s ease, background .25s ease;
@@ -398,7 +384,6 @@
   .theme-row:hover { background: var(--slate-soft); color: var(--text); }
   .theme-row svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-  /* ── MAIN ── */
   .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: calc(100vh / var(--ui-scale)); overflow: hidden; }
 
   .topbar {
@@ -417,7 +402,6 @@
     display: flex; flex-direction: column; min-height: 0; overflow: hidden;
   }
 
-  /* ── INSIGHTS PANEL ── */
   .insights-panel {
     background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
     margin-bottom: 14px; flex-shrink: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
@@ -430,7 +414,6 @@
   .insight-bar-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.16,1,.3,1); }
   .insight-bar-val { width: 26px; text-align: right; flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--text); }
 
-  /* ── STATS ── */
   .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px; flex-shrink: 0; }
   .stat-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px;
@@ -454,7 +437,6 @@
   .s-sub.warn { color: var(--red); font-weight: 600; }
   .stat-spark { flex-shrink: 0; opacity: 0.9; }
 
-  /* ── AVG RESOLUTION BREAKDOWN ── */
   .avgres-card { flex-direction: column; align-items: stretch; gap: 8px; }
   .avgres-top { display: flex; flex-direction: row; align-items: center; gap: 10px; width: 100%; }
   .avgres-mode-tag {
@@ -467,7 +449,6 @@
   .avgres-row .arb-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-light); }
   .avgres-row .arb-val { font-weight: 700; color: var(--text); flex-shrink: 0; }
 
-  /* ── TOOLBAR ── */
   .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; flex-shrink: 0; }
   .dd { position: relative; }
   .dd-trigger {
@@ -502,7 +483,6 @@
   .kbd-hint { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-faint); margin-left: auto; }
   .kbd-hint kbd { font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--slate-soft); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
 
-  /* ── TICKET GRID (ticket-stub cards) ── */
   .ticket-grid-wrap { background: transparent; flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 40px; }
   .ticket-grid {
     display: grid;
@@ -594,14 +574,12 @@
   .empty-state svg { margin-bottom: 14px; opacity: 0.7; }
   .empty-state p { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
 
-  /* skeleton loading */
   .skel-card { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 14px; height: 132px; overflow: hidden; }
   .skel-edge { width: 6px; background: var(--slate-soft); }
   .skel-main { flex: 1; padding: 15px 16px; display: flex; flex-direction: column; gap: 12px; }
   .skel-bar { border-radius: 6px; background: linear-gradient(90deg, var(--slate-soft) 25%, var(--border-soft) 37%, var(--slate-soft) 63%); background-size: 400% 100%; animation: skelShimmer 1.4s ease infinite; }
   @keyframes skelShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 
-  /* ── TOASTS ── */
   .toast-stack { position: fixed; top: 18px; right: 18px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
   .toast {
     display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border);
@@ -613,7 +591,6 @@
   @keyframes toastOut { to { opacity: 0; transform: translateX(24px); } }
   .toast .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
 
-  /* ── MODAL ── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(20,21,26,0.45); display: flex; align-items: center; justify-content: center;
     padding: 24px; z-index: 100; backdrop-filter: blur(2px);
@@ -644,7 +621,6 @@
     background: var(--green-soft); border: 1px solid rgba(22,163,74,0.22); border-radius: 11px; margin-bottom: 14px; font-size: 13px; color: var(--green); font-weight: 600;
   }
 
-  /* activity timeline */
   .timeline { margin-bottom: 18px; }
   .timeline-item { display: flex; gap: 10px; position: relative; padding-bottom: 16px; }
   .timeline-item:last-child { padding-bottom: 0; }
@@ -690,7 +666,6 @@
   .field-error { font-size: 12px; color: var(--red); font-weight: 600; display: none; }
   .field-error.show { display: block; }
 
-  /* resolve confirmation burst */
   .resolve-burst {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     background: rgba(255,255,255,0.0); pointer-events: none; z-index: 5; opacity: 0;
@@ -708,12 +683,10 @@
   .resolve-check path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: checkDraw .35s ease .25s forwards; }
   @keyframes checkDraw { to { stroke-dashoffset: 0; } }
 
-  /* refresh spin */
   @keyframes spinIcon { to { transform: rotate(360deg); } }
   #refresh-icon.spinning { animation: spinIcon 0.7s linear infinite; }
   #refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  /* ── ATTACHMENT (added) ── */
   .modal-attachment { margin-bottom: 18px; }
   .modal-attachment img {
     max-width: 100%; max-height: 320px; border-radius: 10px;
@@ -726,6 +699,54 @@
   }
   .admin-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
   .ticket-attach-flag { display:inline-flex; align-items:center; gap:3px; font-size:11px; color: var(--text-faint); }
+
+  /* ── PLATFORM SELECT (added) ── */
+  .platform-wrap {
+    min-height: calc(100vh / var(--ui-scale)); display: flex; align-items: center; justify-content: center; padding: 24px;
+    background: var(--bg);
+  }
+  .platform-box { width: 100%; max-width: 720px; text-align: center; }
+  .platform-box h1 { font-family: 'Poppins','Inter',sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .platform-box p.sub { font-size: 13px; color: var(--text-light); margin-bottom: 30px; }
+  .platform-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .platform-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 30px 22px;
+    cursor: pointer; box-shadow: var(--shadow-sm); transition: box-shadow .15s, transform .15s, border-color .15s;
+    display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  }
+  .platform-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--blue); }
+  .platform-icon {
+    width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .platform-icon.p-blue { background: linear-gradient(135deg, var(--blue), var(--violet)); }
+  .platform-icon.p-green { background: linear-gradient(135deg, var(--green), #0EA5A4); }
+  .platform-icon svg { width: 26px; height: 26px; }
+  .platform-card h3 { font-size: 15.5px; font-weight: 700; }
+  .platform-card p { font-size: 12.5px; color: var(--text-light); line-height: 1.5; }
+  .platform-back { margin-top: 26px; }
+  @media (max-width: 640px) { .platform-cards { grid-template-columns: 1fr; } }
+
+  /* ── DAILY LOG SCREEN (added) ── */
+  .dlog-topbar {
+    display: flex; align-items: center; justify-content: space-between; padding: 16px 30px;
+    background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .dlog-body { padding: 24px 30px; max-width: 900px; width: 100%; margin: 0 auto; flex: 1; overflow-y: auto; }
+  .dlog-form-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+    margin-bottom: 22px; box-shadow: var(--shadow-sm);
+  }
+  .dlog-form-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+  .dlog-entry {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 12px; box-shadow: var(--shadow-sm);
+  }
+  .dlog-entry-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .dlog-entry-date { font-size: 12.5px; font-weight: 700; color: var(--blue); }
+  .dlog-entry-meta { font-size: 11px; color: var(--text-faint); }
+  .dlog-entry-activity { font-size: 13.5px; line-height: 1.5; margin-bottom: 6px; white-space: pre-wrap; }
+  .dlog-entry-progress { font-size: 12.5px; color: var(--text-light); white-space: pre-wrap; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
 
   @media (max-width: 860px) {
     .sidebar { position: fixed; z-index: 40; left: -244px; }
@@ -816,6 +837,75 @@
   </div>
 </div>
 
+<!-- ── PLATFORM SELECT (campus/senior manager only) ── -->
+<div id="platform-select-screen" class="hidden platform-wrap">
+  <div class="platform-box">
+    <h1>Welcome<span id="platform-select-college-name"></span></h1>
+    <p class="sub">Choose what you'd like to open.</p>
+    <div class="platform-cards">
+      <button class="platform-card" onclick="selectPlatform('tickets')">
+        <div class="platform-icon p-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h3a2 2 0 0 0 4 0h3a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2h-3a2 2 0 0 0-4 0H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/></svg>
+        </div>
+        <h3>Ticketing Platform</h3>
+        <p>View and manage student help-desk tickets raised by your college.</p>
+      </button>
+      <button class="platform-card" onclick="selectPlatform('dailylog')">
+        <div class="platform-icon p-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
+        </div>
+        <h3>Daily Activity Log</h3>
+        <p>Log your daily activities and track your progress over time.</p>
+      </button>
+    </div>
+    <div class="platform-back">
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
+<div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;min-height:calc(100vh / var(--ui-scale));">
+  <div class="dlog-topbar">
+    <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name">—</b></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <div class="dlog-body">
+    <div class="dlog-form-card">
+      <h3>Add today's entry</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="field-label">Date</label>
+          <input id="dlog-date" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Logged by</label>
+          <input id="dlog-name" type="text" placeholder="Your name" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Activities carried out today</label>
+          <input id="dlog-activity" type="text" placeholder="e.g. Visited hostel block A, resolved 3 student queries" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Progress / notes (optional)</label>
+          <input id="dlog-progress" type="text" placeholder="e.g. Escalated fee issue to finance team, pending reply" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="dlog-save-btn" onclick="saveDailyLog()">Save entry</button>
+        <span id="dlog-saved" class="saved-msg hidden">✓ Saved</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text-light);">Recent entries</h3>
+    <div id="dlog-entries"></div>
+    <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
+  </div>
+</div>
+
 <!-- ── DASHBOARD ── -->
 <div id="admin-screen" class="hidden">
   <div class="shell">
@@ -837,6 +927,11 @@
         <button class="nav-row active" data-filter="all" onclick="setStatusFilter('all')">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="6" height="6" rx="1.3"/><rect x="8.5" y="1.5" width="6" height="6" rx="1.3"/><rect x="1.5" y="8.5" width="6" height="6" rx="1.3"/><rect x="8.5" y="8.5" width="6" height="6" rx="1.3"/></svg>
           <span class="nav-label">Dashboard</span>
+        </button>
+
+        <button class="nav-row hidden" id="nav-switch-platform" onclick="backToPlatformSelect()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          <span class="nav-label">Switch platform</span>
         </button>
 
         <div class="sec-label">Tickets</div>
@@ -1181,11 +1276,8 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ADMIN_PIN = '5050';
 
-/* ── Responsive UI scaling ──
-   Keeps the dashboard's visual proportions consistent across
-   different screen resolutions / OS display-scaling settings. */
 function applyUIScale(){
-  const baseWidth = 1536; // reference design width
+  const baseWidth = 1536;
   let scale = window.innerWidth / baseWidth;
   scale = Math.min(Math.max(scale, 0.72), 1.05);
   document.documentElement.style.setProperty('--ui-scale', scale);
@@ -1193,7 +1285,6 @@ function applyUIScale(){
 window.addEventListener('resize', applyUIScale);
 applyUIScale();
 
-/* ── Follow-up Due configuration ── */
 const FOLLOWUP_WORKING_DAYS_7D = 7;
 const FOLLOWUP_WORKING_DAYS_3D = 3;
 const FOLLOWUP_CATEGORIES_7D = new Set([
@@ -1224,7 +1315,6 @@ const PRIORITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' };
 const PRIORITY_RANK  = { high: 0, medium: 1, low: 2 };
 function getPriority(t){ return t.priority || CATEGORY_PRIORITY_MAP[t.category] || 'medium'; }
 
-/* ── Region map ── */
 const REGION_DEFS = {
   chennai:      { label: 'Chennai',              kam: 'Shyam Kumar',   dot: 'dot-red' },
   karnakerala:  { label: 'Karnataka & Kerala',    kam: 'Praveen Rao',   dot: 'dot-amber' },
@@ -1333,13 +1423,17 @@ let modalDraft    = {};
 let modalLocked   = false;
 let kbdFocusIdx   = -1;
 let autosaveTimer = null;
-let avgResView    = 'overall'; // 'overall' | 'region' | 'priority'
+let avgResView    = 'overall';
 
-/* ── Auth / session state (added) ── */
-let authRole      = 'admin';   // which tab is selected on the login screen
-let sessionRole    = 'admin';  // 'admin' | 'manager' — role actually logged in as
-let sessionCollege = null;     // college name (as stored in college_contacts) when sessionRole === 'manager'
-let collegeContacts = [];      // rows from college_contacts, loaded before login
+/* ── Auth / session state ── */
+let authRole      = 'admin';
+let sessionRole    = 'admin';
+let sessionCollege = null;
+let collegeContacts = [];
+
+/* ── Daily log state (added) ── */
+let dailyLogs = [];
+let dlogSaving = false;
 
 const $  = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
@@ -1427,7 +1521,7 @@ function clearOtp(err){
   boxes[0]?.focus();
 }
 
-/* ── Role tabs (added) ── */
+/* ── Role tabs ── */
 function setAuthRole(role){
   authRole = role;
   $('role-tab-admin').classList.toggle('active', role==='admin');
@@ -1437,8 +1531,6 @@ function setAuthRole(role){
   hide('pin-error');
 }
 
-/* Builds the college <select> from the known college list, always — so the dropdown
-   is never empty even before loadCollegeContactsForLogin() has finished (or if it fails). */
 function populateCollegeDropdown(){
   const sel = $('manager-college-select');
   if(!sel) return;
@@ -1451,11 +1543,8 @@ function populateCollegeDropdown(){
     : '<option value="">No colleges configured yet</option>';
 }
 
-/* Loads college_contacts (college + login_pin) so the PIN check works after login screen shows.
-   Falls back to the built-in COLLEGE_REGION_MAP list for the dropdown itself if this fails
-   (e.g. the login_pin column/migration hasn't been added to the database yet). */
 async function loadCollegeContactsForLogin(){
-  populateCollegeDropdown(); // show something immediately, don't wait on the network
+  populateCollegeDropdown();
   try{
     const { data, error } = await sb.from('college_contacts').select('college, login_pin, senior_manager_name, campus_manager_name');
     if(error) throw error;
@@ -1463,8 +1552,6 @@ async function loadCollegeContactsForLogin(){
     populateCollegeDropdown();
   }catch(e){
     console.error('Could not load college_contacts (has the login_pin migration been run?):', e);
-    // dropdown still shows the full college list from COLLEGE_REGION_MAP; PIN check will
-    // fail gracefully with "Incorrect PIN" until the migration is run and PINs are set.
   }
 }
 loadCollegeContactsForLogin();
@@ -1482,6 +1569,8 @@ function submitPin(){
   hide('pin-error');
   sessionRole = 'admin';
   sessionCollege = null;
+  /* Admins skip the platform-select screen entirely and land straight on ticketing. */
+  hide('auth-screen');
   enterDashboard();
 }
 
@@ -1502,25 +1591,52 @@ function submitManagerLogin(){
   hide('pin-error');
   sessionRole = 'manager';
   sessionCollege = college;
-  enterDashboard();
+  /* Campus / Senior managers land on the platform-select screen (Ticketing or Daily Log). */
+  hide('auth-screen');
+  showPlatformSelect();
+}
+
+/* ── Platform select (campus/senior manager only) ── */
+function showPlatformSelect(){
+  hide('admin-screen');
+  hide('dailylog-screen');
+  $('platform-select-college-name').textContent = sessionCollege ? ' — ' + sessionCollege : '';
+  show('platform-select-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+}
+function selectPlatform(which){
+  hide('platform-select-screen');
+  if(which === 'tickets'){
+    enterDashboard();
+  } else if(which === 'dailylog'){
+    enterDailyLog();
+  }
+}
+function backToPlatformSelect(){
+  if(sessionRole !== 'manager') return; // admins never see the platform-select screen
+  hide('admin-screen');
+  hide('dailylog-screen');
+  showPlatformSelect();
 }
 
 function enterDashboard(){
-  hide('auth-screen');
+  hide('platform-select-screen');
+  hide('dailylog-screen');
   show('admin-screen');
   buildRegionDropdown();
   buildPriorityDropdown();
   applySessionUI();
   loadTickets();
+  if(refreshTimer) clearInterval(refreshTimer);
   refreshTimer = setInterval(loadTickets, 15000);
 }
 
-/* Adjusts the dashboard UI to the logged-in role (admin sees everything; managers are scoped to one college). */
 function applySessionUI(){
   const isManager = sessionRole === 'manager';
   $('grp-regions').classList.toggle('hidden', isManager);
   $('regions-sec-label').classList.toggle('hidden', isManager);
   $('dd-region').classList.toggle('hidden', isManager);
+  $('nav-switch-platform').classList.toggle('hidden', !isManager);
 
   const tag = $('session-tag');
   if(isManager){
@@ -1530,7 +1646,6 @@ function applySessionUI(){
   }
 }
 
-/* True if a ticket's free-text college matches the logged-in manager's college. */
 function collegeMatchesSession(ticketCollege){
   if(!sessionCollege) return true;
   const a = normalizeCollege(ticketCollege);
@@ -1540,13 +1655,15 @@ function collegeMatchesSession(ticketCollege){
 }
 
 function logout(){
-  hide('admin-screen'); show('auth-screen');
+  hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen');
+  show('auth-screen');
   clearOtp(false);
   hide('pin-error');
   const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
   setAuthRole('admin');
   firstLoadDone = false; knownTicketIds = new Set();
   sessionRole = 'admin'; sessionCollege = null;
+  dailyLogs = [];
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
 
@@ -1720,7 +1837,6 @@ function getFiltered(){
   return list;
 }
 
-/* ── Sparklines (last 7 days) ── */
 function buildSparkPath(counts, w, h){
   const max = Math.max(...counts, 1);
   const step = w / (counts.length - 1 || 1);
@@ -1750,7 +1866,6 @@ function renderSparklines(){
   };
 }
 
-/* ── Insights panel ── */
 function renderInsightBars(containerId, counts, colorMap, defaultColor){
   const el = $(containerId);
   const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,8);
@@ -1776,7 +1891,6 @@ function renderInsights(){
   renderInsightBars('insight-region', byRegion, regionColorMap, 'var(--violet)');
 }
 
-/* ── Avg resolution time (overall + region-wise + priority-wise) ── */
 function cycleAvgResView(){
   const order = ['overall', 'region', 'priority'];
   const idx = order.indexOf(avgResView);
@@ -1847,7 +1961,6 @@ function renderAvgResolution(){
   }
 }
 
-/* ── Stats ── */
 function renderStats(){
   const followUp3Count = tickets.filter(isFollowUpDue3).length;
   const followUp7Count = tickets.filter(isFollowUpDue7).length;
@@ -1895,7 +2008,6 @@ function renderChips(){
   $('active-chips').innerHTML = chips.join(' ');
 }
 
-/* ── Skeleton loading ── */
 function renderSkeleton(){
   const grid = $('ticket-grid');
   hide('empty-state');
@@ -1911,7 +2023,6 @@ function renderSkeleton(){
   grid.innerHTML = html;
 }
 
-/* ── Load ── */
 async function loadTickets(manual){
   if(!firstLoadDone) renderSkeleton();
 
@@ -1924,7 +2035,6 @@ async function loadTickets(manual){
     if(error) throw error;
     let newData = data || [];
 
-    /* Managers only ever see tickets from their own college. */
     if(sessionRole === 'manager' && sessionCollege){
       newData = newData.filter(t => collegeMatchesSession(t.college));
     }
@@ -1950,7 +2060,6 @@ async function loadTickets(manual){
   }
 }
 
-/* ── Empty state illustration ── */
 function emptyStateSvg(){
   return `<svg width="120" height="90" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="15" y="20" width="90" height="58" rx="10" fill="var(--slate-soft)" stroke="var(--border)" stroke-width="1.5"/>
@@ -1965,7 +2074,6 @@ function emptyStateSvg(){
   </svg>`;
 }
 
-/* ── Render ticket cards ── */
 function renderTickets(){
   renderStats();
   renderChips();
@@ -2037,7 +2145,7 @@ grid.innerHTML = filtered.map((t,i) => {
 
   window._filteredCache = filtered;
 }
-/* ── Quick actions ── */
+
 async function quickSetStatus(id, status){
   const { error } = await sb.from('tickets').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
   if(error){ console.error(error); showToast('Could not update ticket'); return; }
@@ -2046,7 +2154,6 @@ async function quickSetStatus(id, status){
   showToast('Ticket marked in progress');
 }
 
-/* ── Attachment lightbox (added) ── */
 function openAdminLightbox(url){
   if(!url) return;
   const box = document.createElement('div');
@@ -2059,7 +2166,6 @@ function openAdminLightbox(url){
   document.body.appendChild(box);
 }
 
-/* ── Keyboard navigation ── */
 document.addEventListener('keydown', e => {
   if($('ticket-modal') && !$('ticket-modal').classList.contains('hidden')){
     if(e.key === 'Escape') closeModal();
@@ -2088,7 +2194,6 @@ function updateKbdFocus(cards){
   if(c){ c.classList.add('kbd-focus'); c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
 }
 
-/* ── CSV export ── */
 function exportCSV(){
   const list = window._filteredCache || tickets;
   if(!list.length){ showToast('No tickets to export'); return; }
@@ -2112,7 +2217,6 @@ function exportCSV(){
   showToast('CSV exported');
 }
 
-/* ── Modal ── */
 function buildTimeline(t){
   const items = [];
   items.push({ label: 'Ticket created', time: t.created_at, done: true });
@@ -2286,6 +2390,122 @@ async function saveModal(){
   } else {
     setTimeout(() => { hide('modal-saved'); closeModal(); }, 1200);
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ── DAILY ACTIVITY LOG (added) ──
+   Requires a `daily_logs` table in Supabase:
+     id           uuid primary key default gen_random_uuid()
+     college      text not null
+     manager_name text
+     log_date     date not null default current_date
+     activity     text not null
+     progress_notes text
+     created_at   timestamptz not null default now()
+   ══════════════════════════════════════════════════════════ */
+function enterDailyLog(){
+  hide('platform-select-screen');
+  hide('admin-screen');
+  show('dailylog-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  $('dlog-college-name').textContent = sessionCollege || '—';
+
+  const today = new Date().toISOString().slice(0,10);
+  $('dlog-date').value = today;
+
+  const rec = collegeContacts.find(c => c.college === sessionCollege);
+  $('dlog-name').value = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+
+  loadDailyLogs();
+}
+
+async function loadDailyLogs(){
+  const listEl = $('dlog-entries');
+  listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  try{
+    const { data, error } = await sb.from('daily_logs')
+      .select('*')
+      .eq('college', sessionCollege)
+      .order('log_date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    dailyLogs = data || [];
+    renderDailyLogs();
+  }catch(e){
+    console.error('Could not load daily_logs (has the daily_logs table been created?):', e);
+    listEl.innerHTML = '';
+    show('dlog-empty');
+    $('dlog-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table exists in Supabase.</p>`;
+  }
+}
+
+function renderDailyLogs(){
+  const listEl = $('dlog-entries');
+  if(!dailyLogs.length){
+    listEl.innerHTML = '';
+    show('dlog-empty');
+    $('dlog-empty').innerHTML = '<p>No entries yet. Add your first daily log above.</p>';
+    return;
+  }
+  hide('dlog-empty');
+  listEl.innerHTML = dailyLogs.map(l => `
+    <div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+        <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div class="dlog-entry-activity">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+    </div>`).join('');
+}
+
+async function saveDailyLog(){
+  if(dlogSaving) return;
+  const date = $('dlog-date').value;
+  const name = $('dlog-name').value.trim();
+  const activity = $('dlog-activity').value.trim();
+  const progress = $('dlog-progress').value.trim();
+
+  if(!date || !activity){
+    showToast('Please add a date and today\'s activities');
+    return;
+  }
+
+  dlogSaving = true;
+  const saveBtn = $('dlog-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  hide('dlog-saved');
+
+  const payload = {
+    college: sessionCollege,
+    manager_name: name || null,
+    log_date: date,
+    activity: activity,
+    progress_notes: progress || null,
+  };
+
+  const { error } = await sb.from('daily_logs').insert(payload);
+
+  dlogSaving = false;
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Save entry';
+
+  if(error){
+    console.error(error);
+    showToast('Could not save entry: ' + (error.message || 'check console'));
+    return;
+  }
+
+  $('dlog-activity').value = '';
+  $('dlog-progress').value = '';
+  const saved = $('dlog-saved');
+  saved.style.color = 'var(--green)';
+  saved.textContent = '✓ Saved';
+  show('dlog-saved');
+  setTimeout(() => hide('dlog-saved'), 1800);
+
+  loadDailyLogs();
 }
 </script>
 </body>
