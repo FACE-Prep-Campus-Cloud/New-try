@@ -307,6 +307,28 @@
   .auth-footnote { text-align: center; font-size: 11.5px; color: var(--text-faint); margin-top: 18px; }
   body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 
+/* ── Desktop enlargement for the sign-in card ── */
+@media (min-width: 861px) {
+  .auth-box { max-width: 460px; }
+  .auth-avatar { width: 84px; height: 84px; margin-bottom: -42px; }
+  .auth-avatar svg { width: 32px; height: 32px; }
+  .auth-panel { padding: 56px 40px 34px; border-radius: 26px; }
+  .auth-header { margin-bottom: 26px; }
+  .auth-header h1 { font-size: 25px; }
+  .auth-header p { font-size: 14.5px; margin-top: 8px; }
+  .auth-role-toggle { gap: 10px; margin-bottom: 24px; }
+  .role-tab { padding: 12px 10px; font-size: 14px; border-radius: 12px; }
+  .field-label { font-size: 13.5px; margin-bottom: 9px; }
+  .otp-row { gap: 12px; }
+  .otp-box { width: 60px; height: 66px; font-size: 24px; border-radius: 12px; }
+  #manager-login-block input,
+  #manager-login-block select { font-size: 15.5px; padding: 13px 16px; border-radius: 11px; }
+  #manager-login-block > div { margin-bottom: 18px !important; }
+  .btn-primary.btn-auth { padding: 15px 18px; font-size: 14px; border-radius: 11px; margin-top: 4px; }
+  .auth-footnote { font-size: 13px; margin-top: 22px; }
+  .error-msg { font-size: 14px; }
+}
+  
   .shell { display: flex; min-height: calc(100vh / var(--ui-scale)); }
 
   .sidebar {
