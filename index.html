@@ -2729,6 +2729,148 @@ async function saveDailyLog(){
 
   loadDailyLogs();
 }
+
+  /* ══════════════════════════════════════════════════════════
+   ── REVIEW PANEL (admin only, added) ──
+   ══════════════════════════════════════════════════════════ */
+function populateReviewCollegeSelect(){
+  const sel = $('review-college-select');
+  if(!sel) return;
+  const names = collegeContacts.length
+    ? collegeContacts.map(c => c.college)
+    : COLLEGE_REGION_MAP.map(c => c.college);
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = uniqueSorted.length
+    ? uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
+    : '<option value="">No colleges configured yet</option>';
+}
+
+function enterReviewPanel(){
+  hide('platform-select-screen');
+  hide('admin-screen');
+  hide('dailylog-screen');
+  show('review-panel-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+
+  populateReviewCollegeSelect();
+  const sel = $('review-college-select');
+  reviewCollege = sel.value || null;
+  $('review-college-name').textContent = reviewCollege || '—';
+
+  reviewCallFilter = 'all';
+  $('review-filter-select').value = 'all';
+
+  if(reviewCollege) loadReviewLogs();
+  else {
+    reviewLogs = [];
+    renderReviewLogs();
+  }
+}
+
+function onReviewCollegeChange(college){
+  reviewCollege = college;
+  $('review-college-name').textContent = college || '—';
+  loadReviewLogs();
+}
+
+function setReviewLogFilter(v){
+  reviewCallFilter = v;
+  renderReviewLogs();
+}
+
+async function loadReviewLogs(){
+  const listEl = $('review-entries');
+  listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  try{
+    const { data, error } = await sb.from('daily_logs')
+      .select('*')
+      .eq('college', reviewCollege)
+      .order('log_date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    reviewLogs = data || [];
+    renderReviewLogs();
+  }catch(e){
+    console.error('Could not load daily_logs for review panel:', e);
+    listEl.innerHTML = '';
+    show('review-empty');
+    $('review-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table has the review columns (reviewed, reviewed_by, reviewed_at).</p>`;
+  }
+}
+
+function getReviewFiltered(){
+  let list = reviewLogs;
+  if(reviewCallFilter === 'hard')     list = list.filter(l => l.call_type === 'hard');
+  if(reviewCallFilter === 'soft')     list = list.filter(l => l.call_type === 'soft');
+  if(reviewCallFilter === 'pending')  list = list.filter(l => !l.reviewed);
+  if(reviewCallFilter === 'reviewed') list = list.filter(l => !!l.reviewed);
+  return list;
+}
+
+function renderReviewLogs(){
+  $('review-cnt-all').textContent     = reviewLogs.length;
+  $('review-cnt-hard').textContent    = reviewLogs.filter(l => l.call_type === 'hard').length;
+  $('review-cnt-pending').textContent = reviewLogs.filter(l => !l.reviewed).length;
+
+  const listEl = $('review-entries');
+  const filtered = getReviewFiltered();
+
+  if(!filtered.length){
+    listEl.innerHTML = '';
+    show('review-empty');
+    $('review-empty').innerHTML = reviewCollege
+      ? '<p>No entries found for this college / filter.</p>'
+      : '<p>Select a college to view its activity log.</p>';
+    return;
+  }
+  hide('review-empty');
+
+  listEl.innerHTML = filtered.map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    const reviewBadge = l.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
+      : `<span class="review-badge review-no">☐ Review pending</span>`;
+    const reviewBtn = !l.reviewed
+      ? `<button class="btn btn-primary" style="margin-top:10px;" onclick="markLogReviewed('${l.id}')">Mark reviewed</button>`
+      : `<div style="margin-top:8px;font-size:11px;color:var(--text-faint);">Reviewed on ${l.reviewed_at ? fmtAbs(l.reviewed_at) : '—'}</div>`;
+    return `
+    <div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+        <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
+      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+      ${reviewBtn}
+    </div>`;
+  }).join('');
+}
+
+async function markLogReviewed(id){
+  const reviewerName = window.prompt('Enter your name to confirm this review:');
+  if(!reviewerName || !reviewerName.trim()){
+    showToast('Reviewer name is required');
+    return;
+  }
+  const payload = {
+    reviewed: true,
+    reviewed_by: reviewerName.trim(),
+    reviewed_at: new Date().toISOString()
+  };
+  const { error } = await sb.from('daily_logs').update(payload).eq('id', id);
+  if(error){
+    console.error(error);
+    showToast('Could not mark as reviewed: ' + (error.message || 'check console'));
+    return;
+  }
+  reviewLogs = reviewLogs.map(l => l.id === id ? { ...l, ...payload } : l);
+  renderReviewLogs();
+  showToast('Marked as reviewed');
+}
 </script>
 </body>
 </html>
