@@ -787,6 +787,30 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
   .dlog-cat-badge.hard { background: var(--red-soft); color: var(--red); }
   .dlog-cat-badge.soft { background: var(--slate-soft); color: var(--text-light); }
 
+  .review-cal-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+  .review-cal-nav { display:flex; align-items:center; gap:8px; }
+  .review-cal-nav-btn { width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border); background:var(--card); cursor:pointer; color:var(--text-light); }
+  .review-cal-nav-btn:hover { background:var(--slate-soft); color:var(--text); }
+  .review-cal-month-label { font-size:15px; font-weight:700; min-width:150px; text-align:center; }
+  .review-calendar { border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--card); box-shadow:var(--shadow-sm); }
+  .review-cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); background:var(--slate-soft); }
+  .review-cal-weekdays span { padding:8px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); text-align:center; }
+  .review-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); }
+  .review-cal-cell { min-height:92px; border-top:1px solid var(--border); border-right:1px solid var(--border); padding:6px; cursor:pointer; transition:background .12s; display:flex; flex-direction:column; gap:3px; }
+  .review-cal-cell:nth-child(7n) { border-right:none; }
+  .review-cal-cell:hover { background:var(--slate-soft); }
+  .review-cal-cell.outside { opacity:0.38; }
+  .review-cal-cell.is-today .review-cal-daynum { background:var(--blue); color:#fff; border-radius:50%; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; }
+  .review-cal-daynum { font-size:12px; color:var(--text-light); font-weight:600; }
+  .review-cal-pill { display:flex; align-items:center; gap:4px; font-size:10.5px; background:var(--slate-soft); border-radius:5px; padding:2px 5px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .review-cal-pill .cal-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .review-cal-pill .cal-dot.hard { background:var(--red); }
+  .review-cal-pill .cal-dot.soft { background:var(--text-faint); }
+  .review-cal-pill .cal-check { margin-left:auto; color:var(--green); font-size:11px; flex-shrink:0; }
+  .review-cal-more { font-size:10.5px; color:var(--text-faint); padding:1px 5px; }
+  .review-cal-legend { display:flex; gap:16px; margin-top:10px; font-size:11.5px; color:var(--text-light); align-items:center; }
+  .review-cal-legend .cal-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+
   @media (max-width: 860px) {
     .sidebar { position: fixed; z-index: 40; left: -244px; }
     .sidebar.mobile-open { left: 0; }
@@ -1002,9 +1026,43 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
       </div>
     </div>
 
-    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text-light);">Activity log entries</h3>
-    <div id="review-entries"></div>
+    <div class="review-cal-topbar">
+      <h3 style="font-size:14px;color:var(--text-light);margin:0;">Activity log calendar</h3>
+      <div class="review-cal-nav">
+        <button class="review-cal-nav-btn" onclick="reviewCalShift(-1)" aria-label="Previous month">‹</button>
+        <span class="review-cal-month-label" id="review-cal-month-label">—</span>
+        <button class="review-cal-nav-btn" onclick="reviewCalShift(1)" aria-label="Next month">›</button>
+        <button class="btn btn-ghost" onclick="reviewCalToday()">Today</button>
+      </div>
+    </div>
+    <div class="review-calendar">
+      <div class="review-cal-weekdays">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      <div class="review-cal-grid" id="review-cal-grid"></div>
+    </div>
+    <div class="review-cal-legend">
+      <span><span class="cal-dot" style="background:var(--red)"></span>Hard call</span>
+      <span><span class="cal-dot" style="background:var(--text-faint)"></span>Soft call</span>
+      <span>✓ Reviewed</span>
+    </div>
     <div id="review-empty" class="empty-state hidden"><p>No entries found for this college / filter.</p></div>
+  </div>
+</div>
+
+<div id="review-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeReviewDayModal()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="review-day-modal-title"></div>
+        <div class="modal-meta" id="review-day-modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeReviewDayModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <hr class="modal-div">
+      <div id="review-day-modal-entries"></div>
+    </div>
   </div>
 </div>
 
@@ -1540,6 +1598,7 @@ let dlogSaving = false;
 let reviewLogs = [];
 let reviewCollege = null;
 let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed'
+let reviewCalMonth = new Date();
 
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
@@ -2758,6 +2817,7 @@ function enterReviewPanel(){
 
   reviewCallFilter = 'all';
   $('review-filter-select').value = 'all';
+  reviewCalMonth = new Date();
 
   if(reviewCollege) loadReviewLogs();
   else {
@@ -2765,6 +2825,128 @@ function enterReviewPanel(){
     renderReviewLogs();
   }
 }
+
+function reviewCalShift(delta){
+  reviewCalMonth = new Date(reviewCalMonth.getFullYear(), reviewCalMonth.getMonth()+delta, 1);
+  renderReviewCalendar();
+}
+function reviewCalToday(){
+  reviewCalMonth = new Date();
+  renderReviewCalendar();
+}
+function ymd(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function renderReviewCalendar(){
+  const label = $('review-cal-month-label');
+  if(label) label.textContent = reviewCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+
+  const filtered = getReviewFiltered();
+  const byDate = {};
+  filtered.forEach(l => {
+    const key = String(l.log_date).slice(0,10);
+    (byDate[key] = byDate[key] || []).push(l);
+  });
+
+  const year = reviewCalMonth.getFullYear();
+  const month = reviewCalMonth.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  let startOffset = firstOfMonth.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const todayKey = ymd(new Date());
+
+  const cells = [];
+  for(let i=startOffset; i>0; i--){
+    cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push({ date: new Date(year, month, d), outside:false });
+  }
+  while(cells.length % 7 !== 0 || cells.length < 42){
+    const last = cells[cells.length-1].date;
+    cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
+  }
+
+  const grid = $('review-cal-grid');
+  if(!grid) return;
+  const maxShow = 3;
+  grid.innerHTML = cells.map(cell => {
+    const key = ymd(cell.date);
+    const dayEntries = byDate[key] || [];
+    const isToday = key === todayKey;
+    const pillsHtml = dayEntries.slice(0, maxShow).map(e => {
+      const cat = DLOG_CATEGORIES.find(c => c.key === e.category);
+      const catLabel = cat ? cat.label : (e.category || 'Uncategorized');
+      const callType = e.call_type || (cat ? cat.callType : 'soft');
+      return `<div class="review-cal-pill" title="${escHTML(catLabel)}">
+        <span class="cal-dot ${callType}"></span>
+        <span>${escHTML(catLabel)}</span>
+        ${e.reviewed ? '<span class="cal-check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+    const moreHtml = dayEntries.length > maxShow ? `<div class="review-cal-more">+${dayEntries.length - maxShow} more</div>` : '';
+    return `<div class="review-cal-cell ${cell.outside ? 'outside' : ''} ${isToday ? 'is-today' : ''}" onclick="openReviewDayModal('${key}')">
+      <span class="review-cal-daynum">${cell.date.getDate()}</span>
+      ${pillsHtml}
+      ${moreHtml}
+    </div>`;
+  }).join('');
+
+  if(!reviewCollege){
+    show('review-empty');
+    $('review-empty').innerHTML = '<p>Select a college to view its activity log.</p>';
+  } else if(!filtered.length){
+    show('review-empty');
+    $('review-empty').innerHTML = '<p>No entries found for this college / filter.</p>';
+  } else {
+    hide('review-empty');
+  }
+}
+
+function openReviewDayModal(dateKey){
+  const dayEntries = getReviewFiltered().filter(l => String(l.log_date).slice(0,10) === dateKey);
+  if(!dayEntries.length) return;
+  const dateObj = new Date(dateKey + 'T00:00:00');
+  $('review-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  $('review-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${reviewCollege || ''}`;
+
+  $('review-day-modal-entries').innerHTML = dayEntries.map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    const reviewBadge = l.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
+      : `<span class="review-badge review-no">☐ Review pending</span>`;
+    const reviewBtn = !l.reviewed
+      ? `<button class="btn btn-primary" style="margin-top:10px;" onclick="markLogReviewed('${l.id}')">Mark reviewed</button>`
+      : `<div style="margin-top:8px;font-size:11px;color:var(--text-faint);">Reviewed on ${l.reviewed_at ? fmtAbs(l.reviewed_at) : '—'}</div>`;
+    return `<div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
+      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+      ${reviewBtn}
+    </div>`;
+  }).join('');
+
+  show('review-day-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeReviewDayModal(){
+  hide('review-day-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('review-day-modal') && !$('review-day-modal').classList.contains('hidden')){
+    closeReviewDayModal();
+  }
+});
 
 function onReviewCollegeChange(college){
   reviewCollege = college;
@@ -2778,8 +2960,8 @@ function setReviewLogFilter(v){
 }
 
 async function loadReviewLogs(){
-  const listEl = $('review-entries');
-  listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  const listEl = $('review-cal-grid');
+  if(listEl) listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px;">Loading…</div>';
   try{
     const { data, error } = await sb.from('daily_logs')
       .select('*')
@@ -2791,7 +2973,6 @@ async function loadReviewLogs(){
     renderReviewLogs();
   }catch(e){
     console.error('Could not load daily_logs for review panel:', e);
-    listEl.innerHTML = '';
     show('review-empty');
     $('review-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table has the review columns (reviewed, reviewed_by, reviewed_at).</p>`;
   }
@@ -2810,43 +2991,7 @@ function renderReviewLogs(){
   $('review-cnt-all').textContent     = reviewLogs.length;
   $('review-cnt-hard').textContent    = reviewLogs.filter(l => l.call_type === 'hard').length;
   $('review-cnt-pending').textContent = reviewLogs.filter(l => !l.reviewed).length;
-
-  const listEl = $('review-entries');
-  const filtered = getReviewFiltered();
-
-  if(!filtered.length){
-    listEl.innerHTML = '';
-    show('review-empty');
-    $('review-empty').innerHTML = reviewCollege
-      ? '<p>No entries found for this college / filter.</p>'
-      : '<p>Select a college to view its activity log.</p>';
-    return;
-  }
-  hide('review-empty');
-
-  listEl.innerHTML = filtered.map(l => {
-    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
-    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
-    const callType = l.call_type || (cat ? cat.callType : 'soft');
-    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
-    const reviewBadge = l.reviewed
-      ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
-      : `<span class="review-badge review-no">☐ Review pending</span>`;
-    const reviewBtn = !l.reviewed
-      ? `<button class="btn btn-primary" style="margin-top:10px;" onclick="markLogReviewed('${l.id}')">Mark reviewed</button>`
-      : `<div style="margin-top:8px;font-size:11px;color:var(--text-faint);">Reviewed on ${l.reviewed_at ? fmtAbs(l.reviewed_at) : '—'}</div>`;
-    return `
-    <div class="dlog-entry">
-      <div class="dlog-entry-top">
-        <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
-        <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
-      </div>
-      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
-      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
-      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
-      ${reviewBtn}
-    </div>`;
-  }).join('');
+  renderReviewCalendar();
 }
 
 async function markLogReviewed(id){
@@ -2868,6 +3013,10 @@ async function markLogReviewed(id){
   }
   reviewLogs = reviewLogs.map(l => l.id === id ? { ...l, ...payload } : l);
   renderReviewLogs();
+  if($('review-day-modal') && !$('review-day-modal').classList.contains('hidden')){
+    const updated = reviewLogs.find(l => l.id === id);
+    if(updated) openReviewDayModal(String(updated.log_date).slice(0,10));
+  }
   showToast('Marked as reviewed');
 }
 </script>
