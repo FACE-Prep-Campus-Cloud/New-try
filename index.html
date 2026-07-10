@@ -2468,7 +2468,7 @@ function onDlogCategoryChange(key){
   if(!hint) return;
   if(!cat){ hint.textContent = ''; hint.className = 'dlog-call-hint'; return; }
   if(cat.callType === 'hard'){
-    hint.textContent = '✉ Hard call — an email will be prepared when you save this entry.';
+    hint.textContent = '✉ Hard call — an email send to KAM about the issue.';
     hint.className = 'dlog-call-hint hard';
   } else {
     hint.textContent = 'Soft call — no email needed.';
