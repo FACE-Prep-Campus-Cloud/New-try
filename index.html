@@ -904,8 +904,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 </div>
 
 <!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
-<div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;min-height:calc(100vh / var(--ui-scale));">
-  <div class="dlog-topbar">
+<div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
     <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name">—</b></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
@@ -951,8 +950,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 </div>
 
 <!-- ── REVIEW PANEL (admin only) ── -->
-<div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;min-height:calc(100vh / var(--ui-scale));">
-  <div class="dlog-topbar">
+<div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
     <div class="breadcrumb">Review Panel / <b id="review-college-name">—</b></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
