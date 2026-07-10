@@ -748,6 +748,17 @@
   .dlog-entry-activity { font-size: 13.5px; line-height: 1.5; margin-bottom: 6px; white-space: pre-wrap; }
   .dlog-entry-progress { font-size: 12.5px; color: var(--text-light); white-space: pre-wrap; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
 
+  /* ── DAILY LOG CATEGORY / CALL TYPE (added) ── */
+  .dlog-call-hint { font-size: 11.5px; margin-top: 7px; font-weight: 600; }
+  .dlog-call-hint.hard { color: var(--red); }
+  .dlog-call-hint.soft { color: var(--text-faint); font-weight: 500; }
+  .dlog-cat-badge {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .dlog-cat-badge.hard { background: var(--red-soft); color: var(--red); }
+  .dlog-cat-badge.soft { background: var(--slate-soft); color: var(--text-light); }
+
   @media (max-width: 860px) {
     .sidebar { position: fixed; z-index: 40; left: -244px; }
     .sidebar.mobile-open { left: 0; }
@@ -804,7 +815,7 @@
 
       <div class="auth-role-toggle">
         <button type="button" class="role-tab active" id="role-tab-admin" onclick="setAuthRole('admin')">Admin</button>
-        <button type="button" class="role-tab" id="role-tab-manager" onclick="setAuthRole('manager')">Campus Manager</button>
+        <button type="button" class="role-tab" id="role-tab-manager" onclick="setAuthRole('manager')">Campus / Senior Manager</button>
       </div>
 
       <div id="admin-login-block">
@@ -886,7 +897,12 @@
           <input id="dlog-name" type="text" placeholder="Your name" />
         </div>
         <div class="form-group full">
-          <label class="field-label">Activities carried out today</label>
+          <label class="field-label">Category</label>
+          <select id="dlog-category" onchange="onDlogCategoryChange(this.value)"></select>
+          <div class="dlog-call-hint" id="dlog-call-hint"></div>
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Activity details</label>
           <input id="dlog-activity" type="text" placeholder="e.g. Visited hostel block A, resolved 3 student queries" />
         </div>
         <div class="form-group full">
@@ -1434,6 +1450,27 @@ let collegeContacts = [];
 let dailyLogs = [];
 let dlogSaving = false;
 
+/* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
+const DLOG_CATEGORIES = [
+  { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
+  { key: 'mentor_performance',   label: 'Mentor Performance',                              callType: 'hard' },
+  { key: 'student_query',        label: 'Student Query',                                   callType: 'soft' },
+  { key: 'spoc_escalation',      label: 'Stakeholder / SPOC Escalations',                  callType: 'hard' },
+  { key: 'examinations',         label: 'Examinations',                                    callType: 'hard' },
+  { key: 'infrastructure',       label: 'Infrastructure',                                  callType: 'soft' },
+  { key: 'fee',                  label: 'Fee',                                             callType: 'soft' },
+  { key: 'disciplinary_student', label: 'Disciplinary Actions in Students',                 callType: 'hard' },
+  { key: 'disciplinary_mentor',  label: 'Disciplinary Actions in Mentors',                  callType: 'hard' },
+  { key: 'events',               label: 'Events',                                          callType: 'soft' },
+  { key: 'industrial_visit',     label: 'Industrial Visit',                                callType: 'soft' },
+  { key: 'data_submission',      label: 'Data Submissions / G-Sheet Updation',              callType: 'hard' },
+  { key: 'attendance',           label: 'Attendance',                                       callType: 'soft' },
+  { key: 'hostel',               label: 'Hostel',                                          callType: 'soft' },
+  { key: 'portal_technical',     label: 'Technical Issues in Portal',                       callType: 'hard' },
+  { key: 'placement_docs',       label: 'Placement / Internship, Certification & Documents',callType: 'soft' },
+];
+const ESCALATION_EMAIL = 'escalations@faceprepcampus.in'; // TODO: replace with the real recipient address
+
 const $  = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
@@ -1501,7 +1538,6 @@ function showToast(msg){
     const idx = all.indexOf(e.target);
     if(e.target.value && idx < all.length - 1) all[idx+1].focus();
     if(e.target.value && idx === all.length - 1) submitPin();
-    if(e.key === 'Enter') submitPin();
   });
   document.addEventListener('keydown', e => {
     if(!e.target.classList.contains('otp-box')) return;
@@ -1512,7 +1548,7 @@ function showToast(msg){
   });
 })();
 
-  /* Manager PIN: pressing Enter in the PIN field (or college dropdown) submits login */
+/* Manager PIN: pressing Enter in the PIN field (or college dropdown) submits login */
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter') return;
   if(e.target.id === 'manager-pin-input' || e.target.id === 'manager-college-select'){
@@ -1520,6 +1556,7 @@ document.addEventListener('keydown', e => {
     submitManagerLogin();
   }
 });
+
 function getOtpValue(){
   return Array.from(document.querySelectorAll('.otp-box')).map(b => b.value).join('');
 }
@@ -2408,10 +2445,53 @@ async function saveModal(){
      college      text not null
      manager_name text
      log_date     date not null default current_date
+     category     text
+     call_type    text            -- 'hard' or 'soft'
      activity     text not null
      progress_notes text
      created_at   timestamptz not null default now()
    ══════════════════════════════════════════════════════════ */
+function populateDlogCategorySelect(){
+  const sel = $('dlog-category');
+  if(!sel) return;
+  const hard = DLOG_CATEGORIES.filter(c => c.callType === 'hard');
+  const soft = DLOG_CATEGORIES.filter(c => c.callType === 'soft');
+  sel.innerHTML =
+    '<option value="">Select a category</option>' +
+    `<optgroup label="Hard Call — will be emailed">${hard.map(c => `<option value="${c.key}">${escHTML(c.label)}</option>`).join('')}</optgroup>` +
+    `<optgroup label="Soft Call">${soft.map(c => `<option value="${c.key}">${escHTML(c.label)}</option>`).join('')}</optgroup>`;
+}
+
+function onDlogCategoryChange(key){
+  const cat = DLOG_CATEGORIES.find(c => c.key === key);
+  const hint = $('dlog-call-hint');
+  if(!hint) return;
+  if(!cat){ hint.textContent = ''; hint.className = 'dlog-call-hint'; return; }
+  if(cat.callType === 'hard'){
+    hint.textContent = '✉ Hard call — an email will be prepared when you save this entry.';
+    hint.className = 'dlog-call-hint hard';
+  } else {
+    hint.textContent = 'Soft call — no email needed.';
+    hint.className = 'dlog-call-hint soft';
+  }
+}
+
+function sendHardCallEmail(cat, entry){
+  const subject = encodeURIComponent(`[Hard Call] ${cat.label} — ${sessionCollege}`);
+  const lines = [
+    `College: ${sessionCollege}`,
+    `Category: ${cat.label}`,
+    `Date: ${entry.date}`,
+    `Logged by: ${entry.name || '-'}`,
+    '',
+    'Activity:',
+    entry.activity,
+  ];
+  if(entry.progress) lines.push('', 'Progress / notes:', entry.progress);
+  const body = encodeURIComponent(lines.join('\n'));
+  window.open(`mailto:${ESCALATION_EMAIL}?subject=${subject}&body=${body}`, '_blank');
+}
+
 function enterDailyLog(){
   hide('platform-select-screen');
   hide('admin-screen');
@@ -2424,6 +2504,10 @@ function enterDailyLog(){
 
   const rec = collegeContacts.find(c => c.college === sessionCollege);
   $('dlog-name').value = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+
+  populateDlogCategorySelect();
+  $('dlog-category').value = '';
+  onDlogCategoryChange('');
 
   loadDailyLogs();
 }
@@ -2457,28 +2541,39 @@ function renderDailyLogs(){
     return;
   }
   hide('dlog-empty');
-  listEl.innerHTML = dailyLogs.map(l => `
+  listEl.innerHTML = dailyLogs.map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    return `
     <div class="dlog-entry">
       <div class="dlog-entry-top">
         <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
         <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
       </div>
-      <div class="dlog-entry-activity">${escHTML(l.activity)}</div>
+      <div style="margin-top:4px;">${badge}</div>
+      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
       ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function saveDailyLog(){
   if(dlogSaving) return;
   const date = $('dlog-date').value;
   const name = $('dlog-name').value.trim();
+  const categoryKey = $('dlog-category').value;
   const activity = $('dlog-activity').value.trim();
   const progress = $('dlog-progress').value.trim();
 
-  if(!date || !activity){
-    showToast('Please add a date and today\'s activities');
+  if(!date || !categoryKey || !activity){
+    showToast('Please select a category and add activity details');
     return;
   }
+
+  const cat = DLOG_CATEGORIES.find(c => c.key === categoryKey);
+  const callType = cat ? cat.callType : 'soft';
 
   dlogSaving = true;
   const saveBtn = $('dlog-save-btn');
@@ -2490,6 +2585,8 @@ async function saveDailyLog(){
     college: sessionCollege,
     manager_name: name || null,
     log_date: date,
+    category: categoryKey,
+    call_type: callType,
     activity: activity,
     progress_notes: progress || null,
   };
@@ -2508,11 +2605,18 @@ async function saveDailyLog(){
 
   $('dlog-activity').value = '';
   $('dlog-progress').value = '';
+  $('dlog-category').value = '';
+  onDlogCategoryChange('');
+
   const saved = $('dlog-saved');
   saved.style.color = 'var(--green)';
   saved.textContent = '✓ Saved';
   show('dlog-saved');
   setTimeout(() => hide('dlog-saved'), 1800);
+
+  if(callType === 'hard'){
+    sendHardCallEmail(cat, { date, name, activity, progress });
+  }
 
   loadDailyLogs();
 }
