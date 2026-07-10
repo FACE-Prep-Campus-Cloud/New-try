@@ -777,3 +777,1735 @@
 </style>
 </head>
 <body>
+<div id="scale-root">
+<div class="toast-stack" id="toast-stack"></div>
+
+<!-- ── AUTH (Glass on blur) ── -->
+<div id="auth-screen" class="auth-wrap">
+  <div class="auth-blob b1"></div>
+  <div class="auth-blob b2"></div>
+  <div class="auth-blob b3"></div>
+  <div class="auth-grid-overlay"></div>
+
+  <button class="theme-toggle-auth" onclick="toggleTheme()" id="theme-toggle-auth-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+    <svg id="theme-toggle-auth-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/></svg>
+  </button>
+
+  <div class="auth-box">
+    <div class="auth-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    </div>
+
+    <div class="auth-panel">
+      <div class="auth-header">
+        <h1>FACE Prep Campus Help Desk</h1>
+        <p>Sign in to manage campus tickets.</p>
+      </div>
+
+      <div class="auth-role-toggle">
+        <button type="button" class="role-tab active" id="role-tab-admin" onclick="setAuthRole('admin')">Admin</button>
+        <button type="button" class="role-tab" id="role-tab-manager" onclick="setAuthRole('manager')">Campus / Senior Manager</button>
+      </div>
+
+      <div id="admin-login-block">
+        <div style="margin-bottom:14px">
+          <label class="field-label" style="text-align:center;display:block;">Admin PIN</label>
+          <div class="otp-row" id="otp-row">
+            <input class="otp-box" type="password" inputmode="numeric" maxlength="1" data-idx="0" />
+            <input class="otp-box" type="password" inputmode="numeric" maxlength="1" data-idx="1" />
+            <input class="otp-box" type="password" inputmode="numeric" maxlength="1" data-idx="2" />
+            <input class="otp-box" type="password" inputmode="numeric" maxlength="1" data-idx="3" />
+          </div>
+        </div>
+      </div>
+
+      <div id="manager-login-block" class="hidden">
+        <div style="margin-bottom:14px">
+          <label class="field-label">College</label>
+          <select id="manager-college-select"></select>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="field-label">Manager PIN</label>
+          <input id="manager-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
+        </div>
+      </div>
+
+      <div id="pin-error" class="error-msg hidden" style="text-align:center;"></div>
+      <button class="btn btn-primary btn-full btn-auth" onclick="submitLogin()">Enter dashboard <span class="arrow">→</span></button>
+    </div>
+    <div class="auth-footnote">Authorized personnel only · FACE Prep Campus</div>
+  </div>
+</div>
+
+<!-- ── PLATFORM SELECT (campus/senior manager only) ── -->
+<div id="platform-select-screen" class="hidden platform-wrap">
+  <div class="platform-box">
+    <h1>Welcome<span id="platform-select-college-name"></span></h1>
+    <p class="sub">Choose what you'd like to open.</p>
+    <div class="platform-cards">
+      <button class="platform-card" onclick="selectPlatform('tickets')">
+        <div class="platform-icon p-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h3a2 2 0 0 0 4 0h3a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2h-3a2 2 0 0 0-4 0H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/></svg>
+        </div>
+        <h3>Ticketing Platform</h3>
+        <p>View and manage student help-desk tickets raised by your college.</p>
+      </button>
+      <button class="platform-card" onclick="selectPlatform('dailylog')">
+        <div class="platform-icon p-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
+        </div>
+        <h3>Daily Activity Log</h3>
+        <p>Log your daily activities and track your progress over time.</p>
+      </button>
+    </div>
+    <div class="platform-back">
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
+<div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;min-height:calc(100vh / var(--ui-scale));">
+  <div class="dlog-topbar">
+    <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name">—</b></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <div class="dlog-body">
+    <div class="dlog-form-card">
+      <h3>Add today's entry</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="field-label">Date</label>
+          <input id="dlog-date" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Logged by</label>
+          <input id="dlog-name" type="text" placeholder="Your name" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Activities carried out today</label>
+          <input id="dlog-activity" type="text" placeholder="e.g. Visited hostel block A, resolved 3 student queries" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Progress / notes (optional)</label>
+          <input id="dlog-progress" type="text" placeholder="e.g. Escalated fee issue to finance team, pending reply" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="dlog-save-btn" onclick="saveDailyLog()">Save entry</button>
+        <span id="dlog-saved" class="saved-msg hidden">✓ Saved</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text-light);">Recent entries</h3>
+    <div id="dlog-entries"></div>
+    <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="admin-screen" class="hidden">
+  <div class="shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="brand">
+          <img class="brand-logo-img" src="Face prep logo3.png" alt="FACE Prep Campus" />
+        </div>
+        <button class="collapse-btn" onclick="toggleSidebar()" title="Collapse sidebar" aria-label="Collapse sidebar">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg>
+        </button>
+      </div>
+
+      <div id="session-tag"></div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <button class="nav-row active" data-filter="all" onclick="setStatusFilter('all')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="6" height="6" rx="1.3"/><rect x="8.5" y="1.5" width="6" height="6" rx="1.3"/><rect x="1.5" y="8.5" width="6" height="6" rx="1.3"/><rect x="8.5" y="8.5" width="6" height="6" rx="1.3"/></svg>
+          <span class="nav-label">Dashboard</span>
+        </button>
+
+        <div class="sec-label">Tickets</div>
+        <div class="nav-group open" id="grp-tickets">
+          <button class="nav-row" onclick="toggleGroup('grp-tickets')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/><line x1="4.5" y1="10.5" x2="8" y2="10.5"/></svg>
+            <span class="nav-label">All tickets</span>
+            <span class="nav-count" id="nav-cnt-all">0</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+          </button>
+          <div class="sub-nav">
+            <button class="sub-row" data-filter="all" onclick="setStatusFilter('all')">
+              All tickets <span class="nav-count" id="nav-cnt-all-2" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="open" onclick="setStatusFilter('open')">
+              Unresolved <span class="nav-count urgent" id="nav-cnt-open" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="progress" onclick="setStatusFilter('progress')">
+              In progress <span class="nav-count" id="nav-cnt-prog" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="resolved" onclick="setStatusFilter('resolved')">
+              Resolved <span class="nav-count" id="nav-cnt-res" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="followup3" onclick="setStatusFilter('followup3')">
+              Follow up due (+ 3 days) <span class="nav-count urgent" id="nav-cnt-followup3" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="followup7" onclick="setStatusFilter('followup7')">
+              Follow up due (+ 7 days) <span class="nav-count urgent" id="nav-cnt-followup7" style="margin-left:auto">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sec-label">Priority</div>
+        <div class="nav-group open" id="grp-priority">
+          <button class="nav-row" onclick="toggleGroup('grp-priority')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5 9.8 5.6l4.5.6-3.3 3.1.9 4.5L8 11.5l-4 2.3.9-4.5-3.3-3.1 4.5-.6z"/></svg>
+            <span class="nav-label">By priority</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+          </button>
+          <div class="sub-nav">
+            <button class="sub-row" data-filter="priority-high" onclick="setPriorityOnly('high')">
+              High <span class="nav-count urgent" id="nav-cnt-p-high" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="priority-medium" onclick="setPriorityOnly('medium')">
+              Medium <span class="nav-count" id="nav-cnt-p-medium" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="priority-low" onclick="setPriorityOnly('low')">
+              Low <span class="nav-count" id="nav-cnt-p-low" style="margin-left:auto">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sec-label" id="regions-sec-label">Regions</div>
+        <div class="nav-group open" id="grp-regions">
+          <button class="nav-row" onclick="toggleGroup('grp-regions')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.5 4.5 8.5s4.5-5.1 4.5-8.5c0-2.5-2-4.5-4.5-4.5z"/><circle cx="8" cy="6" r="1.6"/></svg>
+            <span class="nav-label">By region</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+          </button>
+          <div class="sub-nav">
+            <button class="sub-row" data-filter="region-chennai" onclick="setRegionOnly('chennai')">
+              Chennai <span class="nav-count" id="nav-cnt-r-chennai" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="region-karnakerala" onclick="setRegionOnly('karnakerala')">
+              Karnataka &amp; Kerala <span class="nav-count" id="nav-cnt-r-karnakerala" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="region-tamilnadu" onclick="setRegionOnly('tamilnadu')">
+              Tamil Nadu <span class="nav-count" id="nav-cnt-r-tamilnadu" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="region-coimbatore" onclick="setRegionOnly('coimbatore')">
+              Coimbatore <span class="nav-count" id="nav-cnt-r-coimbatore" style="margin-left:auto">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sec-label">1-on-1 Reviews</div>
+        <div class="nav-group open" id="grp-reviews">
+          <button class="nav-row" onclick="toggleGroup('grp-reviews')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="6" r="2.5"/><path d="M2.5 13.5c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5"/></svg>
+            <span class="nav-label">Reviews</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+          </button>
+          <div class="sub-nav">
+            <button class="sub-row" data-filter="review-pending" onclick="setReviewFilter('pending')">
+              Pending <span class="nav-count urgent" id="nav-cnt-review" style="margin-left:auto">0</span>
+            </button>
+            <button class="sub-row" data-filter="review-done" onclick="setReviewFilter('done')">
+              Done <span class="nav-count" id="nav-cnt-reviewed" style="margin-left:auto">0</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-foot">
+        <button class="theme-row" onclick="toggleTheme()">
+          <svg id="theme-toggle-side-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/></svg>
+          <span class="logout-label" id="theme-row-label">Dark mode</span>
+        </button>
+        <button class="btn-logout" onclick="logout()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2.5H3.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1H6"/><polyline points="10.5,5 13.5,8 10.5,11"/><line x1="13.5" y1="8" x2="6" y2="8"/></svg>
+          <span class="logout-label">Log out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-content">
+
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="breadcrumb">Dashboard / <b id="breadcrumb-current">All Tickets</b></div>
+        </div>
+        <div class="topbar-right">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="search-input" type="text" placeholder="Search roll no., name, college" oninput="renderTickets()" />
+          </div>
+          <button class="btn btn-ghost hidden" id="topbar-switch-platform" onclick="backToPlatformSelect()" title="Switch platform">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+            Switch platform
+          </button>
+          <button class="btn btn-ghost btn-icon" onclick="toggleInsights()" title="Toggle insights">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 13.5V9M6 13.5V5M10 13.5V7.5M14 13.5V2.5"/></svg>
+          </button>
+          <button class="btn btn-ghost" id="refresh-btn" onclick="loadTickets(true)" title="Refresh">
+            <svg id="refresh-icon" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 2.5A6.5 6.5 0 1 1 8 1.5"/><polyline points="13.5,2.5 13.5,6 10,6"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="page-body">
+
+        <div class="insights-panel hidden" id="insights-panel">
+          <div class="insight-block">
+            <h4>Tickets by category</h4>
+            <div id="insight-category"></div>
+          </div>
+          <div class="insight-block">
+            <h4>Tickets by region</h4>
+            <div id="insight-region"></div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <button class="stat-card" data-filter="all" onclick="setStatusFilter('all')">
+            <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/></svg></div>
+            <div class="stat-body">
+              <div class="s-lbl">Total tickets</div>
+              <div class="s-val" id="cnt-all">0</div>
+              <div class="s-sub">All submitted requests</div>
+            </div>
+          </button>
+          <button class="stat-card" data-filter="open" onclick="setStatusFilter('open')">
+            <div class="stat-icon i-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="10.5" r="0.4" fill="currentColor"/></svg></div>
+            <div class="stat-body">
+              <div class="s-lbl">Unresolved</div>
+              <div class="s-val" id="cnt-open">0</div>
+              <div class="s-sub warn" id="cnt-open-sub">0 follow-up due</div>
+            </div>
+          </button>
+          <button class="stat-card" data-filter="progress" onclick="setStatusFilter('progress')">
+            <div class="stat-icon i-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l2.5 2.5"/></svg></div>
+            <div class="stat-body">
+              <div class="s-lbl">In progress</div>
+              <div class="s-val" id="cnt-prog">0</div>
+              <div class="s-sub">Being handled by coordinators</div>
+            </div>
+          </button>
+          <button class="stat-card" data-filter="resolved" onclick="setStatusFilter('resolved')">
+            <div class="stat-icon i-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M5.5 8.2 7.2 10 10.5 6"/></svg></div>
+            <div class="stat-body">
+              <div class="s-lbl">Resolved</div>
+              <div class="s-val" id="cnt-res">0</div>
+              <div class="s-sub">Closed out tickets</div>
+            </div>
+          </button>
+          <div class="stat-card avgres-card" id="avgres-stat-card" style="cursor:pointer;" onclick="cycleAvgResView()" title="Click to switch between overall, region-wise and priority-wise average resolution time">
+            <div class="avgres-top">
+              <div class="stat-icon i-violet"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M8 4.5v3.5l2.2 1.3"/></svg></div>
+              <div class="stat-body">
+                <div class="s-lbl">Avg Turn around time</div>
+                <div class="s-val" style="display:flex;align-items:center;gap:7px;"><span id="cnt-avgres">—</span><span class="avgres-mode-tag" id="avgres-mode-tag">Overall</span></div>
+                <div class="s-sub" id="cnt-avgres-sub">Time to close a ticket</div>
+              </div>
+            </div>
+            <div class="avgres-breakdown hidden" id="avgres-breakdown"></div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="dd" id="dd-status">
+            <button class="dd-trigger" onclick="toggleDD('dd-status')">
+              Status
+              <svg class="chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div class="dd-panel hidden" id="dd-status-panel">
+              <label class="dd-opt"><span class="swatch" style="background:#9AA1AC"></span>All statuses<input type="radio" name="statusopt" checked onclick="setStatusFilter('all')"></label>
+              <label class="dd-opt"><span class="swatch" style="background:var(--red)"></span>Unresolved<input type="radio" name="statusopt" onclick="setStatusFilter('open')"></label>
+              <label class="dd-opt"><span class="swatch" style="background:var(--amber)"></span>In progress<input type="radio" name="statusopt" onclick="setStatusFilter('progress')"></label>
+              <label class="dd-opt"><span class="swatch" style="background:var(--green)"></span>Resolved<input type="radio" name="statusopt" onclick="setStatusFilter('resolved')"></label>
+            </div>
+          </div>
+
+          <div class="dd" id="dd-priority">
+            <button class="dd-trigger" onclick="toggleDD('dd-priority')">
+              Priority <span class="dd-count hidden" id="priority-dd-count">0</span>
+              <svg class="chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div class="dd-panel hidden" id="dd-priority-panel"></div>
+          </div>
+
+          <div class="dd" id="dd-region">
+            <button class="dd-trigger" onclick="toggleDD('dd-region')">
+              Region <span class="dd-count hidden" id="region-dd-count">0</span>
+              <svg class="chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div class="dd-panel hidden" id="dd-region-panel"></div>
+          </div>
+
+          <div class="dd" id="dd-review">
+            <button class="dd-trigger" onclick="toggleDD('dd-review')">
+              Review
+              <svg class="chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div class="dd-panel hidden" id="dd-review-panel">
+              <label class="dd-opt">Any<input type="radio" name="revopt" checked onclick="setReviewFilter('all')"></label>
+              <label class="dd-opt">Pending<input type="radio" name="revopt" onclick="setReviewFilter('pending')"></label>
+              <label class="dd-opt">Done<input type="radio" name="revopt" onclick="setReviewFilter('done')"></label>
+            </div>
+          </div>
+
+          <div class="dd" id="dd-sort">
+            <button class="dd-trigger" onclick="toggleDD('dd-sort')">
+              Sort: <span id="sort-dd-label">Newest first</span>
+              <svg class="chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div class="dd-panel hidden" id="dd-sort-panel">
+              <label class="dd-opt">Newest first<input type="radio" name="sortopt" checked onclick="setSort('new')"></label>
+              <label class="dd-opt">Oldest first<input type="radio" name="sortopt" onclick="setSort('old')"></label>
+              <label class="dd-opt">Priority: high → low<input type="radio" name="sortopt" onclick="setSort('prio')"></label>
+            </div>
+          </div>
+
+          <span id="active-chips"></span>
+          <span class="kbd-hint"><kbd>J</kbd><kbd>K</kbd> navigate <kbd>Enter</kbd> open</span>
+        </div>
+
+        <div class="ticket-grid-wrap">
+          <div id="ticket-grid" class="ticket-grid"></div>
+          <div id="empty-state" class="empty-state hidden"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TICKET MODAL ── -->
+<div id="ticket-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="resolve-burst" id="resolve-burst">
+      <div class="resolve-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></div>
+    </div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-meta" id="modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <hr class="modal-div">
+
+      <div class="region-info-block" id="modal-region-block">
+        <span id="modal-region-badge"></span>
+        <span class="ri-coord" id="modal-region-coord"></span>
+      </div>
+
+      <div class="closed-info-block hidden" id="modal-closed-block">
+        <span>🔒</span>
+        <span id="modal-closed-text"></span>
+      </div>
+
+      <div class="desc-block" id="modal-desc"></div>
+
+      <div class="modal-attachment hidden" id="modal-attachment">
+        <img id="modal-attachment-img" src="" alt="Ticket attachment" onclick="openAdminLightbox(this.src)" />
+      </div>
+
+      <div class="timeline" id="modal-timeline"></div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="field-label">Status</label>
+          <select id="modal-status" onchange="onStatusChange(this.value)">
+            <option value="open">Unresolved</option>
+            <option value="progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <div class="label-row">
+            <label class="field-label">Any reply ? (shown to student in their ticket portal)</label>
+            <span class="autosave-tag" id="autosave-tag">Saving…</span>
+          </div>
+          <input id="modal-note" type="text" placeholder="e.g. Forwarded to exam cell" oninput="modalEdit('note', this.value)" />
+        </div>
+
+        <div class="review-toggle-wrap">
+          <div class="review-toggle-info">
+            <strong>1-on-1 review with student</strong>
+            <span>Has a personal review session taken place with this student?</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="modal-review" onchange="modalEdit('reviewed', this.checked)" />
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+
+        <div class="closer-name-wrap" id="closer-name-wrap">
+          <strong>Closing this ticket</strong>
+          <span>Enter your name to confirm you're resolving this ticket. This will be recorded on the ticket and can't be changed afterward.</span>
+          <input id="modal-closer" type="text" placeholder="Your full name" oninput="onCloserInput(this.value)" />
+          <div class="field-error" id="closer-error">Please enter your name to resolve this ticket.</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()">Save changes</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <span id="modal-saved" class="saved-msg hidden">✓ Saved</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /#scale-root -->
+
+<script>
+/* ── Supabase ── */
+const SUPABASE_URL     = 'https://rysajbwcuieovbsllaas.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5c2FqYndjdWllb3Zic2xsYWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NjI3MjgsImV4cCI6MjA5NjAzODcyOH0.2WenjYKsfQYAeUJxVJcEVQwqYUlfwrYltrMuC9Ggu4A';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ADMIN_PIN = '5050';
+
+function applyUIScale(){
+  const baseWidth = 1536;
+  let scale = window.innerWidth / baseWidth;
+  scale = Math.min(Math.max(scale, 0.72), 1.05);
+  document.documentElement.style.setProperty('--ui-scale', scale);
+}
+window.addEventListener('resize', applyUIScale);
+applyUIScale();
+
+const FOLLOWUP_WORKING_DAYS_7D = 7;
+const FOLLOWUP_WORKING_DAYS_3D = 3;
+const FOLLOWUP_CATEGORIES_7D = new Set([
+  'Fees & Accounts','Scholarship & Financial Aid','Infrastructure','Placement & Internships',
+  'Certificates & Documents','Ragging / Harassment','Other',
+]);
+
+function workingDaysElapsed(start, end){
+  const cur = new Date(start); cur.setHours(0,0,0,0);
+  const stop = new Date(end); stop.setHours(0,0,0,0);
+  let count = 0;
+  while(cur < stop){
+    cur.setDate(cur.getDate() + 1);
+    const day = cur.getDay();
+    if(day !== 0 && day !== 6) count++;
+  }
+  return count;
+}
+
+const CATEGORY_PRIORITY_MAP = {
+  'Ragging / Harassment':'high','Health & Wellness':'high','Examinations':'high','Technical / Portal':'high',
+  'Fees & Accounts':'high','Certificates & Documents':'high',
+  'Academics':'medium','Teaching Issue':'medium','Scholarship & Financial Aid':'medium','Placement & Internships':'medium',
+  'Hostel & Mess':'medium','Infrastructure':'medium',
+  'Library':'low','Transport':'low','Sports & Extracurricular':'low','Other':'low',
+};
+const PRIORITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' };
+const PRIORITY_RANK  = { high: 0, medium: 1, low: 2 };
+function getPriority(t){ return t.priority || CATEGORY_PRIORITY_MAP[t.category] || 'medium'; }
+
+const REGION_DEFS = {
+  chennai:      { label: 'Chennai',              kam: 'Shyam Kumar',   dot: 'dot-red' },
+  karnakerala:  { label: 'Karnataka & Kerala',    kam: 'Praveen Rao',   dot: 'dot-amber' },
+  tamilnadu:    { label: 'Tamil Nadu',            kam: 'Guna Karthick', dot: 'dot-green' },
+  coimbatore:   { label: 'Coimbatore',            kam: 'KAM TBD', dot: 'dot-violet' },
+};
+const REGION_HEX = { chennai:'#DC2626', karnakerala:'#D9840C', tamilnadu:'#16A34A', coimbatore:'#7C3AED', unmapped:'#9AA1AC' };
+
+const COLLEGE_REGION_MAP = [
+  { college: 'SDNB Vaishnav College for Women', region: 'chennai' },
+  { college: 'AMET University', region: 'chennai' },
+  { college: "Vinayaga Mission's Research Foundation School of Arts and Science", region: 'chennai' },
+  { college: 'Takshashila University', region: 'chennai' },
+  { college: 'TJS College of Arts and Science', region: 'chennai' },
+  { college: 'Alliance University', region: 'karnakerala' },
+  { college: 'Kristu Jayanti (DEEMED TO BE UNIVERSITY)', region: 'karnakerala' },
+  { college: 'St. Agnes College (Autonomous)', region: 'karnakerala' },
+  { college: 'Yenepoya (Deemed to be University)', region: 'karnakerala' },
+  { college: 'Asian School of Business', region: 'karnakerala' },
+  { college: 'S-VYASA University', region: 'karnakerala' },
+  { college: 'Kamaraj College', region: 'tamilnadu' },
+  { college: 'Noorul Islam Centre for Higher Education (NICHE)', region: 'tamilnadu' },
+  { college: 'Sri Amaraavathi College of Arts & Science', region: 'tamilnadu' },
+  { college: 'Bharathidasan College Of Arts & Science', region: 'tamilnadu' },
+  { college: 'Nagarathinam Angalammal Arts and Science College', region: 'tamilnadu' },
+  { college: 'Muthayammal College of Arts and Science', region: 'tamilnadu' },
+  { college: 'JOY University', region: 'tamilnadu' },
+  { college: 'TERFs College of Arts and Science', region: 'tamilnadu' },
+  { college: 'Sasurie College of Arts and Science', region: 'tamilnadu' },
+  { college: 'Rathinam College Of Arts And Science', region: 'coimbatore' },
+  { college: 'Sree Saraswathi Thyagaraja College', region: 'coimbatore' },
+  { college: 'VLB Janakiammal College of Arts and Science', region: 'coimbatore' },
+  { college: 'Hindusthan College of Arts & Science', region: 'coimbatore' },
+  { college: 'Kongunadu College of Arts and Science', region: 'coimbatore' },
+  { college: 'Sri Ramakrishna College of Arts and Science for Women', region: 'coimbatore' },
+  { college: 'Study World Group of Institutions', region: 'coimbatore' },
+];
+
+function normalizeCollege(s){
+  return String(s||'').toLowerCase().replace(/['’]/g, '').replace(/[().,&-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+const REGION_LOOKUP = COLLEGE_REGION_MAP.map(e => ({ norm: normalizeCollege(e.college), region: e.region, original: e.college }));
+
+function resolveRegion(collegeName){
+  const norm = normalizeCollege(collegeName);
+  if(!norm) return null;
+  let hit = REGION_LOOKUP.find(e => e.norm === norm);
+  if(hit) return hit.region;
+  hit = REGION_LOOKUP.find(e => norm.includes(e.norm) || e.norm.includes(norm));
+  if(hit) return hit.region;
+  const normWords = new Set(norm.split(' ').filter(w => w.length > 2));
+  let best = null, bestScore = 0;
+  REGION_LOOKUP.forEach(e => {
+    const entryWords = e.norm.split(' ').filter(w => w.length > 2);
+    const overlap = entryWords.filter(w => normWords.has(w)).length;
+    const score = overlap / Math.max(entryWords.length, 1);
+    if(score > bestScore){ bestScore = score; best = e; }
+  });
+  if(best && bestScore >= 0.6) return best.region;
+  return null;
+}
+function getRegionInfo(collegeName){
+  const key = resolveRegion(collegeName);
+  if(!key) return { key: null, label: 'Unmapped', kam: '—', dot: 'dot-slate' };
+  const def = REGION_DEFS[key];
+  return { key, label: def.label, kam: def.kam, dot: def.dot };
+}
+function isFollowUpDue3(t){
+  if(t.status === 'resolved') return false;
+  if(FOLLOWUP_CATEGORIES_7D.has(t.category)) return false;
+  const wd = workingDaysElapsed(new Date(t.created_at), new Date());
+  return wd >= FOLLOWUP_WORKING_DAYS_3D;
+}
+function isFollowUpDue7(t){
+  if(t.status === 'resolved') return false;
+  if(!FOLLOWUP_CATEGORIES_7D.has(t.category)) return false;
+  const wd = workingDaysElapsed(new Date(t.created_at), new Date());
+  return wd >= FOLLOWUP_WORKING_DAYS_7D;
+}
+function isFollowUpDue(t){ return isFollowUpDue3(t) || isFollowUpDue7(t); }
+function initials(name){
+  const parts = String(name||'?').trim().split(/\s+/);
+  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
+}
+function avatarColor(name){
+  const palette = ['#3457E8','#16A34A','#D9840C','#DC2626','#7C3AED','#0EA5A4'];
+  let h = 0; for(const c of String(name||'')) h = (h*31 + c.charCodeAt(0)) % 997;
+  return palette[h % palette.length];
+}
+function isNewTicket(t){
+  return (Date.now() - new Date(t.created_at).getTime()) < (2*60*60*1000);
+}
+
+/* ── State ── */
+let tickets       = [];
+let knownTicketIds= new Set();
+let firstLoadDone = false;
+let statusFilter  = 'all';
+let regionFilter  = new Set();
+let priorityFilter= new Set();
+let reviewFilter  = 'all';
+let sortDir       = 'new';
+let refreshTimer  = null;
+let modalId       = null;
+let modalDraft    = {};
+let modalLocked   = false;
+let kbdFocusIdx   = -1;
+let autosaveTimer = null;
+let avgResView    = 'overall';
+
+/* ── Auth / session state ── */
+let authRole      = 'admin';
+let sessionRole    = 'admin';
+let sessionCollege = null;
+let collegeContacts = [];
+
+/* ── Daily log state (added) ── */
+let dailyLogs = [];
+let dlogSaving = false;
+
+const $  = id => document.getElementById(id);
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+function escHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtRel(iso){
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if(m<1) return 'just now';
+  if(m<60) return m+'m ago';
+  const h = Math.floor(m/60);
+  if(h<24) return h+'h ago';
+  const d = Math.floor(h/24);
+  if(d<30) return d+'d ago';
+  return new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtAbs(iso){
+  return new Date(iso).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtDuration(hours){
+  if(!isFinite(hours)) return '—';
+  if(hours < 24) return hours.toFixed(1) + 'h';
+  return (hours/24).toFixed(1) + 'd';
+}
+
+/* ── Theme ── */
+function applyThemeIcon(){
+  const dark = document.body.getAttribute('data-theme') === 'dark';
+  const paths = dark
+    ? '<path d="M13.5 9.3A5.8 5.8 0 0 1 6.7 2.5 5.8 5.8 0 1 0 13.5 9.3z"/>'
+    : '<circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/>';
+  const authIcon = $('theme-toggle-auth-icon'); if(authIcon) authIcon.innerHTML = paths;
+  const sideIcon = $('theme-toggle-side-icon'); if(sideIcon) sideIcon.innerHTML = paths;
+  const lbl = $('theme-row-label'); if(lbl) lbl.textContent = dark ? 'Light mode' : 'Dark mode';
+}
+function toggleTheme(){
+  const cur = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  applyThemeIcon();
+  renderSparklines();
+}
+applyThemeIcon();
+
+/* ── Toasts ── */
+function showToast(msg){
+  const stack = $('toast-stack');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span class="toast-dot"></span><span>${escHTML(msg)}</span>`;
+  stack.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 220);
+  }, 4200);
+}
+
+/* ── Auth (OTP boxes) ── */
+(function setupOtp(){
+  const boxes = () => Array.from(document.querySelectorAll('.otp-box'));
+  document.addEventListener('input', e => {
+    if(!e.target.classList.contains('otp-box')) return;
+    e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,1);
+    e.target.classList.toggle('filled', !!e.target.value);
+    const all = boxes();
+    const idx = all.indexOf(e.target);
+    if(e.target.value && idx < all.length - 1) all[idx+1].focus();
+    if(e.target.value && idx === all.length - 1) submitPin();
+  });
+  document.addEventListener('keydown', e => {
+    if(!e.target.classList.contains('otp-box')) return;
+    const all = boxes();
+    const idx = all.indexOf(e.target);
+    if(e.key === 'Backspace' && !e.target.value && idx > 0){ all[idx-1].focus(); }
+    if(e.key === 'Enter') submitPin();
+  });
+})();
+function getOtpValue(){
+  return Array.from(document.querySelectorAll('.otp-box')).map(b => b.value).join('');
+}
+function clearOtp(err){
+  const boxes = Array.from(document.querySelectorAll('.otp-box'));
+  boxes.forEach(b => { b.value=''; b.classList.remove('filled'); if(err) b.classList.add('shake-err'); });
+  if(err) setTimeout(() => boxes.forEach(b => b.classList.remove('shake-err')), 400);
+  boxes[0]?.focus();
+}
+
+/* ── Role tabs ── */
+function setAuthRole(role){
+  authRole = role;
+  $('role-tab-admin').classList.toggle('active', role==='admin');
+  $('role-tab-manager').classList.toggle('active', role==='manager');
+  $('admin-login-block').classList.toggle('hidden', role!=='admin');
+  $('manager-login-block').classList.toggle('hidden', role!=='manager');
+  hide('pin-error');
+}
+
+function populateCollegeDropdown(){
+  const sel = $('manager-college-select');
+  if(!sel) return;
+  const names = collegeContacts.length
+    ? collegeContacts.map(c => c.college)
+    : COLLEGE_REGION_MAP.map(c => c.college);
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = uniqueSorted.length
+    ? uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
+    : '<option value="">No colleges configured yet</option>';
+}
+
+async function loadCollegeContactsForLogin(){
+  populateCollegeDropdown();
+  try{
+    const { data, error } = await sb.from('college_contacts').select('college, login_pin, senior_manager_name, campus_manager_name');
+    if(error) throw error;
+    collegeContacts = data || [];
+    populateCollegeDropdown();
+  }catch(e){
+    console.error('Could not load college_contacts (has the login_pin migration been run?):', e);
+  }
+}
+loadCollegeContactsForLogin();
+
+function submitLogin(){
+  if(authRole === 'admin') submitPin();
+  else submitManagerLogin();
+}
+
+function submitPin(){
+  const pin = getOtpValue();
+  const err = $('pin-error');
+  if(pin.length < 4){ err.textContent='Enter all 4 digits.'; show('pin-error'); return; }
+  if(pin !== ADMIN_PIN){ err.textContent='Incorrect PIN.'; show('pin-error'); clearOtp(true); return; }
+  hide('pin-error');
+  sessionRole = 'admin';
+  sessionCollege = null;
+  /* Admins skip the platform-select screen entirely and land straight on ticketing. */
+  hide('auth-screen');
+  enterDashboard();
+}
+
+function submitManagerLogin(){
+  const err = $('pin-error');
+  const college = $('manager-college-select').value;
+  const pin = ($('manager-pin-input').value || '').trim();
+  if(!college){ err.textContent='Select your college.'; show('pin-error'); return; }
+  if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
+  const rec = collegeContacts.find(c => c.college === college);
+  if(!rec || !rec.login_pin || String(rec.login_pin) !== pin){
+    err.textContent='Incorrect PIN for this college.';
+    show('pin-error');
+    $('manager-pin-input').value = '';
+    $('manager-pin-input').focus();
+    return;
+  }
+  hide('pin-error');
+  sessionRole = 'manager';
+  sessionCollege = college;
+  /* Campus / Senior managers land on the platform-select screen (Ticketing or Daily Log). */
+  hide('auth-screen');
+  showPlatformSelect();
+}
+
+/* ── Platform select (campus/senior manager only) ── */
+function showPlatformSelect(){
+  hide('admin-screen');
+  hide('dailylog-screen');
+  $('platform-select-college-name').textContent = sessionCollege ? ' — ' + sessionCollege : '';
+  show('platform-select-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+}
+function selectPlatform(which){
+  hide('platform-select-screen');
+  if(which === 'tickets'){
+    enterDashboard();
+  } else if(which === 'dailylog'){
+    enterDailyLog();
+  }
+}
+function backToPlatformSelect(){
+  if(sessionRole !== 'manager') return; // admins never see the platform-select screen
+  hide('admin-screen');
+  hide('dailylog-screen');
+  showPlatformSelect();
+}
+
+function enterDashboard(){
+  hide('platform-select-screen');
+  hide('dailylog-screen');
+  show('admin-screen');
+  buildRegionDropdown();
+  buildPriorityDropdown();
+  applySessionUI();
+  loadTickets();
+  if(refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadTickets, 15000);
+}
+
+function applySessionUI(){
+  const isManager = sessionRole === 'manager';
+  $('grp-regions').classList.toggle('hidden', isManager);
+  $('regions-sec-label').classList.toggle('hidden', isManager);
+  $('dd-region').classList.toggle('hidden', isManager);
+  $('topbar-switch-platform').classList.toggle('hidden', !isManager);
+
+  const tag = $('session-tag');
+  if(isManager){
+    tag.innerHTML = `Viewing tickets for<br><b>${escHTML(sessionCollege)}</b>`;
+  } else {
+    tag.innerHTML = `<b>Admin</b> — all colleges`;
+  }
+}
+
+function collegeMatchesSession(ticketCollege){
+  if(!sessionCollege) return true;
+  const a = normalizeCollege(ticketCollege);
+  const b = normalizeCollege(sessionCollege);
+  if(!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
+function logout(){
+  hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen');
+  show('auth-screen');
+  clearOtp(false);
+  hide('pin-error');
+  const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
+  setAuthRole('admin');
+  firstLoadDone = false; knownTicketIds = new Set();
+  sessionRole = 'admin'; sessionCollege = null;
+  dailyLogs = [];
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+}
+
+/* ── Sidebar ── */
+function toggleSidebar(){ $('sidebar').classList.toggle('collapsed'); }
+function toggleGroup(id){ $(id).classList.toggle('open'); }
+function toggleInsights(){ $('insights-panel').classList.toggle('hidden'); renderInsights(); }
+
+/* ── Dropdowns ── */
+function toggleDD(id){
+  const el = $(id);
+  const willOpen = !el.classList.contains('open');
+  document.querySelectorAll('.dd').forEach(d => { d.classList.remove('open'); d.querySelector('.dd-panel').classList.add('hidden'); });
+  if(willOpen){ el.classList.add('open'); el.querySelector('.dd-panel').classList.remove('hidden'); }
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('.dd')) document.querySelectorAll('.dd').forEach(d => { d.classList.remove('open'); d.querySelector('.dd-panel').classList.add('hidden'); });
+});
+function buildRegionDropdown(){
+  const panel = $('dd-region-panel');
+  const keys = Object.keys(REGION_DEFS);
+  panel.innerHTML = keys.map(k => `
+    <label class="dd-opt">
+      <span class="swatch" style="background:${REGION_HEX[k]}"></span> ${escHTML(REGION_DEFS[k].label)}
+      <input type="checkbox" value="${k}" onchange="toggleRegionOpt('${k}', this.checked)">
+    </label>`).join('') + `
+    <div class="dd-sep"></div>
+    <label class="dd-opt"><span class="swatch" style="background:${REGION_HEX.unmapped}"></span> Unmapped<input type="checkbox" value="unmapped" onchange="toggleRegionOpt('unmapped', this.checked)"></label>
+    <div class="dd-sep"></div>
+    <button class="dd-clear" onclick="clearRegionFilter()">Clear region filter</button>`;
+}
+function toggleRegionOpt(key, checked){
+  if(checked) regionFilter.add(key); else regionFilter.delete(key);
+  syncRegionDDCount(); renderTickets();
+}
+function clearRegionFilter(){
+  regionFilter.clear();
+  $('dd-region-panel').querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+  syncRegionDDCount(); renderTickets();
+}
+function syncRegionDDCount(){
+  const badge = $('region-dd-count');
+  const trigger = $('dd-region').querySelector('.dd-trigger');
+  if(regionFilter.size){ badge.textContent = regionFilter.size; show('region-dd-count'); trigger.classList.add('filled'); }
+  else { hide('region-dd-count'); trigger.classList.remove('filled'); }
+}
+
+const PRIORITY_HEX = { high: '#DC2626', medium: '#D9840C', low: '#9AA1AC' };
+function buildPriorityDropdown(){
+  const panel = $('dd-priority-panel');
+  panel.innerHTML = ['high','medium','low'].map(k => `
+    <label class="dd-opt">
+      <span class="swatch" style="background:${PRIORITY_HEX[k]}"></span> ${PRIORITY_LABEL[k]}
+      <input type="checkbox" value="${k}" onchange="togglePriorityOpt('${k}', this.checked)">
+    </label>`).join('') + `
+    <div class="dd-sep"></div>
+    <button class="dd-clear" onclick="clearPriorityFilter()">Clear priority filter</button>`;
+}
+function togglePriorityOpt(key, checked){
+  if(checked) priorityFilter.add(key); else priorityFilter.delete(key);
+  syncPriorityDDCount(); renderTickets();
+}
+function clearPriorityFilter(){
+  priorityFilter.clear();
+  $('dd-priority-panel').querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+  syncPriorityDDCount(); renderTickets();
+}
+function syncPriorityDDCount(){
+  const badge = $('priority-dd-count');
+  const trigger = $('dd-priority').querySelector('.dd-trigger');
+  if(priorityFilter.size){ badge.textContent = priorityFilter.size; show('priority-dd-count'); trigger.classList.add('filled'); }
+  else { hide('priority-dd-count'); trigger.classList.remove('filled'); }
+}
+function setPriorityOnly(key){
+  priorityFilter = new Set([key]);
+  buildPriorityDropdown();
+  $('dd-priority-panel').querySelector(`input[value="${key}"]`).checked = true;
+  syncPriorityDDCount();
+  statusFilter = 'active';
+  syncStatusDD();
+  syncNavActive('priority-'+key);
+  updateHeader('priority-'+key);
+  renderTickets();
+}
+
+function setSort(dir){
+  sortDir = dir;
+  const labelMap = { new: 'Newest first', old: 'Oldest first', prio: 'Priority: high → low' };
+  $('sort-dd-label').textContent = labelMap[dir];
+  toggleDD('dd-sort');
+  renderTickets();
+}
+
+function setStatusFilter(f){
+  statusFilter = f;
+  syncStatusDD(); syncNavActive(); updateHeader(); renderTickets();
+}
+function syncStatusDD(){
+  const map = { all:0, open:1, progress:2, resolved:3 };
+  const radios = document.querySelectorAll('input[name=statusopt]');
+  radios.forEach((r,i) => r.checked = (map[statusFilter] === i));
+  $('dd-status').querySelector('.dd-trigger').classList.toggle('filled', statusFilter!=='all' && statusFilter!=='followup3' && statusFilter!=='followup7');
+}
+function setRegionOnly(key){
+  regionFilter = new Set([key]);
+  buildRegionDropdown();
+  $('dd-region-panel').querySelector(`input[value="${key}"]`).checked = true;
+  syncRegionDDCount();
+  statusFilter = 'all';
+  syncStatusDD();
+  syncNavActive('region-'+key);
+  updateHeader('region-'+key);
+  renderTickets();
+}
+function setReviewFilter(v){
+  reviewFilter = v;
+  const radios = document.querySelectorAll('input[name=revopt]');
+  const idx = { all:0, pending:1, done:2 }[v];
+  radios.forEach((r,i) => r.checked = (i===idx));
+  $('dd-review').querySelector('.dd-trigger').classList.toggle('filled', v!=='all');
+  syncNavActive(v==='all' ? null : 'review-'+v);
+  renderTickets();
+}
+function syncNavActive(explicitKey){
+  const key = explicitKey || statusFilter;
+  document.querySelectorAll('.sub-row, .nav-row[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === key));
+  document.querySelectorAll('.stat-card[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === statusFilter || b.dataset.filter === key));
+}
+function updateHeader(explicitKey){
+  const key = explicitKey || statusFilter;
+  const map = {
+    'all':'All Tickets','open':'Unresolved','progress':'In Progress','resolved':'Resolved',
+    'followup3':'Follow-up Due (3 Days)','followup7':'Follow-up Due (7 Days)',
+    'region-chennai':'Chennai','region-karnakerala':'Karnataka & Kerala','region-tamilnadu':'Tamil Nadu','region-coimbatore':'Coimbatore',
+    'review-pending':'Review Pending','review-done':'Review Done',
+    'priority-high':'High Priority','priority-medium':'Medium Priority','priority-low':'Low Priority',
+  };
+  $('breadcrumb-current').textContent = map[key] || 'Tickets';
+}
+
+function getFiltered(){
+  const q = ($('search-input')?.value||'').toLowerCase().trim();
+  let list = tickets.filter(t => {
+    if(statusFilter==='followup3') return isFollowUpDue3(t);
+    if(statusFilter==='followup7') return isFollowUpDue7(t);
+    if(statusFilter==='active') return t.status !== 'resolved';
+    if(statusFilter==='all') return true;
+    return t.status === statusFilter;
+  });
+  if(regionFilter.size){
+    list = list.filter(t => { const key = resolveRegion(t.college); return regionFilter.has(key || 'unmapped'); });
+  }
+  if(priorityFilter.size){ list = list.filter(t => priorityFilter.has(getPriority(t))); }
+  if(reviewFilter==='pending') list = list.filter(t => !t.reviewed);
+  if(reviewFilter==='done')    list = list.filter(t => !!t.reviewed);
+  if(q){
+    list = list.filter(t =>
+      (t.roll_number||'').toLowerCase().includes(q) ||
+      (t.student_name||'').toLowerCase().includes(q) ||
+      (t.subject||'').toLowerCase().includes(q) ||
+      (t.category||'').toLowerCase().includes(q) ||
+      (t.college||'').toLowerCase().includes(q));
+  }
+  if(sortDir === 'prio'){
+    list.sort((a,b) => PRIORITY_RANK[getPriority(a)] - PRIORITY_RANK[getPriority(b)] || (new Date(b.created_at) - new Date(a.created_at)));
+  } else {
+    list.sort((a,b) => sortDir==='new'
+      ? new Date(b.created_at) - new Date(a.created_at)
+      : new Date(a.created_at) - new Date(b.created_at));
+  }
+  return list;
+}
+
+function buildSparkPath(counts, w, h){
+  const max = Math.max(...counts, 1);
+  const step = w / (counts.length - 1 || 1);
+  return counts.map((c,i) => `${i*step},${h - (c/max)*(h-4) - 2}`).join(' ');
+}
+function renderSparklines(){
+  const days = 7;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const createdCounts = new Array(days).fill(0);
+  const resolvedCounts = new Array(days).fill(0);
+  tickets.forEach(t => {
+    const d = new Date(t.created_at); d.setHours(0,0,0,0);
+    const diff = Math.round((now - d) / 86400000);
+    if(diff >= 0 && diff < days) createdCounts[days-1-diff]++;
+    if(t.status === 'resolved' && t.closed_at){
+      const cd = new Date(t.closed_at); cd.setHours(0,0,0,0);
+      const cdiff = Math.round((now - cd) / 86400000);
+      if(cdiff >= 0 && cdiff < days) resolvedCounts[days-1-cdiff]++;
+    }
+  });
+  const dark = document.body.getAttribute('data-theme') === 'dark';
+  const drawInto = (id, counts, color) => {
+    const el = $(id); if(!el) return;
+    const w = 52, h = 28;
+    const pts = buildSparkPath(counts, w, h);
+    el.innerHTML = `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`;
+  };
+}
+
+function renderInsightBars(containerId, counts, colorMap, defaultColor){
+  const el = $(containerId);
+  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const max = Math.max(...entries.map(e=>e[1]), 1);
+  el.innerHTML = entries.map(([label, val]) => `
+    <div class="insight-bar-row">
+      <span class="insight-bar-label" title="${escHTML(label)}">${escHTML(label)}</span>
+      <span class="insight-bar-track"><span class="insight-bar-fill" style="width:${(val/max)*100}%;background:${colorMap[label]||defaultColor}"></span></span>
+      <span class="insight-bar-val">${val}</span>
+    </div>`).join('') || '<div style="font-size:12px;color:var(--text-faint)">No data yet</div>';
+}
+function renderInsights(){
+  if($('insights-panel').classList.contains('hidden')) return;
+  const byCategory = {};
+  tickets.forEach(t => { byCategory[t.category||'Other'] = (byCategory[t.category||'Other']||0) + 1; });
+  renderInsightBars('insight-category', byCategory, {}, 'var(--blue)');
+
+  const byRegion = {};
+  tickets.forEach(t => { const info = getRegionInfo(t.college); byRegion[info.label] = (byRegion[info.label]||0) + 1; });
+  const regionColorMap = {};
+  Object.keys(REGION_DEFS).forEach(k => regionColorMap[REGION_DEFS[k].label] = REGION_HEX[k]);
+  regionColorMap['Unmapped'] = REGION_HEX.unmapped;
+  renderInsightBars('insight-region', byRegion, regionColorMap, 'var(--violet)');
+}
+
+function cycleAvgResView(){
+  const order = ['overall', 'region', 'priority'];
+  const idx = order.indexOf(avgResView);
+  avgResView = order[(idx + 1) % order.length];
+  renderAvgResolution();
+}
+function computeAvgResolutionGroups(keyFn){
+  const groups = {};
+  tickets.forEach(t => {
+    if(t.status !== 'resolved' || !t.closed_at) return;
+    const key = keyFn(t);
+    if(!groups[key]) groups[key] = { totalMs: 0, count: 0 };
+    groups[key].totalMs += (new Date(t.closed_at) - new Date(t.created_at));
+    groups[key].count += 1;
+  });
+  return groups;
+}
+function renderAvgResolution(){
+  const modeTag = $('avgres-mode-tag');
+  const subEl = $('cnt-avgres-sub');
+  const breakdownEl = $('avgres-breakdown');
+  const valEl = $('cnt-avgres');
+
+  const resolvedAll = tickets.filter(t => t.status==='resolved' && t.closed_at);
+
+  if(avgResView === 'overall'){
+    modeTag.textContent = 'Overall';
+    subEl.textContent = 'Time to close a ticket';
+    hide('avgres-breakdown');
+    if(!resolvedAll.length){ valEl.textContent = '—'; return; }
+    const totalMs = resolvedAll.reduce((sum,t) => sum + (new Date(t.closed_at) - new Date(t.created_at)), 0);
+    valEl.textContent = fmtDuration((totalMs / resolvedAll.length) / 3600000);
+    return;
+  }
+
+  if(avgResView === 'region'){
+    modeTag.textContent = 'By region';
+    subEl.textContent = 'Click to switch view';
+    const groups = computeAvgResolutionGroups(t => resolveRegion(t.college) || 'unmapped');
+    const order = [...Object.keys(REGION_DEFS), 'unmapped'];
+    const rows = order.filter(k => groups[k]).map(k => {
+      const g = groups[k];
+      const label = k === 'unmapped' ? 'Unmapped' : REGION_DEFS[k].label;
+      const hex = REGION_HEX[k];
+      const avgH = (g.totalMs / g.count) / 3600000;
+      return `<div class="avgres-row"><span class="swatch" style="background:${hex}"></span><span class="arb-label">${escHTML(label)}</span><span class="arb-val">${fmtDuration(avgH)}</span></div>`;
+    });
+    valEl.textContent = order.filter(k=>groups[k]).length ? '' : '—';
+    breakdownEl.innerHTML = rows.length ? rows.join('') : '<div style="font-size:11px;color:var(--text-faint)">No resolved tickets yet</div>';
+    show('avgres-breakdown');
+    return;
+  }
+
+  if(avgResView === 'priority'){
+    modeTag.textContent = 'By priority';
+    subEl.textContent = 'Click to switch view';
+    const groups = computeAvgResolutionGroups(t => getPriority(t));
+    const order = ['high','medium','low'];
+    const rows = order.filter(k => groups[k]).map(k => {
+      const g = groups[k];
+      const avgH = (g.totalMs / g.count) / 3600000;
+      return `<div class="avgres-row"><span class="swatch" style="background:${PRIORITY_HEX[k]}"></span><span class="arb-label">${PRIORITY_LABEL[k]}</span><span class="arb-val">${fmtDuration(avgH)}</span></div>`;
+    });
+    valEl.textContent = order.filter(k=>groups[k]).length ? '' : '—';
+    breakdownEl.innerHTML = rows.length ? rows.join('') : '<div style="font-size:11px;color:var(--text-faint)">No resolved tickets yet</div>';
+    show('avgres-breakdown');
+    return;
+  }
+}
+
+function renderStats(){
+  const followUp3Count = tickets.filter(isFollowUpDue3).length;
+  const followUp7Count = tickets.filter(isFollowUpDue7).length;
+  const followUpCount  = followUp3Count + followUp7Count;
+  $('cnt-all').textContent  = tickets.length;
+  $('cnt-open').textContent = tickets.filter(t=>t.status==='open').length;
+  $('cnt-prog').textContent = tickets.filter(t=>t.status==='progress').length;
+  $('cnt-res').textContent  = tickets.filter(t=>t.status==='resolved').length;
+  $('cnt-open-sub').textContent = followUpCount + ' follow-up due';
+
+  $('nav-cnt-all').textContent   = tickets.length;
+  $('nav-cnt-all-2').textContent = tickets.length;
+  $('nav-cnt-open').textContent  = tickets.filter(t=>t.status==='open').length;
+  $('nav-cnt-prog').textContent  = tickets.filter(t=>t.status==='progress').length;
+  $('nav-cnt-res').textContent   = tickets.filter(t=>t.status==='resolved').length;
+  $('nav-cnt-followup3').textContent = followUp3Count;
+  $('nav-cnt-followup7').textContent = followUp7Count;
+
+  $('nav-cnt-p-high').textContent   = tickets.filter(t=>getPriority(t)==='high' && t.status!=='resolved').length;
+  $('nav-cnt-p-medium').textContent = tickets.filter(t=>getPriority(t)==='medium' && t.status!=='resolved').length;
+  $('nav-cnt-p-low').textContent    = tickets.filter(t=>getPriority(t)==='low' && t.status!=='resolved').length;
+
+  const pending = tickets.filter(t=>!t.reviewed).length;
+  const done    = tickets.filter(t=>!!t.reviewed).length;
+  $('nav-cnt-review').textContent   = pending;
+  $('nav-cnt-reviewed').textContent = done;
+
+  const regionCounts = { chennai:0, karnakerala:0, tamilnadu:0, coimbatore:0 };
+  tickets.forEach(t => { const key = resolveRegion(t.college); if(key && regionCounts.hasOwnProperty(key)) regionCounts[key]++; });
+  $('nav-cnt-r-chennai').textContent     = regionCounts.chennai;
+  $('nav-cnt-r-karnakerala').textContent = regionCounts.karnakerala;
+  $('nav-cnt-r-tamilnadu').textContent   = regionCounts.tamilnadu;
+  $('nav-cnt-r-coimbatore').textContent  = regionCounts.coimbatore;
+
+  renderAvgResolution();
+  renderSparklines();
+  renderInsights();
+}
+
+function renderChips(){
+  const chips = [];
+  if(regionFilter.size) chips.push(`<span class="active-chip">Region: ${regionFilter.size} selected<button onclick="clearRegionFilter()" aria-label="Clear region filter">✕</button></span>`);
+  if(priorityFilter.size) chips.push(`<span class="active-chip">Priority: ${[...priorityFilter].map(k=>PRIORITY_LABEL[k]).join(', ')}<button onclick="clearPriorityFilter()" aria-label="Clear priority filter">✕</button></span>`);
+  if(reviewFilter!=='all') chips.push(`<span class="active-chip">Review: ${reviewFilter==='pending'?'Pending':'Done'}<button onclick="setReviewFilter('all')" aria-label="Clear review filter">✕</button></span>`);
+  $('active-chips').innerHTML = chips.join(' ');
+}
+
+function renderSkeleton(){
+  const grid = $('ticket-grid');
+  hide('empty-state');
+  let html = '';
+  for(let i=0;i<6;i++){
+    html += `<div class="skel-card"><div class="skel-edge"></div><div class="skel-main">
+      <div class="skel-bar" style="width:40%;height:12px;"></div>
+      <div class="skel-bar" style="width:70%;height:16px;"></div>
+      <div class="skel-bar" style="width:50%;height:12px;"></div>
+      <div class="skel-bar" style="width:90%;height:10px;margin-top:auto;"></div>
+    </div></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+async function loadTickets(manual){
+  if(!firstLoadDone) renderSkeleton();
+
+  const btn = $('refresh-btn');
+  const icon = $('refresh-icon');
+  if(manual && btn){ btn.disabled = true; icon.classList.add('spinning'); }
+
+  try {
+    const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending: false });
+    if(error) throw error;
+    let newData = data || [];
+
+    if(sessionRole === 'manager' && sessionCollege){
+      newData = newData.filter(t => collegeMatchesSession(t.college));
+    }
+
+    if(firstLoadDone){
+      const newIds = newData.filter(t => !knownTicketIds.has(t.id));
+      if(newIds.length === 1) showToast(`New ticket from ${newIds[0].student_name || 'a student'}`);
+      else if(newIds.length > 1) showToast(`${newIds.length} new tickets received`);
+      else if(manual) showToast('Tickets refreshed');
+    }
+    knownTicketIds = new Set(newData.map(t => t.id));
+    tickets = newData;
+    firstLoadDone = true;
+    renderTickets();
+  } catch(e){
+    console.error(e);
+    showToast('Refresh failed: ' + (e.message || 'check console'));
+    $('ticket-grid').innerHTML = '';
+    show('empty-state');
+    $('empty-state').innerHTML = '<div class="empty-icon">⚠️</div><strong>Couldn\'t load tickets</strong><p>Check your connection and refresh.</p>';
+  } finally {
+    if(manual && btn){ btn.disabled = false; icon.classList.remove('spinning'); }
+  }
+}
+
+function emptyStateSvg(){
+  return `<svg width="120" height="90" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="15" y="20" width="90" height="58" rx="10" fill="var(--slate-soft)" stroke="var(--border)" stroke-width="1.5"/>
+    <path d="M15 34h90" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="28" cy="27" r="2" fill="var(--text-faint)"/>
+    <circle cx="36" cy="27" r="2" fill="var(--text-faint)"/>
+    <circle cx="44" cy="27" r="2" fill="var(--text-faint)"/>
+    <rect x="30" y="44" width="60" height="7" rx="3.5" fill="var(--border)"/>
+    <rect x="30" y="56" width="40" height="7" rx="3.5" fill="var(--border)"/>
+    <circle cx="90" cy="66" r="16" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/>
+    <path d="M84 66h12M90 60v12" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function renderTickets(){
+  renderStats();
+  renderChips();
+  const filtered = getFiltered();
+  const grid  = $('ticket-grid');
+  const empty = $('empty-state');
+  kbdFocusIdx = -1;
+
+  if(filtered.length === 0){
+    grid.innerHTML = '';
+    show('empty-state');
+    empty.innerHTML = emptyStateSvg() + '<strong>No tickets found</strong><p>Try a different filter or search term.</p>';
+    return;
+  }
+  hide('empty-state');
+
+grid.innerHTML = filtered.map((t,i) => {
+    const statusDot = {open:'dot-red',progress:'dot-amber',resolved:'dot-green'}[t.status]||'dot-slate';
+    const statusLbl = {open:'Unresolved',progress:'In Progress',resolved:'Resolved'}[t.status]||t.status;
+    const rInfo = getRegionInfo(t.college);
+    const prio  = getPriority(t);
+    const reviewBadge = t.reviewed
+      ? `<span class="review-badge review-yes">✓ 1:1 done</span>`
+      : `<span class="review-badge review-no">☐ 1:1 pending</span>`;
+    const slaFlag = isFollowUpDue(t) ? `<span class="sla-tag">⚑ Follow-up due</span>` : '';
+    const closedTag = (t.status === 'resolved' && t.closed_by)
+      ? `<span class="closed-by-tag">🔒 Closed by ${escHTML(t.closed_by)}</span>` : '';
+    const attachFlag = t.image_url ? `<span class="ticket-attach-flag">📎 Attachment</span>` : '';
+    const quickActions = t.status !== 'resolved' ? `
+      <div class="ticket-quick-actions">
+        ${t.status==='open' ? `<button class="qa-btn" title="Start progress" onclick="event.stopPropagation();quickSetStatus('${t.id}','progress')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h8M9 4l4 4-4 4"/></svg></button>` : ''}
+        <button class="qa-btn" title="Open ticket" onclick="event.stopPropagation();openModal('${t.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5H3a1 1 0 0 0-1 1v8.5a1 1 0 0 0 1 1h8.5a1 1 0 0 0 1-1V10M9 3.5h3.5V7M12.5 3.5 7 9"/></svg></button>
+      </div>` : '';
+
+    return `<div class="ticket-card ${t.status==='resolved'?'is-closed':''}" data-idx="${i}" onclick="openModal('${t.id}')">
+      <div class="ticket-edge ${prio}"></div>
+      ${quickActions}
+      <div class="ticket-main">
+        <div class="ticket-top-row">
+          <div class="ticket-top-left">
+            <span class="cat-pill">${escHTML(t.category)}</span>
+            <span class="prio-pill prio-${prio}">⚑ ${PRIORITY_LABEL[prio]}</span>
+          </div>
+          <span class="dot-row"><span class="dot ${rInfo.dot}"></span>${escHTML(rInfo.label)}</span>
+        </div>
+        <div class="ticket-id-row">
+          <div style="min-width:0;">
+            <div class="ticket-subject">${escHTML(t.subject)}</div>
+            <div class="ticket-student">${escHTML(t.student_name)}${t.college?' · '+escHTML(t.college):''}</div>
+          </div>
+        </div>
+        <hr class="ticket-perf" />
+        <div class="ticket-bottom-row">
+          <div class="ticket-bottom-left">
+            <span class="dot-row"><span class="dot ${statusDot}"></span>${statusLbl}</span>
+            ${slaFlag}
+            ${attachFlag}
+            ${closedTag}
+          </div>
+          <span class="ticket-time">${fmtRel(t.created_at)}</span>
+        </div>
+      </div>
+      <div class="ticket-stub">
+        <span class="ticket-roll">#${escHTML(t.roll_number)}</span>
+        ${reviewBadge}
+      </div>
+    </div>`;
+  }).join('');
+
+  window._filteredCache = filtered;
+}
+
+async function quickSetStatus(id, status){
+  const { error } = await sb.from('tickets').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+  if(error){ console.error(error); showToast('Could not update ticket'); return; }
+  tickets = tickets.map(t => t.id === id ? { ...t, status } : t);
+  renderTickets();
+  showToast('Ticket marked in progress');
+}
+
+function openAdminLightbox(url){
+  if(!url) return;
+  const box = document.createElement('div');
+  box.className = 'admin-lightbox';
+  box.onclick = () => box.remove();
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = 'Ticket attachment enlarged';
+  box.appendChild(img);
+  document.body.appendChild(box);
+}
+
+document.addEventListener('keydown', e => {
+  if($('ticket-modal') && !$('ticket-modal').classList.contains('hidden')){
+    if(e.key === 'Escape') closeModal();
+    return;
+  }
+  if($('admin-screen').classList.contains('hidden')) return;
+  const active = document.activeElement;
+  if(active && ['INPUT','SELECT','TEXTAREA'].includes(active.tagName)) return;
+
+  const cards = Array.from(document.querySelectorAll('.ticket-card'));
+  if(!cards.length) return;
+
+  if(e.key === 'j' || e.key === 'J'){
+    kbdFocusIdx = Math.min(kbdFocusIdx + 1, cards.length - 1);
+    updateKbdFocus(cards);
+  } else if(e.key === 'k' || e.key === 'K'){
+    kbdFocusIdx = Math.max(kbdFocusIdx - 1, 0);
+    updateKbdFocus(cards);
+  } else if(e.key === 'Enter'){
+    if(kbdFocusIdx >= 0 && cards[kbdFocusIdx]) cards[kbdFocusIdx].click();
+  }
+});
+function updateKbdFocus(cards){
+  cards.forEach(c => c.classList.remove('kbd-focus'));
+  const c = cards[kbdFocusIdx];
+  if(c){ c.classList.add('kbd-focus'); c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+
+function exportCSV(){
+  const list = window._filteredCache || tickets;
+  if(!list.length){ showToast('No tickets to export'); return; }
+  const cols = ['roll_number','student_name','college','category','subject','status','priority','reviewed','created_at','closed_by','closed_at'];
+  const rows = [cols.join(',')];
+  list.forEach(t => {
+    const row = cols.map(c => {
+      let v = c === 'priority' ? getPriority(t) : t[c];
+      v = (v === null || v === undefined) ? '' : String(v);
+      if(v.includes(',') || v.includes('"') || v.includes('\n')) v = '"' + v.replace(/"/g,'""') + '"';
+      return v;
+    });
+    rows.push(row.join(','));
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `facePrep-tickets-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported');
+}
+
+function buildTimeline(t){
+  const items = [];
+  items.push({ label: 'Ticket created', time: t.created_at, done: true });
+  if(t.updated_at && t.updated_at !== t.created_at && t.status !== 'resolved'){
+    items.push({ label: 'Last updated', time: t.updated_at, done: true });
+  }
+  if(t.status === 'resolved' && t.closed_at){
+    items.push({ label: t.closed_by ? `Resolved by ${t.closed_by}` : 'Resolved', time: t.closed_at, done: true });
+  } else {
+    items.push({ label: 'Awaiting resolution', time: null, done: false });
+  }
+  return items.map(it => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${it.done ? 'done' : ''}"></div>
+      <div class="timeline-body">
+        <strong>${escHTML(it.label)}</strong>
+        <span>${it.time ? fmtAbs(it.time) : 'Pending'}</span>
+      </div>
+    </div>`).join('');
+}
+
+function openModal(id){
+  const t = tickets.find(x=>x.id===id);
+  if(!t) return;
+  modalId    = id;
+  modalDraft = { status: t.status, note: t.admin_note||'', reviewed: !!t.reviewed, closer: '' };
+  modalLocked = (t.status === 'resolved');
+
+  $('modal-title').textContent = t.subject || 'No subject';
+  $('modal-meta').textContent  = `${t.roll_number} · ${t.student_name}${t.college?' · '+t.college:''} · ${t.category} · ${fmtRel(t.created_at)}`;
+  $('modal-desc').textContent  = t.description || '(No description provided)';
+
+  if(t.image_url){
+    $('modal-attachment-img').src = t.image_url;
+    show('modal-attachment');
+  } else {
+    hide('modal-attachment');
+  }
+
+  $('modal-status').value      = t.status;
+  $('modal-note').value        = t.admin_note||'';
+  $('modal-review').checked    = !!t.reviewed;
+  $('modal-closer').value      = '';
+  hide('closer-error');
+  $('closer-name-wrap').classList.remove('show');
+  $('modal-timeline').innerHTML = buildTimeline(t);
+  $('autosave-tag').classList.remove('show','saved');
+
+  const rInfo = getRegionInfo(t.college);
+  $('modal-region-badge').innerHTML = `<span class="dot-row"><span class="dot ${rInfo.dot}"></span>${escHTML(rInfo.label)}</span>`;
+  $('modal-region-coord').textContent = rInfo.key ? `Coordinator: ${rInfo.kam}` : 'College not yet mapped to a region';
+
+  const fields = [$('modal-status'), $('modal-note'), $('modal-review')];
+  const saveBtn = $('modal-save-btn');
+
+  if(modalLocked){
+    fields.forEach(f => f.disabled = true);
+    saveBtn.classList.add('hidden');
+    show('modal-closed-block');
+    $('modal-closed-text').textContent = t.closed_by
+      ? `Closed by ${t.closed_by}${t.closed_at ? ' on ' + new Date(t.closed_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : ''}. This ticket is locked and can no longer be edited.`
+      : 'This ticket is resolved and locked. It can no longer be edited.';
+  } else {
+    fields.forEach(f => f.disabled = false);
+    saveBtn.classList.remove('hidden');
+    hide('modal-closed-block');
+  }
+
+  hide('modal-saved');
+  show('ticket-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  hide('ticket-modal');
+  document.body.style.overflow = '';
+  modalId = null; modalDraft = {}; modalLocked = false;
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+}
+function modalEdit(field, val){
+  if(modalLocked) return;
+  modalDraft[field] = val;
+  if(field === 'note') scheduleAutosave();
+}
+function scheduleAutosave(){
+  const tag = $('autosave-tag');
+  tag.textContent = 'Saving…'; tag.classList.remove('saved'); tag.classList.add('show');
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(async () => {
+    if(!modalId || modalLocked) return;
+    const { error } = await sb.from('tickets').update({ admin_note: modalDraft.note, updated_at: new Date().toISOString() }).eq('id', modalId);
+    if(!error){
+      tickets = tickets.map(t => t.id === modalId ? { ...t, admin_note: modalDraft.note } : t);
+      tag.textContent = '✓ Note saved'; tag.classList.add('saved');
+      setTimeout(() => tag.classList.remove('show'), 1800);
+    } else {
+      tag.textContent = 'Save failed';
+    }
+  }, 900);
+}
+
+function onStatusChange(val){
+  if(modalLocked) return;
+  modalDraft.status = val;
+  const wrap = $('closer-name-wrap');
+  if(val === 'resolved'){ wrap.classList.add('show'); }
+  else { wrap.classList.remove('show'); hide('closer-error'); }
+}
+function onCloserInput(val){
+  modalDraft.closer = val;
+  if(val.trim()) hide('closer-error');
+}
+
+function playResolveBurst(){
+  const burst = $('resolve-burst');
+  burst.classList.remove('play');
+  void burst.offsetWidth;
+  burst.classList.add('play');
+}
+
+async function saveModal(){
+  if(!modalId || modalLocked) return;
+
+  if(modalDraft.status === 'resolved' && !(modalDraft.closer || '').trim()){
+    show('closer-error');
+    $('modal-closer').focus();
+    return;
+  }
+
+  const saveBtn = $('modal-save-btn');
+  const savedMsg = $('modal-saved');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  hide('modal-saved');
+
+  const wasResolving = modalDraft.status === 'resolved';
+  const payload = {
+    status:     modalDraft.status,
+    admin_note: modalDraft.note,
+    reviewed:   !!modalDraft.reviewed,
+    updated_at: new Date().toISOString()
+  };
+  if(wasResolving){
+    payload.closed_by = modalDraft.closer.trim();
+    payload.closed_at = new Date().toISOString();
+  }
+
+  const { error } = await sb.from('tickets').update(payload).eq('id', modalId);
+
+  if(error){
+    console.error(error);
+    savedMsg.style.color = 'var(--red)';
+    savedMsg.textContent = '✗ ' + (error.message || 'Save failed — check console.');
+    show('modal-saved');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save changes';
+    return;
+  }
+
+  tickets = tickets.map(t => t.id === modalId ? { ...t, ...payload } : t);
+  renderTickets();
+
+  savedMsg.style.color = 'var(--green)';
+  savedMsg.textContent = '✓ Saved';
+  show('modal-saved');
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Save changes';
+
+  if(wasResolving){
+    playResolveBurst();
+    setTimeout(() => { hide('modal-saved'); closeModal(); }, 1400);
+  } else {
+    setTimeout(() => { hide('modal-saved'); closeModal(); }, 1200);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ── DAILY ACTIVITY LOG (added) ──
+   Requires a `daily_logs` table in Supabase:
+     id           uuid primary key default gen_random_uuid()
+     college      text not null
+     manager_name text
+     log_date     date not null default current_date
+     activity     text not null
+     progress_notes text
+     created_at   timestamptz not null default now()
+   ══════════════════════════════════════════════════════════ */
+function enterDailyLog(){
+  hide('platform-select-screen');
+  hide('admin-screen');
+  show('dailylog-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  $('dlog-college-name').textContent = sessionCollege || '—';
+
+  const today = new Date().toISOString().slice(0,10);
+  $('dlog-date').value = today;
+
+  const rec = collegeContacts.find(c => c.college === sessionCollege);
+  $('dlog-name').value = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+
+  loadDailyLogs();
+}
+
+async function loadDailyLogs(){
+  const listEl = $('dlog-entries');
+  listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  try{
+    const { data, error } = await sb.from('daily_logs')
+      .select('*')
+      .eq('college', sessionCollege)
+      .order('log_date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    dailyLogs = data || [];
+    renderDailyLogs();
+  }catch(e){
+    console.error('Could not load daily_logs (has the daily_logs table been created?):', e);
+    listEl.innerHTML = '';
+    show('dlog-empty');
+    $('dlog-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table exists in Supabase.</p>`;
+  }
+}
+
+function renderDailyLogs(){
+  const listEl = $('dlog-entries');
+  if(!dailyLogs.length){
+    listEl.innerHTML = '';
+    show('dlog-empty');
+    $('dlog-empty').innerHTML = '<p>No entries yet. Add your first daily log above.</p>';
+    return;
+  }
+  hide('dlog-empty');
+  listEl.innerHTML = dailyLogs.map(l => `
+    <div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+        <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div class="dlog-entry-activity">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+    </div>`).join('');
+}
+
+async function saveDailyLog(){
+  if(dlogSaving) return;
+  const date = $('dlog-date').value;
+  const name = $('dlog-name').value.trim();
+  const activity = $('dlog-activity').value.trim();
+  const progress = $('dlog-progress').value.trim();
+
+  if(!date || !activity){
+    showToast('Please add a date and today\'s activities');
+    return;
+  }
+
+  dlogSaving = true;
+  const saveBtn = $('dlog-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  hide('dlog-saved');
+
+  const payload = {
+    college: sessionCollege,
+    manager_name: name || null,
+    log_date: date,
+    activity: activity,
+    progress_notes: progress || null,
+  };
+
+  const { error } = await sb.from('daily_logs').insert(payload);
+
+  dlogSaving = false;
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Save entry';
+
+  if(error){
+    console.error(error);
+    showToast('Could not save entry: ' + (error.message || 'check console'));
+    return;
+  }
+
+  $('dlog-activity').value = '';
+  $('dlog-progress').value = '';
+  const saved = $('dlog-saved');
+  saved.style.color = 'var(--green)';
+  saved.textContent = '✓ Saved';
+  show('dlog-saved');
+  setTimeout(() => hide('dlog-saved'), 1800);
+
+  loadDailyLogs();
+}
+</script>
+</body>
+</html>
