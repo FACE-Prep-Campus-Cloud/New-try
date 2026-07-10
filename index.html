@@ -523,6 +523,7 @@
     transition: box-shadow .12s, transform .12s, outline-color .1s;
     position: relative;
     outline: 2px solid transparent; outline-offset: 2px;
+     height: 190px; 
   }
   .ticket-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
   .ticket-card.is-closed { opacity: 0.88; }
@@ -537,6 +538,7 @@
     flex: 1; min-width: 0;
     padding: 15px 16px 13px 14px;
     display: flex; flex-direction: column; gap: 10px;
+    overflow: hidden;
   }
   .ticket-top-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .ticket-top-left { display: flex; align-items: center; gap: 7px; min-width: 0; flex-wrap: wrap; }
