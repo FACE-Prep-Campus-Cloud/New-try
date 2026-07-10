@@ -887,14 +887,14 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h3a2 2 0 0 0 4 0h3a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2h-3a2 2 0 0 0-4 0H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/></svg>
         </div>
         <h3>Ticketing Platform</h3>
-        <p>View and manage student help-desk tickets raised by your college.</p>
+        <p id="platform-tickets-desc">View and manage student help-desk tickets raised by your college.</p>
       </button>
       <button class="platform-card" onclick="selectPlatform('dailylog')">
         <div class="platform-icon p-green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
         </div>
-        <h3>Daily Activity Log</h3>
-        <p>Log your daily activities and track your progress over time.</p>
+        <h3 id="platform-second-title">Daily Activity Log</h3>
+        <p id="platform-second-desc">Log your daily activities and track your progress over time.</p>
       </button>
     </div>
     <div class="platform-back">
@@ -947,6 +947,66 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
     <h3 style="font-size:14px;margin-bottom:12px;color:var(--text-light);">Recent entries</h3>
     <div id="dlog-entries"></div>
     <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
+  </div>
+</div>
+
+<!-- ── REVIEW PANEL (admin only) ── -->
+<div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;min-height:calc(100vh / var(--ui-scale));">
+  <div class="dlog-topbar">
+    <div class="breadcrumb">Review Panel / <b id="review-college-name">—</b></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <div class="dlog-body">
+    <div class="dlog-form-card">
+      <h3>Which college's activity log?</h3>
+      <div class="form-grid" style="margin-bottom:0;">
+        <div class="form-group">
+          <label class="field-label">College</label>
+          <select id="review-college-select" onchange="onReviewCollegeChange(this.value)"></select>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Show</label>
+          <select id="review-filter-select" onchange="setReviewLogFilter(this.value)">
+            <option value="all">All entries</option>
+            <option value="hard">Hard call only</option>
+            <option value="soft">Soft call only</option>
+            <option value="pending">Pending review</option>
+            <option value="reviewed">Reviewed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);" id="review-stats-row">
+      <div class="stat-card" style="cursor:default;">
+        <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/></svg></div>
+        <div class="stat-body">
+          <div class="s-lbl">Total entries</div>
+          <div class="s-val" id="review-cnt-all">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:default;">
+        <div class="stat-icon i-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5 14.5 13H1.5z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.3" r="0.4" fill="currentColor"/></svg></div>
+        <div class="stat-body">
+          <div class="s-lbl">Hard call</div>
+          <div class="s-val" id="review-cnt-hard">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:default;">
+        <div class="stat-icon i-amber"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l2.5 2.5"/></svg></div>
+        <div class="stat-body">
+          <div class="s-lbl">Pending review</div>
+          <div class="s-val" id="review-cnt-pending">0</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text-light);">Activity log entries</h3>
+    <div id="review-entries"></div>
+    <div id="review-empty" class="empty-state hidden"><p>No entries found for this college / filter.</p></div>
   </div>
 </div>
 
@@ -1478,6 +1538,11 @@ let collegeContacts = [];
 let dailyLogs = [];
 let dlogSaving = false;
 
+/* ── Review panel state (admin only, added) ── */
+let reviewLogs = [];
+let reviewCollege = null;
+let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed'
+
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
   { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
@@ -1645,9 +1710,9 @@ function submitPin(){
   hide('pin-error');
   sessionRole = 'admin';
   sessionCollege = null;
-  /* Admins skip the platform-select screen entirely and land straight on ticketing. */
+  /* Admins now also land on the platform-select screen: Ticketing or Review Panel. */
   hide('auth-screen');
-  enterDashboard();
+  showPlatformSelect();
 }
 
 function submitManagerLogin(){
@@ -1672,11 +1737,20 @@ function submitManagerLogin(){
   showPlatformSelect();
 }
 
-/* ── Platform select (campus/senior manager only) ── */
+/* ── Platform select (admin + campus/senior manager) ── */
 function showPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
-  $('platform-select-college-name').textContent = sessionCollege ? ' — ' + sessionCollege : '';
+  hide('review-panel-screen');
+  const isManager = sessionRole === 'manager';
+  $('platform-select-college-name').textContent = isManager && sessionCollege ? ' — ' + sessionCollege : '';
+  $('platform-tickets-desc').textContent = isManager
+    ? 'View and manage student help-desk tickets raised by your college.'
+    : 'View and manage student help-desk tickets across all colleges.';
+  $('platform-second-title').textContent = isManager ? 'Daily Activity Log' : 'Review Panel';
+  $('platform-second-desc').textContent = isManager
+    ? 'Log your daily activities and track your progress over time.'
+    : "Review campus managers' daily activity logs, college by college.";
   show('platform-select-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
@@ -1685,13 +1759,14 @@ function selectPlatform(which){
   if(which === 'tickets'){
     enterDashboard();
   } else if(which === 'dailylog'){
-    enterDailyLog();
+    if(sessionRole === 'manager') enterDailyLog();
+    else enterReviewPanel();
   }
 }
 function backToPlatformSelect(){
-  if(sessionRole !== 'manager') return; // admins never see the platform-select screen
   hide('admin-screen');
   hide('dailylog-screen');
+  hide('review-panel-screen');
   showPlatformSelect();
 }
 
@@ -1712,7 +1787,7 @@ function applySessionUI(){
   $('grp-regions').classList.toggle('hidden', isManager);
   $('regions-sec-label').classList.toggle('hidden', isManager);
   $('dd-region').classList.toggle('hidden', isManager);
-  $('topbar-switch-platform').classList.toggle('hidden', !isManager);
+  show('topbar-switch-platform');
 
   const tag = $('session-tag');
   if(isManager){
@@ -1731,7 +1806,7 @@ function collegeMatchesSession(ticketCollege){
 }
 
 function logout(){
-  hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen');
+  hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
   show('auth-screen');
   clearOtp(false);
   hide('pin-error');
@@ -1740,6 +1815,7 @@ function logout(){
   firstLoadDone = false; knownTicketIds = new Set();
   sessionRole = 'admin'; sessionCollege = null;
   dailyLogs = [];
+  reviewLogs = []; reviewCollege = null; reviewCallFilter = 'all';
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
 
@@ -2576,13 +2652,16 @@ function renderDailyLogs(){
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
     const callType = l.call_type || (cat ? cat.callType : 'soft');
     const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    const reviewBadge = l.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
+      : `<span class="review-badge review-no">☐ Review pending</span>`;
     return `
     <div class="dlog-entry">
       <div class="dlog-entry-top">
         <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
         <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
       </div>
-      <div style="margin-top:4px;">${badge}</div>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
       <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
       ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
     </div>`;
