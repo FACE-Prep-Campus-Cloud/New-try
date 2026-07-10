@@ -1610,7 +1610,8 @@ function populateCollegeDropdown(){
     : COLLEGE_REGION_MAP.map(c => c.college);
   const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
   sel.innerHTML = uniqueSorted.length
-    ? uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
+    ? '<option value="" disabled selected>Select your college</option>' +
+      uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
     : '<option value="">No colleges configured yet</option>';
 }
 
