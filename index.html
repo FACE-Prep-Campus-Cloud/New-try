@@ -921,8 +921,13 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
   background: transparent;
   color: #fff;
 }
-.review-cal-cell.is-today .review-cal-row-cat,
-.review-cal-cell.is-today .review-cal-pill { color: #fff; }
+.review-cal-cell.is-today .review-cal-pill,
+.review-cal-cell.is-today .review-cal-row-cat {
+  color: var(--text);
+}
+.review-cal-cell.is-today .review-cal-pill {
+  background: rgba(255,255,255,0.85);
+}
 
 .review-cal-nav-btn {
   border: none;
