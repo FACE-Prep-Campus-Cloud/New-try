@@ -787,6 +787,47 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
   .dlog-cat-badge.hard { background: var(--red-soft); color: var(--red); }
   .dlog-cat-badge.soft { background: var(--slate-soft); color: var(--text-light); }
 
+  /* ── FIELD REGISTER — Daily Activity Log redesign (added) ── */
+  .ledger-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--text); padding-bottom: 14px; margin-bottom: 24px; }
+  .ledger-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 700; }
+  .ledger-title { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); margin-top: 3px; }
+  .ledger-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-light); text-align: right; line-height: 1.7; white-space: nowrap; flex-shrink: 0; }
+
+  .ledger-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 30px; box-shadow: var(--shadow-sm); }
+  .ledger-card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); margin-bottom: 16px; }
+
+  .ledger-stamp-hint { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 12px; font-weight: 600; }
+  .ledger-stamp-hint.hard { color: var(--amber); }
+  .ledger-stamp-hint.soft { color: var(--text-faint); font-weight: 500; }
+  .ledger-stamp-hint .mini-stamp {
+    width: 20px; height: 20px; border-radius: 50%; border: 1.5px dashed currentColor; transform: rotate(-8deg);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1;
+  }
+
+  .ledger-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 700; margin: 4px 0 4px; }
+
+  .ledger-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px 2px; border-bottom: 1px dashed var(--border); }
+  .ledger-row:last-child { border-bottom: none; }
+  .ledger-stamp {
+    flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; border: 1.5px dashed var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 8.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.3;
+  }
+  .ledger-stamp.hard { border-color: var(--amber); color: var(--amber); transform: rotate(-6deg); }
+  .ledger-stamp.soft { border-color: var(--text-faint); color: var(--text-faint); transform: rotate(5deg); }
+
+  .ledger-row-body { flex: 1; min-width: 0; }
+  .ledger-row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .ledger-row-cat { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .ledger-row-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-faint); flex-shrink: 0; white-space: nowrap; }
+  .ledger-row-activity { font-size: 13px; color: var(--text-light); margin-top: 4px; line-height: 1.55; white-space: pre-wrap; }
+  .ledger-row-notes { font-size: 12px; color: var(--text-faint); margin-top: 7px; padding-top: 7px; border-top: 1px dashed var(--border-soft); line-height: 1.5; white-space: pre-wrap; }
+  .ledger-row-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; gap: 10px; flex-wrap: wrap; }
+  .ledger-row-logger { font-size: 11.5px; color: var(--text-faint); }
+  .ledger-row-status { font-size: 11px; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+  .ledger-row-status.pending { color: var(--text-faint); }
+  .ledger-row-status.reviewed { color: var(--green); }
+
   .review-cal-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
   .review-cal-nav { display:flex; align-items:center; gap:8px; }
   .review-cal-nav-btn { width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border); background:var(--card); cursor:pointer; color:var(--text-light); }
@@ -821,6 +862,8 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
     .search-wrap input { width: 170px; }
     .topbar, .page-body { padding-left: 18px; padding-right: 18px; }
     .ticket-grid { grid-template-columns: 1fr; }
+    .ledger-head { flex-direction: column; }
+    .ledger-meta { text-align: left; }
   }
 
   @media print {
@@ -929,15 +972,27 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 
 <!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
 <div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
-    <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name">—</b></div>
+    <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name-crumb">—</b></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
       <button class="btn btn-ghost" onclick="logout()">Log out</button>
     </div>
   </div>
   <div class="dlog-body">
-    <div class="dlog-form-card">
-      <h3>Add today's entry</h3>
+
+    <div class="ledger-head">
+      <div>
+        <div class="ledger-eyebrow">Field register</div>
+        <div class="ledger-title" id="dlog-college-name">—</div>
+      </div>
+      <div class="ledger-meta">
+        Entry No. <span id="dlog-entry-no">001</span><br>
+        <span id="dlog-today-label">—</span>
+      </div>
+    </div>
+
+    <div class="ledger-card">
+      <div class="ledger-card-title">New entry</div>
       <div class="form-grid">
         <div class="form-group">
           <label class="field-label">Date</label>
@@ -962,12 +1017,12 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-primary" id="dlog-save-btn" onclick="saveDailyLog()">Save entry</button>
+        <button class="btn btn-primary" id="dlog-save-btn" onclick="saveDailyLog()">File entry</button>
         <span id="dlog-saved" class="saved-msg hidden">✓ Saved</span>
       </div>
     </div>
 
-    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text-light);">Recent entries</h3>
+    <div class="ledger-section-label">Recent entries</div>
     <div id="dlog-entries"></div>
     <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
   </div>
@@ -2602,7 +2657,7 @@ async function saveModal(){
 }
 
 /* ══════════════════════════════════════════════════════════
-   ── DAILY ACTIVITY LOG (added) ──
+   ── DAILY ACTIVITY LOG — Field Register (redesigned) ──
    Requires a `daily_logs` table in Supabase:
      id           uuid primary key default gen_random_uuid()
      college      text not null
@@ -2629,13 +2684,13 @@ function onDlogCategoryChange(key){
   const cat = DLOG_CATEGORIES.find(c => c.key === key);
   const hint = $('dlog-call-hint');
   if(!hint) return;
-  if(!cat){ hint.textContent = ''; hint.className = 'dlog-call-hint'; return; }
+  if(!cat){ hint.className = 'ledger-stamp-hint'; hint.innerHTML = ''; return; }
   if(cat.callType === 'hard'){
-    hint.textContent = '✉ Hard call — an email would be send to KAM about this issue.';
-    hint.className = 'dlog-call-hint hard';
+    hint.className = 'ledger-stamp-hint hard';
+    hint.innerHTML = '<span class="mini-stamp">✉</span><span>Hard call — an email goes to the regional coordinator</span>';
   } else {
-    hint.textContent = 'Soft call — no email needed.';
-    hint.className = 'dlog-call-hint soft';
+    hint.className = 'ledger-stamp-hint soft';
+    hint.innerHTML = '<span class="mini-stamp">·</span><span>Soft call — no email needed</span>';
   }
 }
 
@@ -2661,6 +2716,8 @@ function enterDailyLog(){
   show('dailylog-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
   $('dlog-college-name').textContent = sessionCollege || '—';
+  $('dlog-college-name-crumb').textContent = sessionCollege || '—';
+  $('dlog-today-label').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 
   const today = new Date().toISOString().slice(0,10);
   $('dlog-date').value = today;
@@ -2695,8 +2752,14 @@ async function loadDailyLogs(){
   }
 }
 
+function updateLedgerMeta(){
+  const numEl = $('dlog-entry-no');
+  if(numEl) numEl.textContent = String(dailyLogs.length + 1).padStart(3,'0');
+}
+
 function renderDailyLogs(){
   const listEl = $('dlog-entries');
+  updateLedgerMeta();
   if(!dailyLogs.length){
     listEl.innerHTML = '';
     show('dlog-empty');
@@ -2708,19 +2771,25 @@ function renderDailyLogs(){
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
     const callType = l.call_type || (cat ? cat.callType : 'soft');
-    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
-    const reviewBadge = l.reviewed
-      ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
-      : `<span class="review-badge review-no">☐ Review pending</span>`;
+    const dateStr = new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const statusHtml = l.reviewed
+      ? `<span class="ledger-row-status reviewed">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
+      : `<span class="ledger-row-status pending">◔ Pending review</span>`;
     return `
-    <div class="dlog-entry">
-      <div class="dlog-entry-top">
-        <span class="dlog-entry-date">${new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
-        <span class="dlog-entry-meta">${escHTML(l.manager_name||'')}</span>
+    <div class="ledger-row">
+      <span class="ledger-stamp ${callType}"><span>${callType==='hard'?'Hard':'Soft'}</span><span>Call</span></span>
+      <div class="ledger-row-body">
+        <div class="ledger-row-top">
+          <span class="ledger-row-cat">${escHTML(catLabel)}</span>
+          <span class="ledger-row-date">${dateStr}</span>
+        </div>
+        <div class="ledger-row-activity">${escHTML(l.activity)}</div>
+        ${l.progress_notes ? `<div class="ledger-row-notes">${escHTML(l.progress_notes)}</div>` : ''}
+        <div class="ledger-row-foot">
+          <span class="ledger-row-logger">Logged by ${escHTML(l.manager_name||'—')}</span>
+          ${statusHtml}
+        </div>
       </div>
-      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
-      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
-      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -2744,7 +2813,7 @@ async function saveDailyLog(){
   dlogSaving = true;
   const saveBtn = $('dlog-save-btn');
   saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving…';
+  saveBtn.textContent = 'Filing…';
   hide('dlog-saved');
 
   const payload = {
@@ -2761,7 +2830,7 @@ async function saveDailyLog(){
 
   dlogSaving = false;
   saveBtn.disabled = false;
-  saveBtn.textContent = 'Save entry';
+  saveBtn.textContent = 'File entry';
 
   if(error){
     console.error(error);
