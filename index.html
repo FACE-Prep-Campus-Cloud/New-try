@@ -884,6 +884,57 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
       animation: none !important;
     }
   }
+
+  .review-calendar {
+  border: none;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(20,21,26,0.08);
+}
+.review-cal-weekdays {
+  background: transparent;
+}
+.review-cal-weekdays span {
+  color: #94A3B8;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.review-cal-grid {
+  gap: 4px;
+}
+.review-cal-cell {
+  border: none;
+  border-radius: 10px;
+  min-height: 64px;
+  transition: background .12s;
+}
+.review-cal-cell:hover { background: #F1F5F9; }
+.review-cal-cell.outside { background: #F8FAFC; opacity: 1; }
+.review-cal-cell.outside .review-cal-daynum { color: #CBD5E1; }
+
+.review-cal-daynum { color: #334155; font-weight: 500; }
+
+.review-cal-cell.is-today {
+  background: #2DD9A8;
+}
+.review-cal-cell.is-today .review-cal-daynum {
+  background: transparent;
+  color: #fff;
+}
+.review-cal-cell.is-today .review-cal-row-cat,
+.review-cal-cell.is-today .review-cal-pill { color: #fff; }
+
+.review-cal-nav-btn {
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #94A3B8;
+}
+.review-cal-nav-btn:hover { background: #F1F5F9; color: #334155; }
+.review-cal-month-label { font-weight: 500; color: #1E293B; }
+
+.review-cal-pill .cal-dot.hard,
+.review-cal-pill .cal-dot.soft { background: #2DD9A8; }
 </style>
 </head>
 <body>
