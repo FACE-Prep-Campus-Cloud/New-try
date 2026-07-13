@@ -994,40 +994,67 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
       </div>
     </div>
 
-    <div class="ledger-card">
-      <div class="ledger-card-title">New entry</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="field-label">Date</label>
-          <input id="dlog-date" type="date" />
+    <div class="dlog-layout">
+      <div>
+        <div class="review-cal-topbar">
+          <span style="font-size:14px;color:var(--text-light);font-weight:600;">Your activity calendar</span>
+          <div class="review-cal-nav">
+            <button class="review-cal-nav-btn" onclick="dlogCalShift(-1)" aria-label="Previous month">‹</button>
+            <span class="review-cal-month-label" id="dlog-cal-month-label">—</span>
+            <button class="review-cal-nav-btn" onclick="dlogCalShift(1)" aria-label="Next month">›</button>
+            <button class="btn btn-ghost" onclick="dlogCalToday()">Today</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="field-label">Logged by</label>
-          <input id="dlog-name" type="text" placeholder="Your name" />
+        <div class="review-calendar">
+          <div class="review-cal-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="review-cal-grid" id="dlog-cal-grid"></div>
         </div>
-        <div class="form-group full">
-          <label class="field-label">Category</label>
-          <select id="dlog-category" onchange="onDlogCategoryChange(this.value)"></select>
-          <div class="dlog-call-hint" id="dlog-call-hint"></div>
+        <div class="review-cal-legend">
+          <span><span class="cal-dot" style="background:var(--red)"></span>Hard call</span>
+          <span><span class="cal-dot" style="background:var(--text-faint)"></span>Soft call</span>
         </div>
-        <div class="form-group full">
-          <label class="field-label">Activity details</label>
-          <input id="dlog-activity" type="text" placeholder="e.g. Visited hostel block A, resolved 3 student queries" />
-        </div>
-        <div class="form-group full">
-          <label class="field-label">Progress / notes (optional)</label>
-          <input id="dlog-progress" type="text" placeholder="e.g. Escalated fee issue to finance team, pending reply" />
-        </div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a day to see that day's entries.</div>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-primary" id="dlog-save-btn" onclick="saveDailyLog()">File entry</button>
-        <span id="dlog-saved" class="saved-msg hidden">✓ Saved</span>
+
+      <div>
+        <div class="ledger-card">
+          <div class="ledger-card-title">New entry</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="field-label">Date</label>
+              <input id="dlog-date" type="date" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Logged by</label>
+              <input id="dlog-name" type="text" placeholder="Your name" />
+            </div>
+            <div class="form-group full">
+              <label class="field-label">Category</label>
+              <select id="dlog-category" onchange="onDlogCategoryChange(this.value)"></select>
+              <div class="dlog-call-hint" id="dlog-call-hint"></div>
+            </div>
+            <div class="form-group full">
+              <label class="field-label">Activity details</label>
+              <input id="dlog-activity" type="text" placeholder="e.g. Visited hostel block A, resolved 3 student queries" />
+            </div>
+            <div class="form-group full">
+              <label class="field-label">Progress / notes (optional)</label>
+              <input id="dlog-progress" type="text" placeholder="e.g. Escalated fee issue to finance team, pending reply" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-primary" id="dlog-save-btn" onclick="saveDailyLog()">File entry</button>
+            <span id="dlog-saved" class="saved-msg hidden">✓ Saved</span>
+          </div>
+        </div>
+
+        <div class="ledger-section-label">Recent entries</div>
+        <div id="dlog-entries"></div>
+        <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
       </div>
     </div>
-
-    <div class="ledger-section-label">Recent entries</div>
-    <div id="dlog-entries"></div>
-    <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
   </div>
 </div>
 
@@ -1120,6 +1147,22 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
     <div class="modal-body">
       <hr class="modal-div">
       <div id="review-day-modal-entries"></div>
+    </div>
+  </div>
+</div>
+
+<div id="dlog-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeDlogDayModal()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="dlog-day-modal-title"></div>
+        <div class="modal-meta" id="dlog-day-modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeDlogDayModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <hr class="modal-div">
+      <div id="dlog-day-modal-entries"></div>
     </div>
   </div>
 </div>
@@ -1651,6 +1694,7 @@ let collegeContacts = [];
 /* ── Daily log state (added) ── */
 let dailyLogs = [];
 let dlogSaving = false;
+let dlogCalMonth = new Date();
 
 /* ── Review panel state (admin only, added) ── */
 let reviewLogs = [];
@@ -2735,6 +2779,7 @@ function enterDailyLog(){
   $('dlog-category').value = '';
   onDlogCategoryChange('');
 
+  dlogCalMonth = new Date();
   loadDailyLogs();
 }
 
@@ -2770,10 +2815,11 @@ function renderDailyLogs(){
     listEl.innerHTML = '';
     show('dlog-empty');
     $('dlog-empty').innerHTML = '<p>No entries yet. Add your first daily log above.</p>';
+    renderDlogCalendar();
     return;
   }
   hide('dlog-empty');
-  listEl.innerHTML = dailyLogs.map(l => {
+  listEl.innerHTML = dailyLogs.slice(0, 10).map(l => {
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
     const callType = l.call_type || (cat ? cat.callType : 'soft');
@@ -2798,7 +2844,117 @@ function renderDailyLogs(){
       </div>
     </div>`;
   }).join('');
+
+  renderDlogCalendar();
 }
+
+/* ── Daily log's own activity calendar (added) ── */
+function dlogCalShift(delta){
+  dlogCalMonth = new Date(dlogCalMonth.getFullYear(), dlogCalMonth.getMonth()+delta, 1);
+  renderDlogCalendar();
+}
+function dlogCalToday(){
+  dlogCalMonth = new Date();
+  renderDlogCalendar();
+}
+function ymd(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function renderDlogCalendar(){
+  const label = $('dlog-cal-month-label');
+  if(label) label.textContent = dlogCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+
+  const byDate = {};
+  dailyLogs.forEach(l => {
+    const key = String(l.log_date).slice(0,10);
+    (byDate[key] = byDate[key] || []).push(l);
+  });
+
+  const year = dlogCalMonth.getFullYear();
+  const month = dlogCalMonth.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  let startOffset = firstOfMonth.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const todayKey = ymd(new Date());
+
+  const cells = [];
+  for(let i=startOffset; i>0; i--){
+    cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push({ date: new Date(year, month, d), outside:false });
+  }
+  while(cells.length % 7 !== 0 || cells.length < 42){
+    const last = cells[cells.length-1].date;
+    cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
+  }
+
+  const grid = $('dlog-cal-grid');
+  if(!grid) return;
+  const maxShow = 3;
+  grid.innerHTML = cells.map(cell => {
+    const key = ymd(cell.date);
+    const dayEntries = byDate[key] || [];
+    const isToday = key === todayKey;
+    const pillsHtml = dayEntries.slice(0, maxShow).map(e => {
+      const cat = DLOG_CATEGORIES.find(c => c.key === e.category);
+      const catLabel = cat ? cat.label : (e.category || 'Uncategorized');
+      const callType = e.call_type || (cat ? cat.callType : 'soft');
+      return `<div class="review-cal-pill" title="${escHTML(catLabel)}">
+        <span class="cal-dot ${callType}"></span>
+        <span>${escHTML(catLabel)}</span>
+        ${e.reviewed ? '<span class="cal-check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+    const moreHtml = dayEntries.length > maxShow ? `<div class="review-cal-more">+${dayEntries.length - maxShow} more</div>` : '';
+    return `<div class="review-cal-cell ${cell.outside ? 'outside' : ''} ${isToday ? 'is-today' : ''}" onclick="openDlogDayModal('${key}')">
+      <span class="review-cal-daynum">${cell.date.getDate()}</span>
+      ${pillsHtml}
+      ${moreHtml}
+    </div>`;
+  }).join('');
+}
+
+function openDlogDayModal(dateKey){
+  const dayEntries = dailyLogs.filter(l => String(l.log_date).slice(0,10) === dateKey);
+  if(!dayEntries.length) return;
+  const dateObj = new Date(dateKey + 'T00:00:00');
+  $('dlog-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  $('dlog-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${sessionCollege || ''}`;
+
+  $('dlog-day-modal-entries').innerHTML = dayEntries.map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    const reviewBadge = l.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
+      : `<span class="review-badge review-no">☐ Review pending</span>`;
+    return `<div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
+      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  show('dlog-day-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeDlogDayModal(){
+  hide('dlog-day-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('dlog-day-modal') && !$('dlog-day-modal').classList.contains('hidden')){
+    closeDlogDayModal();
+  }
+});
 
 async function saveDailyLog(){
   if(dlogSaving) return;
@@ -2858,6 +3014,9 @@ async function saveDailyLog(){
   if(callType === 'hard'){
     sendHardCallEmail(cat, { date, name, activity, progress });
   }
+
+  /* jump the calendar to the month of the entry just filed, so the new dot is visible immediately */
+  dlogCalMonth = new Date(date + 'T00:00:00');
 
   loadDailyLogs();
 }
@@ -2932,9 +3091,6 @@ function reviewCalShift(delta){
 function reviewCalToday(){
   reviewCalMonth = new Date();
   renderReviewCalendar();
-}
-function ymd(d){
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
 function renderReviewCalendar(){
