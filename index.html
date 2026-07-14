@@ -2849,6 +2849,14 @@ function enterDailyLog(){
 
   const today = new Date().toISOString().slice(0,10);
   $('dlog-date').value = today;
+  /* Campus managers can only file a log entry for today — the date field is locked. */
+  $('dlog-date').min = today;
+  $('dlog-date').max = today;
+  $('dlog-date').readOnly = true;
+  $('dlog-date').setAttribute('onkeydown','return false');
+  $('dlog-date').style.background = 'var(--slate-soft)';
+  $('dlog-date').style.cursor = 'not-allowed';
+  $('dlog-date').title = 'You can only log entries for today';
 
   const rec = collegeContacts.find(c => c.college === sessionCollege);
   $('dlog-name').value = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
@@ -3041,6 +3049,14 @@ async function saveDailyLog(){
   const categoryKey = $('dlog-category').value;
   const activity = $('dlog-activity').value.trim();
   const progress = $('dlog-progress').value.trim();
+
+  /* Guard: entries can only be filed for today, never a previous or future day. */
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(date !== todayStr){
+    showToast('You can only log entries for today');
+    $('dlog-date').value = todayStr;
+    return;
+  }
 
   if(!date || !categoryKey || !activity){
     showToast('Please select a category and add activity details');
@@ -3243,6 +3259,8 @@ function openReviewDayModal(dateKey){
   const dayEntries = getReviewFiltered().filter(l => String(l.log_date).slice(0,10) === dateKey);
   if(!dayEntries.length) return;
   const dateObj = new Date(dateKey + 'T00:00:00');
+  const todayKey = ymd(new Date());
+  const isTodayCell = dateKey === todayKey;
   $('review-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   $('review-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${reviewCollege || ''}`;
 
@@ -3254,8 +3272,11 @@ function openReviewDayModal(dateKey){
     const reviewBadge = l.reviewed
       ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
       : `<span class="review-badge review-no">☐ Review pending</span>`;
+    /* Marking reviewed is only allowed on the day the entry was logged — not for previous or future days. */
     const reviewBtn = !l.reviewed
-      ? `<button class="btn btn-primary" style="margin-top:10px;" onclick="markLogReviewed('${l.id}')">Mark reviewed</button>`
+      ? (isTodayCell
+          ? `<button class="btn btn-primary" style="margin-top:10px;" onclick="markLogReviewed('${l.id}')">Mark reviewed</button>`
+          : `<div style="margin-top:8px;font-size:11px;color:var(--text-faint);">Can only be marked reviewed on the day it was logged</div>`)
       : `<div style="margin-top:8px;font-size:11px;color:var(--text-faint);">Reviewed on ${l.reviewed_at ? fmtAbs(l.reviewed_at) : '—'}</div>`;
     return `<div class="dlog-entry">
       <div class="dlog-entry-top">
@@ -3333,6 +3354,17 @@ function renderReviewLogs(){
 }
 
 async function markLogReviewed(id){
+  /* Defensive guard: even if called directly, only allow marking an entry reviewed on the day it was logged. */
+  const log = reviewLogs.find(l => l.id === id);
+  if(log){
+    const logDateKey = String(log.log_date).slice(0,10);
+    const todayKey = ymd(new Date());
+    if(logDateKey !== todayKey){
+      showToast("You can only mark today's entries as reviewed");
+      return;
+    }
+  }
+
   const reviewerName = window.prompt('Enter your name to confirm this review:');
   if(!reviewerName || !reviewerName.trim()){
     showToast('Reviewer name is required');
