@@ -3321,9 +3321,14 @@ function getReviewFiltered(){
 }
 
 function renderReviewLogs(){
-  $('review-cnt-all').textContent     = reviewLogs.length;
+  const total = reviewLogs.length;
+  const reviewedCount = reviewLogs.filter(l => !!l.reviewed).length;
+  $('review-cnt-all').textContent     = total;
   $('review-cnt-hard').textContent    = reviewLogs.filter(l => l.call_type === 'hard').length;
-  $('review-cnt-pending').textContent = reviewLogs.filter(l => !l.reviewed).length;
+  $('review-cnt-soft').textContent    = reviewLogs.filter(l => l.call_type === 'soft').length;
+  $('review-cnt-pending').textContent = total - reviewedCount;
+  $('review-cnt-reviewed').textContent = reviewedCount;
+  $('review-cnt-completion').textContent = total ? Math.round((reviewedCount/total)*100) + '%' : '—';
   renderReviewCalendar();
 }
 
