@@ -3218,8 +3218,17 @@ async function saveDailyLog(){
   show('dlog-saved');
   setTimeout(() => hide('dlog-saved'), 1800);
 
-  if(callType === 'hard'){
-    sendHardCallEmail(cat, { date, name, activity, progress });
+if(callType === 'hard'){
+    sb.functions.invoke('notify-hardcall', {
+      body: {
+        college: sessionCollege,
+        category_label: cat.label,
+        log_date: date,
+        manager_name: name,
+        activity,
+        progress_notes: progress,
+      }
+    }).catch(e => console.error('notify-hardcall failed', e));
   }
 
   /* jump the calendar to the month of the entry just filed, so the new dot is visible immediately */
