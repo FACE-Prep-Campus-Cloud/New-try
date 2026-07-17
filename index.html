@@ -7,9 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --ui-scale: 1;
   --bg: #F4F5F7;
@@ -36,14 +34,12 @@
   --shadow-md: 0 4px 16px -6px rgba(20,21,26,0.10);
   --shadow-lg: 0 16px 40px -12px rgba(20,21,26,0.18);
 }
-
 #scale-root {
   transform: scale(var(--ui-scale));
   transform-origin: top left;
   width: calc(100% / var(--ui-scale));
   height: calc(100vh / var(--ui-scale));
 }
-
 body[data-theme="dark"] {
   --bg: #0F1115;
   --card: #1B1F27;
@@ -69,14 +65,12 @@ body[data-theme="dark"] {
   --shadow-md: 0 4px 18px -6px rgba(0,0,0,0.55);
   --shadow-lg: 0 20px 44px -12px rgba(0,0,0,0.6);
 }
-
 html, body { height: 100%; margin: 0; overflow: hidden; }
 body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--bg); min-height: 100vh; -webkit-font-smoothing: antialiased; font-size: 14px; transition: background .25s ease, color .25s ease; }
 .hidden { display: none !important; }
 button, input, select { font-family: inherit; }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 ul { list-style: none; }
-
 .dot-row { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; white-space: nowrap; }
 .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dot-red    { background: var(--red); }
@@ -85,24 +79,20 @@ ul { list-style: none; }
 .dot-blue   { background: var(--blue); }
 .dot-violet { background: var(--violet); }
 .dot-slate  { background: var(--text-faint); }
-
 .sla-tag {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--red);
 }
-
 .review-badge {
   display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 8px; border-radius: 10px;
   font-size: 10.5px; font-weight: 600; white-space: normal; text-align: center; line-height: 1.3;
 }
 .review-yes { background: var(--green-soft); color: var(--green); }
 .review-no  { background: var(--red-soft); color: var(--red); }
-
 .cat-pill {
   display: inline-block; padding: 3px 10px; border-radius: 7px; font-size: 12px; font-weight: 500;
   background: var(--slate-soft); color: var(--text-light); border: 1px solid var(--border); white-space: nowrap;
 }
-
 .prio-pill {
   display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 7px; font-size: 12px; font-weight: 600;
   border: 1px solid transparent; white-space: nowrap;
@@ -110,7 +100,6 @@ ul { list-style: none; }
 .prio-high   { background: var(--red);   color: #fff; }
 .prio-medium { background: var(--amber-soft); color: var(--amber); }
 .prio-low    { background: var(--slate-soft); color: var(--text-light); }
-
 .avatar-wrap { position: relative; flex-shrink: 0; }
 .avatar {
   width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
@@ -123,14 +112,12 @@ ul { list-style: none; }
   0%   { transform: scale(0.85); opacity: 0.9; }
   100% { transform: scale(1.35); opacity: 0; }
 }
-
 .auth-wrap {
   min-height: calc(100vh / var(--ui-scale)); display: flex; align-items: center; justify-content: center; padding: 24px;
   position: relative; overflow: hidden;
   background: #EDEBF7;
 }
 body[data-theme="dark"] .auth-wrap { background: #0A0812; }
-
 .auth-blob {
   position: absolute; border-radius: 50%; filter: blur(75px); opacity: 0.55; pointer-events: none;
   animation: blobFloat 18s ease-in-out infinite;
@@ -147,7 +134,6 @@ body[data-theme="dark"] .auth-blob.b3 { background: #16A34A; opacity: 0.5; }
   33%      { transform: translate(30px,-24px) scale(1.08); }
   66%      { transform: translate(-22px,18px) scale(0.95); }
 }
-
 .auth-grid-overlay {
   position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
   background-image:
@@ -161,7 +147,6 @@ body[data-theme="dark"] .auth-grid-overlay {
     linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
 }
-
 .theme-toggle-auth {
   position: absolute; top: 20px; right: 20px; z-index: 5;
   width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(20,21,26,0.12); background: rgba(255,255,255,0.55);
@@ -173,13 +158,11 @@ body[data-theme="dark"] .auth-grid-overlay {
 .theme-toggle-auth svg { width: 16px; height: 16px; }
 body[data-theme="dark"] .theme-toggle-auth { border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.85); }
 body[data-theme="dark"] .theme-toggle-auth:hover { color: #fff; background: rgba(255,255,255,0.18); }
-
 .auth-box { width: 100%; max-width: 380px; position: relative; z-index: 1; animation: authRise .65s cubic-bezier(.16,1,.3,1) both; display: flex; flex-direction: column; align-items: center; }
 @keyframes authRise {
   from { opacity: 0; transform: translateY(18px) scale(0.985); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 .auth-avatar {
   width: 68px; height: 68px; border-radius: 50%; background: rgba(20,21,26,0.10); backdrop-filter: blur(8px);
   border: 1px solid rgba(20,21,26,0.12); display: flex; align-items: center; justify-content: center;
@@ -188,7 +171,6 @@ body[data-theme="dark"] .theme-toggle-auth:hover { color: #fff; background: rgba
 .auth-avatar svg { width: 26px; height: 26px; stroke: var(--text); }
 body[data-theme="dark"] .auth-avatar { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.28); }
 body[data-theme="dark"] .auth-avatar svg { stroke: #fff; }
-
 .auth-panel {
   width: 100%;
   background: rgba(255,255,255,0.55); backdrop-filter: blur(22px) saturate(140%);
@@ -209,7 +191,6 @@ body[data-theme="dark"] .auth-panel { background: rgba(255,255,255,0.10); border
   85%  { opacity: 0; }
   100% { transform: translateX(30%); opacity: 0; }
 }
-
 .auth-header { text-align: center; margin-bottom: 20px; }
 .auth-header h1 {
   font-family: 'Poppins', 'Inter', sans-serif;
@@ -218,7 +199,6 @@ body[data-theme="dark"] .auth-panel { background: rgba(255,255,255,0.10); border
 .auth-header p  { font-size: 12.5px; color: var(--text-light); margin-top: 6px; }
 body[data-theme="dark"] .auth-header h1 { color: #fff; }
 body[data-theme="dark"] .auth-header p { color: rgba(255,255,255,0.7); }
-
 .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 7px; }
 body[data-theme="dark"] .field-label { color: rgba(255,255,255,0.78); }
 .error-msg { font-size: 13px; color: var(--red); margin: 8px 0; animation: shake .35s ease; }
@@ -235,7 +215,18 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
 input::placeholder { color: var(--text-faint); }
 input:disabled, select:disabled { background: var(--slate-soft); color: var(--text-faint); cursor: not-allowed; }
-
+/* ── Make Daily Log's Date / Logged-by fields obviously editable ── */
+#dlog-date, #dlog-name {
+  cursor: text;
+  background: var(--card);
+}
+#dlog-date:hover, #dlog-name:hover {
+  border-color: #C7CCD3;
+}
+#dlog-date:focus, #dlog-name:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
 .otp-row { display: flex; gap: 9px; justify-content: center; }
 .otp-box {
   width: 48px; height: 54px; text-align: center; font-size: 20px; font-weight: 700;
@@ -250,34 +241,29 @@ body[data-theme="dark"] .otp-box { background: rgba(255,255,255,0.14); border: 1
 body[data-theme="dark"] .otp-box:focus { border-color: #fff; background: rgba(255,255,255,0.22); }
 body[data-theme="dark"] .otp-box.filled { border-color: #fff; background: rgba(255,255,255,0.22); }
 body[data-theme="dark"] .otp-box.shake-err { border-color: #F0554C !important; background: rgba(240,85,76,0.22) !important; }
-
 .auth-links { display: flex; justify-content: center; margin-top: 14px; }
 .auth-link { font-size: 12px; color: var(--text-faint); text-decoration: none; cursor: pointer; transition: color .15s; }
 .auth-link:hover { color: var(--text); }
 body[data-theme="dark"] .auth-link { color: rgba(255,255,255,0.55); }
 body[data-theme="dark"] .auth-link:hover { color: #fff; }
-
 .auth-remember { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 4px 0 18px; font-size: 11.5px; color: var(--text-light); }
 .auth-remember input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--blue); }
 body[data-theme="dark"] .auth-remember { color: rgba(255,255,255,0.65); }
-
 .auth-role-toggle { display: flex; gap: 8px; margin-bottom: 18px; }
 .role-tab {
   flex: 1; padding: 9px 8px; border-radius: 10px; border: 1px solid rgba(20,21,26,0.15);
   background: rgba(20,21,26,0.05); color: var(--text); font-size: 12px; font-weight: 700;
   cursor: pointer; transition: background .15s, color .15s, border-color .15s; text-align: center;
 }
-.role-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.role-tab.active { background: #0EA5A4; color: #fff; border-color: #0EA5A4; }
 body[data-theme="dark"] .role-tab { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.1); color: #fff; }
 body[data-theme="dark"] .role-tab.active { background: #fff; color: #14151A; border-color: #fff; }
-
 #session-tag {
   font-size: 11.5px; color: var(--text-light); padding: 8px 18px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 #session-tag b { color: var(--text); font-weight: 700; }
 .sidebar.collapsed #session-tag { display: none; }
-
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -292,7 +278,6 @@ body[data-theme="dark"] .role-tab.active { background: #fff; color: #14151A; bor
 .btn-full { width: 100%; }
 .btn-icon { padding: 8px; width: 34px; height: 34px; }
 .btn-icon svg { width: 14px; height: 14px; }
-
 .btn-primary.btn-auth {
   position: relative; overflow: hidden; padding: 12px 16px; font-size: 12.5px;
   background: var(--blue); backdrop-filter: blur(4px); color: #fff;
@@ -304,10 +289,8 @@ body[data-theme="dark"] .role-tab.active { background: #fff; color: #14151A; bor
 .btn-auth:hover .arrow { transform: translateX(3px); }
 body[data-theme="dark"] .btn-primary.btn-auth { background: rgba(0,0,0,0.55); }
 body[data-theme="dark"] .btn-primary.btn-auth:hover { background: rgba(0,0,0,0.72); }
-
 .auth-footnote { text-align: center; font-size: 11.5px; color: var(--text-faint); margin-top: 18px; }
 body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
-
 /* ── Desktop enlargement for the sign-in card ── */
 @media (min-width: 861px) {
   .auth-box { max-width: 460px; }
@@ -329,9 +312,7 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
   .auth-footnote { font-size: 13px; margin-top: 22px; }
   .error-msg { font-size: 14px; }
 }
-
 .shell { display: flex; min-height: calc(100vh / var(--ui-scale)); }
-
 .sidebar {
   width: 244px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; position: sticky; top: 0; height: calc(100vh / var(--ui-scale)); overflow-y: auto; transition: width .18s ease, background .25s ease;
@@ -345,7 +326,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .sidebar.collapsed .sub-nav { display: none; }
 .sidebar.collapsed .nav-row, .sidebar.collapsed .btn-logout { justify-content: center; }
 .sidebar.collapsed .sidebar-top { justify-content: center; padding: 18px 12px; }
-
 .sidebar-top { padding: 18px 18px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--border); }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .brand-mark {
@@ -364,11 +344,9 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .collapse-btn:hover { background: var(--slate-soft); }
 .collapse-btn svg { width: 12px; height: 12px; transition: transform .18s; }
 .sidebar.collapsed .collapse-btn svg { transform: rotate(180deg); }
-
 .sidebar-nav { padding: 12px 12px; flex: 1; }
 .sec-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); padding: 0 10px; margin: 16px 0 6px; }
 .sec-label:first-child { margin-top: 4px; }
-
 .nav-row {
   display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border-radius: 9px;
   border: none; cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--text-light);
@@ -383,7 +361,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .nav-row.active .nav-count { background: rgba(52,87,232,0.14); color: var(--blue); }
 .chevron { width: 12px !important; height: 12px !important; color: var(--text-faint); transition: transform .15s; flex-shrink: 0; }
 .nav-group.open > .nav-row .chevron { transform: rotate(90deg); }
-
 .sub-nav { padding-left: 20px; margin-left: 15px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 1px; margin-top: 2px; margin-bottom: 6px; max-height: 0; overflow: hidden; transition: max-height .18s ease; }
 .nav-group.open .sub-nav { max-height: 400px; }
 .sub-row {
@@ -394,7 +371,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .sub-row:hover { background: var(--slate-soft); color: var(--text); }
 .sub-row.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
 .sub-row .nav-count.urgent { background: var(--red-soft); color: var(--red); }
-
 .sidebar-foot { padding: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
 .btn-logout {
   display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border-radius: 9px; border: none;
@@ -402,16 +378,13 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 }
 .btn-logout:hover { background: var(--red-soft); color: var(--red); }
 .btn-logout svg { width: 16px; height: 16px; flex-shrink: 0; }
-
 .theme-row {
   display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border-radius: 9px; border: none;
   cursor: pointer; font-size: 13.5px; color: var(--text-light); background: transparent; transition: background .12s, color .12s;
 }
 .theme-row:hover { background: var(--slate-soft); color: var(--text); }
 .theme-row svg { width: 16px; height: 16px; flex-shrink: 0; }
-
 .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: calc(100vh / var(--ui-scale)); overflow: hidden; }
-
 .topbar {
   display: flex; align-items: center; justify-content: space-between; padding: 14px 30px 10px;
   background: var(--bg); gap: 16px; flex-shrink: 0;
@@ -422,12 +395,10 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .search-wrap { position: relative; }
 .search-wrap input { padding-left: 34px; width: 240px; font-size: 13px; background: var(--card); }
 .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 14px; pointer-events: none; }
-
 .page-body {
   padding: 4px 30px 0; flex: 1; max-width: 1360px; width: 100%;
   display: flex; flex-direction: column; min-height: 0; overflow: hidden;
 }
-
 .insights-panel {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
   margin-bottom: 14px; flex-shrink: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
@@ -439,7 +410,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .insight-bar-track { flex: 1; height: 8px; border-radius: 999px; background: var(--slate-soft); overflow: hidden; }
 .insight-bar-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.16,1,.3,1); }
 .insight-bar-val { width: 26px; text-align: right; flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--text); }
-
 .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px; flex-shrink: 0; }
 .stat-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px;
@@ -462,7 +432,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .s-sub { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .s-sub.warn { color: var(--red); font-weight: 600; }
 .stat-spark { flex-shrink: 0; opacity: 0.9; margin-left: auto; }
-
 .avgres-card { flex-direction: column; align-items: stretch; gap: 8px; }
 .avgres-top { display: flex; flex-direction: row; align-items: center; gap: 10px; width: 100%; }
 .avgres-mode-tag {
@@ -474,7 +443,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .avgres-row .swatch { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .avgres-row .arb-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-light); }
 .avgres-row .arb-val { font-weight: 700; color: var(--text); flex-shrink: 0; }
-
 .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; flex-shrink: 0; }
 .dd { position: relative; }
 .dd-trigger {
@@ -498,24 +466,20 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .dd-sep { height: 1px; background: var(--border-soft); margin: 6px 2px; }
 .dd-clear { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px 9px; font-size: 12.5px; color: var(--text-light); cursor: pointer; border-radius: 8px; }
 .dd-clear:hover { background: var(--slate-soft); color: var(--text); }
-
 .active-chip {
   display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px 6px 12px; border-radius: 999px;
   background: var(--blue-soft); color: var(--blue); font-size: 12px; font-weight: 600;
 }
 .active-chip button { background: none; border: none; color: var(--blue); opacity: 0.6; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
 .active-chip button:hover { opacity: 1; }
-
 .kbd-hint { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-faint); margin-left: auto; }
 .kbd-hint kbd { font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--slate-soft); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
-
 .ticket-grid-wrap { background: transparent; flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 40px; }
 .ticket-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
   gap: 18px;
 }
-
 .ticket-card {
   display: flex;
   background: var(--card);
@@ -532,19 +496,16 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .ticket-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .ticket-card.is-closed { opacity: 0.88; }
 .ticket-card.kbd-focus { outline-color: var(--blue); box-shadow: var(--shadow-md); transform: translateY(-1px); }
-
 .ticket-edge { width: 6px; flex-shrink: 0; border-radius: 14px 0 0 14px; }
 .ticket-edge.high   { background: var(--red); }
 .ticket-edge.medium { background: var(--amber); }
 .ticket-edge.low    { background: var(--text-faint); }
-
 .ticket-card.prio-ribbon-high::before {
   content: 'URGENT';
   position: absolute; top: 12px; right: -30px; width: 130px; padding: 3px 0; text-align: center;
   background: var(--red); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em;
   transform: rotate(40deg); box-shadow: 0 2px 6px rgba(220,38,38,0.35); z-index: 3; pointer-events: none;
 }
-
 .ticket-main {
   flex: 1; min-width: 0;
   padding: 15px 16px 13px 14px;
@@ -565,7 +526,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 .ticket-bottom-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .ticket-time { font-size: 12px; color: var(--text-faint); white-space: nowrap; }
 .closed-by-tag { font-size: 11.5px; color: var(--green); font-weight: 600; white-space: nowrap; }
-
 .ticket-quick-actions {
   position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; opacity: 0; transform: translateY(-6px) scale(0.92);
   transition: opacity .18s, transform .22s cubic-bezier(.34,1.56,.64,1); z-index: 2;
@@ -578,7 +538,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 }
 .qa-btn:hover { background: var(--blue-soft); color: var(--blue); transform: scale(1.06); }
 .qa-btn svg { width: 13px; height: 13px; }
-
 .ticket-stub {
   width: 92px; flex-shrink: 0;
   background:#F1EAE3;
@@ -607,7 +566,6 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 }
 body[data-theme="dark"] .ticket-stub::before { border-left-color: rgba(255,255,255,0.22); }
 body[data-theme="dark"] .ticket-stub { background: #241E18; }
-
 .ticket-roll {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -618,17 +576,14 @@ body[data-theme="dark"] .ticket-stub { background: #241E18; }
   color: #8A6D3B;
 }
 body[data-theme="dark"] .ticket-roll { color: #D8B27A; }
-
 .empty-state { padding: 54px 24px; text-align: center; color: var(--text-light); font-size: 14px; }
 .empty-state svg { margin-bottom: 14px; opacity: 0.7; }
 .empty-state p { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
-
 .skel-card { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 14px; height: 132px; overflow: hidden; }
 .skel-edge { width: 6px; background: var(--slate-soft); }
 .skel-main { flex: 1; padding: 15px 16px; display: flex; flex-direction: column; gap: 12px; }
 .skel-bar { border-radius: 6px; background: linear-gradient(90deg, var(--slate-soft) 25%, var(--border-soft) 37%, var(--slate-soft) 63%); background-size: 400% 100%; animation: skelShimmer 1.4s ease infinite; }
 @keyframes skelShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
-
 .toast-stack { position: fixed; top: 18px; right: 18px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
 .toast {
   display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border);
@@ -639,7 +594,6 @@ body[data-theme="dark"] .ticket-roll { color: #D8B27A; }
 @keyframes toastIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes toastOut { to { opacity: 0; transform: translateX(24px); } }
 .toast .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
-
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(20,21,26,0.45); display: flex; align-items: center; justify-content: center;
   padding: 24px; z-index: 100; backdrop-filter: blur(2px);
@@ -669,7 +623,6 @@ body[data-theme="dark"] .ticket-roll { color: #D8B27A; }
   display: flex; align-items: center; gap: 10px; padding: 12px 16px;
   background: var(--green-soft); border: 1px solid rgba(22,163,74,0.22); border-radius: 11px; margin-bottom: 14px; font-size: 13px; color: var(--green); font-weight: 600;
 }
-
 .timeline { margin-bottom: 18px; }
 .timeline-item { display: flex; gap: 10px; position: relative; padding-bottom: 16px; }
 .timeline-item:last-child { padding-bottom: 0; }
@@ -681,7 +634,6 @@ body[data-theme="dark"] .ticket-roll { color: #D8B27A; }
 .timeline-dot.done { background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
 .timeline-body strong { font-size: 12.5px; font-weight: 600; display: block; }
 .timeline-body span { font-size: 11.5px; color: var(--text-faint); }
-
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
 .form-group { display: flex; flex-direction: column; gap: 7px; }
 .form-group.full { grid-column: 1 / -1; }
@@ -704,7 +656,6 @@ body[data-theme="dark"] .ticket-roll { color: #D8B27A; }
 .toggle-switch input:disabled ~ .toggle-track { opacity: 0.55; cursor: not-allowed; }
 .modal-actions { display: flex; align-items: center; gap: 10px; padding-top: 4px; }
 .saved-msg { font-size: 12.5px; color: var(--green); font-weight: 600; }
-
 .closer-name-wrap {
   grid-column: 1 / -1; background: var(--amber-soft); border: 1px solid rgba(217,132,12,0.3); border-radius: 11px;
   padding: 14px 16px; display: none; flex-direction: column; gap: 8px;
@@ -714,7 +665,6 @@ body[data-theme="dark"] .ticket-roll { color: #D8B27A; }
 .closer-name-wrap span { font-size: 11.5px; color: var(--text-light); }
 .field-error { font-size: 12px; color: var(--red); font-weight: 600; display: none; }
 .field-error.show { display: block; }
-
 .resolve-burst {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   background: rgba(255,255,255,0.0); pointer-events: none; z-index: 5; opacity: 0;
@@ -731,11 +681,9 @@ body[data-theme="dark"] .resolve-burst { background: rgba(0,0,0,0.0); }
 .resolve-check svg { width: 34px; height: 34px; stroke: white; }
 .resolve-check path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: checkDraw .35s ease .25s forwards; }
 @keyframes checkDraw { to { stroke-dashoffset: 0; } }
-
 @keyframes spinIcon { to { transform: rotate(360deg); } }
 #refresh-icon.spinning { animation: spinIcon 0.7s linear infinite; }
 #refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
 .modal-attachment { margin-bottom: 18px; }
 .modal-attachment img {
   max-width: 100%; max-height: 320px; border-radius: 10px;
@@ -748,7 +696,6 @@ body[data-theme="dark"] .resolve-burst { background: rgba(0,0,0,0.0); }
 }
 .admin-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
 .ticket-attach-flag { display:inline-flex; align-items:center; gap:3px; font-size:11px; color: var(--text-faint); }
-
 /* ══════════════════════════════════════════════════════════
    ── PLATFORM SELECT (redesigned — no video, layered mesh) ──
    ══════════════════════════════════════════════════════════ */
@@ -768,7 +715,6 @@ body[data-theme="dark"] .platform-wrap {
     radial-gradient(ellipse 700px 500px at 50% 50%, rgba(52,208,124,0.07), transparent 65%),
     linear-gradient(155deg, #0F1115 0%, #14161C 60%, #14131A 100%);
 }
-
 .platform-wrap::before,
 .platform-wrap::after {
   content: ''; position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; pointer-events: none;
@@ -778,18 +724,28 @@ body[data-theme="dark"] .platform-wrap {
 .platform-wrap::after  { width: 460px; height: 460px; bottom: -140px; right: -100px; background: #FBCFB0; animation-duration: 24s; animation-delay: -6s; }
 body[data-theme="dark"] .platform-wrap::before { background: #4C1D95; opacity: 0.3; }
 body[data-theme="dark"] .platform-wrap::after  { background: #D85A30; opacity: 0.24; }
-
 .platform-wrap-scrim { display: none; }
-
-.platform-box { width: 100%; max-width: 720px; text-align: center; position: relative; z-index: 1; animation: authRise .65s cubic-bezier(.16,1,.3,1) both; }
-.platform-eyebrow {
-  display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; letter-spacing: 0.09em;
-  text-transform: uppercase; color: var(--violet); background: var(--violet-soft); padding: 5px 12px; border-radius: 999px;
-  margin-bottom: 16px;
+.platform-float-icon {
+  position: absolute;
+  color: var(--violet);
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+  animation: iconDrift 15s ease-in-out infinite;
 }
+.platform-float-icon svg { width: 100%; height: 100%; display: block; }
+.platform-float-icon.pf-2, .platform-float-icon.pf-4 { color: var(--blue); }
+.platform-float-icon.pf-3, .platform-float-icon.pf-6 { color: var(--green); }
+.platform-float-icon.pf-5 { color: var(--amber); }
+body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
+@keyframes iconDrift {
+  0%, 100% { transform: translate(0,0) rotate(0deg); }
+  50%      { transform: translate(0,-12px) rotate(-4deg); }
+}
+@media (max-width: 640px) { .platform-float-icon { display: none; } }
+.platform-box { width: 100%; max-width: 720px; text-align: center; position: relative; z-index: 1; animation: authRise .65s cubic-bezier(.16,1,.3,1) both; }
 .platform-box h1 { font-family: 'Poppins','Inter',sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.015em; }
 .platform-box p.sub { font-size: 14px; color: var(--text-light); margin-bottom: 34px; }
-
 .platform-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; perspective: 1200px; }
 .platform-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 34px 24px;
@@ -815,7 +771,6 @@ body[data-theme="dark"] .platform-wrap::after  { background: #D85A30; opacity: 0
 .platform-card p { font-size: 12.5px; color: var(--text-light); line-height: 1.55; position: relative; transform: translateZ(15px); }
 .platform-back { margin-top: 30px; position: relative; z-index: 1; }
 @media (max-width: 640px) { .platform-cards { grid-template-columns: 1fr; } }
-
 /* ── DAILY LOG SCREEN (added) ── */
 .dlog-topbar {
   display: flex; align-items: center; justify-content: space-between; padding: 16px 30px;
@@ -836,7 +791,6 @@ body[data-theme="dark"] .platform-wrap::after  { background: #D85A30; opacity: 0
 .dlog-entry-meta { font-size: 11px; color: var(--text-faint); }
 .dlog-entry-activity { font-size: 13.5px; line-height: 1.5; margin-bottom: 6px; white-space: pre-wrap; }
 .dlog-entry-progress { font-size: 12.5px; color: var(--text-light); white-space: pre-wrap; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
-
 /* ── DAILY LOG CATEGORY / CALL TYPE (added) ── */
 .dlog-call-hint { font-size: 11.5px; margin-top: 7px; font-weight: 600; }
 .dlog-call-hint.hard { color: var(--red); }
@@ -847,13 +801,11 @@ body[data-theme="dark"] .platform-wrap::after  { background: #D85A30; opacity: 0
 }
 .dlog-cat-badge.hard { background: var(--red-soft); color: var(--red); }
 .dlog-cat-badge.soft { background: var(--slate-soft); color: var(--text-light); }
-
 /* ── FIELD REGISTER — Daily Activity Log redesign (added) ── */
 .ledger-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--text); padding-bottom: 14px; margin-bottom: 24px; }
 .ledger-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 700; }
 .ledger-title { font-family: 'Poppins','Inter',sans-serif; font-size: 21px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); margin-top: 3px; }
 .ledger-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-light); text-align: right; line-height: 1.7; white-space: nowrap; flex-shrink: 0; }
-
 .ledger-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 30px; box-shadow: var(--shadow-sm);
   position: relative; background-image:
@@ -864,7 +816,6 @@ body[data-theme="dark"] .ledger-card { background-image:
     radial-gradient(circle at 22% 18%, rgba(255,255,255,0.02) 0, transparent 40%),
     radial-gradient(circle at 78% 62%, rgba(255,255,255,0.018) 0, transparent 45%); }
 .ledger-card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); margin-bottom: 16px; }
-
 .ledger-stamp-hint { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 12px; font-weight: 600; }
 .ledger-stamp-hint.hard { color: var(--amber); }
 .ledger-stamp-hint.soft { color: var(--text-faint); font-weight: 500; }
@@ -872,9 +823,7 @@ body[data-theme="dark"] .ledger-card { background-image:
   width: 20px; height: 20px; border-radius: 50%; border: 1.5px dashed currentColor; transform: rotate(-8deg);
   flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1;
 }
-
 .ledger-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 700; margin: 4px 0 4px; }
-
 .ledger-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px 2px; border-bottom: 1px dashed var(--border); }
 .ledger-row:last-child { border-bottom: none; }
 .ledger-stamp {
@@ -884,7 +833,6 @@ body[data-theme="dark"] .ledger-card { background-image:
 }
 .ledger-stamp.hard { border-color: var(--amber); color: var(--amber); }
 .ledger-stamp.soft { border-color: var(--text-faint); color: var(--text-faint); }
-
 .ledger-row-body { flex: 1; min-width: 0; }
 .ledger-row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .ledger-row-cat { font-size: 13.5px; font-weight: 700; color: var(--text); }
@@ -896,7 +844,6 @@ body[data-theme="dark"] .ledger-card { background-image:
 .ledger-row-status { font-size: 11px; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .ledger-row-status.pending { color: var(--text-faint); }
 .ledger-row-status.reviewed { color: var(--green); }
-
 .review-cal-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
 .review-cal-nav { display:flex; align-items:center; gap:8px; }
 .review-cal-nav-btn { width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border); background:var(--card); cursor:pointer; color:var(--text-light); }
@@ -920,11 +867,9 @@ body[data-theme="dark"] .ledger-card { background-image:
 .review-cal-more { font-size:10.5px; color:var(--text-faint); padding:1px 5px; }
 .review-cal-legend { display:flex; gap:16px; margin-top:10px; font-size:11.5px; color:var(--text-light); align-items:center; }
 .review-cal-legend .cal-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
-
 .dlog-layout { display:grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); gap:24px; align-items:start; }
 .dlog-layout > div { min-width: 0; }
 @media (max-width: 1100px) { .dlog-layout { grid-template-columns: 1fr; } }
-
 @media (max-width: 860px) {
   .sidebar { position: fixed; z-index: 40; left: -244px; }
   .sidebar.mobile-open { left: 0; }
@@ -937,8 +882,8 @@ body[data-theme="dark"] .ledger-card { background-image:
   .ticket-grid { grid-template-columns: 1fr; }
   .ledger-head { flex-direction: column; }
   .ledger-meta { text-align: left; }
+  #review-stats-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
-
 @media print {
   .sidebar, .topbar, .toolbar, .stats-row, .insights-panel, .modal-overlay, .toast-stack, .ticket-quick-actions { display: none !important; }
   body, .bg, .page-body, .ticket-grid-wrap { background: #fff !important; overflow: visible !important; height: auto !important; }
@@ -947,14 +892,12 @@ body[data-theme="dark"] .ledger-card { background-image:
   .ticket-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ccc !important; }
   #scale-root { transform: none !important; width: 100% !important; height: auto !important; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .auth-blob, .auth-panel::before, .auth-box, .avatar-wrap.is-new::after,
-  .platform-wrap::before, .platform-wrap::after, .platform-box {
+  .platform-wrap::before, .platform-wrap::after, .platform-box, .platform-float-icon {
     animation: none !important;
   }
 }
-
 .review-calendar {
   border: none;
   border-radius: 20px;
@@ -981,9 +924,7 @@ body[data-theme="dark"] .ledger-card { background-image:
 .review-cal-cell:hover { background: #F1F5F9; }
 .review-cal-cell.outside { background: #F8FAFC; opacity: 1; }
 .review-cal-cell.outside .review-cal-daynum { color: #CBD5E1; }
-
 .review-cal-daynum { color: #334155; font-weight: 500; }
-
 .review-cal-cell.is-today {
   background: #2DD9A8;
 }
@@ -998,7 +939,6 @@ body[data-theme="dark"] .ledger-card { background-image:
 .review-cal-cell.is-today .review-cal-pill {
   background: rgba(255,255,255,0.85);
 }
-
 .review-cal-nav-btn {
   border: none;
   border-radius: 50%;
@@ -1007,42 +947,96 @@ body[data-theme="dark"] .ledger-card { background-image:
 }
 .review-cal-nav-btn:hover { background: #F1F5F9; color: #334155; }
 .review-cal-month-label { font-weight: 500; color: #1E293B; }
-
 .review-cal-pill .cal-dot.hard,
 .review-cal-pill .cal-dot.soft { background: #2DD9A8; }
+  /* ===== Sky/cloud sign-in restyle ===== */
+.auth-wrap {
+  background: linear-gradient(180deg, #BFE0F5 0%, #D8ECFA 35%, #EAF4FB 65%, #F7FBFE 100%) !important;
+}
+body[data-theme="dark"] .auth-wrap {
+  background: linear-gradient(180deg, #0B1220 0%, #101826 40%, #141B22 100%) !important;
+}
+.auth-blob, .auth-grid-overlay { display: none !important; }
+.auth-wrap::before {
+  content:''; position:absolute; left:0; right:0; bottom:-40px; height:240px; pointer-events:none;
+  background: radial-gradient(ellipse 60% 100% at 20% 100%, rgba(255,255,255,0.95), transparent 60%),
+              radial-gradient(ellipse 50% 100% at 60% 100%, rgba(255,255,255,0.9), transparent 55%),
+              radial-gradient(ellipse 70% 100% at 90% 100%, rgba(255,255,255,0.85), transparent 60%);
+}
+body[data-theme="dark"] .auth-wrap::before { opacity: 0.05; }
+.auth-avatar {
+  width:64px;height:64px;border-radius:18px;background:#14151A;border:none;
+  margin-bottom:-32px; box-shadow:0 10px 24px -8px rgba(20,21,26,0.4);
+}
+.auth-avatar svg{ stroke:#fff;width:24px;height:24px; }
+body[data-theme="dark"] .auth-avatar{ background:#fff; }
+body[data-theme="dark"] .auth-avatar svg{ stroke:#14151A; }
+.auth-panel {
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 24px 60px -20px rgba(20,60,110,0.25) !important;
+}
+body[data-theme="dark"] .auth-panel{ background: rgba(20,22,28,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
+.auth-panel::before{ display:none !important; }
+.auth-header h1 { font-size:22px !important; }
+.auth-header p { font-size:13.5px !important; }
+.btn-primary.btn-auth {
+  background:#14151A !important; text-transform:none !important; letter-spacing:0 !important;
+  font-weight:700 !important; border-radius:14px !important; padding:14px 16px !important;
+}
+.btn-primary.btn-auth:hover{ background:#000 !important; }
+body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color:#14151A !important; }
+/* ── Review rate ring ── */
+.rate-ring-wrap{position:relative;width:54px;height:54px;flex-shrink:0;}
+.rate-ring-wrap svg{transform:rotate(-90deg);}
+.rate-ring-bg{fill:none;stroke:var(--slate-soft);stroke-width:5;}
+.rate-ring-fg{fill:none;stroke:var(--violet);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
+.rate-ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text);}
+/* ── Monthly summary strip (Review Panel + Daily Log) ── */
+.month-summary{display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow-sm);flex-wrap:wrap;}
+.month-summary .ms-item{display:flex;flex-direction:column;gap:2px;min-width:90px;}
+.month-summary .ms-label{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
+.month-summary .ms-val{font-size:16px;font-weight:800;color:var(--text);}
+.month-summary .ms-bar{flex:1;min-width:140px;}
+.month-summary .ms-bar-track{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--slate-soft);}
+.month-summary .ms-bar-hard{background:var(--red);}
+.month-summary .ms-bar-soft{background:var(--text-faint);}
+.month-summary .ms-bar-legend{display:flex;gap:12px;margin-top:6px;font-size:11px;color:var(--text-light);}
+/* ── Logging streak chip ── */
+.streak-chip{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--amber);background:var(--amber-soft);padding:3px 10px;border-radius:999px;}
+/* ── Timeline connector for ledger rows ── */
+.ledger-row{position:relative;}
+.ledger-row::before{content:'';position:absolute;left:23px;top:48px;bottom:-16px;width:1.5px;background:var(--border);}
+.ledger-row:last-child::before{display:none;}
 </style>
 </head>
 <body>
 <div id="scale-root">
 <div class="toast-stack" id="toast-stack"></div>
-
 <!-- ── AUTH (Glass on blur) ── -->
 <div id="auth-screen" class="auth-wrap">
   <div class="auth-blob b1"></div>
   <div class="auth-blob b2"></div>
   <div class="auth-blob b3"></div>
   <div class="auth-grid-overlay"></div>
-
   <button class="theme-toggle-auth" onclick="toggleTheme()" id="theme-toggle-auth-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
     <svg id="theme-toggle-auth-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/></svg>
   </button>
-
   <div class="auth-box">
     <div class="auth-avatar">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
     </div>
-
     <div class="auth-panel">
       <div class="auth-header">
         <h1>FACE Prep Campus Help Desk</h1>
-        <p>Sign in to manage campus tickets.</p>
+        <p>Sign in to manage campus tickets & .</p>
       </div>
-
       <div class="auth-role-toggle">
         <button type="button" class="role-tab active" id="role-tab-admin" onclick="setAuthRole('admin')">KAM</button>
         <button type="button" class="role-tab" id="role-tab-manager" onclick="setAuthRole('manager')">Campus Manager</button>
       </div>
-
       <div id="admin-login-block">
         <div style="margin-bottom:14px">
           <label class="field-label">KAM</label>
@@ -1053,7 +1047,6 @@ body[data-theme="dark"] .ledger-card { background-image:
           <input id="kam-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
         </div>
       </div>
-
       <div id="manager-login-block" class="hidden">
         <div style="margin-bottom:14px">
           <label class="field-label">College</label>
@@ -1064,18 +1057,33 @@ body[data-theme="dark"] .ledger-card { background-image:
           <input id="manager-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
         </div>
       </div>
-
       <div id="pin-error" class="error-msg hidden" style="text-align:center;"></div>
       <button class="btn btn-primary btn-full btn-auth" onclick="submitLogin()">Enter dashboard <span class="arrow">→</span></button>
     </div>
     <div class="auth-footnote">Authorized personnel only · FACE Prep Campus</div>
   </div>
 </div>
-
 <!-- ── PLATFORM SELECT (campus/senior manager only) ── -->
 <div id="platform-select-screen" class="hidden platform-wrap">
+  <div class="platform-float-icon pf-1" style="top:12%;left:7%;width:36px;height:36px;animation-duration:15s;" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
+  </div>
+  <div class="platform-float-icon pf-2" style="top:18%;right:9%;width:30px;height:30px;animation-duration:18s;animation-delay:-3s;" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+  </div>
+  <div class="platform-float-icon pf-3" style="bottom:18%;left:11%;width:26px;height:26px;animation-duration:13s;animation-delay:-6s;" aria-hidden="true">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M5.5 8.2 7.2 10 10.5 6"/></svg>
+  </div>
+  <div class="platform-float-icon pf-4" style="bottom:14%;right:7%;width:32px;height:32px;animation-duration:17s;animation-delay:-2s;" aria-hidden="true">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4,6 L16,6 Q17,6 17,7 L17,8.3 A1.4,1.4 0 0 0 17,11 L17,13 Q17,14 16,14 L4,14 Q3,14 3,13 L3,11 A1.4,1.4 0 0 0 3,8.3 L3,7 Q3,6 4,6 Z"/><line x1="10" y1="7" x2="10" y2="13" stroke-dasharray="1 1.1"/></svg>
+  </div>
+  <div class="platform-float-icon pf-5" style="top:46%;left:4%;width:22px;height:22px;animation-duration:16s;animation-delay:-8s;" aria-hidden="true">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.5 4.5 8.5s4.5-5.1 4.5-8.5c0-2.5-2-4.5-4.5-4.5z"/><circle cx="8" cy="6" r="1.6"/></svg>
+  </div>
+  <div class="platform-float-icon pf-6" style="top:50%;right:5%;width:26px;height:26px;animation-duration:15s;animation-delay:-5s;" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V6a2 2 0 0 1 2-2z"/></svg>
+  </div>
   <div class="platform-box">
-    <span class="platform-eyebrow">FACE Prep Campus</span>
     <h1>Welcome<span id="platform-select-college-name"></span></h1>
     <p class="sub">Choose what you'd like to open.</p>
     <div class="platform-cards" id="platform-cards">
@@ -1104,7 +1112,6 @@ body[data-theme="dark"] .ledger-card { background-image:
     </div>
   </div>
 </div>
-
 <!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
 <div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
     <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name-crumb">—</b></div>
@@ -1114,20 +1121,20 @@ body[data-theme="dark"] .ledger-card { background-image:
     </div>
   </div>
   <div class="dlog-body">
-
     <div class="ledger-head">
       <div>
-        <div class="ledger-eyebrow">Field register</div>
-        <div class="ledger-title" id="dlog-college-name">—</div>
+      <div class="ledger-eyebrow">Field register</div>
+<div class="ledger-title" id="dlog-college-name">—</div>
+<div class="streak-chip hidden" id="dlog-streak-chip"></div>
       </div>
       <div class="ledger-meta">
         Entry No. <span id="dlog-entry-no">001</span><br>
         <span id="dlog-today-label">—</span>
       </div>
     </div>
-
     <div class="dlog-layout">
       <div>
+        <div class="month-summary" id="dlog-month-summary"></div>
         <div class="review-cal-topbar">
           <span style="font-size:14px;color:var(--text-light);font-weight:600;">Your activity calendar</span>
           <div class="review-cal-nav">
@@ -1149,7 +1156,6 @@ body[data-theme="dark"] .ledger-card { background-image:
         </div>
         <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a day to see that day's entries.</div>
       </div>
-
       <div>
         <div class="ledger-card">
           <div class="ledger-card-title">New entry</div>
@@ -1181,7 +1187,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             <span id="dlog-saved" class="saved-msg hidden">✓ Saved</span>
           </div>
         </div>
-
         <div class="ledger-section-label">Recent entries</div>
         <div id="dlog-entries"></div>
         <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
@@ -1189,7 +1194,6 @@ body[data-theme="dark"] .ledger-card { background-image:
     </div>
   </div>
 </div>
-
 <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
     <div class="breadcrumb">Review Panel / <b id="review-college-name">—</b></div>
@@ -1218,20 +1222,27 @@ body[data-theme="dark"] .ledger-card { background-image:
         </div>
       </div>
     </div>
-
-    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);" id="review-stats-row">
+    <div class="stats-row" style="grid-template-columns:repeat(6,1fr);" id="review-stats-row">
       <div class="stat-card" style="cursor:default;">
-        <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/></svg></div>
-        <div class="stat-body">
-          <div class="s-lbl">Total Entries</div>
-          <div class="s-val" id="review-cnt-all">0</div>
-        </div>
-      </div>
+  <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/></svg></div>
+  <div class="stat-body">
+    <div class="s-lbl">Total Entries</div>
+    <div class="s-val" id="review-cnt-all">0</div>
+  </div>
+  <svg class="stat-spark" id="review-spark-all" width="52" height="28"></svg>
+</div>
       <div class="stat-card" style="cursor:default;">
         <div class="stat-icon i-red"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5 14.5 13H1.5z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.3" r="0.4" fill="currentColor"/></svg></div>
         <div class="stat-body">
           <div class="s-lbl">Hard call</div>
           <div class="s-val" id="review-cnt-hard">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:default;">
+        <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/></svg></div>
+        <div class="stat-body">
+          <div class="s-lbl">Soft call</div>
+          <div class="s-val" id="review-cnt-soft">0</div>
         </div>
       </div>
       <div class="stat-card" style="cursor:default;">
@@ -1241,8 +1252,27 @@ body[data-theme="dark"] .ledger-card { background-image:
           <div class="s-val" id="review-cnt-pending">0</div>
         </div>
       </div>
+      <div class="stat-card" style="cursor:default;">
+        <div class="stat-icon i-green"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M5.5 8.2 7.2 10 10.5 6"/></svg></div>
+        <div class="stat-body">
+          <div class="s-lbl">Reviewed</div>
+          <div class="s-val" id="review-cnt-reviewed">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:default;">
+  <div class="rate-ring-wrap">
+    <svg viewBox="0 0 54 54" width="54" height="54">
+      <circle class="rate-ring-bg" cx="27" cy="27" r="22"/>
+      <circle class="rate-ring-fg" id="review-rate-ring" cx="27" cy="27" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+    </svg>
+    <div class="rate-ring-label" id="review-cnt-rate">0%</div>
+  </div>
+  <div class="stat-body">
+    <div class="s-lbl">Review rate</div>
+  </div>
+</div>
     </div>
-
+    <div class="month-summary" id="review-month-summary"></div>
     <div class="review-cal-topbar">
       <h3 style="font-size:14px;color:var(--text-light);margin:0;">Activity log calendar</h3>
       <div class="review-cal-nav">
@@ -1266,7 +1296,6 @@ body[data-theme="dark"] .ledger-card { background-image:
     <div id="review-empty" class="empty-state hidden"><p>No entries found for this college / filter.</p></div>
   </div>
 </div>
-
 <div id="review-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeReviewDayModal()">
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-header">
@@ -1282,7 +1311,6 @@ body[data-theme="dark"] .ledger-card { background-image:
     </div>
   </div>
 </div>
-
 <div id="dlog-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeDlogDayModal()">
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-header">
@@ -1298,11 +1326,9 @@ body[data-theme="dark"] .ledger-card { background-image:
     </div>
   </div>
 </div>
-
 <!-- ── DASHBOARD ── -->
 <div id="admin-screen" class="hidden">
   <div class="shell">
-
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
@@ -1313,15 +1339,12 @@ body[data-theme="dark"] .ledger-card { background-image:
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg>
         </button>
       </div>
-
       <div id="session-tag"></div>
-
       <nav class="sidebar-nav" id="sidebar-nav">
         <button class="nav-row active" data-filter="all" onclick="setStatusFilter('all')">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="6" height="6" rx="1.3"/><rect x="8.5" y="1.5" width="6" height="6" rx="1.3"/><rect x="1.5" y="8.5" width="6" height="6" rx="1.3"/><rect x="8.5" y="8.5" width="6" height="6" rx="1.3"/></svg>
           <span class="nav-label">Dashboard</span>
         </button>
-
         <div class="sec-label">Tickets</div>
         <div class="nav-group open" id="grp-tickets">
           <button class="nav-row" onclick="toggleGroup('grp-tickets')">
@@ -1351,7 +1374,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             </button>
           </div>
         </div>
-
         <div class="sec-label">Priority</div>
         <div class="nav-group open" id="grp-priority">
           <button class="nav-row" onclick="toggleGroup('grp-priority')">
@@ -1371,7 +1393,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             </button>
           </div>
         </div>
-
         <div class="sec-label" id="regions-sec-label">Regions</div>
         <div class="nav-group open" id="grp-regions">
           <button class="nav-row" onclick="toggleGroup('grp-regions')">
@@ -1394,7 +1415,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             </button>
           </div>
         </div>
-
         <div class="sec-label">1-on-1 Reviews</div>
         <div class="nav-group open" id="grp-reviews">
           <button class="nav-row" onclick="toggleGroup('grp-reviews')">
@@ -1412,7 +1432,6 @@ body[data-theme="dark"] .ledger-card { background-image:
           </div>
         </div>
       </nav>
-
       <div class="sidebar-foot">
         <button class="theme-row" onclick="toggleTheme()">
           <svg id="theme-toggle-side-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/></svg>
@@ -1424,10 +1443,8 @@ body[data-theme="dark"] .ledger-card { background-image:
         </button>
       </div>
     </aside>
-
     <!-- Main -->
     <div class="main-content">
-
       <div class="topbar">
         <div class="topbar-left">
           <div class="breadcrumb">Dashboard / <b id="breadcrumb-current">All Tickets</b></div>
@@ -1450,9 +1467,7 @@ body[data-theme="dark"] .ledger-card { background-image:
           </button>
         </div>
       </div>
-
       <div class="page-body">
-
         <div class="insights-panel hidden" id="insights-panel">
           <div class="insight-block">
             <h4>Tickets by category</h4>
@@ -1463,7 +1478,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             <div id="insight-region"></div>
           </div>
         </div>
-
         <div class="stats-row">
           <button class="stat-card" data-filter="all" onclick="setStatusFilter('all')">
             <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/></svg></div>
@@ -1512,7 +1526,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             <div class="avgres-breakdown hidden" id="avgres-breakdown"></div>
           </div>
         </div>
-
         <div class="toolbar">
           <div class="dd" id="dd-status">
             <button class="dd-trigger" onclick="toggleDD('dd-status')">
@@ -1526,7 +1539,6 @@ body[data-theme="dark"] .ledger-card { background-image:
               <label class="dd-opt"><span class="swatch" style="background:var(--green)"></span>Resolved<input type="radio" name="statusopt" onclick="setStatusFilter('resolved')"></label>
             </div>
           </div>
-
           <div class="dd" id="dd-priority">
             <button class="dd-trigger" onclick="toggleDD('dd-priority')">
               Priority <span class="dd-count hidden" id="priority-dd-count">0</span>
@@ -1534,7 +1546,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             </button>
             <div class="dd-panel hidden" id="dd-priority-panel"></div>
           </div>
-
           <div class="dd" id="dd-region">
             <button class="dd-trigger" onclick="toggleDD('dd-region')">
               Region <span class="dd-count hidden" id="region-dd-count">0</span>
@@ -1542,7 +1553,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             </button>
             <div class="dd-panel hidden" id="dd-region-panel"></div>
           </div>
-
           <div class="dd" id="dd-review">
             <button class="dd-trigger" onclick="toggleDD('dd-review')">
               Review
@@ -1554,7 +1564,6 @@ body[data-theme="dark"] .ledger-card { background-image:
               <label class="dd-opt">Done<input type="radio" name="revopt" onclick="setReviewFilter('done')"></label>
             </div>
           </div>
-
           <div class="dd" id="dd-sort">
             <button class="dd-trigger" onclick="toggleDD('dd-sort')">
               Sort: <span id="sort-dd-label">Newest first</span>
@@ -1566,21 +1575,17 @@ body[data-theme="dark"] .ledger-card { background-image:
               <label class="dd-opt">Priority: high → low<input type="radio" name="sortopt" onclick="setSort('prio')"></label>
             </div>
           </div>
-
           <span id="active-chips"></span>
           <span class="kbd-hint"><kbd>J</kbd><kbd>K</kbd> navigate <kbd>Enter</kbd> open</span>
         </div>
-
         <div class="ticket-grid-wrap">
           <div id="ticket-grid" class="ticket-grid"></div>
           <div id="empty-state" class="empty-state hidden"></div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
-
 <!-- ── TICKET MODAL ── -->
 <div id="ticket-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
@@ -1594,28 +1599,21 @@ body[data-theme="dark"] .ledger-card { background-image:
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-
     <div class="modal-body">
       <hr class="modal-div">
-
       <div class="region-info-block" id="modal-region-block">
         <span id="modal-region-badge"></span>
         <span class="ri-coord" id="modal-region-coord"></span>
       </div>
-
       <div class="closed-info-block hidden" id="modal-closed-block">
         <span>🔒</span>
         <span id="modal-closed-text"></span>
       </div>
-
       <div class="desc-block" id="modal-desc"></div>
-
       <div class="modal-attachment hidden" id="modal-attachment">
         <img id="modal-attachment-img" src="" alt="Ticket attachment" onclick="openAdminLightbox(this.src)" />
       </div>
-
       <div class="timeline" id="modal-timeline"></div>
-
       <div class="form-grid">
         <div class="form-group">
           <label class="field-label">Status</label>
@@ -1632,7 +1630,6 @@ body[data-theme="dark"] .ledger-card { background-image:
           </div>
           <input id="modal-note" type="text" placeholder="e.g. Forwarded to exam cell" oninput="modalEdit('note', this.value)" />
         </div>
-
         <div class="review-toggle-wrap">
           <div class="review-toggle-info">
             <strong>1-on-1 review with student</strong>
@@ -1644,7 +1641,6 @@ body[data-theme="dark"] .ledger-card { background-image:
             <div class="toggle-thumb"></div>
           </label>
         </div>
-
         <div class="closer-name-wrap" id="closer-name-wrap">
           <strong>Closing this ticket</strong>
           <span>Enter your name to confirm you're resolving this ticket. This will be recorded on the ticket and can't be changed afterward.</span>
@@ -1652,7 +1648,6 @@ body[data-theme="dark"] .ledger-card { background-image:
           <div class="field-error" id="closer-error">Please enter your name to resolve this ticket.</div>
         </div>
       </div>
-
       <div class="modal-actions">
         <button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()">Save changes</button>
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
@@ -1662,15 +1657,12 @@ body[data-theme="dark"] .ledger-card { background-image:
   </div>
 </div>
 </div><!-- /#scale-root -->
-
 <script>
 /* ── Supabase ── */
 const SUPABASE_URL     = 'https://rysajbwcuieovbsllaas.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5c2FqYndjdWllb3Zic2xsYWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NjI3MjgsImV4cCI6MjA5NjAzODcyOH0.2WenjYKsfQYAeUJxVJcEVQwqYUlfwrYltrMuC9Ggu4A';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const ADMIN_PIN = '5050';
-
+const ADMIN_PIN = '1212';
 function applyUIScale(){
   const baseWidth = 1536;
   let scale = window.innerWidth / baseWidth;
@@ -1679,14 +1671,12 @@ function applyUIScale(){
 }
 window.addEventListener('resize', applyUIScale);
 applyUIScale();
-
 const FOLLOWUP_WORKING_DAYS_7D = 7;
 const FOLLOWUP_WORKING_DAYS_3D = 3;
 const FOLLOWUP_CATEGORIES_7D = new Set([
   'Fees & Accounts','Scholarship & Financial Aid','Infrastructure','Placement & Internships',
   'Certificates & Documents','Ragging / Harassment','Other',
 ]);
-
 function workingDaysElapsed(start, end){
   const cur = new Date(start); cur.setHours(0,0,0,0);
   const stop = new Date(end); stop.setHours(0,0,0,0);
@@ -1698,7 +1688,6 @@ function workingDaysElapsed(start, end){
   }
   return count;
 }
-
 const CATEGORY_PRIORITY_MAP = {
   'Ragging / Harassment':'high','Health & Wellness':'high','Examinations':'high','Technical / Portal':'high',
   'Fees & Accounts':'high','Certificates & Documents':'high',
@@ -1709,7 +1698,6 @@ const CATEGORY_PRIORITY_MAP = {
 const PRIORITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' };
 const PRIORITY_RANK  = { high: 0, medium: 1, low: 2 };
 function getPriority(t){ return t.priority || CATEGORY_PRIORITY_MAP[t.category] || 'medium'; }
-
 const REGION_DEFS = {
   chennai:      { label: 'Chennai',              kam: 'Shyam Kumar',   dot: 'dot-red' },
   karnakerala:  { label: 'Karnataka & Kerala',    kam: 'Praveen Rao',   dot: 'dot-amber' },
@@ -1717,7 +1705,6 @@ const REGION_DEFS = {
   coimbatore:   { label: 'Coimbatore',            kam: 'Guna Karthick', dot: 'dot-violet' },
 };
 const REGION_HEX = { chennai:'#DC2626', karnakerala:'#D9840C', tamilnadu:'#16A34A', coimbatore:'#7C3AED', unmapped:'#9AA1AC' };
-
 const COLLEGE_REGION_MAP = [
   { college: 'SDNB Vaishnav College for Women', region: 'chennai' },
   { college: 'AMET University', region: 'chennai' },
@@ -1747,12 +1734,10 @@ const COLLEGE_REGION_MAP = [
   { college: 'Sri Ramakrishna College of Arts and Science for Women', region: 'coimbatore' },
   { college: 'Study World Group of Institutions', region: 'coimbatore' },
 ];
-
 function normalizeCollege(s){
   return String(s||'').toLowerCase().replace(/['’]/g, '').replace(/[().,&-]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 const REGION_LOOKUP = COLLEGE_REGION_MAP.map(e => ({ norm: normalizeCollege(e.college), region: e.region, original: e.college }));
-
 function resolveRegion(collegeName){
   const norm = normalizeCollege(collegeName);
   if(!norm) return null;
@@ -1802,7 +1787,6 @@ function avatarColor(name){
 function isNewTicket(t){
   return (Date.now() - new Date(t.created_at).getTime()) < (2*60*60*1000);
 }
-
 /* ── State ── */
 let tickets       = [];
 let knownTicketIds= new Set();
@@ -1819,7 +1803,6 @@ let modalLocked   = false;
 let kbdFocusIdx   = -1;
 let autosaveTimer = null;
 let avgResView    = 'overall';
-
 /* ── Auth / session state ── */
 let authRole      = 'admin';
 let sessionRole    = 'admin';
@@ -1827,21 +1810,17 @@ let sessionCollege = null;
 let sessionAllowedColleges = null;
 let sessionKamName = null;
 let collegeContacts = [];
-
 /* ── Daily log state (added) ── */
 let dailyLogs = [];
 let dlogSaving = false;
 let dlogCalMonth = new Date();
-
 /* ── Review panel state (admin only, added) ── */
 let reviewLogs = [];
 let reviewCollege = null;
 let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed'
 let reviewCalMonth = new Date();
-
 /* ── College pending-review counts (for review-college dropdown, added) ── */
 let collegePendingCounts = {}; // { collegeName: pendingCount }
-
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
   { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
@@ -1863,7 +1842,6 @@ const DLOG_CATEGORIES = [
   {key: 'Others',       label: 'Other Issues',callType: 'soft' },
 ];
 const ESCALATION_EMAIL = 'escalations@faceprepcampus.in'; // TODO: replace with the real recipient address
-
 const $  = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
@@ -1887,7 +1865,6 @@ function fmtDuration(hours){
   if(hours < 24) return hours.toFixed(1) + 'h';
   return (hours/24).toFixed(1) + 'd';
 }
-
 /* ── Theme ── */
 function applyThemeIcon(){
   const dark = document.body.getAttribute('data-theme') === 'dark';
@@ -1906,7 +1883,6 @@ function toggleTheme(){
   renderSparklines();
 }
 applyThemeIcon();
-
 /* ── Toasts ── */
 function showToast(msg){
   const stack = $('toast-stack');
@@ -1919,7 +1895,6 @@ function showToast(msg){
     setTimeout(() => el.remove(), 220);
   }, 4200);
 }
-
 /* Manager / KAM PIN: pressing Enter in the PIN field (or select) submits login */
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter') return;
@@ -1928,7 +1903,6 @@ document.addEventListener('keydown', e => {
     submitLogin();
   }
 });
-
 /* ── Role tabs ── */
 function setAuthRole(role){
   authRole = role;
@@ -1938,7 +1912,6 @@ function setAuthRole(role){
   $('manager-login-block').classList.toggle('hidden', role!=='manager');
   hide('pin-error');
 }
-
 function populateCollegeDropdown(){
   const sel = $('manager-college-select');
   if(!sel) return;
@@ -1951,7 +1924,6 @@ function populateCollegeDropdown(){
       uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
     : '<option value="">No colleges configured yet</option>';
 }
-
 /* ── Build the list of KAMs (senior managers) from college_contacts ── */
 function buildKamList(){
   const map = {};
@@ -1978,7 +1950,7 @@ async function loadCollegeContactsForLogin(){
   populateKamDropdown();
   try{
     const { data, error } = await sb.from('college_contacts')
-      .select('college, login_pin, senior_manager_name, senior_manager_pin, campus_manager_name, campus_manager_pin, zone');
+      .select('college,senior_manager_name, senior_manager_pin, campus_manager_name, campus_manager_pin, zone');
     if(error) throw error;
     collegeContacts = data || [];
     populateCollegeDropdown();
@@ -1988,19 +1960,16 @@ async function loadCollegeContactsForLogin(){
   }
 }
 loadCollegeContactsForLogin();
-
 function submitLogin(){
   if(authRole === 'admin') submitKamLogin();
   else submitManagerLogin();
 }
-
 function submitKamLogin(){
   const err = $('pin-error');
   const sel = ($('kam-select').value || '').trim();
   const pin = ($('kam-pin-input').value || '').trim();
   if(!sel){ err.textContent='Please select a login.'; show('pin-error'); return; }
   if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
-
   if(sel === '__master__'){
     if(pin !== ADMIN_PIN){
       err.textContent='Incorrect PIN.'; show('pin-error');
@@ -2016,7 +1985,6 @@ function submitKamLogin(){
     showPlatformSelect();
     return;
   }
-
   const kams = buildKamList();
   const rec = kams.find(k => k.name === sel);
   if(!rec || !rec.pin || String(rec.pin) !== pin){
@@ -2034,7 +2002,6 @@ function submitKamLogin(){
   hide('auth-screen');
   showPlatformSelect();
 }
-
 function submitManagerLogin(){
   const err = $('pin-error');
   const college = $('manager-college-select').value;
@@ -2042,7 +2009,7 @@ function submitManagerLogin(){
   if(!college){ err.textContent='Select your college.'; show('pin-error'); return; }
   if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
   const rec = collegeContacts.find(c => c.college === college);
-  const expectedPin = rec ? (rec.campus_manager_pin || rec.login_pin) : null;
+const expectedPin = rec ? rec.campus_manager_pin : null;
   if(!rec || !expectedPin || String(expectedPin) !== pin){
     err.textContent='Incorrect PIN for this college.';
     show('pin-error');
@@ -2059,7 +2026,6 @@ function submitManagerLogin(){
   hide('auth-screen');
   showPlatformSelect();
 }
-
 /* ── Platform select (admin + KAM + campus manager) ── */
 function showPlatformSelect(){
   hide('admin-screen');
@@ -2083,7 +2049,6 @@ function showPlatformSelect(){
   initPlatformCardTilt();
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
-
 /* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
 function initPlatformCardTilt(){
   const cards = document.querySelectorAll('#platform-cards .platform-card');
@@ -2119,7 +2084,6 @@ function backToPlatformSelect(){
   hide('review-panel-screen');
   showPlatformSelect();
 }
-
 function enterDashboard(){
   hide('platform-select-screen');
   hide('dailylog-screen');
@@ -2131,14 +2095,12 @@ function enterDashboard(){
   if(refreshTimer) clearInterval(refreshTimer);
   refreshTimer = setInterval(loadTickets, 15000);
 }
-
 function applySessionUI(){
   const isRestricted = sessionRole === 'manager' || sessionRole === 'kam';
   $('grp-regions').classList.toggle('hidden', isRestricted);
   $('regions-sec-label').classList.toggle('hidden', isRestricted);
   $('dd-region').classList.toggle('hidden', isRestricted);
   show('topbar-switch-platform');
-
   const tag = $('session-tag');
   if(sessionRole === 'manager'){
     tag.innerHTML = `Viewing tickets for<br><b>${escHTML(sessionCollege)}</b>`;
@@ -2148,7 +2110,6 @@ function applySessionUI(){
     tag.innerHTML = `<b>Admin</b> — all colleges`;
   }
 }
-
 function collegeMatchesSession(ticketCollege){
   const a = normalizeCollege(ticketCollege);
   if(!a) return sessionRole !== 'manager' && sessionRole !== 'kam';
@@ -2166,7 +2127,6 @@ function collegeMatchesSession(ticketCollege){
   }
   return true;
 }
-
 function logout(){
   hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
   show('auth-screen');
@@ -2180,12 +2140,10 @@ function logout(){
   reviewLogs = []; reviewCollege = null; reviewCallFilter = 'all';
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
-
 /* ── Sidebar ── */
 function toggleSidebar(){ $('sidebar').classList.toggle('collapsed'); }
 function toggleGroup(id){ $(id).classList.toggle('open'); }
 function toggleInsights(){ $('insights-panel').classList.toggle('hidden'); renderInsights(); }
-
 /* ── Dropdowns ── */
 function toggleDD(id){
   const el = $(id);
@@ -2224,7 +2182,6 @@ function syncRegionDDCount(){
   if(regionFilter.size){ badge.textContent = regionFilter.size; show('region-dd-count'); trigger.classList.add('filled'); }
   else { hide('region-dd-count'); trigger.classList.remove('filled'); }
 }
-
 const PRIORITY_HEX = { high: '#DC2626', medium: '#D9840C', low: '#9AA1AC' };
 function buildPriorityDropdown(){
   const panel = $('dd-priority-panel');
@@ -2262,7 +2219,6 @@ function setPriorityOnly(key){
   updateHeader('priority-'+key);
   renderTickets();
 }
-
 function setSort(dir){
   sortDir = dir;
   const labelMap = { new: 'Newest first', old: 'Oldest first', prio: 'Priority: high → low' };
@@ -2270,7 +2226,6 @@ function setSort(dir){
   toggleDD('dd-sort');
   renderTickets();
 }
-
 function setStatusFilter(f){
   statusFilter = f;
   syncStatusDD(); syncNavActive(); updateHeader(); renderTickets();
@@ -2317,7 +2272,6 @@ function updateHeader(explicitKey){
   };
   $('breadcrumb-current').textContent = map[key] || 'Tickets';
 }
-
 function getFiltered(){
   const q = ($('search-input')?.value||'').toLowerCase().trim();
   let list = tickets.filter(t => {
@@ -2350,7 +2304,6 @@ function getFiltered(){
   }
   return list;
 }
-
 function buildSparkPath(counts, w, h){
   const max = Math.max(...counts, 1);
   const step = w / (counts.length - 1 || 1);
@@ -2384,7 +2337,6 @@ function renderSparklines(){
   drawInto('spark-open', createdCounts,  getComputedStyle(document.body).getPropertyValue('--red').trim() || '#DC2626');
   drawInto('spark-res',  resolvedCounts, getComputedStyle(document.body).getPropertyValue('--green').trim() || '#16A34A');
 }
-
 function renderInsightBars(containerId, counts, colorMap, defaultColor){
   const el = $(containerId);
   const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,8);
@@ -2401,7 +2353,6 @@ function renderInsights(){
   const byCategory = {};
   tickets.forEach(t => { byCategory[t.category||'Other'] = (byCategory[t.category||'Other']||0) + 1; });
   renderInsightBars('insight-category', byCategory, {}, 'var(--blue)');
-
   const byRegion = {};
   tickets.forEach(t => { const info = getRegionInfo(t.college); byRegion[info.label] = (byRegion[info.label]||0) + 1; });
   const regionColorMap = {};
@@ -2409,7 +2360,6 @@ function renderInsights(){
   regionColorMap['Unmapped'] = REGION_HEX.unmapped;
   renderInsightBars('insight-region', byRegion, regionColorMap, 'var(--violet)');
 }
-
 function cycleAvgResView(){
   const order = ['overall', 'region', 'priority'];
   const idx = order.indexOf(avgResView);
@@ -2432,9 +2382,7 @@ function renderAvgResolution(){
   const subEl = $('cnt-avgres-sub');
   const breakdownEl = $('avgres-breakdown');
   const valEl = $('cnt-avgres');
-
   const resolvedAll = tickets.filter(t => t.status==='resolved' && t.closed_at);
-
   if(avgResView === 'overall'){
     modeTag.textContent = 'Overall';
     subEl.textContent = 'Time to close a ticket';
@@ -2444,7 +2392,6 @@ function renderAvgResolution(){
     valEl.textContent = fmtDuration((totalMs / resolvedAll.length) / 3600000);
     return;
   }
-
   if(avgResView === 'region'){
     modeTag.textContent = 'By region';
     subEl.textContent = 'Click to switch view';
@@ -2462,7 +2409,6 @@ function renderAvgResolution(){
     show('avgres-breakdown');
     return;
   }
-
   if(avgResView === 'priority'){
     modeTag.textContent = 'By priority';
     subEl.textContent = 'Click to switch view';
@@ -2479,7 +2425,6 @@ function renderAvgResolution(){
     return;
   }
 }
-
 function renderStats(){
   const followUp3Count = tickets.filter(isFollowUpDue3).length;
   const followUp7Count = tickets.filter(isFollowUpDue7).length;
@@ -2489,7 +2434,6 @@ function renderStats(){
   $('cnt-prog').textContent = tickets.filter(t=>t.status==='progress').length;
   $('cnt-res').textContent  = tickets.filter(t=>t.status==='resolved').length;
   $('cnt-open-sub').textContent = followUpCount + ' follow-up due';
-
   $('nav-cnt-all').textContent   = tickets.length;
   $('nav-cnt-all-2').textContent = tickets.length;
   $('nav-cnt-open').textContent  = tickets.filter(t=>t.status==='open').length;
@@ -2497,28 +2441,23 @@ function renderStats(){
   $('nav-cnt-res').textContent   = tickets.filter(t=>t.status==='resolved').length;
   $('nav-cnt-followup3').textContent = followUp3Count;
   $('nav-cnt-followup7').textContent = followUp7Count;
-
   $('nav-cnt-p-high').textContent   = tickets.filter(t=>getPriority(t)==='high' && t.status!=='resolved').length;
   $('nav-cnt-p-medium').textContent = tickets.filter(t=>getPriority(t)==='medium' && t.status!=='resolved').length;
   $('nav-cnt-p-low').textContent    = tickets.filter(t=>getPriority(t)==='low' && t.status!=='resolved').length;
-
   const pending = tickets.filter(t=>!t.reviewed).length;
   const done    = tickets.filter(t=>!!t.reviewed).length;
   $('nav-cnt-review').textContent   = pending;
   $('nav-cnt-reviewed').textContent = done;
-
   const regionCounts = { chennai:0, karnakerala:0, tamilnadu:0, coimbatore:0 };
   tickets.forEach(t => { const key = resolveRegion(t.college); if(key && regionCounts.hasOwnProperty(key)) regionCounts[key]++; });
   $('nav-cnt-r-chennai').textContent     = regionCounts.chennai;
   $('nav-cnt-r-karnakerala').textContent = regionCounts.karnakerala;
   $('nav-cnt-r-tamilnadu').textContent   = regionCounts.tamilnadu;
   $('nav-cnt-r-coimbatore').textContent  = regionCounts.coimbatore;
-
   renderAvgResolution();
   renderSparklines();
   renderInsights();
 }
-
 function renderChips(){
   const chips = [];
   if(regionFilter.size) chips.push(`<span class="active-chip">Region: ${regionFilter.size} selected<button onclick="clearRegionFilter()" aria-label="Clear region filter">✕</button></span>`);
@@ -2526,7 +2465,6 @@ function renderChips(){
   if(reviewFilter!=='all') chips.push(`<span class="active-chip">Review: ${reviewFilter==='pending'?'Pending':'Done'}<button onclick="setReviewFilter('all')" aria-label="Clear review filter">✕</button></span>`);
   $('active-chips').innerHTML = chips.join(' ');
 }
-
 function renderSkeleton(){
   const grid = $('ticket-grid');
   hide('empty-state');
@@ -2541,23 +2479,18 @@ function renderSkeleton(){
   }
   grid.innerHTML = html;
 }
-
 async function loadTickets(manual){
   if(!firstLoadDone) renderSkeleton();
-
   const btn = $('refresh-btn');
   const icon = $('refresh-icon');
   if(manual && btn){ btn.disabled = true; icon.classList.add('spinning'); }
-
   try {
     const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending: false });
     if(error) throw error;
     let newData = data || [];
-
     if(sessionRole === 'manager' || sessionRole === 'kam'){
       newData = newData.filter(t => collegeMatchesSession(t.college));
     }
-
     if(firstLoadDone){
       const newIds = newData.filter(t => !knownTicketIds.has(t.id));
       if(newIds.length === 1) showToast(`New ticket from ${newIds[0].student_name || 'a student'}`);
@@ -2578,7 +2511,6 @@ async function loadTickets(manual){
     if(manual && btn){ btn.disabled = false; icon.classList.remove('spinning'); }
   }
 }
-
 function emptyStateSvg(){
   return `<svg width="120" height="90" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="15" y="20" width="90" height="58" rx="10" fill="var(--slate-soft)" stroke="var(--border)" stroke-width="1.5"/>
@@ -2592,7 +2524,6 @@ function emptyStateSvg(){
     <path d="M84 66h12M90 60v12" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
 }
-
 function renderTickets(){
   renderStats();
   renderChips();
@@ -2600,7 +2531,6 @@ function renderTickets(){
   const grid  = $('ticket-grid');
   const empty = $('empty-state');
   kbdFocusIdx = -1;
-
   if(filtered.length === 0){
     grid.innerHTML = '';
     show('empty-state');
@@ -2608,7 +2538,6 @@ function renderTickets(){
     return;
   }
   hide('empty-state');
-
 grid.innerHTML = filtered.map((t,i) => {
     const statusDot = {open:'dot-red',progress:'dot-amber',resolved:'dot-green'}[t.status]||'dot-slate';
     const statusLbl = {open:'Unresolved',progress:'In Progress',resolved:'Resolved'}[t.status]||t.status;
@@ -2627,7 +2556,6 @@ grid.innerHTML = filtered.map((t,i) => {
         ${t.status==='open' ? `<button class="qa-btn" title="Start progress" onclick="event.stopPropagation();quickSetStatus('${t.id}','progress')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h8M9 4l4 4-4 4"/></svg></button>` : ''}
         <button class="qa-btn" title="Open ticket" onclick="event.stopPropagation();openModal('${t.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5H3a1 1 0 0 0-1 1v8.5a1 1 0 0 0 1 1h8.5a1 1 0 0 0 1-1V10M9 3.5h3.5V7M12.5 3.5 7 9"/></svg></button>
       </div>` : '';
-
     return `<div class="ticket-card ${t.status==='resolved'?'is-closed':''}${ribbonClass}" data-idx="${i}" onclick="openModal('${t.id}')">
       <div class="ticket-edge ${prio}"></div>
       ${quickActions}
@@ -2662,10 +2590,8 @@ grid.innerHTML = filtered.map((t,i) => {
       </div>
     </div>`;
   }).join('');
-
   window._filteredCache = filtered;
 }
-
 async function quickSetStatus(id, status){
   const { error } = await sb.from('tickets').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
   if(error){ console.error(error); showToast('Could not update ticket'); return; }
@@ -2673,7 +2599,6 @@ async function quickSetStatus(id, status){
   renderTickets();
   showToast('Ticket marked in progress');
 }
-
 function openAdminLightbox(url){
   if(!url) return;
   const box = document.createElement('div');
@@ -2685,7 +2610,6 @@ function openAdminLightbox(url){
   box.appendChild(img);
   document.body.appendChild(box);
 }
-
 document.addEventListener('keydown', e => {
   if($('ticket-modal') && !$('ticket-modal').classList.contains('hidden')){
     if(e.key === 'Escape') closeModal();
@@ -2694,10 +2618,8 @@ document.addEventListener('keydown', e => {
   if($('admin-screen').classList.contains('hidden')) return;
   const active = document.activeElement;
   if(active && ['INPUT','SELECT','TEXTAREA'].includes(active.tagName)) return;
-
   const cards = Array.from(document.querySelectorAll('.ticket-card'));
   if(!cards.length) return;
-
   if(e.key === 'j' || e.key === 'J'){
     kbdFocusIdx = Math.min(kbdFocusIdx + 1, cards.length - 1);
     updateKbdFocus(cards);
@@ -2713,7 +2635,6 @@ function updateKbdFocus(cards){
   const c = cards[kbdFocusIdx];
   if(c){ c.classList.add('kbd-focus'); c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
 }
-
 function exportCSV(){
   const list = window._filteredCache || tickets;
   if(!list.length){ showToast('No tickets to export'); return; }
@@ -2736,7 +2657,6 @@ function exportCSV(){
   URL.revokeObjectURL(url);
   showToast('CSV exported');
 }
-
 function buildTimeline(t){
   const items = [];
   items.push({ label: 'Ticket created', time: t.created_at, done: true });
@@ -2757,25 +2677,21 @@ function buildTimeline(t){
       </div>
     </div>`).join('');
 }
-
 function openModal(id){
   const t = tickets.find(x=>x.id===id);
   if(!t) return;
   modalId    = id;
   modalDraft = { status: t.status, note: t.admin_note||'', reviewed: !!t.reviewed, closer: '' };
   modalLocked = (t.status === 'resolved');
-
   $('modal-title').textContent = t.subject || 'No subject';
   $('modal-meta').textContent  = `${t.roll_number} · ${t.student_name}${t.college?' · '+t.college:''} · ${t.category} · ${fmtRel(t.created_at)}`;
   $('modal-desc').textContent  = t.description || '(No description provided)';
-
   if(t.image_url){
     $('modal-attachment-img').src = t.image_url;
     show('modal-attachment');
   } else {
     hide('modal-attachment');
   }
-
   $('modal-status').value      = t.status;
   $('modal-note').value        = t.admin_note||'';
   $('modal-review').checked    = !!t.reviewed;
@@ -2784,14 +2700,11 @@ function openModal(id){
   $('closer-name-wrap').classList.remove('show');
   $('modal-timeline').innerHTML = buildTimeline(t);
   $('autosave-tag').classList.remove('show','saved');
-
   const rInfo = getRegionInfo(t.college);
   $('modal-region-badge').innerHTML = `<span class="dot-row"><span class="dot ${rInfo.dot}"></span>${escHTML(rInfo.label)}</span>`;
   $('modal-region-coord').textContent = rInfo.key ? `Coordinator: ${rInfo.kam}` : 'College not yet mapped to a region';
-
   const fields = [$('modal-status'), $('modal-note'), $('modal-review')];
   const saveBtn = $('modal-save-btn');
-
   if(modalLocked){
     fields.forEach(f => f.disabled = true);
     saveBtn.classList.add('hidden');
@@ -2804,7 +2717,6 @@ function openModal(id){
     saveBtn.classList.remove('hidden');
     hide('modal-closed-block');
   }
-
   hide('modal-saved');
   show('ticket-modal');
   document.body.style.overflow = 'hidden';
@@ -2836,7 +2748,6 @@ function scheduleAutosave(){
     }
   }, 900);
 }
-
 function onStatusChange(val){
   if(modalLocked) return;
   modalDraft.status = val;
@@ -2848,29 +2759,24 @@ function onCloserInput(val){
   modalDraft.closer = val;
   if(val.trim()) hide('closer-error');
 }
-
 function playResolveBurst(){
   const burst = $('resolve-burst');
   burst.classList.remove('play');
   void burst.offsetWidth;
   burst.classList.add('play');
 }
-
 async function saveModal(){
   if(!modalId || modalLocked) return;
-
   if(modalDraft.status === 'resolved' && !(modalDraft.closer || '').trim()){
     show('closer-error');
     $('modal-closer').focus();
     return;
   }
-
   const saveBtn = $('modal-save-btn');
   const savedMsg = $('modal-saved');
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving…';
   hide('modal-saved');
-
   const wasResolving = modalDraft.status === 'resolved';
   const payload = {
     status:     modalDraft.status,
@@ -2882,9 +2788,7 @@ async function saveModal(){
     payload.closed_by = modalDraft.closer.trim();
     payload.closed_at = new Date().toISOString();
   }
-
   const { error } = await sb.from('tickets').update(payload).eq('id', modalId);
-
   if(error){
     console.error(error);
     savedMsg.style.color = 'var(--red)';
@@ -2894,16 +2798,13 @@ async function saveModal(){
     saveBtn.textContent = 'Save changes';
     return;
   }
-
   tickets = tickets.map(t => t.id === modalId ? { ...t, ...payload } : t);
   renderTickets();
-
   savedMsg.style.color = 'var(--green)';
   savedMsg.textContent = '✓ Saved';
   show('modal-saved');
   saveBtn.disabled = false;
   saveBtn.textContent = 'Save changes';
-
   if(wasResolving){
     playResolveBurst();
     setTimeout(() => { hide('modal-saved'); closeModal(); }, 1400);
@@ -2911,7 +2812,6 @@ async function saveModal(){
     setTimeout(() => { hide('modal-saved'); closeModal(); }, 1200);
   }
 }
-
 /* ══════════════════════════════════════════════════════════
    ── DAILY ACTIVITY LOG — Field Register (redesigned) ──
    Requires a `daily_logs` table in Supabase:
@@ -2935,7 +2835,6 @@ function populateDlogCategorySelect(){
     `<optgroup label="Hard Call — will be emailed">${hard.map(c => `<option value="${c.key}">${escHTML(c.label)}</option>`).join('')}</optgroup>` +
     `<optgroup label="Soft Call">${soft.map(c => `<option value="${c.key}">${escHTML(c.label)}</option>`).join('')}</optgroup>`;
 }
-
 function onDlogCategoryChange(key){
   const cat = DLOG_CATEGORIES.find(c => c.key === key);
   const hint = $('dlog-call-hint');
@@ -2949,7 +2848,6 @@ function onDlogCategoryChange(key){
     hint.innerHTML = '<span class="mini-stamp">·</span><span>Soft call — no email needed</span>';
   }
 }
-
 function sendHardCallEmail(cat, entry){
   const subject = encodeURIComponent(`[Hard Call] ${cat.label} — ${sessionCollege}`);
   const lines = [
@@ -2965,7 +2863,6 @@ function sendHardCallEmail(cat, entry){
   const body = encodeURIComponent(lines.join('\n'));
   window.open(`mailto:${ESCALATION_EMAIL}?subject=${subject}&body=${body}`, '_blank');
 }
-
 function enterDailyLog(){
   hide('platform-select-screen');
   hide('admin-screen');
@@ -2974,21 +2871,16 @@ function enterDailyLog(){
   $('dlog-college-name').textContent = sessionCollege || '—';
   $('dlog-college-name-crumb').textContent = sessionCollege || '—';
   $('dlog-today-label').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-
   const today = new Date().toISOString().slice(0,10);
   $('dlog-date').value = today;
-
   const rec = collegeContacts.find(c => c.college === sessionCollege);
   $('dlog-name').value = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
-
   populateDlogCategorySelect();
   $('dlog-category').value = '';
   onDlogCategoryChange('');
-
   dlogCalMonth = new Date();
   loadDailyLogs();
 }
-
 async function loadDailyLogs(){
   const listEl = $('dlog-entries');
   listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
@@ -3008,15 +2900,23 @@ async function loadDailyLogs(){
     $('dlog-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table exists in Supabase.</p>`;
   }
 }
-
 function updateLedgerMeta(){
   const numEl = $('dlog-entry-no');
   if(numEl) numEl.textContent = String(dailyLogs.length + 1).padStart(3,'0');
 }
-
 function renderDailyLogs(){
   const listEl = $('dlog-entries');
   updateLedgerMeta();
+  const streak = computeLoggingStreak(dailyLogs);
+  const streakChip = document.getElementById('dlog-streak-chip');
+  if(streakChip){
+    if(streak > 0){
+      streakChip.textContent = `🔥 ${streak}-day logging streak`;
+      streakChip.classList.remove('hidden');
+    } else {
+      streakChip.classList.add('hidden');
+    }
+  }
   if(!dailyLogs.length){
     listEl.innerHTML = '';
     show('dlog-empty');
@@ -3051,10 +2951,8 @@ function renderDailyLogs(){
       </div>
     </div>`;
   }).join('');
-
   renderDlogCalendar();
 }
-
 /* ── Daily log's own activity calendar (added) ── */
 function dlogCalShift(delta){
   dlogCalMonth = new Date(dlogCalMonth.getFullYear(), dlogCalMonth.getMonth()+delta, 1);
@@ -3067,17 +2965,15 @@ function dlogCalToday(){
 function ymd(d){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-
 function renderDlogCalendar(){
   const label = $('dlog-cal-month-label');
   if(label) label.textContent = dlogCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
-
+  renderMonthSummary('dlog-month-summary', dailyLogs, dlogCalMonth);
   const byDate = {};
   dailyLogs.forEach(l => {
     const key = String(l.log_date).slice(0,10);
     (byDate[key] = byDate[key] || []).push(l);
   });
-
   const year = dlogCalMonth.getFullYear();
   const month = dlogCalMonth.getMonth();
   const firstOfMonth = new Date(year, month, 1);
@@ -3086,7 +2982,6 @@ function renderDlogCalendar(){
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   const todayKey = ymd(new Date());
-
   const cells = [];
   for(let i=startOffset; i>0; i--){
     cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
@@ -3098,7 +2993,6 @@ function renderDlogCalendar(){
     const last = cells[cells.length-1].date;
     cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
   }
-
   const grid = $('dlog-cal-grid');
   if(!grid) return;
   const maxShow = 3;
@@ -3124,14 +3018,12 @@ function renderDlogCalendar(){
     </div>`;
   }).join('');
 }
-
 function openDlogDayModal(dateKey){
   const dayEntries = dailyLogs.filter(l => String(l.log_date).slice(0,10) === dateKey);
   if(!dayEntries.length) return;
   const dateObj = new Date(dateKey + 'T00:00:00');
   $('dlog-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   $('dlog-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${sessionCollege || ''}`;
-
   $('dlog-day-modal-entries').innerHTML = dayEntries.map(l => {
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
@@ -3149,7 +3041,6 @@ function openDlogDayModal(dateKey){
       ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
     </div>`;
   }).join('');
-
   show('dlog-day-modal');
   document.body.style.overflow = 'hidden';
 }
@@ -3162,7 +3053,6 @@ document.addEventListener('keydown', e => {
     closeDlogDayModal();
   }
 });
-
 async function saveDailyLog(){
   if(dlogSaving) return;
   const date = $('dlog-date').value;
@@ -3170,21 +3060,17 @@ async function saveDailyLog(){
   const categoryKey = $('dlog-category').value;
   const activity = $('dlog-activity').value.trim();
   const progress = $('dlog-progress').value.trim();
-
   if(!date || !categoryKey || !activity){
     showToast('Please select a category and add activity details');
     return;
   }
-
   const cat = DLOG_CATEGORIES.find(c => c.key === categoryKey);
   const callType = cat ? cat.callType : 'soft';
-
   dlogSaving = true;
   const saveBtn = $('dlog-save-btn');
   saveBtn.disabled = true;
   saveBtn.textContent = 'Filing…';
   hide('dlog-saved');
-
   const payload = {
     college: sessionCollege,
     manager_name: name || null,
@@ -3194,30 +3080,24 @@ async function saveDailyLog(){
     activity: activity,
     progress_notes: progress || null,
   };
-
   const { error } = await sb.from('daily_logs').insert(payload);
-
   dlogSaving = false;
   saveBtn.disabled = false;
   saveBtn.textContent = 'File entry';
-
   if(error){
     console.error(error);
     showToast('Could not save entry: ' + (error.message || 'check console'));
     return;
   }
-
   $('dlog-activity').value = '';
   $('dlog-progress').value = '';
   $('dlog-category').value = '';
   onDlogCategoryChange('');
-
   const saved = $('dlog-saved');
   saved.style.color = 'var(--green)';
   saved.textContent = '✓ Saved';
   show('dlog-saved');
   setTimeout(() => hide('dlog-saved'), 1800);
-
 if(callType === 'hard'){
     sb.functions.invoke('notify-hardcall', {
       body: {
@@ -3230,13 +3110,10 @@ if(callType === 'hard'){
       }
     }).catch(e => console.error('notify-hardcall failed', e));
   }
-
   /* jump the calendar to the month of the entry just filed, so the new dot is visible immediately */
   dlogCalMonth = new Date(date + 'T00:00:00');
-
   loadDailyLogs();
 }
-
   /* ══════════════════════════════════════════════════════════
    ── REVIEW PANEL (admin only, added) ──
    ══════════════════════════════════════════════════════════ */
@@ -3256,7 +3133,6 @@ async function loadCollegePendingCounts(){
     collegePendingCounts = {};
   }
 }
-
 function populateReviewCollegeSelect(){
   const sel = $('review-college-select');
   if(!sel) return;
@@ -3279,31 +3155,26 @@ function populateReviewCollegeSelect(){
     : '<option value="">No colleges configured yet</option>';
   if(prevValue) sel.value = prevValue;
 }
-
 async function enterReviewPanel(){
   hide('platform-select-screen');
   hide('admin-screen');
   hide('dailylog-screen');
   show('review-panel-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
-
   await loadCollegePendingCounts();
   populateReviewCollegeSelect();
   const sel = $('review-college-select');
   reviewCollege = sel.value || null;
   $('review-college-name').textContent = reviewCollege || '—';
-
   reviewCallFilter = 'all';
   $('review-filter-select').value = 'all';
   reviewCalMonth = new Date();
-
   if(reviewCollege) loadReviewLogs();
   else {
     reviewLogs = [];
     renderReviewLogs();
   }
 }
-
 function reviewCalShift(delta){
   reviewCalMonth = new Date(reviewCalMonth.getFullYear(), reviewCalMonth.getMonth()+delta, 1);
   renderReviewCalendar();
@@ -3312,18 +3183,15 @@ function reviewCalToday(){
   reviewCalMonth = new Date();
   renderReviewCalendar();
 }
-
 function renderReviewCalendar(){
   const label = $('review-cal-month-label');
   if(label) label.textContent = reviewCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
-
   const filtered = getReviewFiltered();
   const byDate = {};
   filtered.forEach(l => {
     const key = String(l.log_date).slice(0,10);
     (byDate[key] = byDate[key] || []).push(l);
   });
-
   const year = reviewCalMonth.getFullYear();
   const month = reviewCalMonth.getMonth();
   const firstOfMonth = new Date(year, month, 1);
@@ -3332,7 +3200,6 @@ function renderReviewCalendar(){
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   const todayKey = ymd(new Date());
-
   const cells = [];
   for(let i=startOffset; i>0; i--){
     cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
@@ -3344,7 +3211,6 @@ function renderReviewCalendar(){
     const last = cells[cells.length-1].date;
     cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
   }
-
   const grid = $('review-cal-grid');
   if(!grid) return;
   const maxShow = 3;
@@ -3369,7 +3235,6 @@ function renderReviewCalendar(){
       ${moreHtml}
     </div>`;
   }).join('');
-
   if(!reviewCollege){
     show('review-empty');
     $('review-empty').innerHTML = '<p>Select a college to view its activity log.</p>';
@@ -3380,14 +3245,12 @@ function renderReviewCalendar(){
     hide('review-empty');
   }
 }
-
 function openReviewDayModal(dateKey){
   const dayEntries = getReviewFiltered().filter(l => String(l.log_date).slice(0,10) === dateKey);
   if(!dayEntries.length) return;
   const dateObj = new Date(dateKey + 'T00:00:00');
   $('review-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   $('review-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${reviewCollege || ''}`;
-
   $('review-day-modal-entries').innerHTML = dayEntries.map(l => {
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
@@ -3409,7 +3272,6 @@ function openReviewDayModal(dateKey){
       ${reviewBtn}
     </div>`;
   }).join('');
-
   show('review-day-modal');
   document.body.style.overflow = 'hidden';
 }
@@ -3422,18 +3284,15 @@ document.addEventListener('keydown', e => {
     closeReviewDayModal();
   }
 });
-
 function onReviewCollegeChange(college){
   reviewCollege = college;
   $('review-college-name').textContent = college || '—';
   loadReviewLogs();
 }
-
 function setReviewLogFilter(v){
   reviewCallFilter = v;
   renderReviewLogs();
 }
-
 async function loadReviewLogs(){
   const listEl = $('review-cal-grid');
   if(listEl) listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px;">Loading…</div>';
@@ -3452,7 +3311,6 @@ async function loadReviewLogs(){
     $('review-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table has the review columns (reviewed, reviewed_by, reviewed_at).</p>`;
   }
 }
-
 function getReviewFiltered(){
   let list = reviewLogs;
   if(reviewCallFilter === 'hard')     list = list.filter(l => l.call_type === 'hard');
@@ -3461,14 +3319,28 @@ function getReviewFiltered(){
   if(reviewCallFilter === 'reviewed') list = list.filter(l => !!l.reviewed);
   return list;
 }
-
 function renderReviewLogs(){
-  $('review-cnt-all').textContent     = reviewLogs.length;
-  $('review-cnt-hard').textContent    = reviewLogs.filter(l => l.call_type === 'hard').length;
-  $('review-cnt-pending').textContent = reviewLogs.filter(l => !l.reviewed).length;
+  const total    = reviewLogs.length;
+  const hard     = reviewLogs.filter(l => l.call_type === 'hard').length;
+  const soft     = reviewLogs.filter(l => l.call_type === 'soft').length;
+  const reviewed = reviewLogs.filter(l => !!l.reviewed).length;
+  const pending  = total - reviewed;
+  const rate     = total ? Math.round((reviewed/total)*100) : 0;
+  $('review-cnt-all').textContent      = total;
+  $('review-cnt-hard').textContent     = hard;
+  $('review-cnt-soft').textContent     = soft;
+  $('review-cnt-pending').textContent  = pending;
+  $('review-cnt-reviewed').textContent = reviewed;
+  $('review-cnt-rate').textContent     = rate + '%';
+  const ring = document.getElementById('review-rate-ring');
+  if(ring){
+    const circumference = 138.2;
+    ring.style.strokeDashoffset = circumference - (circumference * rate / 100);
+  }
+  renderReviewSparkline();
+  renderMonthSummary('review-month-summary', reviewLogs, reviewCalMonth);
   renderReviewCalendar();
 }
-
 async function markLogReviewed(id){
   const reviewerName = window.prompt('Enter your name to confirm this review:');
   if(!reviewerName || !reviewerName.trim()){
@@ -3493,8 +3365,75 @@ async function markLogReviewed(id){
     if(updated) openReviewDayModal(String(updated.log_date).slice(0,10));
   }
   showToast('Marked as reviewed');
-
   loadCollegePendingCounts().then(populateReviewCollegeSelect);
+}
+
+/* ── Shared: month summary strip ── */
+function renderMonthSummary(containerId, entries, monthDate){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const y = monthDate.getFullYear(), m = monthDate.getMonth();
+  const monthEntries = entries.filter(l => {
+    const d = new Date(l.log_date);
+    return d.getFullYear()===y && d.getMonth()===m;
+  });
+  const total = monthEntries.length;
+  const hard = monthEntries.filter(l=>l.call_type==='hard').length;
+  const soft = total - hard;
+  const reviewed = monthEntries.filter(l=>!!l.reviewed).length;
+  const pct = total ? Math.round(reviewed/total*100) : 0;
+  const hardPct = total ? (hard/total*100) : 0;
+  const softPct = total ? (soft/total*100) : 0;
+  el.innerHTML = `
+    <div class="ms-item">
+      <span class="ms-label">This month</span>
+      <span class="ms-val">${total} entries</span>
+    </div>
+    <div class="ms-item">
+      <span class="ms-label">Reviewed</span>
+      <span class="ms-val">${pct}%</span>
+    </div>
+    <div class="ms-bar">
+      <div class="ms-bar-track">
+        <div class="ms-bar-hard" style="width:${hardPct}%"></div>
+        <div class="ms-bar-soft" style="width:${softPct}%"></div>
+      </div>
+      <div class="ms-bar-legend">
+        <span>${hard} hard call</span>
+        <span>${soft} soft call</span>
+      </div>
+    </div>`;
+}
+
+/* ── Shared: consecutive-day logging streak ── */
+function computeLoggingStreak(entries){
+  const dates = new Set(entries.map(l => String(l.log_date).slice(0,10)));
+  let streak = 0;
+  let cur = new Date(); cur.setHours(0,0,0,0);
+  while(dates.has(ymd(cur))){
+    streak++;
+    cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+
+/* ── Review Panel: sparkline for Total Entries ── */
+function renderReviewSparkline(){
+  const days = 7;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const counts = new Array(days).fill(0);
+  reviewLogs.forEach(l => {
+    const d = new Date(l.log_date); d.setHours(0,0,0,0);
+    const diff = Math.round((now-d)/86400000);
+    if(diff>=0 && diff<days) counts[days-1-diff]++;
+  });
+  const el = document.getElementById('review-spark-all');
+  if(!el) return;
+  const w=52,h=28;
+  const pts = buildSparkPath(counts,w,h);
+  const areaPts = `0,${h} ${pts} ${w},${h}`;
+  const color = getComputedStyle(document.body).getPropertyValue('--violet').trim() || '#7C3AED';
+  el.innerHTML = `<polyline points="${areaPts}" fill="${color}" opacity="0.12" stroke="none"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>`;
 }
 </script>
 </body>
