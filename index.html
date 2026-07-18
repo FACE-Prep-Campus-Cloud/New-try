@@ -968,74 +968,43 @@ body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color
    Daily Log + Review Panel — background & floating header
    ══════════════════════════════════════════════════════════ */
 
-/* ── Background: slow-spinning geometric outlines ── */
+/* ── Background: Ink-dark ledger (near-black, faint twinkling dots) ── */
 #dailylog-screen,
 #review-panel-screen {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #F2ECFD, #EBEFFE);
+  background: #14151A;
   padding: 16px 20px 0;
 }
 body[data-theme="dark"] #dailylog-screen,
 body[data-theme="dark"] #review-panel-screen {
-  background: linear-gradient(135deg, #1D1730, #171B26);
+  background: #0B0C0F;
 }
 
-#dailylog-screen::before,
-#review-panel-screen::before {
-  content: '';
+.ink-stars {
   position: absolute;
-  width: 110px;
-  height: 110px;
-  border: 2px solid rgba(124, 58, 237, 0.28);
-  border-radius: 20px;
-  top: 90px;
-  left: 40px;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
-  animation: bgSpinCW 20s linear infinite;
+  overflow: hidden;
 }
-
-#dailylog-screen::after,
-#review-panel-screen::after {
-  content: '';
+.ink-stars span {
   position: absolute;
-  width: 80px;
-  height: 80px;
-  border: 2px solid rgba(52, 87, 232, 0.28);
   border-radius: 50%;
-  bottom: 70px;
-  right: 90px;
-  pointer-events: none;
-  z-index: 0;
-  animation: bgSpinCCW 16s linear infinite;
+  background: #fff;
+  animation: inkTwinkle ease-in-out infinite;
 }
-
-body[data-theme="dark"] #dailylog-screen::before,
-body[data-theme="dark"] #review-panel-screen::before {
-  border-color: rgba(165, 130, 255, 0.28);
-}
-body[data-theme="dark"] #dailylog-screen::after,
-body[data-theme="dark"] #review-panel-screen::after {
-  border-color: rgba(91, 124, 255, 0.28);
-}
-
-@keyframes bgSpinCW {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-@keyframes bgSpinCCW {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(-360deg); }
+@keyframes inkTwinkle {
+  0%, 100% { opacity: 0.1; }
+  50%      { opacity: 0.8; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #dailylog-screen::before, #dailylog-screen::after,
-  #review-panel-screen::before, #review-panel-screen::after {
+  .ink-stars span {
     animation: none !important;
+    opacity: 0.35 !important;
   }
 }
-
 /* ── Floating card header, buttons pinned right ── */
 .dlog-topbar {
   background: var(--card);
@@ -1190,8 +1159,10 @@ body[data-theme="dark"] #review-panel-screen::after {
   </div>
 </div>
 <!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
-<div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
-    <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name-crumb">—</b></div>
+<div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="ink-stars" id="dlog-starwrap"></div>
+  <div class="dlog-topbar">
+   <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name-crumb">—</b></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
       <button class="btn btn-ghost" onclick="logout()">Log out</button>
@@ -1272,7 +1243,9 @@ body[data-theme="dark"] #review-panel-screen::after {
   </div>
 </div>
 <!-- ── REVIEW PANEL (admin only) ── -->
-<div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">  <div class="dlog-topbar">
+ <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="ink-stars" id="review-starwrap"></div>
+  <div class="dlog-topbar">
     <div class="breadcrumb">Review Panel / <b id="review-college-name">—</b></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
@@ -1960,7 +1933,27 @@ function toggleTheme(){
   renderSparklines();
 }
 applyThemeIcon();
+/* ── Ink-dark ledger background: twinkling stars for Daily Log + Review Panel ── */
+function initInkStars(id, count){
+  const wrap = document.getElementById(id);
+  if(!wrap || wrap.dataset.inited) return;
+  wrap.dataset.inited = '1';
+  for(let i=0;i<count;i++){
+    const s = document.createElement('span');
+    const size = 1 + Math.random()*2;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = (Math.random()*100)+'%';
+    s.style.top = (Math.random()*100)+'%';
+    s.style.animationDuration = (2+Math.random()*3)+'s';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    wrap.appendChild(s);
+  }
+}
+initInkStars('dlog-starwrap', 45);
+initInkStars('review-starwrap', 45);
 /* ── Toasts ── */
+ /* ── Toasts ── */
 function showToast(msg){
   const stack = $('toast-stack');
   const el = document.createElement('div');
