@@ -1046,6 +1046,8 @@ body[data-theme="dark"] #review-panel-screen::after {
   box-shadow: var(--shadow-md);
   position: relative;
   z-index: 1;
+   flex-shrink: 0;               /* NEW: keep topbar from shrinking/scrolling */
+
 
   display: flex;
   align-items: center;
@@ -1072,6 +1074,9 @@ body[data-theme="dark"] #review-panel-screen::after {
   position: relative;
   z-index: 1;
   padding: 0 30px 24px;
+ flex: 1;                      /* NEW: take remaining vertical space */
+  min-height: 0;                /* NEW: required for flex children to scroll properly */
+  overflow-y: auto;             
 }
 
 @media (max-width: 640px) {
