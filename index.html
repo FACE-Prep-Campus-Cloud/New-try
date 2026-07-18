@@ -773,11 +773,19 @@ body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
 @media (max-width: 640px) { .platform-cards { grid-template-columns: 1fr; } }
 /* ── DAILY LOG SCREEN (added) ── */
 .dlog-topbar {
-  display: flex; align-items: center; justify-content: space-between; padding: 16px 30px;
-  background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0;
+  background: var(--card);
+  border-bottom: none;
+  border-radius: 14px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 1;
 }
-.dlog-body { padding: 24px 30px; max-width: 1400px; width: 100%; margin: 0 auto; flex: 1; overflow-y: auto; }
-.dlog-form-card {
+}
+.dlog-body {
+  padding: 0 30px 24px;
+}.dlog-form-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
   margin-bottom: 22px; box-shadow: var(--shadow-sm);
 }
@@ -1013,10 +1021,10 @@ body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color
   /* ── Animated background: Daily Log + Review Panel ── */
 #dailylog-screen,
 #review-panel-screen {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #F2ECFD, #EBEFFE);
+  background: var(--bg);
+  padding: 16px 20px 0;
 }
+
 body[data-theme="dark"] #dailylog-screen,
 body[data-theme="dark"] #review-panel-screen {
   background: linear-gradient(135deg, #1D1730, #171B26);
