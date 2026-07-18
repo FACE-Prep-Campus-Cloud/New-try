@@ -968,43 +968,53 @@ body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color
    Daily Log + Review Panel — background & floating header
    ══════════════════════════════════════════════════════════ */
 
-/* ── Background: Ink-dark ledger (near-black, faint twinkling dots) ── */
+/* ── Background: Sky and clouds (matches auth screen) ── */
 #dailylog-screen,
 #review-panel-screen {
   position: relative;
   overflow: hidden;
-  background: #14151A;
+  background: linear-gradient(180deg, #BFE0F5 0%, #D8ECFA 45%, #EAF4FB 75%, #F7FBFE 100%);
   padding: 16px 20px 0;
 }
 body[data-theme="dark"] #dailylog-screen,
 body[data-theme="dark"] #review-panel-screen {
-  background: #0B0C0F;
+  background: linear-gradient(180deg, #0B1220 0%, #101826 45%, #141B22 100%);
 }
 
-.ink-stars {
+.sky-clouds-bg {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
 }
-.ink-stars span {
+.sky-clouds-bg svg {
   position: absolute;
-  border-radius: 50%;
-  background: #fff;
-  animation: inkTwinkle ease-in-out infinite;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45%;
 }
-@keyframes inkTwinkle {
-  0%, 100% { opacity: 0.1; }
-  50%      { opacity: 0.8; }
+body[data-theme="dark"] .sky-clouds-bg svg { opacity: 0.15; }
+
+.sky-cloud {
+  position: absolute;
+  background: #fff;
+  border-radius: 50px;
+  opacity: 0.8;
+  animation: skyCloudDrift linear infinite;
+}
+body[data-theme="dark"] .sky-cloud { opacity: 0.12; }
+
+@keyframes skyCloudDrift {
+  from { transform: translateX(-15vw); }
+  to   { transform: translateX(115vw); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ink-stars span {
-    animation: none !important;
-    opacity: 0.35 !important;
-  }
+  .sky-cloud { animation: none !important; left: 20%; }
 }
+
 /* ── Floating card header, buttons pinned right ── */
 .dlog-topbar {
   background: var(--card);
@@ -1015,7 +1025,7 @@ body[data-theme="dark"] #review-panel-screen {
   box-shadow: var(--shadow-md);
   position: relative;
   z-index: 1;
-   flex-shrink: 0;               /* NEW: keep topbar from shrinking/scrolling */
+   flex-shrink: 0;               /* keep topbar from shrinking/scrolling */
 
 
   display: flex;
@@ -1043,8 +1053,8 @@ body[data-theme="dark"] #review-panel-screen {
   position: relative;
   z-index: 1;
   padding: 0 30px 24px;
- flex: 1;                      /* NEW: take remaining vertical space */
-  min-height: 0;                /* NEW: required for flex children to scroll properly */
+ flex: 1;                      /* take remaining vertical space */
+  min-height: 0;                /* required for flex children to scroll properly */
   overflow-y: auto;             
 }
 
@@ -1160,9 +1170,14 @@ body[data-theme="dark"] #review-panel-screen {
 </div>
 <!-- ── DAILY LOG SCREEN (campus/senior manager only) ── -->
 <div id="dailylog-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
-  <div class="ink-stars" id="dlog-starwrap"></div>
+  <div class="sky-clouds-bg" id="dlog-skywrap">
+    <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+      <path fill="#BFE0F5"><animate attributeName="d" dur="10s" repeatCount="indefinite" values="M0,55 Q75,40 150,55 T300,55 V100 H0 Z;M0,50 Q75,65 150,50 T300,50 V100 H0 Z;M0,55 Q75,40 150,55 T300,55 V100 H0 Z"/></path>
+      <path fill="#D8ECFA" opacity="0.85"><animate attributeName="d" dur="7s" repeatCount="indefinite" values="M0,70 Q75,58 150,70 T300,70 V100 H0 Z;M0,65 Q75,80 150,65 T300,65 V100 H0 Z;M0,70 Q75,58 150,70 T300,70 V100 H0 Z"/></path>
+    </svg>
+  </div>
   <div class="dlog-topbar">
-   <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name-crumb">—</b></div>
+    <div class="breadcrumb">Daily Activity Log / <b id="dlog-college-name-crumb">—</b></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
       <button class="btn btn-ghost" onclick="logout()">Log out</button>
@@ -1243,8 +1258,13 @@ body[data-theme="dark"] #review-panel-screen {
   </div>
 </div>
 <!-- ── REVIEW PANEL (admin only) ── -->
- <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
-  <div class="ink-stars" id="review-starwrap"></div>
+<div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="sky-clouds-bg" id="review-skywrap">
+    <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+      <path fill="#BFE0F5"><animate attributeName="d" dur="10s" repeatCount="indefinite" values="M0,55 Q75,40 150,55 T300,55 V100 H0 Z;M0,50 Q75,65 150,50 T300,50 V100 H0 Z;M0,55 Q75,40 150,55 T300,55 V100 H0 Z"/></path>
+      <path fill="#D8ECFA" opacity="0.85"><animate attributeName="d" dur="7s" repeatCount="indefinite" values="M0,70 Q75,58 150,70 T300,70 V100 H0 Z;M0,65 Q75,80 150,65 T300,65 V100 H0 Z;M0,70 Q75,58 150,70 T300,70 V100 H0 Z"/></path>
+    </svg>
+  </div>
   <div class="dlog-topbar">
     <div class="breadcrumb">Review Panel / <b id="review-college-name">—</b></div>
     <div style="display:flex;gap:8px;">
@@ -1933,27 +1953,27 @@ function toggleTheme(){
   renderSparklines();
 }
 applyThemeIcon();
-/* ── Ink-dark ledger background: twinkling stars for Daily Log + Review Panel ── */
-function initInkStars(id, count){
+/* ── Sky and clouds background: drifting clouds for Daily Log + Review Panel ── */
+function initSkyClouds(id, count){
   const wrap = document.getElementById(id);
   if(!wrap || wrap.dataset.inited) return;
   wrap.dataset.inited = '1';
   for(let i=0;i<count;i++){
-    const s = document.createElement('span');
-    const size = 1 + Math.random()*2;
-    s.style.width = size+'px';
-    s.style.height = size+'px';
-    s.style.left = (Math.random()*100)+'%';
-    s.style.top = (Math.random()*100)+'%';
-    s.style.animationDuration = (2+Math.random()*3)+'s';
-    s.style.animationDelay = (Math.random()*3)+'s';
-    wrap.appendChild(s);
+    const c = document.createElement('div');
+    c.className = 'sky-cloud';
+    const w = 40 + Math.random()*70;
+    const h = w * (0.42 + Math.random()*0.15);
+    c.style.width = w+'px';
+    c.style.height = h+'px';
+    c.style.top = (5 + Math.random()*45)+'%';
+    c.style.animationDuration = (18 + Math.random()*22)+'s';
+    c.style.animationDelay = (-Math.random()*30)+'s';
+    wrap.appendChild(c);
   }
 }
-initInkStars('dlog-starwrap', 45);
-initInkStars('review-starwrap', 45);
+initSkyClouds('dlog-skywrap', 6);
+initSkyClouds('review-skywrap', 6);
 /* ── Toasts ── */
- /* ── Toasts ── */
 function showToast(msg){
   const stack = $('toast-stack');
   const el = document.createElement('div');
