@@ -6,7 +6,7 @@
 <title>FACE Prep Campus Help Desk — Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --ui-scale: 1;
@@ -215,7 +215,6 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
 input::placeholder { color: var(--text-faint); }
 input:disabled, select:disabled { background: var(--slate-soft); color: var(--text-faint); cursor: not-allowed; }
-/* ── Make Daily Log's Date / Logged-by fields obviously editable ── */
 #dlog-date, #dlog-name {
   cursor: text;
   background: var(--card);
@@ -291,7 +290,6 @@ body[data-theme="dark"] .btn-primary.btn-auth { background: rgba(0,0,0,0.55); }
 body[data-theme="dark"] .btn-primary.btn-auth:hover { background: rgba(0,0,0,0.72); }
 .auth-footnote { text-align: center; font-size: 11.5px; color: var(--text-faint); margin-top: 18px; }
 body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
-/* ── Desktop enlargement for the sign-in card ── */
 @media (min-width: 861px) {
   .auth-box { max-width: 460px; }
   .auth-avatar { width: 84px; height: 84px; margin-bottom: -42px; }
@@ -696,6 +694,7 @@ body[data-theme="dark"] .resolve-burst { background: rgba(0,0,0,0.0); }
 }
 .admin-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
 .ticket-attach-flag { display:inline-flex; align-items:center; gap:3px; font-size:11px; color: var(--text-faint); }
+
 /* ══════════════════════════════════════════════════════════
    ── PLATFORM SELECT (redesigned — no video, layered mesh) ──
    ══════════════════════════════════════════════════════════ */
@@ -771,21 +770,9 @@ body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
 .platform-card p { font-size: 12.5px; color: var(--text-light); line-height: 1.55; position: relative; transform: translateZ(15px); }
 .platform-back { margin-top: 30px; position: relative; z-index: 1; }
 @media (max-width: 640px) { .platform-cards { grid-template-columns: 1fr; } }
+
 /* ── DAILY LOG SCREEN (added) ── */
-.dlog-topbar {
-  background: var(--card);
-  border-bottom: none;
-  border-radius: 14px;
-  padding: 12px 20px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-md);
-  position: relative;
-  z-index: 1;
-}
-}
-.dlog-body {
-  padding: 0 30px 24px;
-}.dlog-form-card {
+.dlog-form-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
   margin-bottom: 22px; box-shadow: var(--shadow-sm);
 }
@@ -799,6 +786,7 @@ body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
 .dlog-entry-meta { font-size: 11px; color: var(--text-faint); }
 .dlog-entry-activity { font-size: 13.5px; line-height: 1.5; margin-bottom: 6px; white-space: pre-wrap; }
 .dlog-entry-progress { font-size: 12.5px; color: var(--text-light); white-space: pre-wrap; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
+
 /* ── DAILY LOG CATEGORY / CALL TYPE (added) ── */
 .dlog-call-hint { font-size: 11.5px; margin-top: 7px; font-weight: 600; }
 .dlog-call-hint.hard { color: var(--red); }
@@ -809,6 +797,7 @@ body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
 }
 .dlog-cat-badge.hard { background: var(--red-soft); color: var(--red); }
 .dlog-cat-badge.soft { background: var(--slate-soft); color: var(--text-light); }
+
 /* ── FIELD REGISTER — Daily Activity Log redesign (added) ── */
 .ledger-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--text); padding-bottom: 14px; margin-bottom: 24px; }
 .ledger-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 700; }
@@ -832,8 +821,10 @@ body[data-theme="dark"] .ledger-card { background-image:
   flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1;
 }
 .ledger-section-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); font-weight: 700; margin: 4px 0 4px; }
-.ledger-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px 2px; border-bottom: 1px dashed var(--border); }
+.ledger-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px 2px; border-bottom: 1px dashed var(--border); position: relative; }
+.ledger-row::before { content: ''; position: absolute; left: 23px; top: 48px; bottom: -16px; width: 1.5px; background: var(--border); }
 .ledger-row:last-child { border-bottom: none; }
+.ledger-row:last-child::before { display: none; }
 .ledger-stamp {
   flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; border: 1.5px dashed var(--border);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -852,29 +843,34 @@ body[data-theme="dark"] .ledger-card { background-image:
 .ledger-row-status { font-size: 11px; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .ledger-row-status.pending { color: var(--text-faint); }
 .ledger-row-status.reviewed { color: var(--green); }
+
 .review-cal-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
 .review-cal-nav { display:flex; align-items:center; gap:8px; }
-.review-cal-nav-btn { width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border); background:var(--card); cursor:pointer; color:var(--text-light); }
-.review-cal-nav-btn:hover { background:var(--slate-soft); color:var(--text); }
-.review-cal-month-label { font-size:15px; font-weight:700; min-width:150px; text-align:center; }
-.review-calendar { border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--card); box-shadow:var(--shadow-sm); }
-.review-cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); background:var(--slate-soft); }
-.review-cal-weekdays span { padding:8px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); text-align:center; }
-.review-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); }
-.review-cal-cell { min-height:92px; border-top:1px solid var(--border); border-right:1px solid var(--border); padding:6px; cursor:pointer; transition:background .12s; display:flex; flex-direction:column; gap:3px; }
-.review-cal-cell:nth-child(7n) { border-right:none; }
-.review-cal-cell:hover { background:var(--slate-soft); }
-.review-cal-cell.outside { opacity:0.38; }
-.review-cal-cell.is-today .review-cal-daynum { background:var(--blue); color:#fff; border-radius:50%; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; }
-.review-cal-daynum { font-size:12px; color:var(--text-light); font-weight:600; }
+.review-cal-nav-btn { width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; border:none; background:transparent; cursor:pointer; color:#94A3B8; }
+.review-cal-nav-btn:hover { background:#F1F5F9; color:#334155; }
+.review-cal-month-label { font-size:15px; font-weight:500; min-width:150px; text-align:center; color:#1E293B; }
+.review-calendar { border:none; border-radius:20px; overflow:hidden; background:var(--card); box-shadow:0 1px 3px rgba(20,21,26,0.08); padding:20px; }
+.review-cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); background:transparent; }
+.review-cal-weekdays span { padding:8px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:#94A3B8; text-align:center; }
+.review-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.review-cal-cell { min-height:64px; border:none; border-radius:10px; padding:6px; cursor:pointer; transition:background .12s; display:flex; flex-direction:column; gap:3px; }
+.review-cal-cell:hover { background:#F1F5F9; }
+.review-cal-cell.outside { background:#F8FAFC; opacity:1; }
+.review-cal-cell.outside .review-cal-daynum { color:#CBD5E1; }
+.review-cal-cell.is-today { background:#2DD9A8; }
+.review-cal-cell.is-today .review-cal-daynum { background:transparent; color:#fff; }
+.review-cal-cell.is-today .review-cal-pill, .review-cal-cell.is-today .review-cal-row-cat { color: var(--text); }
+.review-cal-cell.is-today .review-cal-pill { background: rgba(255,255,255,0.85); }
+.review-cal-daynum { font-size:12px; color:#334155; font-weight:500; }
 .review-cal-pill { display:flex; align-items:center; gap:4px; font-size:10.5px; background:var(--slate-soft); border-radius:5px; padding:2px 5px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .review-cal-pill .cal-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.review-cal-pill .cal-dot.hard { background:var(--red); }
-.review-cal-pill .cal-dot.soft { background:var(--text-faint); }
+.review-cal-pill .cal-dot.hard { background:#2DD9A8; }
+.review-cal-pill .cal-dot.soft { background:#2DD9A8; }
 .review-cal-pill .cal-check { margin-left:auto; color:var(--green); font-size:11px; flex-shrink:0; }
 .review-cal-more { font-size:10.5px; color:var(--text-faint); padding:1px 5px; }
 .review-cal-legend { display:flex; gap:16px; margin-top:10px; font-size:11.5px; color:var(--text-light); align-items:center; }
 .review-cal-legend .cal-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+
 .dlog-layout { display:grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); gap:24px; align-items:start; }
 .dlog-layout > div { min-width: 0; }
 @media (max-width: 1100px) { .dlog-layout { grid-template-columns: 1fr; } }
@@ -906,58 +902,8 @@ body[data-theme="dark"] .ledger-card { background-image:
     animation: none !important;
   }
 }
-.review-calendar {
-  border: none;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(20,21,26,0.08);
-}
-.review-cal-weekdays {
-  background: transparent;
-}
-.review-cal-weekdays span {
-  color: #94A3B8;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-.review-cal-grid {
-  gap: 4px;
-}
-.review-cal-cell {
-  border: none;
-  border-radius: 10px;
-  min-height: 64px;
-  transition: background .12s;
-}
-.review-cal-cell:hover { background: #F1F5F9; }
-.review-cal-cell.outside { background: #F8FAFC; opacity: 1; }
-.review-cal-cell.outside .review-cal-daynum { color: #CBD5E1; }
-.review-cal-daynum { color: #334155; font-weight: 500; }
-.review-cal-cell.is-today {
-  background: #2DD9A8;
-}
-.review-cal-cell.is-today .review-cal-daynum {
-  background: transparent;
-  color: #fff;
-}
-.review-cal-cell.is-today .review-cal-pill,
-.review-cal-cell.is-today .review-cal-row-cat {
-  color: var(--text);
-}
-.review-cal-cell.is-today .review-cal-pill {
-  background: rgba(255,255,255,0.85);
-}
-.review-cal-nav-btn {
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: #94A3B8;
-}
-.review-cal-nav-btn:hover { background: #F1F5F9; color: #334155; }
-.review-cal-month-label { font-weight: 500; color: #1E293B; }
-.review-cal-pill .cal-dot.hard,
-.review-cal-pill .cal-dot.soft { background: #2DD9A8; }
-  /* ===== Sky/cloud sign-in restyle ===== */
+
+/* ===== Sky/cloud sign-in restyle ===== */
 .auth-wrap {
   background: linear-gradient(180deg, #BFE0F5 0%, #D8ECFA 35%, #EAF4FB 65%, #F7FBFE 100%) !important;
 }
@@ -996,12 +942,14 @@ body[data-theme="dark"] .auth-panel{ background: rgba(20,22,28,0.88) !important;
 }
 .btn-primary.btn-auth:hover{ background:#000 !important; }
 body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color:#14151A !important; }
+
 /* ── Review rate ring ── */
 .rate-ring-wrap{position:relative;width:54px;height:54px;flex-shrink:0;}
 .rate-ring-wrap svg{transform:rotate(-90deg);}
 .rate-ring-bg{fill:none;stroke:var(--slate-soft);stroke-width:5;}
 .rate-ring-fg{fill:none;stroke:var(--violet);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
 .rate-ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text);}
+
 /* ── Monthly summary strip (Review Panel + Daily Log) ── */
 .month-summary{display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow-sm);flex-wrap:wrap;}
 .month-summary .ms-item{display:flex;flex-direction:column;gap:2px;min-width:90px;}
@@ -1012,19 +960,22 @@ body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color
 .month-summary .ms-bar-hard{background:var(--red);}
 .month-summary .ms-bar-soft{background:var(--text-faint);}
 .month-summary .ms-bar-legend{display:flex;gap:12px;margin-top:6px;font-size:11px;color:var(--text-light);}
+
 /* ── Logging streak chip ── */
 .streak-chip{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--amber);background:var(--amber-soft);padding:3px 10px;border-radius:999px;}
-/* ── Timeline connector for ledger rows ── */
-.ledger-row{position:relative;}
-.ledger-row::before{content:'';position:absolute;left:23px;top:48px;bottom:-16px;width:1.5px;background:var(--border);}
-.ledger-row:last-child::before{display:none;}
-  /* ── Animated background: Daily Log + Review Panel ── */
+
+/* ══════════════════════════════════════════════════════════
+   Daily Log + Review Panel — background & floating header
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Background: slow-spinning geometric outlines ── */
 #dailylog-screen,
 #review-panel-screen {
-  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F2ECFD, #EBEFFE);
   padding: 16px 20px 0;
 }
-
 body[data-theme="dark"] #dailylog-screen,
 body[data-theme="dark"] #review-panel-screen {
   background: linear-gradient(135deg, #1D1730, #171B26);
@@ -1078,18 +1029,57 @@ body[data-theme="dark"] #review-panel-screen::after {
   to   { transform: rotate(-360deg); }
 }
 
-/* Keep real content above the decorative shapes */
-.dlog-topbar, .dlog-body,
-#review-panel-screen .dlog-topbar,
-#review-panel-screen .dlog-body {
-  position: relative;
-  z-index: 1;
-}
-
 @media (prefers-reduced-motion: reduce) {
   #dailylog-screen::before, #dailylog-screen::after,
   #review-panel-screen::before, #review-panel-screen::after {
     animation: none !important;
+  }
+}
+
+/* ── Floating card header, buttons pinned right ── */
+.dlog-topbar {
+  background: var(--card);
+  border-bottom: none;
+  border-radius: 14px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
+.dlog-topbar > div:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dlog-topbar > div:last-child {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.dlog-body {
+  position: relative;
+  z-index: 1;
+  padding: 0 30px 24px;
+}
+
+@media (max-width: 640px) {
+  .dlog-topbar {
+    flex-wrap: wrap;
+  }
+  .dlog-topbar > div:first-child {
+    white-space: normal;
   }
 }
 </style>
