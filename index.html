@@ -1010,6 +1010,80 @@ body[data-theme="dark"] .btn-primary.btn-auth{ background:#fff !important; color
 .ledger-row{position:relative;}
 .ledger-row::before{content:'';position:absolute;left:23px;top:48px;bottom:-16px;width:1.5px;background:var(--border);}
 .ledger-row:last-child::before{display:none;}
+  /* ── Animated background: Daily Log + Review Panel ── */
+#dailylog-screen,
+#review-panel-screen {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F2ECFD, #EBEFFE);
+}
+body[data-theme="dark"] #dailylog-screen,
+body[data-theme="dark"] #review-panel-screen {
+  background: linear-gradient(135deg, #1D1730, #171B26);
+}
+
+#dailylog-screen::before,
+#review-panel-screen::before {
+  content: '';
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border: 2px solid rgba(124, 58, 237, 0.28);
+  border-radius: 20px;
+  top: 90px;
+  left: 40px;
+  pointer-events: none;
+  z-index: 0;
+  animation: bgSpinCW 20s linear infinite;
+}
+
+#dailylog-screen::after,
+#review-panel-screen::after {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 2px solid rgba(52, 87, 232, 0.28);
+  border-radius: 50%;
+  bottom: 70px;
+  right: 90px;
+  pointer-events: none;
+  z-index: 0;
+  animation: bgSpinCCW 16s linear infinite;
+}
+
+body[data-theme="dark"] #dailylog-screen::before,
+body[data-theme="dark"] #review-panel-screen::before {
+  border-color: rgba(165, 130, 255, 0.28);
+}
+body[data-theme="dark"] #dailylog-screen::after,
+body[data-theme="dark"] #review-panel-screen::after {
+  border-color: rgba(91, 124, 255, 0.28);
+}
+
+@keyframes bgSpinCW {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes bgSpinCCW {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* Keep real content above the decorative shapes */
+.dlog-topbar, .dlog-body,
+#review-panel-screen .dlog-topbar,
+#review-panel-screen .dlog-body {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dailylog-screen::before, #dailylog-screen::after,
+  #review-panel-screen::before, #review-panel-screen::after {
+    animation: none !important;
+  }
+}
 </style>
 </head>
 <body>
