@@ -1217,22 +1217,6 @@ body[data-theme="dark"] { --illustration-bg: #221A22; }
 <body>
 <div id="scale-root">
 <div class="toast-stack" id="toast-stack"></div>
-<!-- ── AUTH (Glass on blur) ── -->
-<!--
-  Replace the ENTIRE old auth-screen block in the dashboard file
-  (everything from  <!-- ── AUTH (Glass on blur) ── -->  down to its
-  matching closing </div>, right before  <!-- ── PLATFORM SELECT ...  )
-  with the markup below.
-
-  Every functional id is unchanged (kam-select, kam-pin-input,
-  manager-college-select, manager-pin-input, pin-error,
-  role-tab-admin, role-tab-manager, admin-login-block,
-  manager-login-block, and the submitLogin() button) so ALL existing
-  JS — setAuthRole(), submitLogin(), submitKamLogin(),
-  submitManagerLogin(), loadCollegeContactsForLogin() — keeps
-  working exactly as before. No script changes needed.
--->
-
 <!-- ── AUTH (Illustrated split-card login) ── -->
 <div id="auth-screen" class="authv2-wrap">
   <div class="authv2-card">
