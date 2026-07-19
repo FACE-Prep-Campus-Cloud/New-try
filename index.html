@@ -134,6 +134,50 @@ body[data-theme="dark"] .auth-blob.b3 { background: #16A34A; opacity: 0.5; }
   33%      { transform: translate(30px,-24px) scale(1.08); }
   66%      { transform: translate(-22px,18px) scale(0.95); }
 }
+ /* ── Googly character companions ── */
+.char-crew {
+  position: absolute; left: 6%; bottom: 0; z-index: 2; pointer-events: none;
+  display: flex; align-items: flex-end; gap: -20px;
+}
+@media (max-width: 860px) { .char-crew { display: none; } }
+.char { position: relative; animation: charBob 3.4s ease-in-out infinite; transform-origin: bottom center; }
+.char:nth-child(2) { animation-delay: -0.6s; }
+.char:nth-child(3) { animation-delay: -1.4s; }
+.char:nth-child(4) { animation-delay: -2.1s; }
+@keyframes charBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-8px) rotate(-1deg); }
+}
+.char-body {
+  border-radius: 34px 34px 10px 10px;
+  box-shadow: 0 18px 30px -14px rgba(20,21,26,0.35);
+  position: relative;
+}
+.char.tall .char-body   { width: 92px; height: 190px; background: var(--violet); }
+.char.mid .char-body    { width: 84px; height: 150px; background: #E8548F; border-radius: 30px 30px 8px 8px; }
+.char.dome .char-body   { width: 150px; height: 96px; background: var(--amber); border-radius: 90px 90px 8px 8px; }
+.char.small .char-body  { width: 78px; height: 128px; background: #F2C13D; border-radius: 30px 30px 8px 8px; }
+.char-eyes { position: absolute; top: 34%; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; }
+.char.dome .char-eyes { top: 42%; gap: 12px; }
+.eye {
+  width: 15px; height: 15px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+}
+.pupil {
+  width: 6px; height: 6px; border-radius: 50%; background: #14151A;
+  transition: transform 0.05s linear;
+}
+.char-mouth {
+  position: absolute; top: 58%; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 2px; background: #14151A; border-radius: 2px; opacity: 0.75;
+}
+.char.tall .char-mouth { width: 2px; height: 16px; top: 32%; }
+.char.dome .char-mouth {
+  width: 20px; height: 10px; border: 2px solid #14151A; border-top: none;
+  border-radius: 0 0 20px 20px; background: none; top: 50%;
+}
+body[data-theme="dark"] .char-body { filter: brightness(0.88); }
 .auth-grid-overlay {
   position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
   background-image:
@@ -1080,6 +1124,26 @@ body[data-theme="dark"] .sky-cloud { opacity: 0.12; }
   <button class="theme-toggle-auth" onclick="toggleTheme()" id="theme-toggle-auth-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
     <svg id="theme-toggle-auth-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/></svg>
   </button>
+<div class="char-crew" id="char-crew">
+  <div class="char dome">
+    <div class="char-body">
+      <div class="char-eyes"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+      <div class="char-mouth"></div>
+    </div>
+  </div>
+  <div class="char mid">
+    <div class="char-body">
+      <div class="char-eyes"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+    </div>
+  </div>
+  <div class="char tall">
+    <div class="char-body">
+      <div class="char-eyes"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+      <div class="char-mouth"></div>
+    </div>
+  </div>
+</div>
+ 
   <div class="auth-box">
     <div class="auth-avatar">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
@@ -1985,6 +2049,26 @@ function showToast(msg){
     setTimeout(() => el.remove(), 220);
   }, 4200);
 }
+ /* ── Eyes follow the cursor, characters drift slightly toward it ── */
+(function(){
+  const crew = document.getElementById('char-crew');
+  if(!crew) return;
+  const pupils = crew.querySelectorAll('.pupil');
+  let targetX = 0, targetY = 0, curX = 0, curY = 0;
+  document.addEventListener('mousemove', e => {
+    const w = window.innerWidth, h = window.innerHeight;
+    targetX = (e.clientX / w - 0.5) * 2;   // -1 .. 1
+    targetY = (e.clientY / h - 0.5) * 2;
+  });
+  function tick(){
+    curX += (targetX - curX) * 0.12;
+    curY += (targetY - curY) * 0.12;
+    pupils.forEach(p => { p.style.transform = `translate(${curX*3.2}px, ${curY*3}px)`; });
+    crew.style.transform = `translate(${curX*6}px, ${curY*3}px)`;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
 /* Manager / KAM PIN: pressing Enter in the PIN field (or select) submits login */
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter') return;
