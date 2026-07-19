@@ -1110,77 +1110,257 @@ body[data-theme="dark"] .sky-cloud { opacity: 0.12; }
     white-space: normal;
   }
 }
+
+:root {
+  --brand-1: #D11AB3;
+  --brand-2: #EF6E5C;
+  --brand-3: #F6A968;
+  --brand-4: #7C5CFC;
+  --brand-5: #E879C6;
+  --brand-gradient: linear-gradient(120deg, var(--brand-1) 0%, var(--brand-2) 55%, var(--brand-3) 100%);
+  --illustration-bg: #FBF1F1;
+}
+body[data-theme="dark"] { --illustration-bg: #221A22; }
+
+.authv2-wrap {
+  min-height: calc(100vh / var(--ui-scale));
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px 24px; position: relative; overflow: hidden; background: var(--bg);
+}
+.authv2-card {
+  width: 100%; max-width: 920px; max-height: calc(100vh - 40px);
+  background: var(--card); border-radius: 28px; box-shadow: var(--shadow-lg);
+  display: flex; overflow: hidden; animation: authRise .6s cubic-bezier(.16,1,.3,1) both;
+}
+.authv2-illustration {
+  flex: 0 0 42%; background: var(--illustration-bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  padding: 40px 24px 0; position: relative; min-height: 440px; overflow: hidden;
+}
+@media (max-width: 820px) { .authv2-illustration { display: none; } }
+
+.bokeh { position: absolute; border-radius: 50%; pointer-events: none; animation: bokehDrift ease-in-out infinite; }
+.bokeh-1 { width: 20px; height: 20px; top: 12%; left: 16%; background: var(--brand-3); opacity: .55; animation-duration: 6.5s; filter: blur(2px); }
+.bokeh-2 { width: 10px; height: 10px; top: 8%;  left: 60%; background: var(--brand-2); opacity: .8;  animation-duration: 5.5s; animation-delay: .4s; filter: blur(.5px); }
+.bokeh-3 { width: 38px; height: 38px; top: 5%;  left: 82%; background: var(--brand-4); opacity: .35; animation-duration: 7.2s; animation-delay: .8s; filter: blur(4px); }
+.bokeh-4 { width: 13px; height: 13px; top: 25%; left: 79%; background: var(--brand-5); opacity: .7;  animation-duration: 6s;   animation-delay: .2s; filter: blur(1px); }
+.bokeh-5 { width: 9px;  height: 9px;  top: 30%; left: 39%; background: var(--brand-4); opacity: .5;  animation-duration: 5s;   animation-delay: 1s;  filter: blur(.5px); }
+.bokeh-6 { width: 30px; height: 30px; top: 17%; left: 5%;  background: var(--brand-2); opacity: .28; animation-duration: 6.8s; animation-delay: .6s; filter: blur(3.5px); }
+.bokeh-7 { width: 7px;  height: 7px;  top: 38%; left: 60%; background: var(--brand-3); opacity: .65; animation-duration: 5.8s; animation-delay: .3s; filter: blur(.5px); }
+@keyframes bokehDrift {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50%      { transform: translate(0,-10px) scale(1.06); }
+}
+
+.illo-glow {
+  position: absolute; left: 50%; bottom: 40px; width: 280px; height: 200px; transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(209,26,179,0.16) 0%, rgba(209,26,179,0) 70%);
+  pointer-events: none; z-index: 0;
+}
+.illo-copy { position: relative; z-index: 1; text-align: center; margin-bottom: 18px; padding: 0 8px; }
+.illo-copy h2 { font-family: 'Poppins','Inter',sans-serif; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+.illo-copy p  { font-size: 13px; color: var(--text-light); margin-top: 6px; line-height: 1.5; }
+
+.illo-scene {
+  position: relative; z-index: 1; width: 232px; margin-bottom: 48px; pointer-events: none;
+  animation: illoFloat 4s ease-in-out infinite; transform-origin: bottom center;
+}
+.illo-svg { width: 100%; height: auto; display: block; }
+@keyframes illoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.illo-shadow { animation: shadowBreathe 4s ease-in-out infinite; transform-origin: center; filter: blur(2px); }
+@keyframes shadowBreathe { 0%,100% { transform: scaleX(1); opacity: .08; } 50% { transform: scaleX(.86); opacity: .05; } }
+
+.authv2-formzone {
+  flex: 1 1 58%; background: var(--card); padding: 40px 52px;
+  display: flex; flex-direction: column; justify-content: center;
+  max-height: calc(100vh - 40px); overflow-y: auto;
+}
+@media (max-width: 820px) { .authv2-formzone { flex: 1 1 100%; padding: 36px 28px; } }
+
+.authv2-logo-wrap { display: flex; justify-content: center; margin-bottom: 26px; }
+.authv2-logo { height: 68px; width: auto; max-width: 100%; display: block; object-fit: contain; animation: logoBounceIn .7s ease both; }
+@keyframes logoBounceIn { 0% {opacity:0; transform:scale(.6);} 55% {opacity:1; transform:scale(1.08);} 75% {transform:scale(.96);} 100% {transform:scale(1);} }
+
+.authv2-header { text-align: center; margin-bottom: 26px; }
+.authv2-header h1 { font-family: 'Poppins','Inter',sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+.authv2-header p  { font-size: 13.5px; color: var(--text-light); margin-top: 7px; line-height: 1.5; }
+
+.authv2-forminner { max-width: 340px; width: 100%; margin: 0 auto; }
+
+.authv2-role-toggle { display: flex; gap: 8px; margin-bottom: 22px; background: var(--slate-soft); padding: 4px; border-radius: 13px; }
+.authv2-role-tab {
+  flex: 1; padding: 9px 8px; border-radius: 10px; border: none; background: transparent;
+  color: var(--text-light); font-size: 12.5px; font-weight: 700; cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s; text-align: center;
+}
+.authv2-role-tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow-sm); }
+
+.authv2-field-group { margin-bottom: 14px; }
+
+.authv2-btn {
+  width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 13px 16px; margin-top: 6px; background: var(--brand-gradient); background-size: 160% 160%;
+  color: #fff; font-size: 14px; font-weight: 700; letter-spacing: .01em; border: none; border-radius: 13px;
+  cursor: pointer; transition: transform .1s, box-shadow .18s, background-position .4s ease;
+  box-shadow: 0 10px 22px -8px rgba(209,26,179,.4);
+}
+.authv2-btn:hover { background-position: 100% 0; box-shadow: 0 14px 28px -8px rgba(209,26,179,.5); }
+.authv2-btn:active { transform: scale(.97); }
+.authv2-btn .arrow { transition: transform .18s; }
+.authv2-btn:hover .arrow { transform: translateX(3px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .authv2-card, .illo-scene, .illo-shadow, .bokeh, .authv2-logo { animation: none !important; }
+}
 </style>
 </head>
 <body>
 <div id="scale-root">
 <div class="toast-stack" id="toast-stack"></div>
 <!-- ── AUTH (Glass on blur) ── -->
-<div id="auth-screen" class="auth-wrap">
-  <div class="auth-blob b1"></div>
-  <div class="auth-blob b2"></div>
-  <div class="auth-blob b3"></div>
-  <div class="auth-grid-overlay"></div>
-  <button class="theme-toggle-auth" onclick="toggleTheme()" id="theme-toggle-auth-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
-    <svg id="theme-toggle-auth-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/></svg>
-  </button>
-<div class="char-crew" id="char-crew">
-  <div class="char dome">
-    <div class="char-body">
-      <div class="char-eyes"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
-      <div class="char-mouth"></div>
-    </div>
-  </div>
-  <div class="char mid">
-    <div class="char-body">
-      <div class="char-eyes"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
-    </div>
-  </div>
-  <div class="char tall">
-    <div class="char-body">
-      <div class="char-eyes"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
-      <div class="char-mouth"></div>
-    </div>
-  </div>
-</div>
- 
-  <div class="auth-box">
-    <div class="auth-avatar">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-    </div>
-    <div class="auth-panel">
-      <div class="auth-header">
-        <h1>FACE Prep Campus Help Desk</h1>
-        <p>Sign in to manage campus tickets & .</p>
+<!--
+  Replace the ENTIRE old auth-screen block in the dashboard file
+  (everything from  <!-- ── AUTH (Glass on blur) ── -->  down to its
+  matching closing </div>, right before  <!-- ── PLATFORM SELECT ...  )
+  with the markup below.
+
+  Every functional id is unchanged (kam-select, kam-pin-input,
+  manager-college-select, manager-pin-input, pin-error,
+  role-tab-admin, role-tab-manager, admin-login-block,
+  manager-login-block, and the submitLogin() button) so ALL existing
+  JS — setAuthRole(), submitLogin(), submitKamLogin(),
+  submitManagerLogin(), loadCollegeContactsForLogin() — keeps
+  working exactly as before. No script changes needed.
+-->
+
+<!-- ── AUTH (Illustrated split-card login) ── -->
+<div id="auth-screen" class="authv2-wrap">
+  <div class="authv2-card">
+    <div class="authv2-illustration" id="illo-panel">
+      <span class="bokeh bokeh-1" aria-hidden="true"></span>
+      <span class="bokeh bokeh-2" aria-hidden="true"></span>
+      <span class="bokeh bokeh-3" aria-hidden="true"></span>
+      <span class="bokeh bokeh-4" aria-hidden="true"></span>
+      <span class="bokeh bokeh-5" aria-hidden="true"></span>
+      <span class="bokeh bokeh-6" aria-hidden="true"></span>
+      <span class="bokeh bokeh-7" aria-hidden="true"></span>
+
+      <div class="illo-glow" aria-hidden="true"></div>
+
+      <div class="illo-copy">
+        <h2>Welcome back</h2>
+        <p>Manage tickets in one place</p>
       </div>
-      <div class="auth-role-toggle">
-        <button type="button" class="role-tab active" id="role-tab-admin" onclick="setAuthRole('admin')">KAM</button>
-        <button type="button" class="role-tab" id="role-tab-manager" onclick="setAuthRole('manager')">Campus Manager</button>
+
+      <div class="illo-scene" aria-hidden="true">
+        <svg class="illo-svg" viewBox="0 0 240 220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="roofGrad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stop-color="#D11AB3"/>
+              <stop offset="55%" stop-color="#EF6E5C"/>
+              <stop offset="100%" stop-color="#F6A968"/>
+            </linearGradient>
+            <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8A6BFF"/>
+              <stop offset="100%" stop-color="#6F4CF0"/>
+            </linearGradient>
+            <linearGradient id="bubbleGrad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stop-color="#D11AB3"/>
+              <stop offset="55%" stop-color="#EF6E5C"/>
+              <stop offset="100%" stop-color="#F6A968"/>
+            </linearGradient>
+          </defs>
+
+          <ellipse class="illo-shadow" cx="115" cy="196" rx="82" ry="8" fill="#14151A"/>
+
+          <g>
+            <rect x="10" y="176" width="20" height="18" rx="3" fill="#EF6E5C" opacity="0.9"/>
+            <path d="M20 176c-8-6-10-16-2-22 2 8 2 16 2 22z" fill="#7C5CFC"/>
+            <path d="M20 176c8-4 12-14 6-21-4 7-6 15-6 21z" fill="#8A6BFF"/>
+            <path d="M20 176c-2-9 2-18 8-22-1 8-3 16-8 22z" fill="#6F4CF0"/>
+          </g>
+
+          <g>
+            <polygon points="72,58 22,96 122,96" fill="url(#roofGrad)"/>
+            <rect x="65" y="66" width="14" height="12" rx="2" fill="#F6A968"/>
+            <rect x="30" y="96" width="84" height="70" rx="5" fill="url(#wallGrad)"/>
+            <rect x="30" y="96" width="84" height="13" fill="#EF6E5C"/>
+            <rect x="40" y="119" width="16" height="18" rx="2" fill="#fff" opacity="0.92"/>
+            <rect x="64" y="119" width="16" height="18" rx="2" fill="#fff" opacity="0.92"/>
+            <rect x="88" y="119" width="16" height="18" rx="2" fill="#fff" opacity="0.92"/>
+            <rect x="40" y="142" width="16" height="18" rx="2" fill="#fff" opacity="0.92"/>
+            <rect x="64" y="142" width="16" height="18" rx="2" fill="#fff" opacity="0.92"/>
+            <rect x="88" y="142" width="16" height="18" rx="2" fill="#fff" opacity="0.92"/>
+          </g>
+
+          <g>
+            <path d="M142 62h60a12 12 0 0 1 12 12v26a12 12 0 0 1-12 12h-36l-18 16v-16h-6a12 12 0 0 1-12-12V74a12 12 0 0 1 12-12z" fill="url(#bubbleGrad)"/>
+            <rect x="156" y="82" width="42" height="5" rx="2.5" fill="#fff" opacity="0.9"/>
+            <rect x="156" y="93" width="28" height="5" rx="2.5" fill="#fff" opacity="0.65"/>
+          </g>
+
+          <g>
+            <rect x="114" y="112" width="58" height="80" rx="10" fill="#fff" stroke="#D11AB3" stroke-width="3"/>
+            <rect x="114" y="112" width="58" height="16" rx="10" fill="#D11AB3"/>
+            <rect x="124" y="140" width="30" height="4.5" rx="2.25" fill="#EF6E5C"/>
+            <rect x="124" y="150" width="38" height="4.5" rx="2.25" fill="#F6A968"/>
+            <rect x="124" y="160" width="22" height="4.5" rx="2.25" fill="#7C5CFC"/>
+            <rect x="124" y="170" width="34" height="4.5" rx="2.25" fill="#EF6E5C"/>
+          </g>
+
+          <g>
+            <circle cx="182" cy="192" r="21" fill="#F6A968"/>
+            <path d="M172 192l7 7 13-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
       </div>
-      <div id="admin-login-block">
-        <div style="margin-bottom:14px">
-          <label class="field-label">KAM</label>
-          <select id="kam-select"></select>
-        </div>
-        <div style="margin-bottom:14px">
-          <label class="field-label">PIN</label>
-          <input id="kam-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
-        </div>
-      </div>
-      <div id="manager-login-block" class="hidden">
-        <div style="margin-bottom:14px">
-          <label class="field-label">College</label>
-          <select id="manager-college-select"></select>
-        </div>
-        <div style="margin-bottom:14px">
-          <label class="field-label">Manager PIN</label>
-          <input id="manager-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
-        </div>
-      </div>
-      <div id="pin-error" class="error-msg hidden" style="text-align:center;"></div>
-      <button class="btn btn-primary btn-full btn-auth" onclick="submitLogin()">Enter dashboard <span class="arrow">→</span></button>
     </div>
-    <div class="auth-footnote">Authorized personnel only · FACE Prep Campus</div>
+
+    <div class="authv2-formzone">
+      <div class="authv2-forminner">
+        <div class="authv2-logo-wrap">
+          <img class="authv2-logo" src="Face prep logo3.png" alt="FACE Prep Campus" />
+        </div>
+
+        <div class="authv2-header">
+          <h1>Campus Help Desk</h1>
+          <p>Sign in to manage tickets &amp; daily activity logs.</p>
+        </div>
+
+        <div class="authv2-role-toggle">
+          <button type="button" class="authv2-role-tab active" id="role-tab-admin" onclick="setAuthRole('admin')">KAM</button>
+          <button type="button" class="authv2-role-tab" id="role-tab-manager" onclick="setAuthRole('manager')">Campus Manager</button>
+        </div>
+
+        <div id="admin-login-block">
+          <div class="authv2-field-group">
+            <label class="field-label">Login as</label>
+            <select id="kam-select"></select>
+          </div>
+          <div class="authv2-field-group">
+            <label class="field-label">PIN</label>
+            <input id="kam-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
+          </div>
+        </div>
+
+        <div id="manager-login-block" class="hidden">
+          <div class="authv2-field-group">
+            <label class="field-label">College</label>
+            <select id="manager-college-select"></select>
+          </div>
+          <div class="authv2-field-group">
+            <label class="field-label">Manager PIN</label>
+            <input id="manager-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Enter your PIN" />
+          </div>
+        </div>
+
+        <div id="pin-error" class="error-msg hidden" style="text-align:center;"></div>
+
+        <button class="authv2-btn" onclick="submitLogin()">Enter dashboard <span class="arrow">→</span></button>
+
+        <div class="auth-footnote">Authorized personnel only · FACE Prep Campus</div>
+      </div>
+    </div>
   </div>
 </div>
 <!-- ── PLATFORM SELECT (campus/senior manager only) ── -->
