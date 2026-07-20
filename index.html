@@ -2559,21 +2559,26 @@ function applySessionUI(){
 function collegeMatchesSession(ticketCollege){
   const a = normalizeCollege(ticketCollege);
   if(!a) return sessionRole !== 'manager' && sessionRole !== 'kam';
-  if(sessionRole === 'manager' && sessionCollege){
-    const b = normalizeCollege(sessionCollege);
+
+  function fuzzyMatch(b){
     if(!b) return false;
-    return a === b || a.includes(b) || b.includes(a);
+    if(a === b || a.includes(b) || b.includes(a)) return true;
+    const aWords = new Set(a.split(' ').filter(w => w.length > 2));
+    const bWords = b.split(' ').filter(w => w.length > 2);
+    if(!bWords.length) return false;
+    const overlap = bWords.filter(w => aWords.has(w)).length;
+    return (overlap / bWords.length) >= 0.6;
+  }
+
+  if(sessionRole === 'manager' && sessionCollege){
+    return fuzzyMatch(normalizeCollege(sessionCollege));
   }
   if(sessionRole === 'kam' && sessionAllowedColleges){
-    return sessionAllowedColleges.some(c => {
-      const b = normalizeCollege(c);
-      if(!b) return false;
-      return a === b || a.includes(b) || b.includes(a);
-    });
+    return sessionAllowedColleges.some(c => fuzzyMatch(normalizeCollege(c)));
   }
   return true;
 }
-function logout(){
+ function logout(){
   hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
   show('auth-screen');
   hide('pin-error');
