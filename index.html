@@ -1780,17 +1780,122 @@ body[data-theme="dark"] .dlog-topbar {
     </div>
   </div>
   <div class="dlog-body">
-    <div class="ledger-card hidden" id="csnap-form-block">
-      <div class="ledger-card-title">New classroom snap</div>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label class="field-label">Photo (required)</label>
-          <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
-          <div id="snap-photo-preview-wrap" class="hidden" style="margin-top:8px;">
-            <img id="snap-photo-preview" style="max-height:160px;border-radius:10px;border:1px solid var(--border);" />
-          </div>
-        </div>
-        <div class="form-group">
+<div class="ledger-card hidden" id="csnap-form-block">
+  <div class="ledger-card-title">New classroom observation</div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="field-label">Date</label>
+      <input id="csnap-date" type="date" readonly />
+    </div>
+    <div class="form-group">
+      <label class="field-label">Department</label>
+      <input id="csnap-department" type="text" placeholder="e.g. BCA" />
+    </div>
+    <div class="form-group">
+      <label class="field-label">Mentor Name</label>
+      <input id="csnap-mentor" type="text" placeholder="Mentor being observed" />
+    </div>
+    <div class="form-group">
+      <label class="field-label">Year / Batch</label>
+      <input id="csnap-year" type="text" placeholder="e.g. II, I-A Batch" />
+    </div>
+    <div class="form-group full">
+      <label class="field-label">Skill / Subject</label>
+      <input id="csnap-subject" type="text" placeholder="e.g. Java, Python, FED" />
+    </div>
+
+    <div class="form-group full">
+      <div class="ledger-section-label" style="margin-top:6px;">Mentor Evaluation</div>
+    </div>
+
+    <div class="form-group">
+      <label class="field-label">Presentation (aids used)</label>
+      <input id="csnap-presentation" type="text" placeholder="e.g. Laptop, Projector & Blackboard" />
+    </div>
+    <div class="form-group">
+      <label class="field-label">Communication (language)</label>
+      <select id="csnap-communication">
+        <option value="">Select</option>
+        <option value="Tamil">Tamil</option>
+        <option value="English">English</option>
+        <option value="Bilingual">Bilingual</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Classroom Control</label>
+      <select id="csnap-classroom-control">
+        <option value="">Select</option>
+        <option value="Good">Good</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Poor">Poor</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Subject Knowledge</label>
+      <select id="csnap-subject-knowledge">
+        <option value="">Select</option>
+        <option value="Yes, Good">Yes, Good</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Doubtful">Doubtful</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label class="field-label">Session Interaction</label>
+      <input id="csnap-session-interaction" type="text" placeholder="How the mentor engaged with students" />
+    </div>
+    <div class="form-group full">
+      <label class="field-label">Content Delivery — Live Class Demo</label>
+      <input id="csnap-content-delivery" type="text" placeholder="What was demonstrated / explained live" />
+    </div>
+    <div class="form-group">
+      <label class="field-label">Activity / Explanation</label>
+      <select id="csnap-activity">
+        <option value="">Select</option>
+        <option value="Yes">Yes — activity given</option>
+        <option value="No Activity - oral Explanation">No Activity — oral explanation only</option>
+        <option value="Partial">Partial</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Schedule Plan Execution</label>
+      <select id="csnap-schedule-execution">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Study Material Shared</label>
+      <select id="csnap-material-shared">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No — not shared yet</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label class="field-label">Comments (for mentor / KAM)</label>
+      <input id="csnap-comments" type="text" placeholder="Overall observation comments" />
+    </div>
+    <div class="form-group full">
+      <label class="field-label">Students Feedback</label>
+      <input id="csnap-student-feedback" type="text" placeholder="What students said / how they responded" />
+    </div>
+
+    <div class="form-group full">
+      <label class="field-label">Photo of the ongoing class (required)</label>
+      <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
+      <div id="snap-photo-preview-wrap" class="hidden" style="margin-top:8px;">
+        <img id="snap-photo-preview" style="max-height:160px;border-radius:10px;border:1px solid var(--border);" />
+      </div>
+    </div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn btn-primary" id="snap-save-btn" onclick="saveClassroomSnap()">Upload observation</button>
+    <span id="snap-saved" class="saved-msg hidden">✓ Saved</span>
+  </div>
+</div>
+   <div class="form-group">
           <label class="field-label">Class / Section</label>
           <input id="snap-class" type="text" placeholder="e.g. II B.Com A" />
         </div>
@@ -3947,13 +4052,21 @@ async function enterClassroomSnap(){
   $('csnap-form-block').classList.toggle('hidden', !isManager);
   $('csnap-college-filter-block').classList.toggle('hidden', isManager);
   $('csnap-breadcrumb-college').textContent = isManager ? (sessionCollege || '—') : 'All colleges';
+  if(isManager){
+    $('csnap-date').value = new Date().toISOString().slice(0,10);
+    ['csnap-department','csnap-mentor','csnap-year','csnap-subject','csnap-presentation',
+     'csnap-session-interaction','csnap-content-delivery','csnap-comments','csnap-student-feedback']
+      .forEach(id => { const el = $(id); if(el) el.value=''; });
+    ['csnap-communication','csnap-classroom-control','csnap-subject-knowledge',
+     'csnap-activity','csnap-schedule-execution','csnap-material-shared']
+      .forEach(id => { const el = $(id); if(el) el.value=''; });
+  }
   snapSelectedFile = null;
   const fileInput = $('snap-photo-input'); if(fileInput) fileInput.value = '';
   hide('snap-photo-preview-wrap');
   if(!isManager) populateSnapCollegeSelect();
   loadClassroomSnaps();
 }
-
 function populateSnapCollegeSelect(){
   const sel = $('csnap-college-select');
   if(!sel) return;
@@ -3999,7 +4112,7 @@ function renderClassroomSnaps(){
   if(!classroomSnaps.length){
     grid.innerHTML = '';
     show('csnap-empty');
-    $('csnap-empty').innerHTML = '<p>No classroom snaps logged yet.</p>';
+    $('csnap-empty').innerHTML = '<p>No classroom observations logged yet.</p>';
     return;
   }
   hide('csnap-empty');
@@ -4010,15 +4123,31 @@ function renderClassroomSnaps(){
       : `<span class="review-badge review-no">☐ Pending</span>`;
     const reviewBtn = (!isManager && !s.reviewed)
       ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
+    const dateStr = s.observation_date
+      ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+      : fmtRel(s.created_at);
+    const chips = [
+      s.communication && `Language: ${escHTML(s.communication)}`,
+      s.classroom_control && `Control: ${escHTML(s.classroom_control)}`,
+      s.subject_knowledge && `Subject Knowledge: ${escHTML(s.subject_knowledge)}`,
+      s.activity_explanation && `Activity: ${escHTML(s.activity_explanation)}`,
+      s.schedule_execution && `Schedule: ${escHTML(s.schedule_execution)}`,
+      s.material_shared && `Material Shared: ${escHTML(s.material_shared)}`,
+    ].filter(Boolean).map(c => `<span class="cat-pill" style="font-size:10.5px;">${c}</span>`).join(' ');
     return `<div class="snap-card">
-      <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
+      <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom observation photo" onclick="openAdminLightbox(this.src)">
       <div class="snap-body">
         <div class="snap-top">
-          <span class="snap-class">${escHTML(s.class_name||'—')}${s.subject?' · '+escHTML(s.subject):''}</span>
-          <span class="snap-date">${fmtRel(s.created_at)}</span>
+          <span class="snap-class">${escHTML(s.mentor_name||'—')}${s.department?' · '+escHTML(s.department):''}</span>
+          <span class="snap-date">${dateStr}</span>
         </div>
-        ${s.teacher_name ? `<div class="snap-teacher">Teacher: ${escHTML(s.teacher_name)}</div>` : ''}
-        ${s.notes ? `<div class="snap-notes">${escHTML(s.notes)}</div>` : ''}
+        ${s.subject || s.year_batch ? `<div class="snap-teacher">${escHTML(s.subject||'')}${s.year_batch?' · '+escHTML(s.year_batch):''}</div>` : ''}
+        ${chips ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;">${chips}</div>` : ''}
+        ${s.presentation ? `<div class="snap-notes"><b>Presentation:</b> ${escHTML(s.presentation)}</div>` : ''}
+        ${s.session_interaction ? `<div class="snap-notes"><b>Interaction:</b> ${escHTML(s.session_interaction)}</div>` : ''}
+        ${s.content_delivery ? `<div class="snap-notes"><b>Content Delivery:</b> ${escHTML(s.content_delivery)}</div>` : ''}
+        ${s.comments ? `<div class="snap-notes"><b>Comments:</b> ${escHTML(s.comments)}</div>` : ''}
+        ${s.student_feedback ? `<div class="snap-notes"><b>Students Feedback:</b> ${escHTML(s.student_feedback)}</div>` : ''}
         <div class="snap-foot">
           <span class="snap-logger">${escHTML(s.manager_name||'—')}${!isManager && s.college ? ' · '+escHTML(s.college) : ''}</span>
           ${reviewBadge}
@@ -4028,15 +4157,27 @@ function renderClassroomSnaps(){
     </div>`;
   }).join('');
 }
-
 async function saveClassroomSnap(){
   if(snapSaving) return;
-  if(!snapSelectedFile){ showToast('Please attach a photo of the classroom'); return; }
-  const className = $('snap-class').value.trim();
-  const subject   = $('snap-subject').value.trim();
-  const teacher   = $('snap-teacher').value.trim();
-  const notes     = $('snap-notes').value.trim();
-  if(!className){ showToast('Please enter the class/section'); return; }
+  if(!snapSelectedFile){ showToast('Please attach a photo of the ongoing class'); return; }
+  const department = $('csnap-department').value.trim();
+  const mentorName = $('csnap-mentor').value.trim();
+  if(!department || !mentorName){ showToast('Please enter the department and mentor name'); return; }
+
+  const year               = $('csnap-year').value.trim();
+  const subject            = $('csnap-subject').value.trim();
+  const presentation       = $('csnap-presentation').value.trim();
+  const communication      = $('csnap-communication').value;
+  const classroomControl   = $('csnap-classroom-control').value;
+  const subjectKnowledge   = $('csnap-subject-knowledge').value;
+  const sessionInteraction = $('csnap-session-interaction').value.trim();
+  const contentDelivery    = $('csnap-content-delivery').value.trim();
+  const activity           = $('csnap-activity').value;
+  const scheduleExecution  = $('csnap-schedule-execution').value;
+  const materialShared     = $('csnap-material-shared').value;
+  const comments           = $('csnap-comments').value.trim();
+  const studentFeedback    = $('csnap-student-feedback').value.trim();
+
   snapSaving = true;
   const btn = $('snap-save-btn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -4047,32 +4188,50 @@ async function saveClassroomSnap(){
     if(upErr) throw upErr;
     const { data: pub } = sb.storage.from('classroom-snaps').getPublicUrl(path);
     const rec = collegeContacts.find(c => c.college === sessionCollege);
-    const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+    const loggedBy = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
     const payload = {
       college: sessionCollege,
-      manager_name: name || null,
-      class_name: className,
+      manager_name: loggedBy || null,
+      observation_date: $('csnap-date').value || new Date().toISOString().slice(0,10),
+      department: department,
+      mentor_name: mentorName,
+      year_batch: year || null,
       subject: subject || null,
-      teacher_name: teacher || null,
-      notes: notes || null,
+      presentation: presentation || null,
+      communication: communication || null,
+      classroom_control: classroomControl || null,
+      subject_knowledge: subjectKnowledge || null,
+      session_interaction: sessionInteraction || null,
+      content_delivery: contentDelivery || null,
+      activity_explanation: activity || null,
+      schedule_execution: scheduleExecution || null,
+      material_shared: materialShared || null,
+      comments: comments || null,
+      student_feedback: studentFeedback || null,
       photo_url: pub.publicUrl,
     };
     const { error } = await sb.from('classroom_snaps').insert(payload);
     if(error) throw error;
-    $('snap-class').value=''; $('snap-subject').value=''; $('snap-teacher').value=''; $('snap-notes').value='';
+
+    ['csnap-department','csnap-mentor','csnap-year','csnap-subject','csnap-presentation',
+     'csnap-session-interaction','csnap-content-delivery','csnap-comments','csnap-student-feedback']
+      .forEach(id => { const el = $(id); if(el) el.value=''; });
+    ['csnap-communication','csnap-classroom-control','csnap-subject-knowledge',
+     'csnap-activity','csnap-schedule-execution','csnap-material-shared']
+      .forEach(id => { const el = $(id); if(el) el.value=''; });
     $('snap-photo-input').value=''; snapSelectedFile=null; hide('snap-photo-preview-wrap');
+
     const saved = $('snap-saved');
     saved.style.color='var(--green)'; saved.textContent='✓ Saved'; show('snap-saved');
     setTimeout(() => hide('snap-saved'), 1800);
     loadClassroomSnaps();
   }catch(e){
     console.error(e);
-    showToast('Could not upload snap: ' + (e.message || 'check console'));
+    showToast('Could not upload observation: ' + (e.message || 'check console'));
   }finally{
-    snapSaving = false; btn.disabled = false; btn.textContent = 'Upload snap';
+    snapSaving = false; btn.disabled = false; btn.textContent = 'Upload observation';
   }
 }
-
 async function markSnapReviewed(id){
   const reviewerName = window.prompt("Enter your name to confirm this review:");
   if(!reviewerName || !reviewerName.trim()){ showToast('Reviewer name is required'); return; }
