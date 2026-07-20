@@ -2423,8 +2423,12 @@ function showPlatformSelect(){
 }
 /* ── Greeting + live badges + streak on the platform-select screen (added) ── */
 function getGreetingName(){
-  if(sessionRole === 'manager' && sessionCollege) return sessionCollege.split(' ')[0];
-  if(sessionRole === 'kam' && sessionKamName) return sessionKamName.split(' ')[0];
+  if(sessionRole === 'manager' && sessionCollege){
+    const rec = collegeContacts.find(c => c.college === sessionCollege);
+    if(rec && rec.campus_manager_name) return rec.campus_manager_name;
+    return sessionCollege; // fallback if no campus manager name is on record
+  }
+  if(sessionRole === 'kam' && sessionKamName) return sessionKamName;
   return 'Admin';
 }
 function renderPlatformGreeting(){
