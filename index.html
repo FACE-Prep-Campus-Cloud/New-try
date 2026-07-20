@@ -262,17 +262,23 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shado
 input::placeholder { color: var(--text-faint); }
 input:disabled, select:disabled { background: var(--slate-soft); color: var(--text-faint); cursor: not-allowed; }
 #dlog-date, #dlog-name {
-  cursor: text;
-  background: var(--card);
+  cursor: not-allowed;
+  background: var(--slate-soft);
+  color: var(--text-light);
 }
 #dlog-date:hover, #dlog-name:hover {
-  border-color: #C7CCD3;
+  border-color: var(--border);
 }
 #dlog-date:focus, #dlog-name:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px var(--blue-soft);
+  border-color: var(--border);
+  box-shadow: none;
 }
-.otp-row { display: flex; gap: 9px; justify-content: center; }
+/* hide/disable the calendar picker icon so it can't be clicked open */
+#dlog-date::-webkit-calendar-picker-indicator {
+  opacity: 0.35;
+  pointer-events: none;
+}
+  .otp-row { display: flex; gap: 9px; justify-content: center; }
 .otp-box {
   width: 48px; height: 54px; text-align: center; font-size: 20px; font-weight: 700;
   font-family: 'JetBrains Mono', monospace; border-radius: 10px; padding: 0;
@@ -1474,14 +1480,14 @@ body[data-theme="dark"] { --illustration-bg: #221A22; }
         <div class="ledger-card">
           <div class="ledger-card-title">New entry</div>
           <div class="form-grid">
-            <div class="form-group">
-              <label class="field-label">Date</label>
-              <input id="dlog-date" type="date" />
-            </div>
-            <div class="form-group">
-              <label class="field-label">Logged by</label>
-              <input id="dlog-name" type="text" placeholder="Your name" />
-            </div>
+           <div class="form-group">
+  <label class="field-label">Date</label>
+  <input id="dlog-date" type="date" readonly />
+</div>
+<div class="form-group">
+  <label class="field-label">Logged by</label>
+  <input id="dlog-name" type="text" placeholder="Your name" readonly />
+</div>
             <div class="form-group full">
               <label class="field-label">Category</label>
               <select id="dlog-category" onchange="onDlogCategoryChange(this.value)"></select>
@@ -3365,11 +3371,13 @@ function renderDailyLogs(){
     renderDlogCalendar();
     return;
   }
-  hide('dlog-empty');
-  listEl.innerHTML = dailyLogs.slice(0, 10).map(l => {
+hide('dlog-empty');
+  const DLOG_RECENT_LIMIT = 10;              // ← move it here
+  listEl.innerHTML = dailyLogs.slice(0, DLOG_RECENT_LIMIT).map(l => {
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    // (delete the old "const DLOG_RECENT_LIMIT = 10;" line that was here)
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
-    const callType = l.call_type || (cat ? cat.callType : 'soft');
+ const callType = l.call_type || (cat ? cat.callType : 'soft');
     const dateStr = new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
     const statusHtml = l.reviewed
       ? `<span class="ledger-row-status reviewed">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
@@ -3496,8 +3504,11 @@ document.addEventListener('keydown', e => {
 });
 async function saveDailyLog(){
   if(dlogSaving) return;
-  const date = $('dlog-date').value;
-  const name = $('dlog-name').value.trim();
+ // Always derive these from trusted session data — never trust the input fields,
+// even though they're displayed as readonly.
+const date = new Date().toISOString().slice(0,10);
+const rec = collegeContacts.find(c => c.college === sessionCollege);
+const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
   const categoryKey = $('dlog-category').value;
   const activity = $('dlog-activity').value.trim();
   const progress = $('dlog-progress').value.trim();
