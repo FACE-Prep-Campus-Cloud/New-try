@@ -2823,8 +2823,24 @@ async function loadPlatformSelectBadges(){
     }catch(e){ console.error(e); }
     hide('platform-streak');
   }
+
+  /* ── NEW: Classroom Snap pending-review badge ── */
+  try{
+    const { data, error } = await sb.from('classroom_snaps').select('id,college,reviewed');
+    if(error) throw error;
+    let snapRows = data || [];
+    if(sessionRole === 'manager' || sessionRole === 'kam'){
+      snapRows = snapRows.filter(s => collegeMatchesSession(s.college));
+    }
+    const snapPending = snapRows.filter(s => !s.reviewed).length;
+    const snapBadge = $('platform-snap-badge');
+    if(snapBadge){
+      if(snapPending > 0){ snapBadge.textContent = `${snapPending} pending`; show('platform-snap-badge'); }
+      else hide('platform-snap-badge');
+    }
+  }catch(e){ console.error('Could not load classroom_snaps pending count:', e); }
 }
-/* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
+ /* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
 function initPlatformCardTilt(){
   const cards = document.querySelectorAll('#platform-cards .platform-card');
   cards.forEach(card => {
