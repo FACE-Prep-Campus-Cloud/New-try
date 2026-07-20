@@ -3601,13 +3601,14 @@ function populateReviewCollegeSelect(){
     ? '<option value="" disabled selected>Select college</option>' +
       uniqueSorted.map(name => {
         const pending = collegePendingCounts[name] || 0;
-        const label = pending > 0 ? `${name} (${pending} pending)` : name;
-        return `<option value="${escHTML(name)}">${escHTML(label)}</option>`;
+const label = pending > 0 ? `🔴 ${name} — ${pending} pending` : `${name}`;
+       const style = pending > 0 ? ' style="color:#DC2626;font-weight:600;"' : '';
+        return `<option value="${escHTML(name)}"${style}>${escHTML(label)}</option>`;
       }).join('')
     : '<option value="">No colleges configured yet</option>';
   if(prevValue) sel.value = prevValue;
 }
-async function enterReviewPanel(){
+ async function enterReviewPanel(){
   hide('platform-select-screen');
   hide('admin-screen');
   hide('dailylog-screen');
