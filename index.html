@@ -982,6 +982,68 @@ body[data-theme="dark"] .auth-wrap::before { opacity: 0.05; }
   width:64px;height:64px;border-radius:18px;background:#14151A;border:none;
   margin-bottom:-32px; box-shadow:0 10px 24px -8px rgba(20,21,26,0.4);
 }
+
+  .review-calendar {
+  border: none;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--card) 0%, var(--slate-soft) 120%);
+  box-shadow: var(--shadow-md);
+  padding: 22px;
+  position: relative;
+}
+.review-calendar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--brand-gradient);
+}
+
+.review-cal-weekdays {
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+}
+.review-cal-weekdays span:nth-last-child(-n+2) { color: var(--brand-2); } /* Sat/Sun tint */
+
+.review-cal-grid { gap: 6px; }
+
+.review-cal-cell {
+  min-height: 72px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid transparent;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.review-cal-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border);
+}
+.review-cal-cell.outside { background: var(--border-soft); }
+
+/* days that have entries get a soft wash */
+.review-cal-cell:has(.review-cal-pill) {
+  background: linear-gradient(160deg, var(--card), var(--blue-soft) 180%);
+}
+
+.review-cal-cell.is-today {
+  background: var(--brand-gradient);
+  box-shadow: 0 6px 18px -6px rgba(209,26,179,0.4);
+}
+.review-cal-cell.is-today .review-cal-daynum {
+  color: #fff; font-weight: 800;
+}
+.review-cal-cell.is-today .review-cal-pill {
+  background: rgba(255,255,255,0.9);
+}
+
+.review-cal-daynum { font-weight: 600; }
+
+.review-cal-pill {
+  border-radius: 7px;
+  padding: 3px 6px;
+  font-weight: 600;
+}
 .auth-avatar svg{ stroke:#fff;width:24px;height:24px; }
 body[data-theme="dark"] .auth-avatar{ background:#fff; }
 body[data-theme="dark"] .auth-avatar svg{ stroke:#14151A; }
