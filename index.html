@@ -277,6 +277,14 @@ input:disabled, select:disabled { background: var(--slate-soft); color: var(--te
   background: rgba(20,21,26,0.05); border: 1px solid rgba(20,21,26,0.15); color: var(--text);
   transition: border-color .15s, box-shadow .15s, background .15s, transform .1s;
 }
+ .pin-shake-err {
+  animation: shake .35s ease;
+  border-color: var(--red) !important;
+  background: rgba(220,38,38,0.08) !important;
+}
+body[data-theme="dark"] .pin-shake-err {
+  background: rgba(240,85,76,0.16) !important;
+}
 .otp-box:focus { border-color: var(--blue); background: rgba(20,21,26,0.08); box-shadow: none; transform: translateY(-2px); }
 .otp-box.filled { border-color: var(--blue); background: rgba(20,21,26,0.08); }
 .otp-box.shake-err { animation: shake .35s ease; border-color: var(--red) !important; background: rgba(220,38,38,0.12) !important; }
@@ -2072,6 +2080,14 @@ function isFollowUpDue7(t){
   const wd = workingDaysElapsed(new Date(t.created_at), new Date());
   return wd >= FOLLOWUP_WORKING_DAYS_7D;
 }
+
+ function triggerShake(el){
+  if(!el) return;
+  el.classList.remove('pin-shake-err');
+  void el.offsetWidth; // force reflow so animation restarts even if class was just removed
+  el.classList.add('pin-shake-err');
+  setTimeout(() => el.classList.remove('pin-shake-err'), 400);
+}
 function isFollowUpDue(t){ return isFollowUpDue3(t) || isFollowUpDue7(t); }
 function initials(name){
   const parts = String(name||'?').trim().split(/\s+/);
@@ -2308,9 +2324,10 @@ function submitKamLogin(){
   const pin = ($('kam-pin-input').value || '').trim();
   if(!sel){ err.textContent='Please select a login.'; show('pin-error'); return; }
   if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
-  if(sel === '__master__'){
+ if(sel === '__master__'){
     if(pin !== ADMIN_PIN){
       err.textContent='Incorrect PIN.'; show('pin-error');
+      triggerShake($('kam-pin-input'));
       $('kam-pin-input').value=''; $('kam-pin-input').focus();
       return;
     }
@@ -2325,9 +2342,10 @@ function submitKamLogin(){
   }
   const kams = buildKamList();
   const rec = kams.find(k => k.name === sel);
-  if(!rec || !rec.pin || String(rec.pin) !== pin){
+ if(!rec || !rec.pin || String(rec.pin) !== pin){
     err.textContent='Incorrect PIN for this KAM.';
     show('pin-error');
+    triggerShake($('kam-pin-input'));
     $('kam-pin-input').value = '';
     $('kam-pin-input').focus();
     return;
@@ -2348,9 +2366,10 @@ function submitManagerLogin(){
   if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
   const rec = collegeContacts.find(c => c.college === college);
 const expectedPin = rec ? rec.campus_manager_pin : null;
-  if(!rec || !expectedPin || String(expectedPin) !== pin){
+if(!rec || !expectedPin || String(expectedPin) !== pin){
     err.textContent='Incorrect PIN for this college.';
     show('pin-error');
+    triggerShake($('manager-pin-input'));
     $('manager-pin-input').value = '';
     $('manager-pin-input').focus();
     return;
