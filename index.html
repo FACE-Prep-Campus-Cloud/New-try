@@ -3371,12 +3371,13 @@ function renderDailyLogs(){
     renderDlogCalendar();
     return;
   }
- hide('dlog-empty');
+hide('dlog-empty');
+  const DLOG_RECENT_LIMIT = 10;              // ← move it here
   listEl.innerHTML = dailyLogs.slice(0, DLOG_RECENT_LIMIT).map(l => {
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
-    const DLOG_RECENT_LIMIT = 10;
+    // (delete the old "const DLOG_RECENT_LIMIT = 10;" line that was here)
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
-    const callType = l.call_type || (cat ? cat.callType : 'soft');
+ const callType = l.call_type || (cat ? cat.callType : 'soft');
     const dateStr = new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
     const statusHtml = l.reviewed
       ? `<span class="ledger-row-status reviewed">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
