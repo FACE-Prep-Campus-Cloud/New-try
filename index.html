@@ -1379,28 +1379,40 @@ body[data-theme="dark"] { --illustration-bg: #221A22; }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V6a2 2 0 0 1 2-2z"/></svg>
   </div>
   <div class="platform-box">
-    <h1>Welcome<span id="platform-select-college-name"></span></h1>
+    <div class="platform-header">
+      <div class="platform-eyebrow" id="platform-date-label"></div>
+      <h1 class="platform-greeting" id="platform-greeting">Welcome</h1>
+    </div>
     <p class="sub">Choose what you'd like to open.</p>
     <div class="platform-cards" id="platform-cards">
       <button class="platform-card" onclick="selectPlatform('tickets')">
-<div class="platform-icon p-blue">
-  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-    <g transform="rotate(-35 10 10)">
-      <path d="M4,6 L16,6 Q17,6 17,7 L17,8.3 A1.4,1.4 0 0 0 17,11 L17,13 Q17,14 16,14 L4,14 Q3,14 3,13 L3,11 A1.4,1.4 0 0 0 3,8.3 L3,7 Q3,6 4,6 Z"/>
-      <line x1="10" y1="7" x2="10" y2="13" stroke-dasharray="1 1.1"/>
-    </g>
-  </svg>
-</div>
+        <div class="platform-card-top">
+          <div class="platform-icon p-blue">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <g transform="rotate(-35 10 10)">
+                <path d="M4,6 L16,6 Q17,6 17,7 L17,8.3 A1.4,1.4 0 0 0 17,11 L17,13 Q17,14 16,14 L4,14 Q3,14 3,13 L3,11 A1.4,1.4 0 0 0 3,8.3 L3,7 Q3,6 4,6 Z"/>
+                <line x1="10" y1="7" x2="10" y2="13" stroke-dasharray="1 1.1"/>
+              </g>
+            </svg>
+          </div>
+          <span class="platform-count-badge warn hidden" id="platform-open-badge"></span>
+        </div>
         <h3>Ticketing Platform</h3>
         <p id="platform-tickets-desc">View and manage student help-desk tickets raised by your college.</p>
       </button>
       <button class="platform-card" onclick="selectPlatform('dailylog')">
-        <div class="platform-icon p-green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
+        <div class="platform-card-top">
+          <div class="platform-icon p-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
+          </div>
+          <span class="platform-count-badge pending hidden" id="platform-pending-badge"></span>
         </div>
         <h3 id="platform-second-title">Daily Activity Log</h3>
         <p id="platform-second-desc">Log your daily activities and track your progress over time.</p>
       </button>
+    </div>
+    <div class="platform-streak hidden" id="platform-streak">
+      <span aria-hidden="true">🔥</span> <span id="platform-streak-text"></span>
     </div>
     <div class="platform-back">
       <button class="btn btn-ghost" onclick="logout()">Log out</button>
@@ -2393,9 +2405,7 @@ function showPlatformSelect(){
   hide('review-panel-screen');
   const isManager = sessionRole === 'manager';
   const isKam = sessionRole === 'kam';
-  $('platform-select-college-name').textContent = isManager && sessionCollege
-    ? ' — ' + sessionCollege
-    : (isKam && sessionKamName ? ' — ' + sessionKamName : '');
+  renderPlatformGreeting();
   $('platform-tickets-desc').textContent = isManager
     ? 'View and manage student help-desk tickets raised by your college.'
     : isKam
@@ -2408,7 +2418,70 @@ function showPlatformSelect(){
  show('platform-select-screen');
   initPlatformCardTilt();
   initVantaBirds();
+  loadPlatformSelectBadges();
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+}
+/* ── Greeting + live badges + streak on the platform-select screen (added) ── */
+function getGreetingName(){
+  if(sessionRole === 'manager' && sessionCollege) return sessionCollege.split(' ')[0];
+  if(sessionRole === 'kam' && sessionKamName) return sessionKamName.split(' ')[0];
+  return 'Admin';
+}
+function renderPlatformGreeting(){
+  const hour = new Date().getHours();
+  const part = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  $('platform-greeting').textContent = `${part}, ${getGreetingName()}`;
+  $('platform-date-label').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+async function loadPlatformSelectBadges(){
+  try{
+    const { data, error } = await sb.from('tickets').select('id,status,college');
+    if(error) throw error;
+    let rows = data || [];
+    if(sessionRole === 'manager' || sessionRole === 'kam') rows = rows.filter(t => collegeMatchesSession(t.college));
+    const openCount = rows.filter(t => t.status !== 'resolved').length;
+    const badge = $('platform-open-badge');
+    if(badge){
+      if(openCount > 0){ badge.textContent = `${openCount} open`; show('platform-open-badge'); }
+      else hide('platform-open-badge');
+    }
+  }catch(e){ console.error(e); }
+
+  if(sessionRole === 'manager'){
+    try{
+      const { data, error } = await sb.from('daily_logs').select('id,log_date,reviewed').eq('college', sessionCollege);
+      if(error) throw error;
+      const logs = data || [];
+      const pending = logs.filter(l => !l.reviewed).length;
+      const badge = $('platform-pending-badge');
+      if(badge){
+        if(pending > 0){ badge.textContent = `${pending} pending`; show('platform-pending-badge'); }
+        else hide('platform-pending-badge');
+      }
+      const streak = computeLoggingStreak(logs);
+      if(streak > 0){
+        $('platform-streak-text').textContent = `${streak}-day logging streak`;
+        show('platform-streak');
+      } else hide('platform-streak');
+    }catch(e){ console.error(e); }
+  } else {
+    try{
+      await loadCollegePendingCounts();
+      let total = Object.values(collegePendingCounts).reduce((a,b)=>a+b,0);
+      if(sessionRole === 'kam' && sessionAllowedColleges){
+        const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+        total = Object.entries(collegePendingCounts)
+          .filter(([c]) => allowedNorm.includes(normalizeCollege(c)))
+          .reduce((sum,[,v]) => sum+v, 0);
+      }
+      const badge = $('platform-pending-badge');
+      if(badge){
+        if(total > 0){ badge.textContent = `${total} pending`; show('platform-pending-badge'); }
+        else hide('platform-pending-badge');
+      }
+    }catch(e){ console.error(e); }
+    hide('platform-streak');
+  }
 }
 /* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
 function initPlatformCardTilt(){
