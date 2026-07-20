@@ -2405,8 +2405,9 @@ function showPlatformSelect(){
   $('platform-second-desc').textContent = isManager
     ? 'Log your daily activities and track your progress over time.'
     : "Review campus managers' daily activity logs, college by college.";
-  show('platform-select-screen');
+ show('platform-select-screen');
   initPlatformCardTilt();
+  initVantaBirds();
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
 /* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
@@ -2431,6 +2432,7 @@ function initPlatformCardTilt(){
 }
 function selectPlatform(which){
   hide('platform-select-screen');
+  destroyVantaBirds();
   if(which === 'tickets'){
     enterDashboard();
   } else if(which === 'dailylog'){
@@ -2442,6 +2444,7 @@ function backToPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
   hide('review-panel-screen');
+  destroyVantaBirds();
   showPlatformSelect();
 }
 function enterDashboard(){
@@ -2497,7 +2500,8 @@ function logout(){
   firstLoadDone = false; knownTicketIds = new Set();
   sessionRole = 'admin'; sessionCollege = null; sessionAllowedColleges = null; sessionKamName = null;
   dailyLogs = [];
-  reviewLogs = []; reviewCollege = null; reviewCallFilter = 'all';
+reviewLogs = []; reviewCollege = null; reviewCallFilter = 'all';
+  destroyVantaBirds();
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
 /* ── Sidebar ── */
