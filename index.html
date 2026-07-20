@@ -3518,9 +3518,12 @@ function populateDlogCategorySelect(){
 function onDlogCategoryChange(key){
   const cat = DLOG_CATEGORIES.find(c => c.key === key);
   const hint = $('dlog-call-hint');
+  const sel = $('dlog-category');
+  sel.classList.remove('is-hard');
   if(!hint) return;
   if(!cat){ hint.className = 'ledger-stamp-hint'; hint.innerHTML = ''; return; }
   if(cat.callType === 'hard'){
+    sel.classList.add('is-hard');
     hint.className = 'ledger-stamp-hint hard';
     hint.innerHTML = '<span class="mini-stamp">✉</span><span>Hard call — an email goes to the KAM</span>';
   } else {
