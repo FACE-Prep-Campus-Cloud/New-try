@@ -1290,6 +1290,58 @@ body[data-theme="dark"] { --illustration-bg: #221A22; }
 @media (prefers-reduced-motion: reduce) {
   .authv2-card, .illo-scene, .illo-shadow, .bokeh, .authv2-logo { animation: none !important; }
 }
+  /* Filter card gets the same accent bar as the calendar */
+.dlog-form-card {
+  position: relative;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--card) 0%, var(--slate-soft) 130%);
+}
+.dlog-form-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  border-radius: 18px 18px 0 0;
+  background: var(--brand-gradient);
+}
+
+/* Stat cards: rounder, colored wash, lift on hover */
+.stat-card {
+  border-radius: 16px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+/* Icon backgrounds → soft circle instead of solid square */
+.stat-icon {
+  border-radius: 50%;
+  width: 34px; height: 34px;
+}
+.stat-icon.i-red    { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); }
+.stat-icon.i-slate  { background: linear-gradient(135deg, #64748B, #94A3B8); }
+.stat-icon.i-amber  { background: linear-gradient(135deg, var(--brand-2), var(--brand-3)); }
+.stat-icon.i-green  { background: linear-gradient(135deg, #16A34A, #34D399); }
+
+/* Per-metric background tint on the card itself */
+.stat-card:nth-child(2) { background: linear-gradient(160deg, var(--card), var(--red-soft) 200%); }
+.stat-card:nth-child(4) { background: linear-gradient(160deg, var(--card), var(--amber-soft) 200%); }
+.stat-card:nth-child(5) { background: linear-gradient(160deg, var(--card), var(--green-soft) 200%); }
+
+/* Review rate ring: brand gradient instead of flat violet */
+.rate-ring-fg { stroke: var(--brand-2); }
+.rate-ring-wrap svg defs { /* add a gradient def in the SVG if you want a true multi-color stroke */ }
+
+/* Month summary bar: gradient fill */
+.month-summary .ms-bar-hard { background: linear-gradient(90deg, var(--brand-1), var(--brand-2)); }
+.month-summary .ms-bar-soft { background: linear-gradient(90deg, #94A3B8, #CBD5E1); }
+.month-summary {
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--card), var(--slate-soft) 180%);
+}
+
+/* College/Show selects: rounder + a touch taller */
+#review-college-select, #review-filter-select {
+  border-radius: 12px;
+  padding: 12px 14px;
+}
 </style>
 </head>
 <body>
@@ -1650,11 +1702,17 @@ body[data-theme="dark"] { --illustration-bg: #221A22; }
       </div>
       <div class="stat-card" style="cursor:default;">
   <div class="rate-ring-wrap">
-    <svg viewBox="0 0 54 54" width="54" height="54">
-      <circle class="rate-ring-bg" cx="27" cy="27" r="22"/>
-      <circle class="rate-ring-fg" id="review-rate-ring" cx="27" cy="27" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
-    </svg>
-    <div class="rate-ring-label" id="review-cnt-rate">0%</div>
+<svg viewBox="0 0 54 54" width="54" height="54">
+  <defs>
+    <linearGradient id="rateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D11AB3"/>
+      <stop offset="100%" stop-color="#F6A968"/>
+    </linearGradient>
+  </defs>
+  <circle class="rate-ring-bg" cx="27" cy="27" r="22"/>
+  <circle class="rate-ring-fg" id="review-rate-ring" cx="27" cy="27" r="22" stroke="url(#rateGrad)" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+</svg>
+   <div class="rate-ring-label" id="review-cnt-rate">0%</div>
   </div>
   <div class="stat-body">
     <div class="s-lbl">Review rate</div>
