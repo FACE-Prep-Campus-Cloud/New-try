@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FACE Prep Campus Help Desk — Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+ <style>
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -1357,7 +1359,8 @@ body[data-theme="dark"] { --illustration-bg: #221A22; }
 </div>
 <!-- ── PLATFORM SELECT (campus/senior manager only) ── -->
 <div id="platform-select-screen" class="hidden platform-wrap">
-  <div class="platform-float-icon pf-1" style="top:12%;left:7%;width:36px;height:36px;animation-duration:15s;" aria-hidden="true">
+  <div id="platform-vanta-bg" style="position:absolute;inset:0;z-index:0;pointer-events:none;"></div>
+ <div class="platform-float-icon pf-1" style="top:12%;left:7%;width:36px;height:36px;animation-duration:15s;" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3M16 2v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 13h5M8 17h8"/></svg>
   </div>
   <div class="platform-float-icon pf-2" style="top:18%;right:9%;width:30px;height:30px;animation-duration:18s;animation-delay:-3s;" aria-hidden="true">
@@ -3792,6 +3795,18 @@ function renderReviewSparkline(){
   const color = getComputedStyle(document.body).getPropertyValue('--violet').trim() || '#7C3AED';
   el.innerHTML = `<polyline points="${areaPts}" fill="${color}" opacity="0.12" stroke="none"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>`;
 }
+ let vantaBirdsEffect = null;
+function initVantaBirds(){
+  if(vantaBirdsEffect || typeof VANTA === 'undefined') return;
+  vantaBirdsEffect = VANTA.BIRDS({
+    el: "#platform-vanta-bg", mouseControls: true, touchControls: true, gyroControls: false,
+    minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00,
+    backgroundAlpha: 0.0, color1: 0x7c3aed, color2: 0xf6a968,
+    colorMode: "varianceGradient", birdSize: 1.2, wingSpan: 24,
+    speedLimit: 4, separation: 55, alignment: 45, cohesion: 45, quantity: 3
+  });
+}
+function destroyVantaBirds(){ if(vantaBirdsEffect){ vantaBirdsEffect.destroy(); vantaBirdsEffect = null; } }
 </script>
 </body>
 </html>
