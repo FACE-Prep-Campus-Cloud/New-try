@@ -1450,6 +1450,21 @@ body[data-theme="dark"] .dlog-topbar {
 }
 .ledger-stamp.hard { background: var(--amber-soft); }
 .ledger-stamp.soft { background: var(--slate-soft); }
+.platform-icon.p-amber { background: linear-gradient(135deg, var(--amber), #EF6E5C); }
+.platform-cards { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.snap-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px; }
+.snap-card { background: var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; }
+.snap-photo { width:100%; height:160px; object-fit:cover; cursor:zoom-in; display:block; background: var(--slate-soft); }
+.snap-body { padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+.snap-top { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.snap-class { font-size:13.5px; font-weight:700; color:var(--text); }
+.snap-date { font-size:11px; color:var(--text-faint); white-space:nowrap; flex-shrink:0; }
+.snap-teacher { font-size:12px; color:var(--text-light); }
+.snap-notes { font-size:12.5px; color:var(--text-light); line-height:1.5; }
+.snap-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px; flex-wrap:wrap; }
+.snap-logger { font-size:11.5px; color:var(--text-faint); }
+#snap-photo-preview-wrap img { display:block; }
 </style>
 </head>
 <body>
@@ -1638,6 +1653,19 @@ body[data-theme="dark"] .dlog-topbar {
         <h3 id="platform-second-title">Daily Activity Log</h3>
         <p id="platform-second-desc">Log your daily activities and track your progress over time.</p>
       </button>
+      <button class="platform-card" onclick="selectPlatform('classroomsnap')">
+        <div class="platform-card-top">
+          <div class="platform-icon p-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/>
+              <circle cx="12" cy="13" r="3.5"/>
+            </svg>
+          </div>
+          <span class="platform-count-badge pending hidden" id="platform-snap-badge"></span>
+        </div>
+        <h3 id="platform-third-title">Classroom Observation Log</h3>
+        <p id="platform-third-desc">Snap a photo during classroom visits and log what you observed.</p>
+      </button>
     </div>
     <div class="platform-streak hidden" id="platform-streak">
       <span aria-hidden="true">🔥</span> <span id="platform-streak-text"></span>
@@ -1734,6 +1762,68 @@ body[data-theme="dark"] .dlog-topbar {
         <div id="dlog-empty" class="empty-state hidden"><p>No entries yet. Add your first daily log above.</p></div>
       </div>
     </div>
+  </div>
+</div>
+<!-- ── CLASSROOM SNAP SCREEN ── -->
+<div id="classroom-snap-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="sky-clouds-bg" id="csnap-skywrap">
+    <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+      <path fill="#BFE0F5"><animate attributeName="d" dur="10s" repeatCount="indefinite" values="M0,55 Q75,40 150,55 T300,55 V100 H0 Z;M0,50 Q75,65 150,50 T300,50 V100 H0 Z;M0,55 Q75,40 150,55 T300,55 V100 H0 Z"/></path>
+      <path fill="#D8ECFA" opacity="0.85"><animate attributeName="d" dur="7s" repeatCount="indefinite" values="M0,70 Q75,58 150,70 T300,70 V100 H0 Z;M0,65 Q75,80 150,65 T300,65 V100 H0 Z;M0,70 Q75,58 150,70 T300,70 V100 H0 Z"/></path>
+    </svg>
+  </div>
+  <div class="dlog-topbar">
+    <div class="breadcrumb">Classroom Snap / <b id="csnap-breadcrumb-college">—</b></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <div class="dlog-body">
+    <div class="ledger-card hidden" id="csnap-form-block">
+      <div class="ledger-card-title">New classroom snap</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="field-label">Photo (required)</label>
+          <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
+          <div id="snap-photo-preview-wrap" class="hidden" style="margin-top:8px;">
+            <img id="snap-photo-preview" style="max-height:160px;border-radius:10px;border:1px solid var(--border);" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Class / Section</label>
+          <input id="snap-class" type="text" placeholder="e.g. II B.Com A" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Subject</label>
+          <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Teacher</label>
+          <input id="snap-teacher" type="text" placeholder="Teacher's name" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Observation notes</label>
+          <input id="snap-notes" type="text" placeholder="What did you observe during this visit?" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="snap-save-btn" onclick="saveClassroomSnap()">Upload snap</button>
+        <span id="snap-saved" class="saved-msg hidden">✓ Saved</span>
+      </div>
+    </div>
+    <div class="dlog-form-card hidden" id="csnap-college-filter-block">
+      <h3>Which college's snaps?</h3>
+      <div class="form-grid" style="margin-bottom:0;">
+        <div class="form-group">
+          <label class="field-label">College</label>
+          <select id="csnap-college-select" onchange="onSnapCollegeFilterChange(this.value)"></select>
+        </div>
+      </div>
+    </div>
+    <div class="ledger-section-label">Recent snaps</div>
+    <div class="snap-grid" id="csnap-grid"></div>
+    <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
   </div>
 </div>
 <!-- ── REVIEW PANEL (admin only) ── -->
@@ -2384,6 +2474,13 @@ let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed
 let reviewCalMonth = new Date();
 /* ── College pending-review counts (for review-college dropdown, added) ── */
 let collegePendingCounts = {}; // { collegeName: pendingCount }
+/* ══════════════════════════════════════════════════════════
+   ── CLASSROOM SNAP (added) ──
+   ══════════════════════════════════════════════════════════ */
+let classroomSnaps = [];
+let snapSelectedFile = null;
+let snapSaving = false;
+let snapReviewCollege = null;
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
   { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
@@ -2466,6 +2563,7 @@ function initSkyClouds(id, count){
 }
 initSkyClouds('dlog-skywrap', 6);
 initSkyClouds('review-skywrap', 6);
+initSkyClouds('csnap-skywrap', 6);
 /* ── Toasts ── */
 function showToast(msg){
   const stack = $('toast-stack');
@@ -2637,6 +2735,7 @@ function showPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
   hide('review-panel-screen');
+  hide('classroom-snap-screen');
   const isManager = sessionRole === 'manager';
   const isKam = sessionRole === 'kam';
   renderPlatformGreeting();
@@ -2649,6 +2748,10 @@ function showPlatformSelect(){
   $('platform-second-desc').textContent = isManager
     ? 'Log your daily activities and track your progress over time.'
     : "Review campus managers' daily activity logs, college by college.";
+  $('platform-third-title').textContent = isManager ? 'Classroom Observation Log' : 'ClassRoom Snap';
+  $('platform-third-desc').textContent = isManager
+    ? 'Snap a photo during classroom visits and log what you observed.'
+    : 'Browse classroom visit photos and observations logged by campus managers.';
  show('platform-select-screen');
   initPlatformCardTilt();
   initVantaBirds();
@@ -2749,12 +2852,15 @@ function selectPlatform(which){
   } else if(which === 'dailylog'){
     if(sessionRole === 'manager') enterDailyLog();
     else enterReviewPanel();
+  } else if(which === 'classroomsnap'){
+    enterClassroomSnap();
   }
 }
 function backToPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
   hide('review-panel-screen');
+  hide('classroom-snap-screen');
   destroyVantaBirds();
   showPlatformSelect();
 }
@@ -2808,6 +2914,8 @@ function collegeMatchesSession(ticketCollege){
 }
  function logout(){
   hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
+  hide('classroom-snap-screen');
+  classroomSnaps = []; snapReviewCollege = null;
   show('auth-screen');
   hide('pin-error');
   const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
@@ -3801,6 +3909,163 @@ if(callType === 'hard'){
   /* jump the calendar to the month of the entry just filed, so the new dot is visible immediately */
   dlogCalMonth = new Date(date + 'T00:00:00');
   loadDailyLogs();
+}
+/* ══════════════════════════════════════════════════════════
+   ── CLASSROOM SNAP (added) ──
+   ══════════════════════════════════════════════════════════ */
+function onSnapPhotoChange(input){
+  const file = input.files && input.files[0];
+  if(!file){ snapSelectedFile = null; hide('snap-photo-preview-wrap'); return; }
+  snapSelectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => { $('snap-photo-preview').src = e.target.result; show('snap-photo-preview-wrap'); };
+  reader.readAsDataURL(file);
+}
+
+async function enterClassroomSnap(){
+  hide('platform-select-screen');
+  hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen');
+  show('classroom-snap-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  const isManager = sessionRole === 'manager';
+  $('csnap-form-block').classList.toggle('hidden', !isManager);
+  $('csnap-college-filter-block').classList.toggle('hidden', isManager);
+  $('csnap-breadcrumb-college').textContent = isManager ? (sessionCollege || '—') : 'All colleges';
+  snapSelectedFile = null;
+  const fileInput = $('snap-photo-input'); if(fileInput) fileInput.value = '';
+  hide('snap-photo-preview-wrap');
+  if(!isManager) populateSnapCollegeSelect();
+  loadClassroomSnaps();
+}
+
+function populateSnapCollegeSelect(){
+  const sel = $('csnap-college-select');
+  if(!sel) return;
+  let names = collegeContacts.length ? collegeContacts.map(c => c.college) : COLLEGE_REGION_MAP.map(c => c.college);
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+    names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
+  }
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = '<option value="">All colleges</option>' +
+    uniqueSorted.map(n => `<option value="${escHTML(n)}">${escHTML(n)}</option>`).join('');
+  snapReviewCollege = sel.value || null;
+}
+
+function onSnapCollegeFilterChange(v){
+  snapReviewCollege = v || null;
+  loadClassroomSnaps();
+}
+
+async function loadClassroomSnaps(){
+  const grid = $('csnap-grid');
+  grid.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  try{
+    let query = sb.from('classroom_snaps').select('*').order('created_at', { ascending: false });
+    if(sessionRole === 'manager') query = query.eq('college', sessionCollege);
+    else if(snapReviewCollege) query = query.eq('college', snapReviewCollege);
+    const { data, error } = await query;
+    if(error) throw error;
+    let rows = data || [];
+    if(sessionRole === 'kam' && !snapReviewCollege) rows = rows.filter(r => collegeMatchesSession(r.college));
+    classroomSnaps = rows;
+    renderClassroomSnaps();
+  }catch(e){
+    console.error('Could not load classroom_snaps (has the table/bucket been created?):', e);
+    grid.innerHTML = '';
+    show('csnap-empty');
+    $('csnap-empty').innerHTML = `<p>Couldn't load snaps. Make sure the <b>classroom_snaps</b> table and <b>classroom-snaps</b> storage bucket exist.</p>`;
+  }
+}
+
+function renderClassroomSnaps(){
+  const grid = $('csnap-grid');
+  if(!classroomSnaps.length){
+    grid.innerHTML = '';
+    show('csnap-empty');
+    $('csnap-empty').innerHTML = '<p>No classroom snaps logged yet.</p>';
+    return;
+  }
+  hide('csnap-empty');
+  const isManager = sessionRole === 'manager';
+  grid.innerHTML = classroomSnaps.map(s => {
+    const reviewBadge = s.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
+      : `<span class="review-badge review-no">☐ Pending</span>`;
+    const reviewBtn = (!isManager && !s.reviewed)
+      ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
+    return `<div class="snap-card">
+      <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
+      <div class="snap-body">
+        <div class="snap-top">
+          <span class="snap-class">${escHTML(s.class_name||'—')}${s.subject?' · '+escHTML(s.subject):''}</span>
+          <span class="snap-date">${fmtRel(s.created_at)}</span>
+        </div>
+        ${s.teacher_name ? `<div class="snap-teacher">Teacher: ${escHTML(s.teacher_name)}</div>` : ''}
+        ${s.notes ? `<div class="snap-notes">${escHTML(s.notes)}</div>` : ''}
+        <div class="snap-foot">
+          <span class="snap-logger">${escHTML(s.manager_name||'—')}${!isManager && s.college ? ' · '+escHTML(s.college) : ''}</span>
+          ${reviewBadge}
+        </div>
+        ${reviewBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveClassroomSnap(){
+  if(snapSaving) return;
+  if(!snapSelectedFile){ showToast('Please attach a photo of the classroom'); return; }
+  const className = $('snap-class').value.trim();
+  const subject   = $('snap-subject').value.trim();
+  const teacher   = $('snap-teacher').value.trim();
+  const notes     = $('snap-notes').value.trim();
+  if(!className){ showToast('Please enter the class/section'); return; }
+  snapSaving = true;
+  const btn = $('snap-save-btn');
+  btn.disabled = true; btn.textContent = 'Uploading…';
+  try{
+    const ext = (snapSelectedFile.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${sessionCollege || 'unknown'}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('classroom-snaps').upload(path, snapSelectedFile, { cacheControl: '3600', upsert: false });
+    if(upErr) throw upErr;
+    const { data: pub } = sb.storage.from('classroom-snaps').getPublicUrl(path);
+    const rec = collegeContacts.find(c => c.college === sessionCollege);
+    const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+    const payload = {
+      college: sessionCollege,
+      manager_name: name || null,
+      class_name: className,
+      subject: subject || null,
+      teacher_name: teacher || null,
+      notes: notes || null,
+      photo_url: pub.publicUrl,
+    };
+    const { error } = await sb.from('classroom_snaps').insert(payload);
+    if(error) throw error;
+    $('snap-class').value=''; $('snap-subject').value=''; $('snap-teacher').value=''; $('snap-notes').value='';
+    $('snap-photo-input').value=''; snapSelectedFile=null; hide('snap-photo-preview-wrap');
+    const saved = $('snap-saved');
+    saved.style.color='var(--green)'; saved.textContent='✓ Saved'; show('snap-saved');
+    setTimeout(() => hide('snap-saved'), 1800);
+    loadClassroomSnaps();
+  }catch(e){
+    console.error(e);
+    showToast('Could not upload snap: ' + (e.message || 'check console'));
+  }finally{
+    snapSaving = false; btn.disabled = false; btn.textContent = 'Upload snap';
+  }
+}
+
+async function markSnapReviewed(id){
+  const reviewerName = window.prompt("Enter your name to confirm this review:");
+  if(!reviewerName || !reviewerName.trim()){ showToast('Reviewer name is required'); return; }
+  const payload = { reviewed: true, reviewed_by: reviewerName.trim(), reviewed_at: new Date().toISOString() };
+  const { error } = await sb.from('classroom_snaps').update(payload).eq('id', id);
+  if(error){ console.error(error); showToast('Could not mark as reviewed'); return; }
+  classroomSnaps = classroomSnaps.map(s => s.id === id ? { ...s, ...payload } : s);
+  renderClassroomSnaps();
+  showToast('Marked as reviewed');
 }
   /* ══════════════════════════════════════════════════════════
    ── REVIEW PANEL (admin only, added) ──
