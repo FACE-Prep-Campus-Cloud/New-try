@@ -3371,9 +3371,10 @@ function renderDailyLogs(){
     renderDlogCalendar();
     return;
   }
-  hide('dlog-empty');
-  listEl.innerHTML = dailyLogs.slice(0, 10).map(l => {
+ hide('dlog-empty');
+  listEl.innerHTML = dailyLogs.slice(0, DLOG_RECENT_LIMIT).map(l => {
     const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const DLOG_RECENT_LIMIT = 10;
     const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
     const callType = l.call_type || (cat ? cat.callType : 'soft');
     const dateStr = new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
