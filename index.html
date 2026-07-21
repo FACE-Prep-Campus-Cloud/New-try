@@ -1453,7 +1453,11 @@ body[data-theme="dark"] .dlog-topbar {
 .platform-icon.p-amber { background: linear-gradient(135deg, var(--amber), #EF6E5C); }
 .platform-cards { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 
-.snap-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px; }
+.snap-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap:16px;
+} display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px; }
 .snap-card { background: var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; }
 .snap-photo { width:100%; height:160px; object-fit:cover; cursor:zoom-in; display:block; background: var(--slate-soft); }
 .snap-body { padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
