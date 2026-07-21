@@ -1494,6 +1494,17 @@ body[data-theme="dark"] .dlog-topbar {
   color: var(--text-faint); font-weight: 700; margin: 6px 0 -4px; padding-top: 10px; border-top: 1px dashed var(--border);
 }
 .form-section-label:first-child { border-top: none; padding-top: 0; }
+  .snap-notes { cursor: pointer; border-radius: 8px; padding: 6px 8px; margin: 0 -8px; transition: background .12s; position: relative; }
+.snap-notes:hover { background: var(--slate-soft); }
+.snap-notes::after { content: 'View full observation →'; display:block; font-size:10.5px; font-weight:700; color: var(--blue); margin-top:4px; opacity:0; transition: opacity .12s; }
+.snap-notes:hover::after { opacity:1; }
+
+.snap-detail-photo { width:100%; max-height:360px; object-fit:cover; border-radius:12px; border:1px solid var(--border); cursor:zoom-in; display:block; margin-bottom:18px; }
+.snap-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; margin-bottom:18px; }
+.snap-detail-grid .full { grid-column: 1 / -1; }
+.snap-detail-item b { display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-faint); font-weight:700; margin-bottom:4px; }
+.snap-detail-item span { font-size:13.5px; color:var(--text); line-height:1.5; white-space:pre-wrap; }
+.snap-detail-item span.empty { color: var(--text-faint); font-style: italic; }
 </style>
 </head>
 <body>
@@ -2074,6 +2085,22 @@ body[data-theme="dark"] .dlog-topbar {
     </div>
   </div>
 </div>
+<div id="snap-detail-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeSnapDetailModal()">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="snap-detail-title"></div>
+        <div class="modal-meta" id="snap-detail-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeSnapDetailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <hr class="modal-div">
+      <div id="snap-detail-body"></div>
+    </div>
+  </div>
+</div>
+ 
 <!-- ── DASHBOARD ── -->
 <div id="admin-screen" class="hidden">
   <div class="shell">
@@ -4173,8 +4200,8 @@ function renderClassroomSnaps(){
           <span class="snap-date">${fmtRel(s.created_at)}</span>
         </div>
         ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
-        ${s.notes ? `<div class="snap-notes">${escHTML(s.notes)}</div>` : ''}
-        ${badgesHtml}
+${s.notes ? `<div class="snap-notes" onclick="event.stopPropagation();openSnapDetailModal('${s.id}')">${escHTML(s.notes)}</div>` : ''}
+${badgesHtml}
         ${detailsHtml}
         <div class="snap-foot">
           <span class="snap-logger">${escHTML(s.manager_name||'—')}${!isManager && s.college ? ' · '+escHTML(s.college) : ''}</span>
@@ -4186,6 +4213,58 @@ function renderClassroomSnaps(){
   }).join('');
 }
 
+ function snapDetailRow(label, value){
+  const v = (value === null || value === undefined || String(value).trim() === '') ? '' : value;
+  return `<div class="snap-detail-item"><b>${escHTML(label)}</b><span class="${v ? '' : 'empty'}">${v ? escHTML(v) : 'Not recorded'}</span></div>`;
+}
+function openSnapDetailModal(id){
+  const s = classroomSnaps.find(x => x.id === id);
+  if(!s) return;
+  $('snap-detail-title').textContent = `${s.class_name || 'Classroom Observation'}${s.subject ? ' · ' + s.subject : ''}`;
+  $('snap-detail-meta').textContent = `${s.college ? s.college + ' · ' : ''}${s.manager_name || '—'} · ${fmtRel(s.created_at)}`;
+  const reviewBadge = s.reviewed
+    ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
+    : `<span class="review-badge review-no">☐ Review pending</span>`;
+  const reviewBtn = (sessionRole !== 'manager' && !s.reviewed)
+    ? `<button class="btn btn-primary" style="margin-top:6px;" onclick="markSnapReviewed('${s.id}');closeSnapDetailModal();">Mark reviewed</button>`
+    : '';
+  $('snap-detail-body').innerHTML = `
+    ${s.photo_url ? `<img class="snap-detail-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">` : ''}
+    <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">${reviewBadge}</div>
+    <div class="snap-detail-grid">
+      ${snapDetailRow('Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '')}
+      ${snapDetailRow('Department', s.department)}
+      ${snapDetailRow('Class / Section', s.class_name)}
+      ${snapDetailRow('Year / Batch', s.year_batch)}
+      ${snapDetailRow('Subject', s.subject)}
+      ${snapDetailRow('Mentor', s.teacher_name)}
+      ${snapDetailRow('Presentation', s.presentation)}
+      ${snapDetailRow('Communication', s.communication)}
+      ${snapDetailRow('Classroom control', s.classroom_control)}
+      ${snapDetailRow('Subject knowledge', s.subject_knowledge)}
+      <div class="snap-detail-item full">${snapDetailRow('Session interaction', s.session_interaction)}</div>
+      <div class="snap-detail-item full">${snapDetailRow('Content delivery — live class demo', s.content_delivery)}</div>
+      <div class="snap-detail-item full">${snapDetailRow('Activity / explanation', s.activity_explanation)}</div>
+      ${snapDetailRow('Schedule plan execution', s.schedule_execution)}
+      ${snapDetailRow('Study material shared', s.material_shared)}
+      <div class="snap-detail-item full">${snapDetailRow('Comments / observation notes', s.notes)}</div>
+      <div class="snap-detail-item full">${snapDetailRow("Students' feedback", s.student_feedback)}</div>
+    </div>
+    ${reviewBtn}
+  `;
+  show('snap-detail-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeSnapDetailModal(){
+  hide('snap-detail-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('snap-detail-modal') && !$('snap-detail-modal').classList.contains('hidden')){
+    closeSnapDetailModal();
+  }
+});
+ 
 async function saveClassroomSnap(){
   if(snapSaving) return;
   if(!snapSelectedFile){ showToast('Please attach a photo of the classroom'); return; }
