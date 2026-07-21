@@ -4128,33 +4128,10 @@ if(callType === 'hard'){
    ── CLASSROOM SNAP (added) ──
    ══════════════════════════════════════════════════════════ */
 /* Fuzzy-resolve a college's department list the same way resolveRegion() works */
-function resolveDepartmentList(collegeName){
-  const norm = normalizeCollege(collegeName);
-  if(!norm) return [];
-  const keys = Object.keys(COLLEGE_DEPARTMENTS);
-  let hit = keys.find(k => normalizeCollege(k) === norm);
-  if(hit) return COLLEGE_DEPARTMENTS[hit];
-  hit = keys.find(k => { const kn = normalizeCollege(k); return norm.includes(kn) || kn.includes(norm); });
-  if(hit) return COLLEGE_DEPARTMENTS[hit];
-  const normWords = new Set(norm.split(' ').filter(w => w.length > 2));
-  let best = null, bestScore = 0;
-  keys.forEach(k => {
-    const kWords = normalizeCollege(k).split(' ').filter(w => w.length > 2);
-    const overlap = kWords.filter(w => normWords.has(w)).length;
-    const score = overlap / Math.max(kWords.length, 1);
-    if(score > bestScore){ bestScore = score; best = k; }
-  });
-  if(best && bestScore >= 0.6) return COLLEGE_DEPARTMENTS[best];
-  return [];
-}
 
 function populateSnapDepartmentSelect(){
-  const sel = $('snap-department');
-  if(!sel) return;
-  const list = resolveDepartmentList(sessionCollege);
-  sel.innerHTML = list.length
-    ? '<option value="">Select department / class</option>' + list.map(d => `<option value="${escHTML(d)}">${escHTML(d)}</option>`).join('')
-    : '<option value="">No departments configured for this college</option>';
+  const el = $('snap-department');
+  if(el) el.value = '';
 }
 
 function onSnapPhotoChange(input){
