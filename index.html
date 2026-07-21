@@ -4235,8 +4235,6 @@ function onSnapCollegeFilterChange(v){
 }
 
 async function loadClassroomSnaps(){
-  const grid = $('csnap-grid');
-  grid.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
   try{
     let query = sb.from('classroom_snaps').select('*').order('created_at', { ascending: false });
     if(sessionRole === 'manager') query = query.eq('college', sessionCollege);
@@ -4249,12 +4247,10 @@ async function loadClassroomSnaps(){
     renderClassroomSnaps();
   }catch(e){
     console.error('Could not load classroom_snaps (has the table/bucket been created?):', e);
-    grid.innerHTML = '';
     show('csnap-empty');
     $('csnap-empty').innerHTML = `<p>Couldn't load snaps. Make sure the <b>classroom_snaps</b> table and <b>classroom-snaps</b> storage bucket exist.</p>`;
   }
 }
-
 const RATING_LABELS = {
   rating_punctuality: 'Punctuality',
   rating_professionalism: 'Professionalism',
