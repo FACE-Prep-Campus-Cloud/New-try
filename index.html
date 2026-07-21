@@ -1995,52 +1995,6 @@ body[data-theme="dark"] .dlog-topbar {
     <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
   </div>
  
- <div class="dlog-layout" id="csnap-layout">
-      <div>
-        <div class="review-cal-topbar">
-          <span style="font-size:14px;color:var(--text-light);font-weight:600;">Classroom snap calendar</span>
-          <div class="review-cal-nav">
-            <button class="review-cal-nav-btn" onclick="csnapCalShift(-1)" aria-label="Previous month">‹</button>
-            <span class="review-cal-month-label" id="csnap-cal-month-label">—</span>
-            <button class="review-cal-nav-btn" onclick="csnapCalShift(1)" aria-label="Next month">›</button>
-            <button class="btn btn-ghost" onclick="csnapCalToday()">Today</button>
-          </div>
-        </div>
-        <div class="review-calendar">
-          <div class="review-cal-weekdays">
-            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-          </div>
-          <div class="review-cal-grid" id="csnap-cal-grid"></div>
-        </div>
-        <div class="review-cal-legend">
-          <span><span class="cal-dot" style="background:var(--amber)"></span>Snap logged</span>
-          <span>✓ Reviewed</span>
-        </div>
-        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a day to see that day's snaps.</div>
-      </div>
-
-      <div>
-        <div class="ledger-card hidden" id="csnap-form-block">
-          <div class="ledger-card-title">Classroom Observation</div>
-          <div class="snap-form-grid">
-            <!-- keep all the existing form fields exactly as they are -->
-          </div>
-          <div class="modal-actions">
-            <button class="btn btn-primary" id="snap-save-btn" onclick="saveClassroomSnap()">Upload</button>
-            <span id="snap-saved" class="saved-msg hidden">✓ Saved</span>
-          </div>
-        </div>
-        <div class="dlog-form-card hidden" id="csnap-college-filter-block">
-          <h3>Which college's snaps?</h3>
-          <div class="form-grid" style="margin-bottom:0;">
-            <div class="form-group">
-              <label class="field-label">College</label>
-              <select id="csnap-college-select" onchange="onSnapCollegeFilterChange(this.value)"></select>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
   <div class="sky-clouds-bg" id="review-skywrap">
