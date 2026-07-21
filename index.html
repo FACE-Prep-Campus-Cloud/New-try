@@ -1946,25 +1946,48 @@ body[data-theme="dark"] .dlog-topbar {
     </div>
   </details>
 </div>
-     <div class="modal-actions">
-        <button class="btn btn-primary" id="snap-save-btn" onclick="saveClassroomSnap()">Upload</button>
-        <span id="snap-saved" class="saved-msg hidden">✓ Saved</span>
-      </div>
-    </div>
-    <div class="dlog-form-card hidden" id="csnap-college-filter-block">
-      <h3>Which college's snaps?</h3>
-      <div class="form-grid" style="margin-bottom:0;">
-        <div class="form-group">
-          <label class="field-label">College</label>
-          <select id="csnap-college-select" onchange="onSnapCollegeFilterChange(this.value)"></select>
+<div class="modal-actions">
+            <button class="btn btn-primary" id="snap-save-btn" onclick="saveClassroomSnap()">Upload</button>
+            <span id="snap-saved" class="saved-msg hidden">✓ Saved</span>
+          </div>
+        </div>
+        <div class="dlog-form-card hidden" id="csnap-college-filter-block">
+          <h3>Which college's snaps?</h3>
+          <div class="form-grid" style="margin-bottom:0;">
+            <div class="form-group">
+              <label class="field-label">College</label>
+              <select id="csnap-college-select" onchange="onSnapCollegeFilterChange(this.value)"></select>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div>
+        <div class="review-cal-topbar">
+          <span style="font-size:14px;color:var(--text-light);font-weight:600;">Classroom snap calendar</span>
+          <div class="review-cal-nav">
+            <button class="review-cal-nav-btn" onclick="csnapCalShift(-1)" aria-label="Previous month">‹</button>
+            <span class="review-cal-month-label" id="csnap-cal-month-label">—</span>
+            <button class="review-cal-nav-btn" onclick="csnapCalShift(1)" aria-label="Next month">›</button>
+            <button class="btn btn-ghost" onclick="csnapCalToday()">Today</button>
+          </div>
+        </div>
+        <div class="review-calendar">
+          <div class="review-cal-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="review-cal-grid" id="csnap-cal-grid"></div>
+        </div>
+        <div class="review-cal-legend">
+          <span><span class="cal-dot" style="background:var(--amber)"></span>Snap logged</span>
+          <span>✓ Reviewed</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a day to see that day's snaps.</div>
+      </div>
     </div>
-    <div class="ledger-section-label">Recent snaps</div>
-    <div class="snap-grid" id="csnap-grid"></div>
     <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
   </div>
-</div>
+    </div>
 <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
   <div class="sky-clouds-bg" id="review-skywrap">
@@ -2107,6 +2130,21 @@ body[data-theme="dark"] .dlog-topbar {
     <div class="modal-body">
       <hr class="modal-div">
       <div id="dlog-day-modal-entries"></div>
+    </div>
+  </div>
+</div>
+ <div id="csnap-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCsnapDayModal()">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="csnap-day-modal-title"></div>
+        <div class="modal-meta" id="csnap-day-modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeCsnapDayModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <hr class="modal-div">
+      <div class="snap-grid" id="csnap-day-modal-entries"></div>
     </div>
   </div>
 </div>
@@ -2636,7 +2674,9 @@ let classroomSnaps = [];
 let snapSelectedFile = null;
 let snapSaving = false;
 let snapReviewCollege = null;
-let snapLocation = null; // { lat, lng, accuracy } captured when the photo is taken
+let snapLocation = null; 
+ let csnapCalMonth = new Date();
+ // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
   { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
@@ -4154,6 +4194,7 @@ async function enterClassroomSnap(){
   $('csnap-breadcrumb-college').textContent = isManager ? (sessionCollege || '—') : 'All colleges';
   snapSelectedFile = null;
   snapLocation = null;
+ csnapCalMonth = new Date();
   const fileInput = $('snap-photo-input'); if(fileInput) fileInput.value = '';
   hide('snap-photo-preview-wrap');
   if($('snap-location-status')) $('snap-location-status').textContent = '';
@@ -4225,69 +4266,154 @@ function ratingBadgeTone(v){
   return '';
 }
 
+ function buildSnapCardHtml(s){
+  const isManager = sessionRole === 'manager';
+  const reviewBadge = s.reviewed
+    ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
+    : `<span class="review-badge review-no">☐ Pending</span>`;
+  const reviewBtn = (!isManager && !s.reviewed)
+    ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
+
+  const ratingFields = Object.keys(RATING_LABELS).filter(k => s[k]);
+  const badgesHtml = ratingFields.length ? `<div class="snap-eval-badges">${ratingFields.map(k =>
+    `<span class="snap-eval-badge ${ratingBadgeTone(s[k])}">${escHTML(RATING_LABELS[k])}: ${escHTML(s[k])}/5</span>`).join('')}</div>` : '';
+
+  const detailFields = [
+    ['Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : null],
+    ['Department', s.department],
+    ['Course', s.course_type],
+    ['Course name', s.course_name || s.subject],
+    ['Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : null],
+    ['Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : null],
+    ['Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : null],
+    ['Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : null],
+    ['Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : null],
+    ['Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : null],
+    ['Remarks', s.notes],
+  ].filter(([,v]) => v);
+  const detailsHtml = detailFields.length ? `
+    <details class="snap-eval-details">
+      <summary>Full evaluation</summary>
+      <div class="snap-eval-grid">
+        ${detailFields.map(([label,val]) => `<div class="snap-eval-row"><b>${escHTML(label)}</b><span>${escHTML(val)}</span></div>`).join('')}
+      </div>
+    </details>` : '';
+
+  return `<div class="snap-card">
+    <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
+    <div class="snap-body">
+      <div class="snap-top">
+        <span class="snap-class">${s.department ? escHTML(s.department) : '—'}</span>
+        <span class="snap-date">${fmtRel(s.created_at)}</span>
+      </div>
+      ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
+      ${s.course_name || s.subject ? `<div class="snap-teacher">${escHTML(s.course_type||'')}${s.course_type?' · ':''}${escHTML(s.course_name||s.subject)}</div>` : ''}
+      ${s.notes ? `<div class="snap-notes" onclick="event.stopPropagation();openSnapDetailModal('${s.id}')">${escHTML(s.notes)}</div>` : ''}
+      ${badgesHtml}
+      ${detailsHtml}
+      <div class="snap-foot">
+        <span class="snap-logger">${escHTML(s.manager_name||'—')}${sessionRole !== 'manager' && s.college ? ' · '+escHTML(s.college) : ''}</span>
+        ${reviewBadge}
+      </div>
+      ${reviewBtn}
+    </div>
+  </div>`;
+}
+
 function renderClassroomSnaps(){
-  const grid = $('csnap-grid');
   if(!classroomSnaps.length){
-    grid.innerHTML = '';
     show('csnap-empty');
     $('csnap-empty').innerHTML = '<p>No classroom snaps logged yet.</p>';
-    return;
+  } else {
+    hide('csnap-empty');
   }
-  hide('csnap-empty');
-  const isManager = sessionRole === 'manager';
-  grid.innerHTML = classroomSnaps.map(s => {
-    const reviewBadge = s.reviewed
-      ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
-      : `<span class="review-badge review-no">☐ Pending</span>`;
-    const reviewBtn = (!isManager && !s.reviewed)
-      ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
+  renderCsnapCalendar();
+}
 
-    const ratingFields = Object.keys(RATING_LABELS).filter(k => s[k]);
-    const badgesHtml = ratingFields.length ? `<div class="snap-eval-badges">${ratingFields.map(k =>
-      `<span class="snap-eval-badge ${ratingBadgeTone(s[k])}">${escHTML(RATING_LABELS[k])}: ${escHTML(s[k])}/5</span>`).join('')}</div>` : '';
+ function snapDateKey(s){
+  return s.observation_date ? String(s.observation_date).slice(0,10) : String(s.created_at).slice(0,10);
+}
+function csnapCalShift(delta){
+  csnapCalMonth = new Date(csnapCalMonth.getFullYear(), csnapCalMonth.getMonth()+delta, 1);
+  renderCsnapCalendar();
+}
+function csnapCalToday(){
+  csnapCalMonth = new Date();
+  renderCsnapCalendar();
+}
+function renderCsnapCalendar(){
+  const label = $('csnap-cal-month-label');
+  if(label) label.textContent = csnapCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
 
-    const detailFields = [
-      ['Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : null],
-      ['Department', s.department],
-      ['Course', s.course_type],
-      ['Course name', s.course_name || s.subject],
-      ['Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : null],
-      ['Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : null],
-      ['Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : null],
-      ['Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : null],
-      ['Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : null],
-      ['Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : null],
-      ['Remarks', s.notes],
-    ].filter(([,v]) => v);
-    const detailsHtml = detailFields.length ? `
-      <details class="snap-eval-details">
-        <summary>Full evaluation</summary>
-        <div class="snap-eval-grid">
-          ${detailFields.map(([label,val]) => `<div class="snap-eval-row"><b>${escHTML(label)}</b><span>${escHTML(val)}</span></div>`).join('')}
-        </div>
-      </details>` : '';
+  const byDate = {};
+  classroomSnaps.forEach(s => {
+    const key = snapDateKey(s);
+    (byDate[key] = byDate[key] || []).push(s);
+  });
 
-    return `<div class="snap-card">
-      <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
-      <div class="snap-body">
-        <div class="snap-top">
-          <span class="snap-class">${s.department ? escHTML(s.department) : '—'}</span>
-          <span class="snap-date">${fmtRel(s.created_at)}</span>
-        </div>
-        ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
-        ${s.course_name || s.subject ? `<div class="snap-teacher">${escHTML(s.course_type||'')}${s.course_type?' · ':''}${escHTML(s.course_name||s.subject)}</div>` : ''}
-${s.notes ? `<div class="snap-notes" onclick="event.stopPropagation();openSnapDetailModal('${s.id}')">${escHTML(s.notes)}</div>` : ''}
-${badgesHtml}
-        ${detailsHtml}
-        <div class="snap-foot">
-          <span class="snap-logger">${escHTML(s.manager_name||'—')}${!isManager && s.college ? ' · '+escHTML(s.college) : ''}</span>
-          ${reviewBadge}
-        </div>
-        ${reviewBtn}
-      </div>
+  const year = csnapCalMonth.getFullYear();
+  const month = csnapCalMonth.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  let startOffset = firstOfMonth.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const todayKey = ymd(new Date());
+
+  const cells = [];
+  for(let i=startOffset; i>0; i--){
+    cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push({ date: new Date(year, month, d), outside:false });
+  }
+  while(cells.length % 7 !== 0 || cells.length < 42){
+    const last = cells[cells.length-1].date;
+    cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
+  }
+
+  const grid = $('csnap-cal-grid');
+  if(!grid) return;
+  const maxShow = 3;
+  grid.innerHTML = cells.map(cell => {
+    const key = ymd(cell.date);
+    const dayEntries = byDate[key] || [];
+    const isToday = key === todayKey;
+    const pillsHtml = dayEntries.slice(0, maxShow).map(s => {
+      const label = s.department || s.course_name || s.subject || 'Snap';
+      return `<div class="review-cal-pill" title="${escHTML(label)}">
+        <span class="cal-dot" style="background:var(--amber)"></span>
+        <span>${escHTML(label)}</span>
+        ${s.reviewed ? '<span class="cal-check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+    const moreHtml = dayEntries.length > maxShow ? `<div class="review-cal-more">+${dayEntries.length - maxShow} more</div>` : '';
+    return `<div class="review-cal-cell ${cell.outside ? 'outside' : ''} ${isToday ? 'is-today' : ''}" onclick="openCsnapDayModal('${key}')">
+      <span class="review-cal-daynum">${cell.date.getDate()}</span>
+      ${pillsHtml}
+      ${moreHtml}
     </div>`;
   }).join('');
 }
+function openCsnapDayModal(dateKey){
+  const dayEntries = classroomSnaps.filter(s => snapDateKey(s) === dateKey);
+  if(!dayEntries.length) return;
+  const dateObj = new Date(dateKey + 'T00:00:00');
+  $('csnap-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  $('csnap-day-modal-meta').textContent = `${dayEntries.length} snap${dayEntries.length===1?'':'s'} · ${sessionCollege || ''}`;
+  $('csnap-day-modal-entries').innerHTML = dayEntries.map(buildSnapCardHtml).join('');
+  show('csnap-day-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeCsnapDayModal(){
+  hide('csnap-day-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('csnap-day-modal') && !$('csnap-day-modal').classList.contains('hidden')){
+    closeCsnapDayModal();
+  }
+});
 
  function snapDetailRow(label, value){
   const v = (value === null || value === undefined || String(value).trim() === '') ? '' : value;
