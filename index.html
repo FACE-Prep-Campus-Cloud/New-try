@@ -261,20 +261,20 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
 input::placeholder { color: var(--text-faint); }
 input:disabled, select:disabled { background: var(--slate-soft); color: var(--text-faint); cursor: not-allowed; }
-#dlog-date, #dlog-name {
+#dlog-date, #dlog-name, #snap-obs-date {
   cursor: not-allowed;
   background: var(--slate-soft);
   color: var(--text-light);
 }
-#dlog-date:hover, #dlog-name:hover {
+#dlog-date:hover, #dlog-name:hover, #snap-obs-date:hover {
   border-color: var(--border);
 }
-#dlog-date:focus, #dlog-name:focus {
+#dlog-date:focus, #dlog-name:focus, #snap-obs-date:focus {
   border-color: var(--border);
   box-shadow: none;
 }
 /* hide/disable the calendar picker icon so it can't be clicked open */
-#dlog-date::-webkit-calendar-picker-indicator {
+#dlog-date::-webkit-calendar-picker-indicator, #snap-obs-date::-webkit-calendar-picker-indicator {
   opacity: 0.35;
   pointer-events: none;
 }
@@ -1846,15 +1846,11 @@ body[data-theme="dark"] .dlog-topbar {
 
   <div class="form-group">
     <label class="field-label">Observation date</label>
-    <input id="snap-obs-date" type="date" />
+    <input id="snap-obs-date" type="date" readonly />
   </div>
   <div class="form-group">
     <label class="field-label">Department</label>
     <input id="snap-department" type="text" placeholder="e.g. BCA" />
-  </div>
-  <div class="form-group">
-    <label class="field-label">Class / Section</label>
-    <input id="snap-class" type="text" placeholder="e.g. II B.Com A" />
   </div>
   <div class="form-group">
     <label class="field-label">Year / Batch</label>
@@ -4105,7 +4101,7 @@ async function enterClassroomSnap(){
     /* default the observation date to today; clear the evaluation fields for a fresh entry */
     const obsDateEl = $('snap-obs-date');
     if(obsDateEl) obsDateEl.value = new Date().toISOString().slice(0,10);
-    ['snap-department','snap-class','snap-year','snap-subject','snap-teacher',
+    ['snap-department','snap-year','snap-subject','snap-teacher',
      'snap-presentation','snap-communication','snap-classroom-control','snap-subject-knowledge',
      'snap-session-interaction','snap-content-delivery','snap-activity-explanation',
      'snap-schedule-execution','snap-material-shared','snap-notes','snap-student-feedback'
@@ -4217,7 +4213,7 @@ function renderClassroomSnaps(){
       <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
       <div class="snap-body">
         <div class="snap-top">
-          <span class="snap-class">${escHTML(s.class_name||'—')}${s.subject?' · '+escHTML(s.subject):''}</span>
+          <span class="snap-class">${s.subject ? escHTML(s.subject) : '—'}</span>
           <span class="snap-date">${fmtRel(s.created_at)}</span>
         </div>
         ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
@@ -4241,7 +4237,7 @@ ${badgesHtml}
 function openSnapDetailModal(id){
   const s = classroomSnaps.find(x => x.id === id);
   if(!s) return;
-  $('snap-detail-title').textContent = `${s.class_name || 'Classroom Observation'}${s.subject ? ' · ' + s.subject : ''}`;
+  $('snap-detail-title').textContent = s.subject ? `Classroom Observation · ${s.subject}` : 'Classroom Observation';
   $('snap-detail-meta').textContent = `${s.college ? s.college + ' · ' : ''}${s.manager_name || '—'} · ${fmtRel(s.created_at)}`;
   const reviewBadge = s.reviewed
     ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
@@ -4255,7 +4251,6 @@ function openSnapDetailModal(id){
     <div class="snap-detail-grid">
       ${snapDetailRow('Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '')}
       ${snapDetailRow('Department', s.department)}
-      ${snapDetailRow('Class / Section', s.class_name)}
       ${snapDetailRow('Year / Batch', s.year_batch)}
       ${snapDetailRow('Subject', s.subject)}
       ${snapDetailRow('Mentor', s.teacher_name)}
@@ -4289,11 +4284,12 @@ document.addEventListener('keydown', e => {
 async function saveClassroomSnap(){
   if(snapSaving) return;
   if(!snapSelectedFile){ showToast('Please attach a photo of the classroom'); return; }
-  const className = $('snap-class').value.trim();
   const subject   = $('snap-subject').value.trim();
   const teacher   = $('snap-teacher').value.trim();
   const notes     = $('snap-notes').value.trim();
-  const obsDate            = $('snap-obs-date').value || null;
+  // Always derive the date from the trusted system clock — never trust the input's
+  // value, even though it's readonly (readonly fields can still be tampered with via devtools).
+  const obsDate   = new Date().toISOString().slice(0,10);
   const department         = $('snap-department').value.trim();
   const year                = $('snap-year').value.trim();
   const presentation        = $('snap-presentation').value.trim();
@@ -4306,7 +4302,6 @@ async function saveClassroomSnap(){
   const scheduleExecution   = $('snap-schedule-execution').value.trim();
   const materialShared      = $('snap-material-shared').value.trim();
   const studentFeedback     = $('snap-student-feedback').value.trim();
-  if(!className){ showToast('Please enter the class/section'); return; }
   snapSaving = true;
   const btn = $('snap-save-btn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -4321,7 +4316,7 @@ async function saveClassroomSnap(){
     const payload = {
       college: sessionCollege,
       manager_name: name || null,
-      class_name: className,
+      class_name: null,
       subject: subject || null,
       teacher_name: teacher || null,
       notes: notes || null,
@@ -4344,7 +4339,7 @@ async function saveClassroomSnap(){
     };
     const { error } = await sb.from('classroom_snaps').insert(payload);
     if(error) throw error;
-    $('snap-class').value=''; $('snap-subject').value=''; $('snap-teacher').value=''; $('snap-notes').value='';
+    $('snap-subject').value=''; $('snap-teacher').value=''; $('snap-notes').value='';
     $('snap-department').value=''; $('snap-year').value='';
     $('snap-presentation').value=''; $('snap-communication').value=''; $('snap-classroom-control').value='';
     $('snap-subject-knowledge').value=''; $('snap-session-interaction').value=''; $('snap-content-delivery').value='';
