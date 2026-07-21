@@ -1465,6 +1465,35 @@ body[data-theme="dark"] .dlog-topbar {
 .snap-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px; flex-wrap:wrap; }
 .snap-logger { font-size:11.5px; color:var(--text-faint); }
 #snap-photo-preview-wrap img { display:block; }
+
+/* ── Mentor evaluation fields (added) ── */
+.snap-eval-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+.snap-eval-badge {
+  display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700;
+  padding:3px 9px; border-radius:999px; background: var(--slate-soft); color: var(--text-light);
+  border:1px solid var(--border); white-space:nowrap;
+}
+.snap-eval-badge.good { background: var(--green-soft); color: var(--green); border-color: transparent; }
+.snap-eval-badge.warn { background: var(--amber-soft); color: var(--amber); border-color: transparent; }
+.snap-eval-details {
+  margin-top: 6px; border: 1px solid var(--border); border-radius: 10px; background: var(--slate-soft);
+}
+.snap-eval-details summary {
+  cursor: pointer; padding: 8px 12px; font-size: 12px; font-weight: 700; color: var(--text-light);
+  list-style: none; display: flex; align-items: center; gap: 6px;
+}
+.snap-eval-details summary::-webkit-details-marker { display: none; }
+.snap-eval-details summary::before { content: '▸'; transition: transform .15s; }
+.snap-eval-details[open] summary::before { transform: rotate(90deg); }
+.snap-eval-grid { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.snap-eval-row { font-size: 12px; line-height: 1.5; }
+.snap-eval-row b { color: var(--text); font-weight: 700; display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-faint); margin-bottom: 1px; }
+.snap-eval-row span { color: var(--text-light); }
+.form-section-label {
+  grid-column: 1 / -1; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-faint); font-weight: 700; margin: 6px 0 -4px; padding-top: 10px; border-top: 1px dashed var(--border);
+}
+.form-section-label:first-child { border-top: none; padding-top: 0; }
 </style>
 </head>
 <body>
@@ -1791,20 +1820,94 @@ body[data-theme="dark"] .dlog-topbar {
           </div>
         </div>
         <div class="form-group">
+          <label class="field-label">Observation date</label>
+          <input id="snap-obs-date" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Department</label>
+          <input id="snap-department" type="text" placeholder="e.g. BCA" />
+        </div>
+        <div class="form-group">
           <label class="field-label">Class / Section</label>
           <input id="snap-class" type="text" placeholder="e.g. II B.Com A" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Year / Batch</label>
+          <input id="snap-year" type="text" placeholder="e.g. II or I-A Batch" />
         </div>
         <div class="form-group">
           <label class="field-label">Subject</label>
           <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
         </div>
-        <div class="form-group full">
+        <div class="form-group">
           <label class="field-label">Mentor</label>
           <input id="snap-teacher" type="text" placeholder="Mentor name" />
         </div>
+
+        <div class="form-section-label">Mentor evaluation</div>
+        <div class="form-group">
+          <label class="field-label">Presentation</label>
+          <input id="snap-presentation" type="text" list="dl-presentation" placeholder="e.g. Laptop, Projector & Blackboard" />
+          <datalist id="dl-presentation">
+            <option value="Laptop, Projector & Blackboard"></option>
+            <option value="Blackboard only"></option>
+            <option value="Laptop & Projector"></option>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Communication</label>
+          <input id="snap-communication" type="text" list="dl-communication" placeholder="e.g. Tamil / English / Bilingual" />
+          <datalist id="dl-communication">
+            <option value="Tamil"></option>
+            <option value="English"></option>
+            <option value="Bilingual"></option>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Classroom control</label>
+          <input id="snap-classroom-control" type="text" list="dl-rating" placeholder="e.g. Good / Moderate" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Subject knowledge</label>
+          <input id="snap-subject-knowledge" type="text" list="dl-rating" placeholder="e.g. Good / Moderate" />
+          <datalist id="dl-rating">
+            <option value="Good"></option>
+            <option value="Moderate"></option>
+            <option value="Needs Improvement"></option>
+          </datalist>
+        </div>
         <div class="form-group full">
-          <label class="field-label">Observation notes</label>
+          <label class="field-label">Session interaction</label>
+          <input id="snap-session-interaction" type="text" placeholder="How the mentor engaged students during the session" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Content delivery — live class demo</label>
+          <input id="snap-content-delivery" type="text" placeholder="How the class content was delivered" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Activity / explanation</label>
+          <input id="snap-activity-explanation" type="text" placeholder="e.g. No Activity - oral explanation" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Schedule plan execution</label>
+          <input id="snap-schedule-execution" type="text" list="dl-yesno" placeholder="e.g. Yes / No" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Study material shared</label>
+          <input id="snap-material-shared" type="text" list="dl-yesno" placeholder="e.g. Yes / No" />
+          <datalist id="dl-yesno">
+            <option value="Yes"></option>
+            <option value="No"></option>
+            <option value="Partial"></option>
+          </datalist>
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Comments / observation notes</label>
           <input id="snap-notes" type="text" placeholder="What did you observe during this visit?" />
+        </div>
+        <div class="form-group full">
+          <label class="field-label">Students' feedback (optional)</label>
+          <input id="snap-student-feedback" type="text" placeholder="Feedback gathered from students, if any" />
         </div>
       </div>
       <div class="modal-actions">
@@ -3950,7 +4053,18 @@ async function enterClassroomSnap(){
   snapSelectedFile = null;
   const fileInput = $('snap-photo-input'); if(fileInput) fileInput.value = '';
   hide('snap-photo-preview-wrap');
-  if(!isManager) populateSnapCollegeSelect();
+  if(isManager){
+    /* default the observation date to today; clear the evaluation fields for a fresh entry */
+    const obsDateEl = $('snap-obs-date');
+    if(obsDateEl) obsDateEl.value = new Date().toISOString().slice(0,10);
+    ['snap-department','snap-class','snap-year','snap-subject','snap-teacher',
+     'snap-presentation','snap-communication','snap-classroom-control','snap-subject-knowledge',
+     'snap-session-interaction','snap-content-delivery','snap-activity-explanation',
+     'snap-schedule-execution','snap-material-shared','snap-notes','snap-student-feedback'
+    ].forEach(id => { const el = $(id); if(el) el.value = ''; });
+  } else {
+    populateSnapCollegeSelect();
+  }
   loadClassroomSnaps();
 }
 
@@ -3994,6 +4108,15 @@ async function loadClassroomSnaps(){
   }
 }
 
+/* ── Small helper: pick a badge tone for common rating-style values ── */
+function evalBadgeTone(val){
+  const v = String(val||'').toLowerCase();
+  if(!v) return '';
+  if(v.includes('good') || v === 'yes') return 'good';
+  if(v.includes('moderate') || v.includes('improvement') || v === 'no' || v.includes('partial')) return 'warn';
+  return '';
+}
+
 function renderClassroomSnaps(){
   const grid = $('csnap-grid');
   if(!classroomSnaps.length){
@@ -4010,6 +4133,38 @@ function renderClassroomSnaps(){
       : `<span class="review-badge review-no">☐ Pending</span>`;
     const reviewBtn = (!isManager && !s.reviewed)
       ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
+
+    /* quick-glance evaluation badges */
+    const quickFields = [
+      ['Classroom control', s.classroom_control],
+      ['Subject knowledge', s.subject_knowledge],
+      ['Schedule execution', s.schedule_execution],
+      ['Material shared', s.material_shared],
+    ].filter(([,v]) => v);
+    const badgesHtml = quickFields.length ? `<div class="snap-eval-badges">${quickFields.map(([label,val]) =>
+      `<span class="snap-eval-badge ${evalBadgeTone(val)}">${escHTML(label)}: ${escHTML(val)}</span>`).join('')}</div>` : '';
+
+    /* full evaluation, collapsed by default */
+    const detailFields = [
+      ['Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : null],
+      ['Department', s.department],
+      ['Year / Batch', s.year_batch],
+      ['Presentation', s.presentation],
+      ['Communication', s.communication],
+      ['Session interaction', s.session_interaction],
+      ['Content delivery — live class demo', s.content_delivery],
+      ['Activity / explanation', s.activity_explanation],
+      ['Comments', s.comments],
+      ["Students' feedback", s.student_feedback],
+    ].filter(([,v]) => v);
+    const detailsHtml = detailFields.length ? `
+      <details class="snap-eval-details">
+        <summary>Full evaluation</summary>
+        <div class="snap-eval-grid">
+          ${detailFields.map(([label,val]) => `<div class="snap-eval-row"><b>${escHTML(label)}</b><span>${escHTML(val)}</span></div>`).join('')}
+        </div>
+      </details>` : '';
+
     return `<div class="snap-card">
       <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
       <div class="snap-body">
@@ -4017,8 +4172,10 @@ function renderClassroomSnaps(){
           <span class="snap-class">${escHTML(s.class_name||'—')}${s.subject?' · '+escHTML(s.subject):''}</span>
           <span class="snap-date">${fmtRel(s.created_at)}</span>
         </div>
-        ${s.teacher_name ? `<div class="snap-teacher">Teacher: ${escHTML(s.teacher_name)}</div>` : ''}
+        ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
         ${s.notes ? `<div class="snap-notes">${escHTML(s.notes)}</div>` : ''}
+        ${badgesHtml}
+        ${detailsHtml}
         <div class="snap-foot">
           <span class="snap-logger">${escHTML(s.manager_name||'—')}${!isManager && s.college ? ' · '+escHTML(s.college) : ''}</span>
           ${reviewBadge}
@@ -4036,6 +4193,19 @@ async function saveClassroomSnap(){
   const subject   = $('snap-subject').value.trim();
   const teacher   = $('snap-teacher').value.trim();
   const notes     = $('snap-notes').value.trim();
+  const obsDate            = $('snap-obs-date').value || null;
+  const department         = $('snap-department').value.trim();
+  const year                = $('snap-year').value.trim();
+  const presentation        = $('snap-presentation').value.trim();
+  const communication        = $('snap-communication').value.trim();
+  const classroomControl    = $('snap-classroom-control').value.trim();
+  const subjectKnowledge    = $('snap-subject-knowledge').value.trim();
+  const sessionInteraction  = $('snap-session-interaction').value.trim();
+  const contentDelivery     = $('snap-content-delivery').value.trim();
+  const activityExplanation = $('snap-activity-explanation').value.trim();
+  const scheduleExecution   = $('snap-schedule-execution').value.trim();
+  const materialShared      = $('snap-material-shared').value.trim();
+  const studentFeedback     = $('snap-student-feedback').value.trim();
   if(!className){ showToast('Please enter the class/section'); return; }
   snapSaving = true;
   const btn = $('snap-save-btn');
@@ -4056,10 +4226,31 @@ async function saveClassroomSnap(){
       teacher_name: teacher || null,
       notes: notes || null,
       photo_url: pub.publicUrl,
+      observation_date: obsDate,
+      department: department || null,
+      mentor_name: teacher || null,
+      year_batch: year || null,
+      presentation: presentation || null,
+      communication: communication || null,
+      classroom_control: classroomControl || null,
+      subject_knowledge: subjectKnowledge || null,
+      session_interaction: sessionInteraction || null,
+      content_delivery: contentDelivery || null,
+      activity_explanation: activityExplanation || null,
+      schedule_execution: scheduleExecution || null,
+      material_shared: materialShared || null,
+      comments: notes || null,
+      student_feedback: studentFeedback || null,
     };
     const { error } = await sb.from('classroom_snaps').insert(payload);
     if(error) throw error;
     $('snap-class').value=''; $('snap-subject').value=''; $('snap-teacher').value=''; $('snap-notes').value='';
+    $('snap-department').value=''; $('snap-year').value='';
+    $('snap-presentation').value=''; $('snap-communication').value=''; $('snap-classroom-control').value='';
+    $('snap-subject-knowledge').value=''; $('snap-session-interaction').value=''; $('snap-content-delivery').value='';
+    $('snap-activity-explanation').value=''; $('snap-schedule-execution').value=''; $('snap-material-shared').value='';
+    $('snap-student-feedback').value='';
+    $('snap-obs-date').value = new Date().toISOString().slice(0,10);
     $('snap-photo-input').value=''; snapSelectedFile=null; hide('snap-photo-preview-wrap');
     const saved = $('snap-saved');
     saved.style.color='var(--green)'; saved.textContent='✓ Saved'; show('snap-saved');
