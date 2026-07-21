@@ -1469,6 +1469,16 @@ body[data-theme="dark"] .dlog-topbar {
 .snap-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px; flex-wrap:wrap; }
 .snap-logger { font-size:11.5px; color:var(--text-faint); }
 #snap-photo-preview-wrap img { display:block; }
+  .csnap-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.csnap-stat-tile{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow-sm);}
+.csnap-stat-tile .cst-label{font-size:10.5px;color:var(--text-light);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.csnap-stat-tile .cst-val{font-size:20px;font-weight:800;margin-top:3px;color:var(--text);}
+.csnap-needs-review-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 6px;border-bottom:1px dashed var(--border);cursor:pointer;border-radius:8px;transition:background .12s;}
+.csnap-needs-review-row:last-child{border-bottom:none;}
+.csnap-needs-review-row:hover{background:var(--slate-soft);}
+.csnap-nr-title{font-size:13px;font-weight:600;color:var(--text);}
+.csnap-nr-sub{font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+.csnap-nr-empty{font-size:12.5px;color:var(--text-faint);padding:8px 4px;}
 
 /* ── Mentor evaluation fields (added) ── */
 .snap-eval-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
@@ -1991,6 +2001,14 @@ body[data-theme="dark"] .dlog-topbar {
       </div>
 
     </div>
+<div id="csnap-sidebar-summary">
+  <div class="csnap-stats-row" id="csnap-stats-row"></div>
+  <div class="ledger-card" id="csnap-needs-review-card" style="margin-top:14px;">
+    <div class="ledger-card-title">Needs review</div>
+    <div id="csnap-needs-review-list"></div>
+  </div>
+</div>
+ 
     <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
   </div>
  </div>
@@ -3146,6 +3164,46 @@ reviewLogs = []; reviewCollege = null; reviewCallFilter = 'all';
   destroyVantaBirds();
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
+ function renderCsnapSidebarSummary(){
+  const statsRow = $('csnap-stats-row');
+  const listEl = $('csnap-needs-review-list');
+  if(!statsRow || !listEl) return;
+
+  const total = classroomSnaps.length;
+  const pending = classroomSnaps.filter(s => !s.reviewed).length;
+  const now = new Date();
+  const thisMonth = classroomSnaps.filter(s => {
+    const d = new Date(s.created_at);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+
+  statsRow.innerHTML = `
+    <div class="csnap-stat-tile"><div class="cst-label">Total snaps</div><div class="cst-val">${total}</div></div>
+    <div class="csnap-stat-tile"><div class="cst-label">Pending review</div><div class="cst-val" style="color:${pending>0?'var(--amber)':'var(--text)'}">${pending}</div></div>
+    <div class="csnap-stat-tile"><div class="cst-label">This month</div><div class="cst-val">${thisMonth}</div></div>`;
+
+  const needsReview = classroomSnaps
+    .filter(s => !s.reviewed)
+    .sort((a,b) => new Date(a.created_at) - new Date(b.created_at))
+    .slice(0, 6);
+
+  if(!needsReview.length){
+    listEl.innerHTML = `<div class="csnap-nr-empty">Nothing pending — all caught up.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = needsReview.map(s => {
+    const label = s.department || s.course_name || s.subject || 'Classroom snap';
+    const collegeBit = (sessionRole !== 'manager' && s.college) ? escHTML(s.college) + ' · ' : '';
+    return `<div class="csnap-needs-review-row" onclick="openSnapDetailModal('${s.id}')">
+      <div>
+        <div class="csnap-nr-title">${collegeBit}${escHTML(label)}</div>
+        <div class="csnap-nr-sub">${s.teacher_name ? escHTML(s.teacher_name) + ' · ' : ''}${fmtRel(s.created_at)}</div>
+      </div>
+      <span style="color:var(--text-faint);">›</span>
+    </div>`;
+  }).join('');
+}
 /* ── Sidebar ── */
 function toggleSidebar(){ $('sidebar').classList.toggle('collapsed'); }
 function toggleGroup(id){ $(id).classList.toggle('open'); }
@@ -4174,6 +4232,7 @@ async function enterClassroomSnap(){
   const isManager = sessionRole === 'manager';
   $('csnap-form-block').classList.toggle('hidden', !isManager);
   $('csnap-college-filter-block').classList.toggle('hidden', isManager);
+ $('csnap-sidebar-summary').classList.toggle('hidden', isManager);
   $('csnap-breadcrumb-college').textContent = isManager ? (sessionCollege || '—') : 'All colleges';
   snapSelectedFile = null;
   snapLocation = null;
@@ -4310,6 +4369,8 @@ function renderClassroomSnaps(){
     hide('csnap-empty');
   }
   renderCsnapCalendar();
+   renderCsnapSidebarSummary();   // ← add this line
+
 }
 
  function snapDateKey(s){
