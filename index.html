@@ -4247,10 +4247,13 @@ async function loadClassroomSnaps(){
     renderClassroomSnaps();
   }catch(e){
     console.error('Could not load classroom_snaps (has the table/bucket been created?):', e);
+    classroomSnaps = [];
+    renderClassroomSnaps(); // <-- add this so the calendar grid still draws itself
     show('csnap-empty');
     $('csnap-empty').innerHTML = `<p>Couldn't load snaps. Make sure the <b>classroom_snaps</b> table and <b>classroom-snaps</b> storage bucket exist.</p>`;
   }
 }
+ 
 const RATING_LABELS = {
   rating_punctuality: 'Punctuality',
   rating_professionalism: 'Professionalism',
