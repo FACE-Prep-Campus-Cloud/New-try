@@ -151,7 +151,7 @@ body[data-theme="dark"] .auth-blob.b3 { background: #16A34A; opacity: 0.5; }
   50%      { transform: translateY(-8px) rotate(-1deg); }
 }
 .char-body {
-  border-radius: 34px 34px 10px 10px;
+  border-radius: 34px 34px 10px 13px;
   box-shadow: 0 18px 30px -14px rgba(20,21,26,0.35);
   position: relative;
 }
@@ -1836,103 +1836,111 @@ body[data-theme="dark"] .dlog-topbar {
     <div class="ledger-card hidden" id="csnap-form-block">
       <div class="ledger-card-title">Classroom Observation</div>
 <div class="snap-form-grid">
+  <div class="form-group">
+    <label class="field-label">Mentor Name</label>
+    <input id="snap-teacher" type="text" placeholder="Mentor name" />
+  </div>
+  <div class="form-group">
+    <label class="field-label">Class Observed — Department</label>
+    <select id="snap-department">
+      <option value="">Select department / class</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="field-label">Course</label>
+    <select id="snap-course-type">
+      <option value="">Select course type</option>
+      <option value="Academic Paper">Academic Paper</option>
+      <option value="Skill Paper">Skill Paper</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="field-label">Course Name</label>
+    <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
+  </div>
+
   <div class="form-group full">
-    <label class="field-label">Photo of the on going class (mandatory) </label>
+    <label class="field-label">Live location photo upload (mandatory)</label>
     <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
     <div id="snap-photo-preview-wrap" class="hidden" style="margin-top:8px;">
       <img id="snap-photo-preview" style="max-height:140px;border-radius:10px;border:1px solid var(--border);" />
     </div>
-  </div>
-
-  <div class="form-group">
-    <label class="field-label">Observation date</label>
-    <input id="snap-obs-date" type="date" readonly />
-  </div>
-  <div class="form-group">
-    <label class="field-label">Department</label>
-    <input id="snap-department" type="text" placeholder="e.g. BCA" />
-  </div>
-  <div class="form-group">
-    <label class="field-label">Year / Batch</label>
-    <input id="snap-year" type="text" placeholder="e.g. II or I-A Batch" />
-  </div>
-  <div class="form-group">
-    <label class="field-label">Subject</label>
-    <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
-  </div>
-  <div class="form-group">
-    <label class="field-label">Mentor</label>
-    <input id="snap-teacher" type="text" placeholder="Mentor name" />
+    <div id="snap-location-status" style="font-size:11.5px;color:var(--text-faint);margin-top:6px;"></div>
   </div>
 
   <details class="snap-eval-toggle" open>
-    <summary>Mentor evaluation</summary>
+    <summary>Mentor evaluation (rate each 1–5)</summary>
     <div class="snap-eval-toggle-body">
       <div class="snap-form-grid" style="margin-top:8px;">
         <div class="form-group">
-          <label class="field-label">Presentation</label>
-          <input id="snap-presentation" type="text" list="dl-presentation" placeholder="e.g. Laptop, Projector & Blackboard" />
-          <datalist id="dl-presentation">
-            <option value="Laptop, Projector & Blackboard"></option>
-            <option value="Blackboard only"></option>
-            <option value="Laptop & Projector"></option>
-          </datalist>
+          <label class="field-label" title="Reports to class on time and prepared before session begins">Punctuality</label>
+          <select id="snap-punctuality">
+            <option value="">Rate 1–5</option>
+            <option value="5">5 — Always on time, fully prepared</option>
+            <option value="4">4 — Usually on time, minor delays</option>
+            <option value="3">3 — Sometimes late, occasionally affects session</option>
+            <option value="2">2 — Frequently late, needs reminders</option>
+            <option value="1">1 — Consistently late/absent without notice</option>
+          </select>
         </div>
         <div class="form-group">
-          <label class="field-label">Communication</label>
-          <input id="snap-communication" type="text" list="dl-communication" placeholder="e.g. Tamil / English / Bilingual" />
-          <datalist id="dl-communication">
-            <option value="Tamil"></option>
-            <option value="English"></option>
-            <option value="Bilingual"></option>
-          </datalist>
+          <label class="field-label" title="Attire, grooming, courtesy, professional conduct">Professionalism (Attire &amp; Behaviour)</label>
+          <select id="snap-professionalism">
+            <option value="">Rate 1–5</option>
+            <option value="5">5 — Always professional, well-groomed, courteous</option>
+            <option value="4">4 — Formal attire, good behaviour, minor gaps</option>
+            <option value="3">3 — Acceptable but inconsistent</option>
+            <option value="2">2 — Casual/inappropriate, needs improvement</option>
+            <option value="1">1 — Unprofessional, negatively affects class</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="field-label" title="Voice audibility, confidence, English communication, classroom control, time management. For Tamil-medium subjects, English communication may be N/A.">Class Handling</label>
+          <select id="snap-class-handling">
+            <option value="">Rate 1–5</option>
+            <option value="5">5 — Excellent clarity, confidence, control, on time</option>
+            <option value="4">4 — Good communication and management, minor gaps</option>
+            <option value="3">3 — Adequate but inconsistent</option>
+            <option value="2">2 — Difficulty with communication/control/time</option>
+            <option value="1">1 — Poor communication, control, and time management</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="field-label" title="How well the mentor connects theory with practical application">Skill Development / Hands-on Delivery</label>
+          <select id="snap-skill-development">
+            <option value="">Rate 1–5</option>
+            <option value="5">5 — Excellent hands-on examples &amp; demonstrations</option>
+            <option value="4">4 — Frequently relates concepts to practice</option>
+            <option value="3">3 — Some practical examples, mostly theoretical</option>
+            <option value="2">2 — Very limited practical exposure</option>
+            <option value="1">1 — No practical explanation, entirely theoretical</option>
+          </select>
         </div>
         <div class="form-group">
-          <label class="field-label">Classroom control</label>
-          <input id="snap-classroom-control" type="text" list="dl-rating" placeholder="e.g. Good / Moderate" />
+          <label class="field-label" title="Questioning, discussions, activities, interactive teaching">Student Engagement</label>
+          <select id="snap-student-engagement">
+            <option value="">Rate 1–5</option>
+            <option value="5">5 — Highly engaged throughout</option>
+            <option value="4">4 — Engaged most of the session</option>
+            <option value="3">3 — Moderate, limited to a few students</option>
+            <option value="2">2 — Low participation</option>
+            <option value="1">1 — No interaction, disengaged</option>
+          </select>
         </div>
         <div class="form-group">
-          <label class="field-label">Subject knowledge</label>
-          <input id="snap-subject-knowledge" type="text" list="dl-rating" placeholder="e.g. Good / Moderate" />
-          <datalist id="dl-rating">
-            <option value="Good"></option>
-            <option value="Moderate"></option>
-            <option value="Needs Improvement"></option>
-          </datalist>
-        </div>
-        <div class="form-group">
-          <label class="field-label">Schedule plan execution</label>
-          <input id="snap-schedule-execution" type="text" list="dl-yesno" placeholder="e.g. Yes / No" />
-        </div>
-        <div class="form-group">
-          <label class="field-label">Study material shared</label>
-          <input id="snap-material-shared" type="text" list="dl-yesno" placeholder="e.g. Yes / No" />
-          <datalist id="dl-yesno">
-            <option value="Yes"></option>
-            <option value="No"></option>
-            <option value="Partial"></option>
-          </datalist>
-        </div>
-
-        <div class="form-group full">
-          <label class="field-label">Session interaction</label>
-          <input id="snap-session-interaction" type="text" placeholder="How the mentor engaged students during the session" />
+          <label class="field-label" title="Daily task assigned, previous task reviewed, feedback given">Tasks Given &amp; Follow-up</label>
+          <select id="snap-tasks-followup">
+            <option value="">Rate 1–5</option>
+            <option value="5">5 — Consistent tasks, thorough review, good feedback</option>
+            <option value="4">4 — Regular tasks, minor gaps in review</option>
+            <option value="3">3 — Occasional tasks, inconsistent follow-up</option>
+            <option value="2">2 — Rarely assigned/reviewed</option>
+            <option value="1">1 — No tasks, no review, no feedback</option>
+          </select>
         </div>
         <div class="form-group full">
-          <label class="field-label">Content delivery — live class demo</label>
-          <input id="snap-content-delivery" type="text" placeholder="How the class content was delivered" />
-        </div>
-        <div class="form-group full">
-          <label class="field-label">Activity / explanation</label>
-          <input id="snap-activity-explanation" type="text" placeholder="e.g. No Activity - oral explanation" />
-        </div>
-        <div class="form-group full">
-          <label class="field-label">Comments / observation notes</label>
-          <input id="snap-notes" type="text" placeholder="What did you observe during this visit?" />
-        </div>
-        <div class="form-group full">
-          <label class="field-label">Students' feedback (optional)</label>
-          <input id="snap-student-feedback" type="text" placeholder="Feedback gathered from students, if any" />
+          <label class="field-label">Additional remarks (optional)</label>
+          <input id="snap-notes" type="text" placeholder="Anything else worth noting" />
         </div>
       </div>
     </div>
@@ -2628,6 +2636,7 @@ let classroomSnaps = [];
 let snapSelectedFile = null;
 let snapSaving = false;
 let snapReviewCollege = null;
+let snapLocation = null; // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
   { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
@@ -4076,6 +4085,36 @@ if(callType === 'hard'){
 /* ══════════════════════════════════════════════════════════
    ── CLASSROOM SNAP (added) ──
    ══════════════════════════════════════════════════════════ */
+/* Fuzzy-resolve a college's department list the same way resolveRegion() works */
+function resolveDepartmentList(collegeName){
+  const norm = normalizeCollege(collegeName);
+  if(!norm) return [];
+  const keys = Object.keys(COLLEGE_DEPARTMENTS);
+  let hit = keys.find(k => normalizeCollege(k) === norm);
+  if(hit) return COLLEGE_DEPARTMENTS[hit];
+  hit = keys.find(k => { const kn = normalizeCollege(k); return norm.includes(kn) || kn.includes(norm); });
+  if(hit) return COLLEGE_DEPARTMENTS[hit];
+  const normWords = new Set(norm.split(' ').filter(w => w.length > 2));
+  let best = null, bestScore = 0;
+  keys.forEach(k => {
+    const kWords = normalizeCollege(k).split(' ').filter(w => w.length > 2);
+    const overlap = kWords.filter(w => normWords.has(w)).length;
+    const score = overlap / Math.max(kWords.length, 1);
+    if(score > bestScore){ bestScore = score; best = k; }
+  });
+  if(best && bestScore >= 0.6) return COLLEGE_DEPARTMENTS[best];
+  return [];
+}
+
+function populateSnapDepartmentSelect(){
+  const sel = $('snap-department');
+  if(!sel) return;
+  const list = resolveDepartmentList(sessionCollege);
+  sel.innerHTML = list.length
+    ? '<option value="">Select department / class</option>' + list.map(d => `<option value="${escHTML(d)}">${escHTML(d)}</option>`).join('')
+    : '<option value="">No departments configured for this college</option>';
+}
+
 function onSnapPhotoChange(input){
   const file = input.files && input.files[0];
   if(!file){ snapSelectedFile = null; hide('snap-photo-preview-wrap'); return; }
@@ -4083,6 +4122,25 @@ function onSnapPhotoChange(input){
   const reader = new FileReader();
   reader.onload = e => { $('snap-photo-preview').src = e.target.result; show('snap-photo-preview-wrap'); };
   reader.readAsDataURL(file);
+
+  const statusEl = $('snap-location-status');
+  snapLocation = null;
+  if(statusEl) statusEl.textContent = 'Capturing live location…';
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        snapLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+        if(statusEl) statusEl.textContent = `📍 Location captured (±${Math.round(pos.coords.accuracy)}m)`;
+      },
+      err => {
+        console.error('Geolocation failed:', err);
+        if(statusEl) statusEl.textContent = '⚠ Could not capture location — check location permission';
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  } else if(statusEl){
+    statusEl.textContent = '⚠ Location not supported on this device';
+  }
 }
 
 async function enterClassroomSnap(){
@@ -4095,16 +4153,15 @@ async function enterClassroomSnap(){
   $('csnap-college-filter-block').classList.toggle('hidden', isManager);
   $('csnap-breadcrumb-college').textContent = isManager ? (sessionCollege || '—') : 'All colleges';
   snapSelectedFile = null;
+  snapLocation = null;
   const fileInput = $('snap-photo-input'); if(fileInput) fileInput.value = '';
   hide('snap-photo-preview-wrap');
+  if($('snap-location-status')) $('snap-location-status').textContent = '';
   if(isManager){
-    /* default the observation date to today; clear the evaluation fields for a fresh entry */
-    const obsDateEl = $('snap-obs-date');
-    if(obsDateEl) obsDateEl.value = new Date().toISOString().slice(0,10);
-    ['snap-department','snap-year','snap-subject','snap-teacher',
-     'snap-presentation','snap-communication','snap-classroom-control','snap-subject-knowledge',
-     'snap-session-interaction','snap-content-delivery','snap-activity-explanation',
-     'snap-schedule-execution','snap-material-shared','snap-notes','snap-student-feedback'
+    populateSnapDepartmentSelect();
+    ['snap-teacher','snap-course-type','snap-subject',
+     'snap-punctuality','snap-professionalism','snap-class-handling',
+     'snap-skill-development','snap-student-engagement','snap-tasks-followup','snap-notes'
     ].forEach(id => { const el = $(id); if(el) el.value = ''; });
   } else {
     populateSnapCollegeSelect();
@@ -4152,12 +4209,19 @@ async function loadClassroomSnaps(){
   }
 }
 
-/* ── Small helper: pick a badge tone for common rating-style values ── */
-function evalBadgeTone(val){
-  const v = String(val||'').toLowerCase();
-  if(!v) return '';
-  if(v.includes('good') || v === 'yes') return 'good';
-  if(v.includes('moderate') || v.includes('improvement') || v === 'no' || v.includes('partial')) return 'warn';
+const RATING_LABELS = {
+  rating_punctuality: 'Punctuality',
+  rating_professionalism: 'Professionalism',
+  rating_class_handling: 'Class Handling',
+  rating_skill_development: 'Skill Development',
+  rating_student_engagement: 'Student Engagement',
+  rating_tasks_followup: 'Tasks & Follow-up',
+};
+function ratingBadgeTone(v){
+  const n = Number(v);
+  if(!n) return '';
+  if(n >= 4) return 'good';
+  if(n <= 2) return 'warn';
   return '';
 }
 
@@ -4178,28 +4242,22 @@ function renderClassroomSnaps(){
     const reviewBtn = (!isManager && !s.reviewed)
       ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
 
-    /* quick-glance evaluation badges */
-    const quickFields = [
-      ['Classroom control', s.classroom_control],
-      ['Subject knowledge', s.subject_knowledge],
-      ['Schedule execution', s.schedule_execution],
-      ['Material shared', s.material_shared],
-    ].filter(([,v]) => v);
-    const badgesHtml = quickFields.length ? `<div class="snap-eval-badges">${quickFields.map(([label,val]) =>
-      `<span class="snap-eval-badge ${evalBadgeTone(val)}">${escHTML(label)}: ${escHTML(val)}</span>`).join('')}</div>` : '';
+    const ratingFields = Object.keys(RATING_LABELS).filter(k => s[k]);
+    const badgesHtml = ratingFields.length ? `<div class="snap-eval-badges">${ratingFields.map(k =>
+      `<span class="snap-eval-badge ${ratingBadgeTone(s[k])}">${escHTML(RATING_LABELS[k])}: ${escHTML(s[k])}/5</span>`).join('')}</div>` : '';
 
-    /* full evaluation, collapsed by default */
     const detailFields = [
       ['Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : null],
       ['Department', s.department],
-      ['Year / Batch', s.year_batch],
-      ['Presentation', s.presentation],
-      ['Communication', s.communication],
-      ['Session interaction', s.session_interaction],
-      ['Content delivery — live class demo', s.content_delivery],
-      ['Activity / explanation', s.activity_explanation],
-      ['Comments', s.comments],
-      ["Students' feedback", s.student_feedback],
+      ['Course', s.course_type],
+      ['Course name', s.course_name || s.subject],
+      ['Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : null],
+      ['Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : null],
+      ['Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : null],
+      ['Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : null],
+      ['Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : null],
+      ['Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : null],
+      ['Remarks', s.notes],
     ].filter(([,v]) => v);
     const detailsHtml = detailFields.length ? `
       <details class="snap-eval-details">
@@ -4213,10 +4271,11 @@ function renderClassroomSnaps(){
       <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
       <div class="snap-body">
         <div class="snap-top">
-          <span class="snap-class">${s.subject ? escHTML(s.subject) : '—'}</span>
+          <span class="snap-class">${s.department ? escHTML(s.department) : '—'}</span>
           <span class="snap-date">${fmtRel(s.created_at)}</span>
         </div>
         ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
+        ${s.course_name || s.subject ? `<div class="snap-teacher">${escHTML(s.course_type||'')}${s.course_type?' · ':''}${escHTML(s.course_name||s.subject)}</div>` : ''}
 ${s.notes ? `<div class="snap-notes" onclick="event.stopPropagation();openSnapDetailModal('${s.id}')">${escHTML(s.notes)}</div>` : ''}
 ${badgesHtml}
         ${detailsHtml}
@@ -4237,7 +4296,7 @@ ${badgesHtml}
 function openSnapDetailModal(id){
   const s = classroomSnaps.find(x => x.id === id);
   if(!s) return;
-  $('snap-detail-title').textContent = s.subject ? `Classroom Observation · ${s.subject}` : 'Classroom Observation';
+  $('snap-detail-title').textContent = s.department ? `Classroom Observation · ${s.department}` : 'Classroom Observation';
   $('snap-detail-meta').textContent = `${s.college ? s.college + ' · ' : ''}${s.manager_name || '—'} · ${fmtRel(s.created_at)}`;
   const reviewBadge = s.reviewed
     ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
@@ -4250,21 +4309,18 @@ function openSnapDetailModal(id){
     <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">${reviewBadge}</div>
     <div class="snap-detail-grid">
       ${snapDetailRow('Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '')}
-      ${snapDetailRow('Department', s.department)}
-      ${snapDetailRow('Year / Batch', s.year_batch)}
-      ${snapDetailRow('Subject', s.subject)}
       ${snapDetailRow('Mentor', s.teacher_name)}
-      ${snapDetailRow('Presentation', s.presentation)}
-      ${snapDetailRow('Communication', s.communication)}
-      ${snapDetailRow('Classroom control', s.classroom_control)}
-      ${snapDetailRow('Subject knowledge', s.subject_knowledge)}
-      <div class="snap-detail-item full">${snapDetailRow('Session interaction', s.session_interaction)}</div>
-      <div class="snap-detail-item full">${snapDetailRow('Content delivery — live class demo', s.content_delivery)}</div>
-      <div class="snap-detail-item full">${snapDetailRow('Activity / explanation', s.activity_explanation)}</div>
-      ${snapDetailRow('Schedule plan execution', s.schedule_execution)}
-      ${snapDetailRow('Study material shared', s.material_shared)}
-      <div class="snap-detail-item full">${snapDetailRow('Comments / observation notes', s.notes)}</div>
-      <div class="snap-detail-item full">${snapDetailRow("Students' feedback", s.student_feedback)}</div>
+      ${snapDetailRow('Department', s.department)}
+      ${snapDetailRow('Course', s.course_type)}
+      ${snapDetailRow('Course Name', s.course_name || s.subject)}
+      ${snapDetailRow('Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : '')}
+      ${snapDetailRow('Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : '')}
+      ${snapDetailRow('Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : '')}
+      ${snapDetailRow('Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : '')}
+      ${snapDetailRow('Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : '')}
+      ${snapDetailRow('Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : '')}
+      <div class="snap-detail-item full">${snapDetailRow('Remarks', s.notes)}</div>
+      ${s.photo_lat ? snapDetailRow('Photo location', `${Number(s.photo_lat).toFixed(5)}, ${Number(s.photo_lng).toFixed(5)}`) : ''}
     </div>
     ${reviewBtn}
   `;
@@ -4283,25 +4339,23 @@ document.addEventListener('keydown', e => {
  
 async function saveClassroomSnap(){
   if(snapSaving) return;
-  if(!snapSelectedFile){ showToast('Please attach a photo of the classroom'); return; }
-  const subject   = $('snap-subject').value.trim();
-  const teacher   = $('snap-teacher').value.trim();
-  const notes     = $('snap-notes').value.trim();
-  // Always derive the date from the trusted system clock — never trust the input's
-  // value, even though it's readonly (readonly fields can still be tampered with via devtools).
-  const obsDate   = new Date().toISOString().slice(0,10);
-  const department         = $('snap-department').value.trim();
-  const year                = $('snap-year').value.trim();
-  const presentation        = $('snap-presentation').value.trim();
-  const communication        = $('snap-communication').value.trim();
-  const classroomControl    = $('snap-classroom-control').value.trim();
-  const subjectKnowledge    = $('snap-subject-knowledge').value.trim();
-  const sessionInteraction  = $('snap-session-interaction').value.trim();
-  const contentDelivery     = $('snap-content-delivery').value.trim();
-  const activityExplanation = $('snap-activity-explanation').value.trim();
-  const scheduleExecution   = $('snap-schedule-execution').value.trim();
-  const materialShared      = $('snap-material-shared').value.trim();
-  const studentFeedback     = $('snap-student-feedback').value.trim();
+  if(!snapSelectedFile){ showToast('Please attach a live location photo of the classroom'); return; }
+
+  const teacher      = $('snap-teacher').value.trim();
+  const department    = $('snap-department').value;
+  const courseType    = $('snap-course-type').value;
+  const courseName    = $('snap-subject').value.trim();
+  const punctuality        = $('snap-punctuality').value || null;
+  const professionalism    = $('snap-professionalism').value || null;
+  const classHandling      = $('snap-class-handling').value || null;
+  const skillDevelopment   = $('snap-skill-development').value || null;
+  const studentEngagement  = $('snap-student-engagement').value || null;
+  const tasksFollowup      = $('snap-tasks-followup').value || null;
+  const notes = $('snap-notes').value.trim();
+  const obsDate = new Date().toISOString().slice(0,10);
+
+  if(!department){ showToast('Please select the department / class observed'); return; }
+
   snapSaving = true;
   const btn = $('snap-save-btn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -4316,37 +4370,36 @@ async function saveClassroomSnap(){
     const payload = {
       college: sessionCollege,
       manager_name: name || null,
-      class_name: null,
-      subject: subject || null,
+      class_name: department || null,
+      subject: courseName || null,
       teacher_name: teacher || null,
+      mentor_name: teacher || null,
       notes: notes || null,
+      comments: notes || null,
       photo_url: pub.publicUrl,
       observation_date: obsDate,
       department: department || null,
-      mentor_name: teacher || null,
-      year_batch: year || null,
-      presentation: presentation || null,
-      communication: communication || null,
-      classroom_control: classroomControl || null,
-      subject_knowledge: subjectKnowledge || null,
-      session_interaction: sessionInteraction || null,
-      content_delivery: contentDelivery || null,
-      activity_explanation: activityExplanation || null,
-      schedule_execution: scheduleExecution || null,
-      material_shared: materialShared || null,
-      comments: notes || null,
-      student_feedback: studentFeedback || null,
+      course_type: courseType || null,
+      course_name: courseName || null,
+      photo_lat: snapLocation ? snapLocation.lat : null,
+      photo_lng: snapLocation ? snapLocation.lng : null,
+      photo_location_accuracy: snapLocation ? snapLocation.accuracy : null,
+      rating_punctuality: punctuality,
+      rating_professionalism: professionalism,
+      rating_class_handling: classHandling,
+      rating_skill_development: skillDevelopment,
+      rating_student_engagement: studentEngagement,
+      rating_tasks_followup: tasksFollowup,
     };
     const { error } = await sb.from('classroom_snaps').insert(payload);
     if(error) throw error;
-    $('snap-subject').value=''; $('snap-teacher').value=''; $('snap-notes').value='';
-    $('snap-department').value=''; $('snap-year').value='';
-    $('snap-presentation').value=''; $('snap-communication').value=''; $('snap-classroom-control').value='';
-    $('snap-subject-knowledge').value=''; $('snap-session-interaction').value=''; $('snap-content-delivery').value='';
-    $('snap-activity-explanation').value=''; $('snap-schedule-execution').value=''; $('snap-material-shared').value='';
-    $('snap-student-feedback').value='';
-    $('snap-obs-date').value = new Date().toISOString().slice(0,10);
-    $('snap-photo-input').value=''; snapSelectedFile=null; hide('snap-photo-preview-wrap');
+    $('snap-teacher').value=''; $('snap-course-type').value=''; $('snap-subject').value='';
+    $('snap-punctuality').value=''; $('snap-professionalism').value=''; $('snap-class-handling').value='';
+    $('snap-skill-development').value=''; $('snap-student-engagement').value=''; $('snap-tasks-followup').value='';
+    $('snap-notes').value='';
+    populateSnapDepartmentSelect();
+    $('snap-photo-input').value=''; snapSelectedFile=null; snapLocation=null; hide('snap-photo-preview-wrap');
+    if($('snap-location-status')) $('snap-location-status').textContent = '';
     const saved = $('snap-saved');
     saved.style.color='var(--green)'; saved.textContent='✓ Saved'; show('snap-saved');
     setTimeout(() => hide('snap-saved'), 1800);
