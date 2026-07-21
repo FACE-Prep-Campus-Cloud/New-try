@@ -1832,125 +1832,154 @@ body[data-theme="dark"] .dlog-topbar {
       <button class="btn btn-ghost" onclick="logout()">Log out</button>
     </div>
   </div>
-  <div class="dlog-body">
-    <div class="ledger-card hidden" id="csnap-form-block">
-      <div class="ledger-card-title">Classroom Observation</div>
-<div class="snap-form-grid">
-  <div class="form-group">
-    <label class="field-label">Mentor Name</label>
-    <input id="snap-teacher" type="text" placeholder="Mentor name" />
-  </div>
-  <div class="form-group">
-    <label class="field-label">Class Observed — Department</label>
-    <select id="snap-department">
-      <option value="">Select department / class</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label class="field-label">Course</label>
-    <select id="snap-course-type">
-      <option value="">Select course type</option>
-      <option value="Academic Paper">Academic Paper</option>
-      <option value="Skill Paper">Skill Paper</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label class="field-label">Course Name</label>
-    <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
-  </div>
+<div class="dlog-body">
+    <div class="dlog-layout" id="csnap-layout">
 
-  <div class="form-group full">
-    <label class="field-label">Live location photo upload (mandatory)</label>
-    <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
-    <div id="snap-photo-preview-wrap" class="hidden" style="margin-top:8px;">
-      <img id="snap-photo-preview" style="max-height:140px;border-radius:10px;border:1px solid var(--border);" />
-    </div>
-    <div id="snap-location-status" style="font-size:11.5px;color:var(--text-faint);margin-top:6px;"></div>
-  </div>
-
-  <details class="snap-eval-toggle" open>
-    <summary>Mentor evaluation (rate each 1–5)</summary>
-    <div class="snap-eval-toggle-body">
-      <div class="snap-form-grid" style="margin-top:8px;">
-        <div class="form-group">
-          <label class="field-label" title="Reports to class on time and prepared before session begins">Punctuality</label>
-          <select id="snap-punctuality">
-            <option value="">Rate 1–5</option>
-            <option value="5">5 — Always on time, fully prepared</option>
-            <option value="4">4 — Usually on time, minor delays</option>
-            <option value="3">3 — Sometimes late, occasionally affects session</option>
-            <option value="2">2 — Frequently late, needs reminders</option>
-            <option value="1">1 — Consistently late/absent without notice</option>
-          </select>
+      <!-- LEFT (wide) column: calendar -->
+      <div>
+        <div class="review-cal-topbar">
+          <span style="font-size:14px;color:var(--text-light);font-weight:600;">Classroom snap calendar</span>
+          <div class="review-cal-nav">
+            <button class="review-cal-nav-btn" onclick="csnapCalShift(-1)" aria-label="Previous month">‹</button>
+            <span class="review-cal-month-label" id="csnap-cal-month-label">—</span>
+            <button class="review-cal-nav-btn" onclick="csnapCalShift(1)" aria-label="Next month">›</button>
+            <button class="btn btn-ghost" onclick="csnapCalToday()">Today</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="field-label" title="Attire, grooming, courtesy, professional conduct">Professionalism (Attire &amp; Behaviour)</label>
-          <select id="snap-professionalism">
-            <option value="">Rate 1–5</option>
-            <option value="5">5 — Always professional, well-groomed, courteous</option>
-            <option value="4">4 — Formal attire, good behaviour, minor gaps</option>
-            <option value="3">3 — Acceptable but inconsistent</option>
-            <option value="2">2 — Casual/inappropriate, needs improvement</option>
-            <option value="1">1 — Unprofessional, negatively affects class</option>
-          </select>
+        <div class="review-calendar">
+          <div class="review-cal-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="review-cal-grid" id="csnap-cal-grid"></div>
         </div>
-        <div class="form-group full">
-          <label class="field-label" title="Voice audibility, confidence, English communication, classroom control, time management. For Tamil-medium subjects, English communication may be N/A.">Class Handling</label>
-          <select id="snap-class-handling">
-            <option value="">Rate 1–5</option>
-            <option value="5">5 — Excellent clarity, confidence, control, on time</option>
-            <option value="4">4 — Good communication and management, minor gaps</option>
-            <option value="3">3 — Adequate but inconsistent</option>
-            <option value="2">2 — Difficulty with communication/control/time</option>
-            <option value="1">1 — Poor communication, control, and time management</option>
-          </select>
+        <div class="review-cal-legend">
+          <span><span class="cal-dot" style="background:var(--amber)"></span>Snap logged</span>
+          <span>✓ Reviewed</span>
         </div>
-        <div class="form-group full">
-          <label class="field-label" title="How well the mentor connects theory with practical application">Skill Development / Hands-on Delivery</label>
-          <select id="snap-skill-development">
-            <option value="">Rate 1–5</option>
-            <option value="5">5 — Excellent hands-on examples &amp; demonstrations</option>
-            <option value="4">4 — Frequently relates concepts to practice</option>
-            <option value="3">3 — Some practical examples, mostly theoretical</option>
-            <option value="2">2 — Very limited practical exposure</option>
-            <option value="1">1 — No practical explanation, entirely theoretical</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="field-label" title="Questioning, discussions, activities, interactive teaching">Student Engagement</label>
-          <select id="snap-student-engagement">
-            <option value="">Rate 1–5</option>
-            <option value="5">5 — Highly engaged throughout</option>
-            <option value="4">4 — Engaged most of the session</option>
-            <option value="3">3 — Moderate, limited to a few students</option>
-            <option value="2">2 — Low participation</option>
-            <option value="1">1 — No interaction, disengaged</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="field-label" title="Daily task assigned, previous task reviewed, feedback given">Tasks Given &amp; Follow-up</label>
-          <select id="snap-tasks-followup">
-            <option value="">Rate 1–5</option>
-            <option value="5">5 — Consistent tasks, thorough review, good feedback</option>
-            <option value="4">4 — Regular tasks, minor gaps in review</option>
-            <option value="3">3 — Occasional tasks, inconsistent follow-up</option>
-            <option value="2">2 — Rarely assigned/reviewed</option>
-            <option value="1">1 — No tasks, no review, no feedback</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label class="field-label">Additional remarks (optional)</label>
-          <input id="snap-notes" type="text" placeholder="Anything else worth noting" />
-        </div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a day to see that day's snaps.</div>
       </div>
-    </div>
-  </details>
-</div>
-<div class="modal-actions">
+
+      <!-- RIGHT (narrow) column: form -->
+      <div>
+        <div class="ledger-card hidden" id="csnap-form-block">
+          <div class="ledger-card-title">Classroom Observation</div>
+          <div class="snap-form-grid">
+            <div class="form-group">
+              <label class="field-label">Mentor Name</label>
+              <input id="snap-teacher" type="text" placeholder="Mentor name" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Class Observed — Department</label>
+              <select id="snap-department">
+                <option value="">Select department / class</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Course</label>
+              <select id="snap-course-type">
+                <option value="">Select course type</option>
+                <option value="Academic Paper">Academic Paper</option>
+                <option value="Skill Paper">Skill Paper</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Course Name</label>
+              <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
+            </div>
+
+            <div class="form-group full">
+              <label class="field-label">Live location photo upload (mandatory)</label>
+              <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
+              <div id="snap-photo-preview-wrap" class="hidden" style="margin-top:8px;">
+                <img id="snap-photo-preview" style="max-height:140px;border-radius:10px;border:1px solid var(--border);" />
+              </div>
+              <div id="snap-location-status" style="font-size:11.5px;color:var(--text-faint);margin-top:6px;"></div>
+            </div>
+
+            <details class="snap-eval-toggle" open>
+              <summary>Mentor evaluation (rate each 1–5)</summary>
+              <div class="snap-eval-toggle-body">
+                <div class="snap-form-grid" style="margin-top:8px;">
+                  <div class="form-group">
+                    <label class="field-label" title="Reports to class on time and prepared before session begins">Punctuality</label>
+                    <select id="snap-punctuality">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Always on time, fully prepared</option>
+                      <option value="4">4 — Usually on time, minor delays</option>
+                      <option value="3">3 — Sometimes late, occasionally affects session</option>
+                      <option value="2">2 — Frequently late, needs reminders</option>
+                      <option value="1">1 — Consistently late/absent without notice</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="field-label" title="Attire, grooming, courtesy, professional conduct">Professionalism (Attire &amp; Behaviour)</label>
+                    <select id="snap-professionalism">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Always professional, well-groomed, courteous</option>
+                      <option value="4">4 — Formal attire, good behaviour, minor gaps</option>
+                      <option value="3">3 — Acceptable but inconsistent</option>
+                      <option value="2">2 — Casual/inappropriate, needs improvement</option>
+                      <option value="1">1 — Unprofessional, negatively affects class</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label class="field-label" title="Voice audibility, confidence, English communication, classroom control, time management. For Tamil-medium subjects, English communication may be N/A.">Class Handling</label>
+                    <select id="snap-class-handling">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Excellent clarity, confidence, control, on time</option>
+                      <option value="4">4 — Good communication and management, minor gaps</option>
+                      <option value="3">3 — Adequate but inconsistent</option>
+                      <option value="2">2 — Difficulty with communication/control/time</option>
+                      <option value="1">1 — Poor communication, control, and time management</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label class="field-label" title="How well the mentor connects theory with practical application">Skill Development / Hands-on Delivery</label>
+                    <select id="snap-skill-development">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Excellent hands-on examples &amp; demonstrations</option>
+                      <option value="4">4 — Frequently relates concepts to practice</option>
+                      <option value="3">3 — Some practical examples, mostly theoretical</option>
+                      <option value="2">2 — Very limited practical exposure</option>
+                      <option value="1">1 — No practical explanation, entirely theoretical</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="field-label" title="Questioning, discussions, activities, interactive teaching">Student Engagement</label>
+                    <select id="snap-student-engagement">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Highly engaged throughout</option>
+                      <option value="4">4 — Engaged most of the session</option>
+                      <option value="3">3 — Moderate, limited to a few students</option>
+                      <option value="2">2 — Low participation</option>
+                      <option value="1">1 — No interaction, disengaged</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="field-label" title="Daily task assigned, previous task reviewed, feedback given">Tasks Given &amp; Follow-up</label>
+                    <select id="snap-tasks-followup">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Consistent tasks, thorough review, good feedback</option>
+                      <option value="4">4 — Regular tasks, minor gaps in review</option>
+                      <option value="3">3 — Occasional tasks, inconsistent follow-up</option>
+                      <option value="2">2 — Rarely assigned/reviewed</option>
+                      <option value="1">1 — No tasks, no review, no feedback</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label class="field-label">Additional remarks (optional)</label>
+                    <input id="snap-notes" type="text" placeholder="Anything else worth noting" />
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="modal-actions">
             <button class="btn btn-primary" id="snap-save-btn" onclick="saveClassroomSnap()">Upload</button>
             <span id="snap-saved" class="saved-msg hidden">✓ Saved</span>
           </div>
         </div>
+
         <div class="dlog-form-card hidden" id="csnap-college-filter-block">
           <h3>Which college's snaps?</h3>
           <div class="form-grid" style="margin-bottom:0;">
@@ -1961,7 +1990,12 @@ body[data-theme="dark"] .dlog-topbar {
           </div>
         </div>
       </div>
-<div class="dlog-layout" id="csnap-layout">
+
+    </div>
+    <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
+  </div>
+ 
+ <div class="dlog-layout" id="csnap-layout">
       <div>
         <div class="review-cal-topbar">
           <span style="font-size:14px;color:var(--text-light);font-weight:600;">Classroom snap calendar</span>
