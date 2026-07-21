@@ -1836,7 +1836,6 @@ body[data-theme="dark"] .dlog-topbar {
     <div class="ledger-card hidden" id="csnap-form-block">
       <div class="ledger-card-title">Classroom Observation</div>
 <div class="snap-form-grid">
-  <div class="form-section-label">Session details</div>
   <div class="form-group">
     <label class="field-label">Mentor Name</label>
     <input id="snap-teacher" type="text" placeholder="Mentor name" />
@@ -1860,7 +1859,6 @@ body[data-theme="dark"] .dlog-topbar {
     <input id="snap-subject" type="text" placeholder="e.g. Financial Accounting" />
   </div>
 
-  <div class="form-section-label">Live location photo</div>
   <div class="form-group full">
     <label class="field-label">Live location photo upload (mandatory)</label>
     <input type="file" id="snap-photo-input" accept="image/*" capture="environment" onchange="onSnapPhotoChange(this)" />
@@ -1873,7 +1871,7 @@ body[data-theme="dark"] .dlog-topbar {
   <details class="snap-eval-toggle" open>
     <summary>Mentor evaluation (rate each 1–5)</summary>
     <div class="snap-eval-toggle-body">
-      <div class="snap-form-grid" style="margin-top:8px;grid-template-columns:repeat(2,1fr);">
+      <div class="snap-form-grid" style="margin-top:8px;">
         <div class="form-group">
           <label class="field-label" title="Reports to class on time and prepared before session begins">Punctuality</label>
           <select id="snap-punctuality">
@@ -1896,7 +1894,7 @@ body[data-theme="dark"] .dlog-topbar {
             <option value="1">1 — Unprofessional, negatively affects class</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group full">
           <label class="field-label" title="Voice audibility, confidence, English communication, classroom control, time management. For Tamil-medium subjects, English communication may be N/A.">Class Handling</label>
           <select id="snap-class-handling">
             <option value="">Rate 1–5</option>
@@ -1907,7 +1905,7 @@ body[data-theme="dark"] .dlog-topbar {
             <option value="1">1 — Poor communication, control, and time management</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group full">
           <label class="field-label" title="How well the mentor connects theory with practical application">Skill Development / Hands-on Delivery</label>
           <select id="snap-skill-development">
             <option value="">Rate 1–5</option>
@@ -2536,3 +2534,2228 @@ const COLLEGE_REGION_MAP = [
   { college: 'Sri Ramakrishna College of Arts and Science for Women', region: 'coimbatore' },
   { college: 'Study World Group of Institutions', region: 'coimbatore' },
 ];
+function normalizeCollege(s){
+  return String(s||'').toLowerCase().replace(/['’]/g, '').replace(/[().,&-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+const REGION_LOOKUP = COLLEGE_REGION_MAP.map(e => ({ norm: normalizeCollege(e.college), region: e.region, original: e.college }));
+function resolveRegion(collegeName){
+  const norm = normalizeCollege(collegeName);
+  if(!norm) return null;
+  let hit = REGION_LOOKUP.find(e => e.norm === norm);
+  if(hit) return hit.region;
+  hit = REGION_LOOKUP.find(e => norm.includes(e.norm) || e.norm.includes(norm));
+  if(hit) return hit.region;
+  const normWords = new Set(norm.split(' ').filter(w => w.length > 2));
+  let best = null, bestScore = 0;
+  REGION_LOOKUP.forEach(e => {
+    const entryWords = e.norm.split(' ').filter(w => w.length > 2);
+    const overlap = entryWords.filter(w => normWords.has(w)).length;
+    const score = overlap / Math.max(entryWords.length, 1);
+    if(score > bestScore){ bestScore = score; best = e; }
+  });
+  if(best && bestScore >= 0.6) return best.region;
+  return null;
+}
+function getRegionInfo(collegeName){
+  const key = resolveRegion(collegeName);
+  if(!key) return { key: null, label: 'Unmapped', kam: '—', dot: 'dot-slate' };
+  const def = REGION_DEFS[key];
+  return { key, label: def.label, kam: def.kam, dot: def.dot };
+}
+function isFollowUpDue3(t){
+  if(t.status === 'resolved') return false;
+  if(FOLLOWUP_CATEGORIES_7D.has(t.category)) return false;
+  const wd = workingDaysElapsed(new Date(t.created_at), new Date());
+  return wd >= FOLLOWUP_WORKING_DAYS_3D;
+}
+function isFollowUpDue7(t){
+  if(t.status === 'resolved') return false;
+  if(!FOLLOWUP_CATEGORIES_7D.has(t.category)) return false;
+  const wd = workingDaysElapsed(new Date(t.created_at), new Date());
+  return wd >= FOLLOWUP_WORKING_DAYS_7D;
+}
+
+ function triggerShake(el){
+  if(!el) return;
+  el.classList.remove('pin-shake-err');
+  void el.offsetWidth; // force reflow so animation restarts even if class was just removed
+  el.classList.add('pin-shake-err');
+  setTimeout(() => el.classList.remove('pin-shake-err'), 400);
+}
+function isFollowUpDue(t){ return isFollowUpDue3(t) || isFollowUpDue7(t); }
+function initials(name){
+  const parts = String(name||'?').trim().split(/\s+/);
+  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || '?';
+}
+function avatarColor(name){
+  const palette = ['#3457E8','#16A34A','#D9840C','#DC2626','#7C3AED','#0EA5A4'];
+  let h = 0; for(const c of String(name||'')) h = (h*31 + c.charCodeAt(0)) % 997;
+  return palette[h % palette.length];
+}
+function isNewTicket(t){
+  return (Date.now() - new Date(t.created_at).getTime()) < (2*60*60*1000);
+}
+/* ── State ── */
+let tickets       = [];
+let knownTicketIds= new Set();
+let firstLoadDone = false;
+let statusFilter  = 'all';
+let regionFilter  = new Set();
+let priorityFilter= new Set();
+let reviewFilter  = 'all';
+let sortDir       = 'new';
+let refreshTimer  = null;
+let modalId       = null;
+let modalDraft    = {};
+let modalLocked   = false;
+let kbdFocusIdx   = -1;
+let autosaveTimer = null;
+let avgResView    = 'overall';
+/* ── Auth / session state ── */
+let authRole      = 'admin';
+let sessionRole    = 'admin';
+let sessionCollege = null;
+let sessionAllowedColleges = null;
+let sessionKamName = null;
+let collegeContacts = [];
+/* ── Daily log state (added) ── */
+let dailyLogs = [];
+let dlogSaving = false;
+let dlogCalMonth = new Date();
+/* ── Review panel state (admin only, added) ── */
+let reviewLogs = [];
+let reviewCollege = null;
+let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed'
+let reviewCalMonth = new Date();
+/* ── College pending-review counts (for review-college dropdown, added) ── */
+let collegePendingCounts = {}; // { collegeName: pendingCount }
+/* ══════════════════════════════════════════════════════════
+   ── CLASSROOM SNAP (added) ──
+   ══════════════════════════════════════════════════════════ */
+let classroomSnaps = [];
+let snapSelectedFile = null;
+let snapSaving = false;
+let snapReviewCollege = null;
+let snapLocation = null; // { lat, lng, accuracy } captured when the photo is taken
+/* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
+const DLOG_CATEGORIES = [
+  { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
+  { key: 'mentor_performance',   label: 'Mentor Performance',                              callType: 'hard' },
+  { key: 'student_query',        label: 'Student Query',                                   callType: 'soft' },
+  { key: 'spoc_escalation',      label: 'Stakeholder / SPOC Escalations',                  callType: 'hard' },
+  { key: 'examinations',         label: 'Examinations',                                    callType: 'hard' },
+  { key: 'infrastructure',       label: 'Infrastructure',                                  callType: 'soft' },
+  { key: 'fee',                  label: 'Fee',                                             callType: 'soft' },
+  { key: 'disciplinary_student', label: 'Disciplinary Actions in Students',                 callType: 'hard' },
+  { key: 'disciplinary_mentor',  label: 'Disciplinary Actions in Mentors',                  callType: 'hard' },
+  { key: 'events',               label: 'Events',                                          callType: 'soft' },
+  { key: 'industrial_visit',     label: 'Industrial Visit',                                callType: 'soft' },
+  { key: 'data_submission',      label: 'Data Submissions / G-Sheet Updation',              callType: 'hard' },
+  { key: 'attendance',           label: 'Attendance',                                       callType: 'soft' },
+  { key: 'hostel',               label: 'Hostel',                                          callType: 'soft' },
+  { key: 'portal_technical',     label: 'Technical Issues in Portal',                       callType: 'hard' },
+  { key: 'placement_docs',       label: 'Placement / Internship, Certification & Documents',callType: 'soft' },
+  {key: 'Others',       label: 'Other Issues',callType: 'soft' },
+];
+const ESCALATION_EMAIL = 'escalations@faceprepcampus.in'; // TODO: replace with the real recipient address
+const $  = id => document.getElementById(id);
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+function escHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtRel(iso){
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if(m<1) return 'just now';
+  if(m<60) return m+'m ago';
+  const h = Math.floor(m/60);
+  if(h<24) return h+'h ago';
+  const d = Math.floor(h/24);
+  if(d<30) return d+'d ago';
+  return new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtAbs(iso){
+  return new Date(iso).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtDuration(hours){
+  if(!isFinite(hours)) return '—';
+  if(hours < 24) return hours.toFixed(1) + 'h';
+  return (hours/24).toFixed(1) + 'd';
+}
+/* ── Theme ── */
+function applyThemeIcon(){
+  const dark = document.body.getAttribute('data-theme') === 'dark';
+  const paths = dark
+    ? '<path d="M13.5 9.3A5.8 5.8 0 0 1 6.7 2.5 5.8 5.8 0 1 0 13.5 9.3z"/>'
+    : '<circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.4M8 13.1v1.4M2.6 8H1.2M14.8 8h-1.4M3.9 3.9l1 1M11.1 11.1l1 1M11.1 3.9l-1 1M3.9 11.1l1 1"/>';
+  const authIcon = $('theme-toggle-auth-icon'); if(authIcon) authIcon.innerHTML = paths;
+  const sideIcon = $('theme-toggle-side-icon'); if(sideIcon) sideIcon.innerHTML = paths;
+  const lbl = $('theme-row-label'); if(lbl) lbl.textContent = dark ? 'Light mode' : 'Dark mode';
+}
+function toggleTheme(){
+  const cur = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  applyThemeIcon();
+  renderSparklines();
+}
+applyThemeIcon();
+/* ── Sky and clouds background: drifting clouds for Daily Log + Review Panel ── */
+function initSkyClouds(id, count){
+  const wrap = document.getElementById(id);
+  if(!wrap || wrap.dataset.inited) return;
+  wrap.dataset.inited = '1';
+  for(let i=0;i<count;i++){
+    const c = document.createElement('div');
+    c.className = 'sky-cloud';
+    const w = 40 + Math.random()*70;
+    const h = w * (0.42 + Math.random()*0.15);
+    c.style.width = w+'px';
+    c.style.height = h+'px';
+    c.style.top = (5 + Math.random()*45)+'%';
+    c.style.animationDuration = (18 + Math.random()*22)+'s';
+    c.style.animationDelay = (-Math.random()*30)+'s';
+    wrap.appendChild(c);
+  }
+}
+initSkyClouds('dlog-skywrap', 6);
+initSkyClouds('review-skywrap', 6);
+initSkyClouds('csnap-skywrap', 6);
+/* ── Toasts ── */
+function showToast(msg){
+  const stack = $('toast-stack');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span class="toast-dot"></span><span>${escHTML(msg)}</span>`;
+  stack.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 220);
+  }, 4200);
+}
+ /* ── Eyes follow the cursor, characters drift slightly toward it ── */
+(function(){
+  const crew = document.getElementById('char-crew');
+  if(!crew) return;
+  const pupils = crew.querySelectorAll('.pupil');
+  let targetX = 0, targetY = 0, curX = 0, curY = 0;
+  document.addEventListener('mousemove', e => {
+    const w = window.innerWidth, h = window.innerHeight;
+    targetX = (e.clientX / w - 0.5) * 2;   // -1 .. 1
+    targetY = (e.clientY / h - 0.5) * 2;
+  });
+  function tick(){
+    curX += (targetX - curX) * 0.12;
+    curY += (targetY - curY) * 0.12;
+    pupils.forEach(p => { p.style.transform = `translate(${curX*3.2}px, ${curY*3}px)`; });
+    crew.style.transform = `translate(${curX*6}px, ${curY*3}px)`;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+/* Manager / KAM PIN: pressing Enter in the PIN field (or select) submits login */
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  if(['manager-pin-input','manager-college-select','kam-pin-input','kam-select'].includes(e.target.id)){
+    e.preventDefault();
+    submitLogin();
+  }
+});
+/* ── Role tabs ── */
+function setAuthRole(role){
+  authRole = role;
+  $('role-tab-admin').classList.toggle('active', role==='admin');
+  $('role-tab-manager').classList.toggle('active', role==='manager');
+  $('admin-login-block').classList.toggle('hidden', role!=='admin');
+  $('manager-login-block').classList.toggle('hidden', role!=='manager');
+  hide('pin-error');
+}
+function populateCollegeDropdown(){
+  const sel = $('manager-college-select');
+  if(!sel) return;
+  const names = collegeContacts.length
+    ? collegeContacts.map(c => c.college)
+    : COLLEGE_REGION_MAP.map(c => c.college);
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = uniqueSorted.length
+    ? '<option value="" disabled selected>Select your college</option>' +
+      uniqueSorted.map(name => `<option value="${escHTML(name)}">${escHTML(name)}</option>`).join('')
+    : '<option value="">No colleges configured yet</option>';
+}
+/* ── Build the list of KAMs (senior managers) from college_contacts ── */
+function buildKamList(){
+  const map = {};
+  collegeContacts.forEach(c => {
+    if(c.senior_manager_name){
+      if(!map[c.senior_manager_name]){
+        map[c.senior_manager_name] = { name: c.senior_manager_name, pin: c.senior_manager_pin, colleges: [] };
+      }
+      map[c.senior_manager_name].colleges.push(c.college);
+    }
+  });
+  return Object.values(map).sort((a,b) => a.name.localeCompare(b.name));
+}
+function populateKamDropdown(){
+  const sel = $('kam-select');
+  if(!sel) return;
+  const kams = buildKamList();
+  sel.innerHTML = '<option value="" disabled selected>Select Login</option>' +
+    '<option value="__master__">Master Admin (All Colleges)</option>' +
+    kams.map(k => `<option value="${escHTML(k.name)}">${escHTML(k.name)}</option>`).join('');
+}
+async function loadCollegeContactsForLogin(){
+  populateCollegeDropdown();
+  populateKamDropdown();
+  try{
+    const { data, error } = await sb.from('college_contacts')
+      .select('college,senior_manager_name, senior_manager_pin, campus_manager_name, campus_manager_pin, zone');
+    if(error) throw error;
+    collegeContacts = data || [];
+    populateCollegeDropdown();
+    populateKamDropdown();
+  }catch(e){
+    console.error('Could not load college_contacts (has the login_pin migration been run?):', e);
+  }
+}
+loadCollegeContactsForLogin();
+function submitLogin(){
+  if(authRole === 'admin') submitKamLogin();
+  else submitManagerLogin();
+}
+function submitKamLogin(){
+  const err = $('pin-error');
+  const sel = ($('kam-select').value || '').trim();
+  const pin = ($('kam-pin-input').value || '').trim();
+  if(!sel){ err.textContent='Please select a login.'; show('pin-error'); return; }
+  if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
+ if(sel === '__master__'){
+    if(pin !== ADMIN_PIN){
+      err.textContent='Incorrect PIN.'; show('pin-error');
+      triggerShake($('kam-pin-input'));
+      $('kam-pin-input').value=''; $('kam-pin-input').focus();
+      return;
+    }
+    hide('pin-error');
+    sessionRole = 'admin';
+    sessionCollege = null;
+    sessionAllowedColleges = null;
+    sessionKamName = null;
+    hide('auth-screen');
+    showPlatformSelect();
+    return;
+  }
+  const kams = buildKamList();
+  const rec = kams.find(k => k.name === sel);
+ if(!rec || !rec.pin || String(rec.pin) !== pin){
+    err.textContent='Incorrect PIN for this KAM.';
+    show('pin-error');
+    triggerShake($('kam-pin-input'));
+    $('kam-pin-input').value = '';
+    $('kam-pin-input').focus();
+    return;
+  }
+  hide('pin-error');
+  sessionRole = 'kam';
+  sessionKamName = rec.name;
+  sessionAllowedColleges = rec.colleges.slice();
+  sessionCollege = null;
+  hide('auth-screen');
+  showPlatformSelect();
+}
+function submitManagerLogin(){
+  const err = $('pin-error');
+  const college = $('manager-college-select').value;
+  const pin = ($('manager-pin-input').value || '').trim();
+  if(!college){ err.textContent='Select your college.'; show('pin-error'); return; }
+  if(!pin){ err.textContent='Enter your PIN.'; show('pin-error'); return; }
+  const rec = collegeContacts.find(c => c.college === college);
+const expectedPin = rec ? rec.campus_manager_pin : null;
+if(!rec || !expectedPin || String(expectedPin) !== pin){
+    err.textContent='Incorrect PIN for this college.';
+    show('pin-error');
+    triggerShake($('manager-pin-input'));
+    $('manager-pin-input').value = '';
+    $('manager-pin-input').focus();
+    return;
+  }
+  hide('pin-error');
+  sessionRole = 'manager';
+  sessionCollege = college;
+  sessionAllowedColleges = null;
+  sessionKamName = null;
+  /* Campus / Senior managers land on the platform-select screen (Ticketing or Daily Log). */
+  hide('auth-screen');
+  showPlatformSelect();
+}
+/* ── Platform select (admin + KAM + campus manager) ── */
+function showPlatformSelect(){
+  hide('admin-screen');
+  hide('dailylog-screen');
+  hide('review-panel-screen');
+  hide('classroom-snap-screen');
+  const isManager = sessionRole === 'manager';
+  const isKam = sessionRole === 'kam';
+  renderPlatformGreeting();
+  $('platform-tickets-desc').textContent = isManager
+    ? 'View and manage student help-desk tickets raised by your college.'
+    : isKam
+      ? 'View and manage student help-desk tickets raised by colleges in your region.'
+      : 'View and manage student help-desk tickets across all colleges.';
+  $('platform-second-title').textContent = isManager ? 'Daily Activity Log' : 'Review Panel';
+  $('platform-second-desc').textContent = isManager
+    ? 'Log your daily activities and track your progress over time.'
+    : "Review campus managers' daily activity logs, college by college.";
+$('platform-third-title').textContent = isManager ? 'Classroom Observation Log' : 'Class room Observations';
+ $('platform-third-desc').textContent = isManager
+    ? 'Snap a photo during classroom visits and log what you observed.'
+    : 'Browse classroom visit photos and observations logged by campus managers.';
+ show('platform-select-screen');
+  initPlatformCardTilt();
+  initVantaBirds();
+  loadPlatformSelectBadges();
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+}
+/* ── Greeting + live badges + streak on the platform-select screen (added) ── */
+function getGreetingName(){
+  if(sessionRole === 'manager' && sessionCollege){
+    const rec = collegeContacts.find(c => c.college === sessionCollege);
+    if(rec && rec.campus_manager_name) return rec.campus_manager_name;
+    return sessionCollege; // fallback if no campus manager name is on record
+  }
+  if(sessionRole === 'kam' && sessionKamName) return sessionKamName;
+  return 'Admin';
+}
+function renderPlatformGreeting(){
+  const hour = new Date().getHours();
+  const part = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  $('platform-greeting').textContent = `${part}, ${getGreetingName()}`;
+  $('platform-date-label').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+async function loadPlatformSelectBadges(){
+  try{
+    const { data, error } = await sb.from('tickets').select('id,status,college');
+    if(error) throw error;
+    let rows = data || [];
+    if(sessionRole === 'manager' || sessionRole === 'kam') rows = rows.filter(t => collegeMatchesSession(t.college));
+    const openCount = rows.filter(t => t.status !== 'resolved').length;
+    const badge = $('platform-open-badge');
+    if(badge){
+      if(openCount > 0){ badge.textContent = `${openCount} open`; show('platform-open-badge'); }
+      else hide('platform-open-badge');
+    }
+  }catch(e){ console.error(e); }
+
+  if(sessionRole === 'manager'){
+    try{
+      const { data, error } = await sb.from('daily_logs').select('id,log_date,reviewed').eq('college', sessionCollege);
+      if(error) throw error;
+      const logs = data || [];
+      const pending = logs.filter(l => !l.reviewed).length;
+      const badge = $('platform-pending-badge');
+      if(badge){
+        if(pending > 0){ badge.textContent = `${pending} pending`; show('platform-pending-badge'); }
+        else hide('platform-pending-badge');
+      }
+      const streak = computeLoggingStreak(logs);
+      if(streak > 0){
+        $('platform-streak-text').textContent = `${streak}-day logging streak`;
+        show('platform-streak');
+      } else hide('platform-streak');
+    }catch(e){ console.error(e); }
+  } else {
+    try{
+      await loadCollegePendingCounts();
+      let total = Object.values(collegePendingCounts).reduce((a,b)=>a+b,0);
+      if(sessionRole === 'kam' && sessionAllowedColleges){
+        const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+        total = Object.entries(collegePendingCounts)
+          .filter(([c]) => allowedNorm.includes(normalizeCollege(c)))
+          .reduce((sum,[,v]) => sum+v, 0);
+      }
+      const badge = $('platform-pending-badge');
+      if(badge){
+        if(total > 0){ badge.textContent = `${total} pending`; show('platform-pending-badge'); }
+        else hide('platform-pending-badge');
+      }
+    }catch(e){ console.error(e); }
+    hide('platform-streak');
+  }
+
+  /* ── NEW: Classroom Snap pending-review badge ── */
+  try{
+    const { data, error } = await sb.from('classroom_snaps').select('id,college,reviewed');
+    if(error) throw error;
+    let snapRows = data || [];
+    if(sessionRole === 'manager' || sessionRole === 'kam'){
+      snapRows = snapRows.filter(s => collegeMatchesSession(s.college));
+    }
+    const snapPending = snapRows.filter(s => !s.reviewed).length;
+    const snapBadge = $('platform-snap-badge');
+    if(snapBadge){
+      if(snapPending > 0){ snapBadge.textContent = `${snapPending} pending`; show('platform-snap-badge'); }
+      else hide('platform-snap-badge');
+    }
+  }catch(e){ console.error('Could not load classroom_snaps pending count:', e); }
+}
+ /* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
+function initPlatformCardTilt(){
+  const cards = document.querySelectorAll('#platform-cards .platform-card');
+  cards.forEach(card => {
+    if(card._tiltBound) return;
+    card._tiltBound = true;
+    const maxTilt = 7;
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (0.5 - py) * maxTilt * 2;
+      const ry = (px - 0.5) * maxTilt * 2;
+      card.style.transform = `translateY(-5px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+    });
+  });
+}
+function selectPlatform(which){
+  hide('platform-select-screen');
+  destroyVantaBirds();
+  if(which === 'tickets'){
+    enterDashboard();
+  } else if(which === 'dailylog'){
+    if(sessionRole === 'manager') enterDailyLog();
+    else enterReviewPanel();
+  } else if(which === 'classroomsnap'){
+    enterClassroomSnap();
+  }
+}
+function backToPlatformSelect(){
+  hide('admin-screen');
+  hide('dailylog-screen');
+  hide('review-panel-screen');
+  hide('classroom-snap-screen');
+  destroyVantaBirds();
+  showPlatformSelect();
+}
+function enterDashboard(){
+  hide('platform-select-screen');
+  hide('dailylog-screen');
+  show('admin-screen');
+  buildRegionDropdown();
+  buildPriorityDropdown();
+  applySessionUI();
+  loadTickets();
+  if(refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadTickets, 15000);
+}
+function applySessionUI(){
+  const isRestricted = sessionRole === 'manager' || sessionRole === 'kam';
+  $('grp-regions').classList.toggle('hidden', isRestricted);
+  $('regions-sec-label').classList.toggle('hidden', isRestricted);
+  $('dd-region').classList.toggle('hidden', isRestricted);
+  show('topbar-switch-platform');
+  const tag = $('session-tag');
+  if(sessionRole === 'manager'){
+    tag.innerHTML = `Viewing tickets for<br><b>${escHTML(sessionCollege)}</b>`;
+  } else if(sessionRole === 'kam'){
+    tag.innerHTML = `<b>${escHTML(sessionKamName)}</b> (KAM)`;
+  } else {
+    tag.innerHTML = `<b>Admin</b> — all colleges`;
+  }
+}
+function collegeMatchesSession(ticketCollege){
+  const a = normalizeCollege(ticketCollege);
+  if(!a) return sessionRole !== 'manager' && sessionRole !== 'kam';
+
+  function fuzzyMatch(b){
+    if(!b) return false;
+    if(a === b || a.includes(b) || b.includes(a)) return true;
+    const aWords = new Set(a.split(' ').filter(w => w.length > 2));
+    const bWords = b.split(' ').filter(w => w.length > 2);
+    if(!bWords.length) return false;
+    const overlap = bWords.filter(w => aWords.has(w)).length;
+    return (overlap / bWords.length) >= 0.6;
+  }
+
+  if(sessionRole === 'manager' && sessionCollege){
+    return fuzzyMatch(normalizeCollege(sessionCollege));
+  }
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    return sessionAllowedColleges.some(c => fuzzyMatch(normalizeCollege(c)));
+  }
+  return true;
+}
+ function logout(){
+  hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
+  hide('classroom-snap-screen');
+  classroomSnaps = []; snapReviewCollege = null;
+  show('auth-screen');
+  hide('pin-error');
+  const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
+  const kamPin = $('kam-pin-input'); if(kamPin) kamPin.value = '';
+  setAuthRole('admin');
+  firstLoadDone = false; knownTicketIds = new Set();
+  sessionRole = 'admin'; sessionCollege = null; sessionAllowedColleges = null; sessionKamName = null;
+  dailyLogs = [];
+reviewLogs = []; reviewCollege = null; reviewCallFilter = 'all';
+  destroyVantaBirds();
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+}
+/* ── Sidebar ── */
+function toggleSidebar(){ $('sidebar').classList.toggle('collapsed'); }
+function toggleGroup(id){ $(id).classList.toggle('open'); }
+function toggleInsights(){ $('insights-panel').classList.toggle('hidden'); renderInsights(); }
+/* ── Dropdowns ── */
+function toggleDD(id){
+  const el = $(id);
+  const willOpen = !el.classList.contains('open');
+  document.querySelectorAll('.dd').forEach(d => { d.classList.remove('open'); d.querySelector('.dd-panel').classList.add('hidden'); });
+  if(willOpen){ el.classList.add('open'); el.querySelector('.dd-panel').classList.remove('hidden'); }
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('.dd')) document.querySelectorAll('.dd').forEach(d => { d.classList.remove('open'); d.querySelector('.dd-panel').classList.add('hidden'); });
+});
+function buildRegionDropdown(){
+  const panel = $('dd-region-panel');
+  const keys = Object.keys(REGION_DEFS);
+  panel.innerHTML = keys.map(k => `
+    <label class="dd-opt">
+      <span class="swatch" style="background:${REGION_HEX[k]}"></span> ${escHTML(REGION_DEFS[k].label)}
+      <input type="checkbox" value="${k}" onchange="toggleRegionOpt('${k}', this.checked)">
+    </label>`).join('') + `
+    <div class="dd-sep"></div>
+    <label class="dd-opt"><span class="swatch" style="background:${REGION_HEX.unmapped}"></span> Unmapped<input type="checkbox" value="unmapped" onchange="toggleRegionOpt('unmapped', this.checked)"></label>
+    <div class="dd-sep"></div>
+    <button class="dd-clear" onclick="clearRegionFilter()">Clear region filter</button>`;
+}
+function toggleRegionOpt(key, checked){
+  if(checked) regionFilter.add(key); else regionFilter.delete(key);
+  syncRegionDDCount(); renderTickets();
+}
+function clearRegionFilter(){
+  regionFilter.clear();
+  $('dd-region-panel').querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+  syncRegionDDCount(); renderTickets();
+}
+function syncRegionDDCount(){
+  const badge = $('region-dd-count');
+  const trigger = $('dd-region').querySelector('.dd-trigger');
+  if(regionFilter.size){ badge.textContent = regionFilter.size; show('region-dd-count'); trigger.classList.add('filled'); }
+  else { hide('region-dd-count'); trigger.classList.remove('filled'); }
+}
+const PRIORITY_HEX = { high: '#DC2626', medium: '#D9840C', low: '#9AA1AC' };
+function buildPriorityDropdown(){
+  const panel = $('dd-priority-panel');
+  panel.innerHTML = ['high','medium','low'].map(k => `
+    <label class="dd-opt">
+      <span class="swatch" style="background:${PRIORITY_HEX[k]}"></span> ${PRIORITY_LABEL[k]}
+      <input type="checkbox" value="${k}" onchange="togglePriorityOpt('${k}', this.checked)">
+    </label>`).join('') + `
+    <div class="dd-sep"></div>
+    <button class="dd-clear" onclick="clearPriorityFilter()">Clear priority filter</button>`;
+}
+function togglePriorityOpt(key, checked){
+  if(checked) priorityFilter.add(key); else priorityFilter.delete(key);
+  syncPriorityDDCount(); renderTickets();
+}
+function clearPriorityFilter(){
+  priorityFilter.clear();
+  $('dd-priority-panel').querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+  syncPriorityDDCount(); renderTickets();
+}
+function syncPriorityDDCount(){
+  const badge = $('priority-dd-count');
+  const trigger = $('dd-priority').querySelector('.dd-trigger');
+  if(priorityFilter.size){ badge.textContent = priorityFilter.size; show('priority-dd-count'); trigger.classList.add('filled'); }
+  else { hide('priority-dd-count'); trigger.classList.remove('filled'); }
+}
+function setPriorityOnly(key){
+  priorityFilter = new Set([key]);
+  buildPriorityDropdown();
+  $('dd-priority-panel').querySelector(`input[value="${key}"]`).checked = true;
+  syncPriorityDDCount();
+  statusFilter = 'active';
+  syncStatusDD();
+  syncNavActive('priority-'+key);
+  updateHeader('priority-'+key);
+  renderTickets();
+}
+function setSort(dir){
+  sortDir = dir;
+  const labelMap = { new: 'Newest first', old: 'Oldest first', prio: 'Priority: high → low' };
+  $('sort-dd-label').textContent = labelMap[dir];
+  toggleDD('dd-sort');
+  renderTickets();
+}
+function setStatusFilter(f){
+  statusFilter = f;
+  syncStatusDD(); syncNavActive(); updateHeader(); renderTickets();
+}
+function syncStatusDD(){
+  const map = { all:0, open:1, progress:2, resolved:3 };
+  const radios = document.querySelectorAll('input[name=statusopt]');
+  radios.forEach((r,i) => r.checked = (map[statusFilter] === i));
+  $('dd-status').querySelector('.dd-trigger').classList.toggle('filled', statusFilter!=='all' && statusFilter!=='followup3' && statusFilter!=='followup7');
+}
+function setRegionOnly(key){
+  regionFilter = new Set([key]);
+  buildRegionDropdown();
+  $('dd-region-panel').querySelector(`input[value="${key}"]`).checked = true;
+  syncRegionDDCount();
+  statusFilter = 'all';
+  syncStatusDD();
+  syncNavActive('region-'+key);
+  updateHeader('region-'+key);
+  renderTickets();
+}
+function setReviewFilter(v){
+  reviewFilter = v;
+  const radios = document.querySelectorAll('input[name=revopt]');
+  const idx = { all:0, pending:1, done:2 }[v];
+  radios.forEach((r,i) => r.checked = (i===idx));
+  $('dd-review').querySelector('.dd-trigger').classList.toggle('filled', v!=='all');
+  syncNavActive(v==='all' ? null : 'review-'+v);
+  renderTickets();
+}
+function syncNavActive(explicitKey){
+  const key = explicitKey || statusFilter;
+  document.querySelectorAll('.sub-row, .nav-row[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === key));
+  document.querySelectorAll('.stat-card[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === statusFilter || b.dataset.filter === key));
+}
+function updateHeader(explicitKey){
+  const key = explicitKey || statusFilter;
+  const map = {
+    'all':'All Tickets','open':'Unresolved','progress':'In Progress','resolved':'Resolved',
+    'followup3':'Follow-up Due (3 Days)','followup7':'Follow-up Due (7 Days)',
+    'region-chennai':'Chennai','region-karnakerala':'Karnataka & Kerala','region-tamilnadu':'Tamil Nadu','region-coimbatore':'Coimbatore',
+    'review-pending':'Review Pending','review-done':'Review Done',
+    'priority-high':'High Priority','priority-medium':'Medium Priority','priority-low':'Low Priority',
+  };
+  $('breadcrumb-current').textContent = map[key] || 'Tickets';
+}
+function getFiltered(){
+  const q = ($('search-input')?.value||'').toLowerCase().trim();
+  let list = tickets.filter(t => {
+    if(statusFilter==='followup3') return isFollowUpDue3(t);
+    if(statusFilter==='followup7') return isFollowUpDue7(t);
+    if(statusFilter==='active') return t.status !== 'resolved';
+    if(statusFilter==='all') return true;
+    return t.status === statusFilter;
+  });
+  if(regionFilter.size){
+    list = list.filter(t => { const key = resolveRegion(t.college); return regionFilter.has(key || 'unmapped'); });
+  }
+  if(priorityFilter.size){ list = list.filter(t => priorityFilter.has(getPriority(t))); }
+  if(reviewFilter==='pending') list = list.filter(t => !t.reviewed);
+  if(reviewFilter==='done')    list = list.filter(t => !!t.reviewed);
+  if(q){
+    list = list.filter(t =>
+      (t.roll_number||'').toLowerCase().includes(q) ||
+      (t.student_name||'').toLowerCase().includes(q) ||
+      (t.subject||'').toLowerCase().includes(q) ||
+      (t.category||'').toLowerCase().includes(q) ||
+      (t.college||'').toLowerCase().includes(q));
+  }
+  if(sortDir === 'prio'){
+    list.sort((a,b) => PRIORITY_RANK[getPriority(a)] - PRIORITY_RANK[getPriority(b)] || (new Date(b.created_at) - new Date(a.created_at)));
+  } else {
+    list.sort((a,b) => sortDir==='new'
+      ? new Date(b.created_at) - new Date(a.created_at)
+      : new Date(a.created_at) - new Date(b.created_at));
+  }
+  return list;
+}
+function buildSparkPath(counts, w, h){
+  const max = Math.max(...counts, 1);
+  const step = w / (counts.length - 1 || 1);
+  return counts.map((c,i) => `${i*step},${h - (c/max)*(h-4) - 2}`).join(' ');
+}
+function renderSparklines(){
+  const days = 7;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const createdCounts = new Array(days).fill(0);
+  const resolvedCounts = new Array(days).fill(0);
+  tickets.forEach(t => {
+    const d = new Date(t.created_at); d.setHours(0,0,0,0);
+    const diff = Math.round((now - d) / 86400000);
+    if(diff >= 0 && diff < days) createdCounts[days-1-diff]++;
+    if(t.status === 'resolved' && t.closed_at){
+      const cd = new Date(t.closed_at); cd.setHours(0,0,0,0);
+      const cdiff = Math.round((now - cd) / 86400000);
+      if(cdiff >= 0 && cdiff < days) resolvedCounts[days-1-cdiff]++;
+    }
+  });
+  const drawInto = (id, counts, color) => {
+    const el = $(id); if(!el) return;
+    const w = 52, h = 28;
+    const pts = buildSparkPath(counts, w, h);
+    const areaPts = `0,${h} ${pts} ${w},${h}`;
+    el.innerHTML = `
+      <polyline points="${areaPts}" fill="${color}" opacity="0.12" stroke="none"/>
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>`;
+  };
+  drawInto('spark-all',  createdCounts,  getComputedStyle(document.body).getPropertyValue('--text-faint').trim() || '#9AA1AC');
+  drawInto('spark-open', createdCounts,  getComputedStyle(document.body).getPropertyValue('--red').trim() || '#DC2626');
+  drawInto('spark-res',  resolvedCounts, getComputedStyle(document.body).getPropertyValue('--green').trim() || '#16A34A');
+}
+function renderInsightBars(containerId, counts, colorMap, defaultColor){
+  const el = $(containerId);
+  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const max = Math.max(...entries.map(e=>e[1]), 1);
+  el.innerHTML = entries.map(([label, val]) => `
+    <div class="insight-bar-row">
+      <span class="insight-bar-label" title="${escHTML(label)}">${escHTML(label)}</span>
+      <span class="insight-bar-track"><span class="insight-bar-fill" style="width:${(val/max)*100}%;background:${colorMap[label]||defaultColor}"></span></span>
+      <span class="insight-bar-val">${val}</span>
+    </div>`).join('') || '<div style="font-size:12px;color:var(--text-faint)">No data yet</div>';
+}
+function renderInsights(){
+  if($('insights-panel').classList.contains('hidden')) return;
+  const byCategory = {};
+  tickets.forEach(t => { byCategory[t.category||'Other'] = (byCategory[t.category||'Other']||0) + 1; });
+  renderInsightBars('insight-category', byCategory, {}, 'var(--blue)');
+  const byRegion = {};
+  tickets.forEach(t => { const info = getRegionInfo(t.college); byRegion[info.label] = (byRegion[info.label]||0) + 1; });
+  const regionColorMap = {};
+  Object.keys(REGION_DEFS).forEach(k => regionColorMap[REGION_DEFS[k].label] = REGION_HEX[k]);
+  regionColorMap['Unmapped'] = REGION_HEX.unmapped;
+  renderInsightBars('insight-region', byRegion, regionColorMap, 'var(--violet)');
+}
+function cycleAvgResView(){
+  const order = ['overall', 'region', 'priority'];
+  const idx = order.indexOf(avgResView);
+  avgResView = order[(idx + 1) % order.length];
+  renderAvgResolution();
+}
+function computeAvgResolutionGroups(keyFn){
+  const groups = {};
+  tickets.forEach(t => {
+    if(t.status !== 'resolved' || !t.closed_at) return;
+    const key = keyFn(t);
+    if(!groups[key]) groups[key] = { totalMs: 0, count: 0 };
+    groups[key].totalMs += (new Date(t.closed_at) - new Date(t.created_at));
+    groups[key].count += 1;
+  });
+  return groups;
+}
+function renderAvgResolution(){
+  const modeTag = $('avgres-mode-tag');
+  const subEl = $('cnt-avgres-sub');
+  const breakdownEl = $('avgres-breakdown');
+  const valEl = $('cnt-avgres');
+  const resolvedAll = tickets.filter(t => t.status==='resolved' && t.closed_at);
+  if(avgResView === 'overall'){
+    modeTag.textContent = 'Overall';
+    subEl.textContent = 'Time to close a ticket';
+    hide('avgres-breakdown');
+    if(!resolvedAll.length){ valEl.textContent = '—'; return; }
+    const totalMs = resolvedAll.reduce((sum,t) => sum + (new Date(t.closed_at) - new Date(t.created_at)), 0);
+    valEl.textContent = fmtDuration((totalMs / resolvedAll.length) / 3600000);
+    return;
+  }
+  if(avgResView === 'region'){
+    modeTag.textContent = 'By region';
+    subEl.textContent = 'Click to switch view';
+    const groups = computeAvgResolutionGroups(t => resolveRegion(t.college) || 'unmapped');
+    const order = [...Object.keys(REGION_DEFS), 'unmapped'];
+    const rows = order.filter(k => groups[k]).map(k => {
+      const g = groups[k];
+      const label = k === 'unmapped' ? 'Unmapped' : REGION_DEFS[k].label;
+      const hex = REGION_HEX[k];
+      const avgH = (g.totalMs / g.count) / 3600000;
+      return `<div class="avgres-row"><span class="swatch" style="background:${hex}"></span><span class="arb-label">${escHTML(label)}</span><span class="arb-val">${fmtDuration(avgH)}</span></div>`;
+    });
+    valEl.textContent = order.filter(k=>groups[k]).length ? '' : '—';
+    breakdownEl.innerHTML = rows.length ? rows.join('') : '<div style="font-size:11px;color:var(--text-faint)">No resolved tickets yet</div>';
+    show('avgres-breakdown');
+    return;
+  }
+  if(avgResView === 'priority'){
+    modeTag.textContent = 'By priority';
+    subEl.textContent = 'Click to switch view';
+    const groups = computeAvgResolutionGroups(t => getPriority(t));
+    const order = ['high','medium','low'];
+    const rows = order.filter(k => groups[k]).map(k => {
+      const g = groups[k];
+      const avgH = (g.totalMs / g.count) / 3600000;
+      return `<div class="avgres-row"><span class="swatch" style="background:${PRIORITY_HEX[k]}"></span><span class="arb-label">${PRIORITY_LABEL[k]}</span><span class="arb-val">${fmtDuration(avgH)}</span></div>`;
+    });
+    valEl.textContent = order.filter(k=>groups[k]).length ? '' : '—';
+    breakdownEl.innerHTML = rows.length ? rows.join('') : '<div style="font-size:11px;color:var(--text-faint)">No resolved tickets yet</div>';
+    show('avgres-breakdown');
+    return;
+  }
+}
+function renderStats(){
+  const followUp3Count = tickets.filter(isFollowUpDue3).length;
+  const followUp7Count = tickets.filter(isFollowUpDue7).length;
+  const followUpCount  = followUp3Count + followUp7Count;
+  $('cnt-all').textContent  = tickets.length;
+  $('cnt-open').textContent = tickets.filter(t=>t.status==='open').length;
+  $('cnt-prog').textContent = tickets.filter(t=>t.status==='progress').length;
+  $('cnt-res').textContent  = tickets.filter(t=>t.status==='resolved').length;
+  $('cnt-open-sub').textContent = followUpCount + ' follow-up due';
+  $('nav-cnt-all').textContent   = tickets.length;
+  $('nav-cnt-all-2').textContent = tickets.length;
+  $('nav-cnt-open').textContent  = tickets.filter(t=>t.status==='open').length;
+  $('nav-cnt-prog').textContent  = tickets.filter(t=>t.status==='progress').length;
+  $('nav-cnt-res').textContent   = tickets.filter(t=>t.status==='resolved').length;
+  $('nav-cnt-followup3').textContent = followUp3Count;
+  $('nav-cnt-followup7').textContent = followUp7Count;
+  $('nav-cnt-p-high').textContent   = tickets.filter(t=>getPriority(t)==='high' && t.status!=='resolved').length;
+  $('nav-cnt-p-medium').textContent = tickets.filter(t=>getPriority(t)==='medium' && t.status!=='resolved').length;
+  $('nav-cnt-p-low').textContent    = tickets.filter(t=>getPriority(t)==='low' && t.status!=='resolved').length;
+  const pending = tickets.filter(t=>!t.reviewed).length;
+  const done    = tickets.filter(t=>!!t.reviewed).length;
+  $('nav-cnt-review').textContent   = pending;
+  $('nav-cnt-reviewed').textContent = done;
+  const regionCounts = { chennai:0, karnakerala:0, tamilnadu:0, coimbatore:0 };
+  tickets.forEach(t => { const key = resolveRegion(t.college); if(key && regionCounts.hasOwnProperty(key)) regionCounts[key]++; });
+  $('nav-cnt-r-chennai').textContent     = regionCounts.chennai;
+  $('nav-cnt-r-karnakerala').textContent = regionCounts.karnakerala;
+  $('nav-cnt-r-tamilnadu').textContent   = regionCounts.tamilnadu;
+  $('nav-cnt-r-coimbatore').textContent  = regionCounts.coimbatore;
+  renderAvgResolution();
+  renderSparklines();
+  renderInsights();
+}
+function renderChips(){
+  const chips = [];
+  if(regionFilter.size) chips.push(`<span class="active-chip">Region: ${regionFilter.size} selected<button onclick="clearRegionFilter()" aria-label="Clear region filter">✕</button></span>`);
+  if(priorityFilter.size) chips.push(`<span class="active-chip">Priority: ${[...priorityFilter].map(k=>PRIORITY_LABEL[k]).join(', ')}<button onclick="clearPriorityFilter()" aria-label="Clear priority filter">✕</button></span>`);
+  if(reviewFilter!=='all') chips.push(`<span class="active-chip">Review: ${reviewFilter==='pending'?'Pending':'Done'}<button onclick="setReviewFilter('all')" aria-label="Clear review filter">✕</button></span>`);
+  $('active-chips').innerHTML = chips.join(' ');
+}
+function renderSkeleton(){
+  const grid = $('ticket-grid');
+  hide('empty-state');
+  let html = '';
+  for(let i=0;i<6;i++){
+    html += `<div class="skel-card"><div class="skel-edge"></div><div class="skel-main">
+      <div class="skel-bar" style="width:40%;height:12px;"></div>
+      <div class="skel-bar" style="width:70%;height:16px;"></div>
+      <div class="skel-bar" style="width:50%;height:12px;"></div>
+      <div class="skel-bar" style="width:90%;height:10px;margin-top:auto;"></div>
+    </div></div>`;
+  }
+  grid.innerHTML = html;
+}
+async function loadTickets(manual){
+  if(!firstLoadDone) renderSkeleton();
+  const btn = $('refresh-btn');
+  const icon = $('refresh-icon');
+  if(manual && btn){ btn.disabled = true; icon.classList.add('spinning'); }
+  try {
+    const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending: false });
+    if(error) throw error;
+    let newData = data || [];
+    if(sessionRole === 'manager' || sessionRole === 'kam'){
+      newData = newData.filter(t => collegeMatchesSession(t.college));
+    }
+    if(firstLoadDone){
+      const newIds = newData.filter(t => !knownTicketIds.has(t.id));
+      if(newIds.length === 1) showToast(`New ticket from ${newIds[0].student_name || 'a student'}`);
+      else if(newIds.length > 1) showToast(`${newIds.length} new tickets received`);
+      else if(manual) showToast('Tickets refreshed');
+    }
+    knownTicketIds = new Set(newData.map(t => t.id));
+    tickets = newData;
+    firstLoadDone = true;
+    renderTickets();
+  } catch(e){
+    console.error(e);
+    showToast('Refresh failed: ' + (e.message || 'check console'));
+    $('ticket-grid').innerHTML = '';
+    show('empty-state');
+    $('empty-state').innerHTML = '<div class="empty-icon">⚠️</div><strong>Couldn\'t load tickets</strong><p>Check your connection and refresh.</p>';
+  } finally {
+    if(manual && btn){ btn.disabled = false; icon.classList.remove('spinning'); }
+  }
+}
+function emptyStateSvg(){
+  return `<svg width="120" height="90" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="15" y="20" width="90" height="58" rx="10" fill="var(--slate-soft)" stroke="var(--border)" stroke-width="1.5"/>
+    <path d="M15 34h90" stroke="var(--border)" stroke-width="1.5"/>
+    <circle cx="28" cy="27" r="2" fill="var(--text-faint)"/>
+    <circle cx="36" cy="27" r="2" fill="var(--text-faint)"/>
+    <circle cx="44" cy="27" r="2" fill="var(--text-faint)"/>
+    <rect x="30" y="44" width="60" height="7" rx="3.5" fill="var(--border)"/>
+    <rect x="30" y="56" width="40" height="7" rx="3.5" fill="var(--border)"/>
+    <circle cx="90" cy="66" r="16" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/>
+    <path d="M84 66h12M90 60v12" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+function renderTickets(){
+  renderStats();
+  renderChips();
+  const filtered = getFiltered();
+  const grid  = $('ticket-grid');
+  const empty = $('empty-state');
+  kbdFocusIdx = -1;
+  if(filtered.length === 0){
+    grid.innerHTML = '';
+    show('empty-state');
+    empty.innerHTML = emptyStateSvg() + '<strong>No tickets found</strong><p>Try a different filter or search term.</p>';
+    return;
+  }
+  hide('empty-state');
+grid.innerHTML = filtered.map((t,i) => {
+    const statusDot = {open:'dot-red',progress:'dot-amber',resolved:'dot-green'}[t.status]||'dot-slate';
+    const statusLbl = {open:'Unresolved',progress:'In Progress',resolved:'Resolved'}[t.status]||t.status;
+    const rInfo = getRegionInfo(t.college);
+    const prio  = getPriority(t);
+    const reviewBadge = t.reviewed
+      ? `<span class="review-badge review-yes">✓ 1:1 Done</span>`
+      : `<span class="review-badge review-no">☐ 1:1 Pending</span>`;
+    const slaFlag = isFollowUpDue(t) ? `<span class="sla-tag">⚑ Follow-up due</span>` : '';
+    const closedTag = (t.status === 'resolved' && t.closed_by)
+      ? `<span class="closed-by-tag">🔒 Closed by ${escHTML(t.closed_by)}</span>` : '';
+    const attachFlag = t.image_url ? `<span class="ticket-attach-flag">📎 Attachment</span>` : '';
+    const ribbonClass = (prio === 'high' && t.status !== 'resolved') ? ' prio-ribbon-high' : '';
+    const quickActions = t.status !== 'resolved' ? `
+      <div class="ticket-quick-actions">
+        ${t.status==='open' ? `<button class="qa-btn" title="Start progress" onclick="event.stopPropagation();quickSetStatus('${t.id}','progress')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h8M9 4l4 4-4 4"/></svg></button>` : ''}
+        <button class="qa-btn" title="Open ticket" onclick="event.stopPropagation();openModal('${t.id}')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5H3a1 1 0 0 0-1 1v8.5a1 1 0 0 0 1 1h8.5a1 1 0 0 0 1-1V10M9 3.5h3.5V7M12.5 3.5 7 9"/></svg></button>
+      </div>` : '';
+    return `<div class="ticket-card ${t.status==='resolved'?'is-closed':''}${ribbonClass}" data-idx="${i}" onclick="openModal('${t.id}')">
+      <div class="ticket-edge ${prio}"></div>
+      ${quickActions}
+      <div class="ticket-main">
+        <div class="ticket-top-row">
+          <div class="ticket-top-left">
+            <span class="cat-pill">${escHTML(t.category)}</span>
+            <span class="prio-pill prio-${prio}">⚑ ${PRIORITY_LABEL[prio]}</span>
+          </div>
+          <span class="dot-row"><span class="dot ${rInfo.dot}"></span>${escHTML(rInfo.label)}</span>
+        </div>
+        <div class="ticket-id-row">
+          <div style="min-width:0;">
+            <div class="ticket-subject">${escHTML(t.subject)}</div>
+            <div class="ticket-student">${escHTML(t.student_name)}${t.college?' · '+escHTML(t.college):''}</div>
+          </div>
+        </div>
+        <hr class="ticket-perf" />
+        <div class="ticket-bottom-row">
+          <div class="ticket-bottom-left">
+            <span class="dot-row"><span class="dot ${statusDot}"></span>${statusLbl}</span>
+            ${slaFlag}
+            ${attachFlag}
+            ${closedTag}
+          </div>
+          <span class="ticket-time">${fmtRel(t.created_at)}</span>
+        </div>
+      </div>
+      <div class="ticket-stub">
+        <span class="ticket-roll">#${escHTML(t.roll_number)}</span>
+        ${reviewBadge}
+      </div>
+    </div>`;
+  }).join('');
+  window._filteredCache = filtered;
+}
+async function quickSetStatus(id, status){
+  const { error } = await sb.from('tickets').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+  if(error){ console.error(error); showToast('Could not update ticket'); return; }
+  tickets = tickets.map(t => t.id === id ? { ...t, status } : t);
+  renderTickets();
+  showToast('Ticket marked in progress');
+}
+function openAdminLightbox(url){
+  if(!url) return;
+  const box = document.createElement('div');
+  box.className = 'admin-lightbox';
+  box.onclick = () => box.remove();
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = 'Ticket attachment enlarged';
+  box.appendChild(img);
+  document.body.appendChild(box);
+}
+document.addEventListener('keydown', e => {
+  if($('ticket-modal') && !$('ticket-modal').classList.contains('hidden')){
+    if(e.key === 'Escape') closeModal();
+    return;
+  }
+  if($('admin-screen').classList.contains('hidden')) return;
+  const active = document.activeElement;
+  if(active && ['INPUT','SELECT','TEXTAREA'].includes(active.tagName)) return;
+  const cards = Array.from(document.querySelectorAll('.ticket-card'));
+  if(!cards.length) return;
+  if(e.key === 'j' || e.key === 'J'){
+    kbdFocusIdx = Math.min(kbdFocusIdx + 1, cards.length - 1);
+    updateKbdFocus(cards);
+  } else if(e.key === 'k' || e.key === 'K'){
+    kbdFocusIdx = Math.max(kbdFocusIdx - 1, 0);
+    updateKbdFocus(cards);
+  } else if(e.key === 'Enter'){
+    if(kbdFocusIdx >= 0 && cards[kbdFocusIdx]) cards[kbdFocusIdx].click();
+  }
+});
+function updateKbdFocus(cards){
+  cards.forEach(c => c.classList.remove('kbd-focus'));
+  const c = cards[kbdFocusIdx];
+  if(c){ c.classList.add('kbd-focus'); c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+function exportCSV(){
+  const list = window._filteredCache || tickets;
+  if(!list.length){ showToast('No tickets to export'); return; }
+  const cols = ['roll_number','student_name','college','category','subject','status','priority','reviewed','created_at','closed_by','closed_at'];
+  const rows = [cols.join(',')];
+  list.forEach(t => {
+    const row = cols.map(c => {
+      let v = c === 'priority' ? getPriority(t) : t[c];
+      v = (v === null || v === undefined) ? '' : String(v);
+      if(v.includes(',') || v.includes('"') || v.includes('\n')) v = '"' + v.replace(/"/g,'""') + '"';
+      return v;
+    });
+    rows.push(row.join(','));
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `facePrep-tickets-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported');
+}
+function buildTimeline(t){
+  const items = [];
+  items.push({ label: 'Ticket created', time: t.created_at, done: true });
+  if(t.updated_at && t.updated_at !== t.created_at && t.status !== 'resolved'){
+    items.push({ label: 'Last updated', time: t.updated_at, done: true });
+  }
+  if(t.status === 'resolved' && t.closed_at){
+    items.push({ label: t.closed_by ? `Resolved by ${t.closed_by}` : 'Resolved', time: t.closed_at, done: true });
+  } else {
+    items.push({ label: 'Awaiting resolution', time: null, done: false });
+  }
+  return items.map(it => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${it.done ? 'done' : ''}"></div>
+      <div class="timeline-body">
+        <strong>${escHTML(it.label)}</strong>
+        <span>${it.time ? fmtAbs(it.time) : 'Pending'}</span>
+      </div>
+    </div>`).join('');
+}
+function openModal(id){
+  const t = tickets.find(x=>x.id===id);
+  if(!t) return;
+  modalId    = id;
+  modalDraft = { status: t.status, note: t.admin_note||'', reviewed: !!t.reviewed, closer: '' };
+  modalLocked = (t.status === 'resolved');
+  $('modal-title').textContent = t.subject || 'No subject';
+  $('modal-meta').textContent  = `${t.roll_number} · ${t.student_name}${t.college?' · '+t.college:''} · ${t.category} · ${fmtRel(t.created_at)}`;
+  $('modal-desc').textContent  = t.description || '(No description provided)';
+  if(t.image_url){
+    $('modal-attachment-img').src = t.image_url;
+    show('modal-attachment');
+  } else {
+    hide('modal-attachment');
+  }
+  $('modal-status').value      = t.status;
+  $('modal-note').value        = t.admin_note||'';
+  $('modal-review').checked    = !!t.reviewed;
+  $('modal-closer').value      = '';
+  hide('closer-error');
+  $('closer-name-wrap').classList.remove('show');
+  $('modal-timeline').innerHTML = buildTimeline(t);
+  $('autosave-tag').classList.remove('show','saved');
+  const rInfo = getRegionInfo(t.college);
+  $('modal-region-badge').innerHTML = `<span class="dot-row"><span class="dot ${rInfo.dot}"></span>${escHTML(rInfo.label)}</span>`;
+  $('modal-region-coord').textContent = rInfo.key ? `Coordinator: ${rInfo.kam}` : 'College not yet mapped to a region';
+  const fields = [$('modal-status'), $('modal-note'), $('modal-review')];
+  const saveBtn = $('modal-save-btn');
+  if(modalLocked){
+    fields.forEach(f => f.disabled = true);
+    saveBtn.classList.add('hidden');
+    show('modal-closed-block');
+    $('modal-closed-text').textContent = t.closed_by
+      ? `Closed by ${t.closed_by}${t.closed_at ? ' on ' + new Date(t.closed_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : ''}. This ticket is locked and can no longer be edited.`
+      : 'This ticket is resolved and locked. It can no longer be edited.';
+  } else {
+    fields.forEach(f => f.disabled = false);
+    saveBtn.classList.remove('hidden');
+    hide('modal-closed-block');
+  }
+  hide('modal-saved');
+  show('ticket-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  hide('ticket-modal');
+  document.body.style.overflow = '';
+  modalId = null; modalDraft = {}; modalLocked = false;
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+}
+function modalEdit(field, val){
+  if(modalLocked) return;
+  modalDraft[field] = val;
+  if(field === 'note') scheduleAutosave();
+}
+function scheduleAutosave(){
+  const tag = $('autosave-tag');
+  tag.textContent = 'Saving…'; tag.classList.remove('saved'); tag.classList.add('show');
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(async () => {
+    if(!modalId || modalLocked) return;
+    const { error } = await sb.from('tickets').update({ admin_note: modalDraft.note, updated_at: new Date().toISOString() }).eq('id', modalId);
+    if(!error){
+      tickets = tickets.map(t => t.id === modalId ? { ...t, admin_note: modalDraft.note } : t);
+      tag.textContent = '✓ Note saved'; tag.classList.add('saved');
+      setTimeout(() => tag.classList.remove('show'), 1800);
+    } else {
+      tag.textContent = 'Save failed';
+    }
+  }, 900);
+}
+function onStatusChange(val){
+  if(modalLocked) return;
+  modalDraft.status = val;
+  const wrap = $('closer-name-wrap');
+  if(val === 'resolved'){ wrap.classList.add('show'); }
+  else { wrap.classList.remove('show'); hide('closer-error'); }
+}
+function onCloserInput(val){
+  modalDraft.closer = val;
+  if(val.trim()) hide('closer-error');
+}
+function playResolveBurst(){
+  const burst = $('resolve-burst');
+  burst.classList.remove('play');
+  void burst.offsetWidth;
+  burst.classList.add('play');
+}
+async function saveModal(){
+  if(!modalId || modalLocked) return;
+  if(modalDraft.status === 'resolved' && !(modalDraft.closer || '').trim()){
+    show('closer-error');
+    $('modal-closer').focus();
+    return;
+  }
+  const saveBtn = $('modal-save-btn');
+  const savedMsg = $('modal-saved');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  hide('modal-saved');
+  const wasResolving = modalDraft.status === 'resolved';
+  const payload = {
+    status:     modalDraft.status,
+    admin_note: modalDraft.note,
+    reviewed:   !!modalDraft.reviewed,
+    updated_at: new Date().toISOString()
+  };
+  if(wasResolving){
+    payload.closed_by = modalDraft.closer.trim();
+    payload.closed_at = new Date().toISOString();
+  }
+  const { error } = await sb.from('tickets').update(payload).eq('id', modalId);
+  if(error){
+    console.error(error);
+    savedMsg.style.color = 'var(--red)';
+    savedMsg.textContent = '✗ ' + (error.message || 'Save failed — check console.');
+    show('modal-saved');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save changes';
+    return;
+  }
+  tickets = tickets.map(t => t.id === modalId ? { ...t, ...payload } : t);
+  renderTickets();
+  savedMsg.style.color = 'var(--green)';
+  savedMsg.textContent = '✓ Saved';
+  show('modal-saved');
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Save changes';
+  if(wasResolving){
+    playResolveBurst();
+    setTimeout(() => { hide('modal-saved'); closeModal(); }, 1400);
+  } else {
+    setTimeout(() => { hide('modal-saved'); closeModal(); }, 1200);
+  }
+}
+/* ══════════════════════════════════════════════════════════
+   ── DAILY ACTIVITY LOG — Field Register (redesigned) ──
+   Requires a `daily_logs` table in Supabase:
+     id           uuid primary key default gen_random_uuid()
+     college      text not null
+     manager_name text
+     log_date     date not null default current_date
+     category     text
+     call_type    text            -- 'hard' or 'soft'
+     activity     text not null
+     progress_notes text
+     created_at   timestamptz not null default now()
+   ══════════════════════════════════════════════════════════ */
+function populateDlogCategorySelect(){
+  const sel = $('dlog-category');
+  if(!sel) return;
+  const hard = DLOG_CATEGORIES.filter(c => c.callType === 'hard');
+  const soft = DLOG_CATEGORIES.filter(c => c.callType === 'soft');
+  sel.innerHTML =
+    '<option value="">Select a category</option>' +
+    `<optgroup label="Hard Call — will be emailed">${hard.map(c => `<option value="${c.key}">${escHTML(c.label)}</option>`).join('')}</optgroup>` +
+    `<optgroup label="Soft Call">${soft.map(c => `<option value="${c.key}">${escHTML(c.label)}</option>`).join('')}</optgroup>`;
+}
+function onDlogCategoryChange(key){
+  const cat = DLOG_CATEGORIES.find(c => c.key === key);
+  const hint = $('dlog-call-hint');
+  const sel = $('dlog-category');
+  sel.classList.remove('is-hard');
+  if(!hint) return;
+  if(!cat){ hint.className = 'ledger-stamp-hint'; hint.innerHTML = ''; return; }
+  if(cat.callType === 'hard'){
+    sel.classList.add('is-hard');
+    hint.className = 'ledger-stamp-hint hard';
+    hint.innerHTML = '<span class="mini-stamp">✉</span><span>Hard call — an email goes to the KAM</span>';
+  } else {
+    hint.className = 'ledger-stamp-hint soft';
+    hint.innerHTML = '<span class="mini-stamp">·</span><span>Soft call — no email needed</span>';
+  }
+}
+function sendHardCallEmail(cat, entry){
+  const subject = encodeURIComponent(`[Hard Call] ${cat.label} — ${sessionCollege}`);
+  const lines = [
+    `College: ${sessionCollege}`,
+    `Category: ${cat.label}`,
+    `Date: ${entry.date}`,
+    `Logged by: ${entry.name || '-'}`,
+    '',
+    'Activity:',
+    entry.activity,
+  ];
+  if(entry.progress) lines.push('', 'Progress / notes:', entry.progress);
+  const body = encodeURIComponent(lines.join('\n'));
+  window.open(`mailto:${ESCALATION_EMAIL}?subject=${subject}&body=${body}`, '_blank');
+}
+function enterDailyLog(){
+  hide('platform-select-screen');
+  hide('admin-screen');
+  show('dailylog-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  $('dlog-college-name').textContent = sessionCollege || '—';
+  $('dlog-college-name-crumb').textContent = sessionCollege || '—';
+  $('dlog-today-label').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  const today = new Date().toISOString().slice(0,10);
+  $('dlog-date').value = today;
+  const rec = collegeContacts.find(c => c.college === sessionCollege);
+  $('dlog-name').value = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+  populateDlogCategorySelect();
+  $('dlog-category').value = '';
+  onDlogCategoryChange('');
+  dlogCalMonth = new Date();
+  loadDailyLogs();
+}
+async function loadDailyLogs(){
+  const listEl = $('dlog-entries');
+  listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  try{
+    const { data, error } = await sb.from('daily_logs')
+      .select('*')
+      .eq('college', sessionCollege)
+      .order('log_date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    dailyLogs = data || [];
+    renderDailyLogs();
+  }catch(e){
+    console.error('Could not load daily_logs (has the daily_logs table been created?):', e);
+    listEl.innerHTML = '';
+    show('dlog-empty');
+    $('dlog-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table exists in Supabase.</p>`;
+  }
+}
+function updateLedgerMeta(){
+  const numEl = $('dlog-entry-no');
+  if(numEl) numEl.textContent = String(dailyLogs.length + 1).padStart(3,'0');
+}
+function renderDailyLogs(){
+  const listEl = $('dlog-entries');
+  updateLedgerMeta();
+  const streak = computeLoggingStreak(dailyLogs);
+  const streakChip = document.getElementById('dlog-streak-chip');
+  if(streakChip){
+    if(streak > 0){
+      streakChip.textContent = `🔥 ${streak}-day logging streak`;
+      streakChip.classList.remove('hidden');
+    } else {
+      streakChip.classList.add('hidden');
+    }
+  }
+  if(!dailyLogs.length){
+    listEl.innerHTML = '';
+    show('dlog-empty');
+    $('dlog-empty').innerHTML = '<p>No entries yet. Add your first daily log above.</p>';
+    renderDlogCalendar();
+    return;
+  }
+hide('dlog-empty');
+  const DLOG_RECENT_LIMIT = 10;              // ← move it here
+  listEl.innerHTML = dailyLogs.slice(0, DLOG_RECENT_LIMIT).map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    // (delete the old "const DLOG_RECENT_LIMIT = 10;" line that was here)
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+ const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const dateStr = new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const statusHtml = l.reviewed
+      ? `<span class="ledger-row-status reviewed">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
+      : `<span class="ledger-row-status pending">◔ Pending review</span>`;
+    const stampRot = (((l.id ? l.id.toString().charCodeAt(0) : dailyLogs.indexOf(l)) % 7) - 3);
+    return `
+    <div class="ledger-row">
+      <span class="ledger-stamp ${callType}" style="transform:rotate(${stampRot}deg);"><span>${callType==='hard'?'Hard':'Soft'}</span><span>Call</span></span>
+      <div class="ledger-row-body">
+        <div class="ledger-row-top">
+          <span class="ledger-row-cat">${escHTML(catLabel)}</span>
+          <span class="ledger-row-date">${dateStr}</span>
+        </div>
+        <div class="ledger-row-activity">${escHTML(l.activity)}</div>
+        ${l.progress_notes ? `<div class="ledger-row-notes">${escHTML(l.progress_notes)}</div>` : ''}
+        <div class="ledger-row-foot">
+          <span class="ledger-row-logger">Logged by ${escHTML(l.manager_name||'—')}</span>
+          ${statusHtml}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  renderDlogCalendar();
+}
+/* ── Daily log's own activity calendar (added) ── */
+function dlogCalShift(delta){
+  dlogCalMonth = new Date(dlogCalMonth.getFullYear(), dlogCalMonth.getMonth()+delta, 1);
+  renderDlogCalendar();
+}
+function dlogCalToday(){
+  dlogCalMonth = new Date();
+  renderDlogCalendar();
+}
+function ymd(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function renderDlogCalendar(){
+  const label = $('dlog-cal-month-label');
+  if(label) label.textContent = dlogCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  renderMonthSummary('dlog-month-summary', dailyLogs, dlogCalMonth);
+  const byDate = {};
+  dailyLogs.forEach(l => {
+    const key = String(l.log_date).slice(0,10);
+    (byDate[key] = byDate[key] || []).push(l);
+  });
+  const year = dlogCalMonth.getFullYear();
+  const month = dlogCalMonth.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  let startOffset = firstOfMonth.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const todayKey = ymd(new Date());
+  const cells = [];
+  for(let i=startOffset; i>0; i--){
+    cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push({ date: new Date(year, month, d), outside:false });
+  }
+  while(cells.length % 7 !== 0 || cells.length < 42){
+    const last = cells[cells.length-1].date;
+    cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
+  }
+  const grid = $('dlog-cal-grid');
+  if(!grid) return;
+  const maxShow = 3;
+  grid.innerHTML = cells.map(cell => {
+    const key = ymd(cell.date);
+    const dayEntries = byDate[key] || [];
+    const isToday = key === todayKey;
+    const pillsHtml = dayEntries.slice(0, maxShow).map(e => {
+      const cat = DLOG_CATEGORIES.find(c => c.key === e.category);
+      const catLabel = cat ? cat.label : (e.category || 'Uncategorized');
+      const callType = e.call_type || (cat ? cat.callType : 'soft');
+      return `<div class="review-cal-pill" title="${escHTML(catLabel)}">
+        <span class="cal-dot ${callType}"></span>
+        <span>${escHTML(catLabel)}</span>
+        ${e.reviewed ? '<span class="cal-check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+    const moreHtml = dayEntries.length > maxShow ? `<div class="review-cal-more">+${dayEntries.length - maxShow} more</div>` : '';
+    return `<div class="review-cal-cell ${cell.outside ? 'outside' : ''} ${isToday ? 'is-today' : ''}" onclick="openDlogDayModal('${key}')">
+      <span class="review-cal-daynum">${cell.date.getDate()}</span>
+      ${pillsHtml}
+      ${moreHtml}
+    </div>`;
+  }).join('');
+}
+function openDlogDayModal(dateKey){
+  const dayEntries = dailyLogs.filter(l => String(l.log_date).slice(0,10) === dateKey);
+  if(!dayEntries.length) return;
+  const dateObj = new Date(dateKey + 'T00:00:00');
+  $('dlog-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  $('dlog-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${sessionCollege || ''}`;
+  $('dlog-day-modal-entries').innerHTML = dayEntries.map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    const reviewBadge = l.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
+      : `<span class="review-badge review-no">☐ Review pending</span>`;
+    return `<div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
+      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+    </div>`;
+  }).join('');
+  show('dlog-day-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeDlogDayModal(){
+  hide('dlog-day-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('dlog-day-modal') && !$('dlog-day-modal').classList.contains('hidden')){
+    closeDlogDayModal();
+  }
+});
+async function saveDailyLog(){
+  if(dlogSaving) return;
+ // Always derive these from trusted session data — never trust the input fields,
+// even though they're displayed as readonly.
+const date = new Date().toISOString().slice(0,10);
+const rec = collegeContacts.find(c => c.college === sessionCollege);
+const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+  const categoryKey = $('dlog-category').value;
+  const activity = $('dlog-activity').value.trim();
+  const progress = $('dlog-progress').value.trim();
+  if(!date || !categoryKey || !activity){
+    showToast('Please select a category and add activity details');
+    return;
+  }
+  const cat = DLOG_CATEGORIES.find(c => c.key === categoryKey);
+  const callType = cat ? cat.callType : 'soft';
+  dlogSaving = true;
+  const saveBtn = $('dlog-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Filing…';
+  hide('dlog-saved');
+  const payload = {
+    college: sessionCollege,
+    manager_name: name || null,
+    log_date: date,
+    category: categoryKey,
+    call_type: callType,
+    activity: activity,
+    progress_notes: progress || null,
+  };
+  const { error } = await sb.from('daily_logs').insert(payload);
+  dlogSaving = false;
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'File entry';
+  if(error){
+    console.error(error);
+    showToast('Could not save entry: ' + (error.message || 'check console'));
+    return;
+  }
+  $('dlog-activity').value = '';
+  $('dlog-progress').value = '';
+  $('dlog-category').value = '';
+  onDlogCategoryChange('');
+  const saved = $('dlog-saved');
+  saved.style.color = 'var(--green)';
+  saved.textContent = '✓ Saved';
+  show('dlog-saved');
+  setTimeout(() => hide('dlog-saved'), 1800);
+if(callType === 'hard'){
+    sb.functions.invoke('notify-hardcall', {
+      body: {
+        college: sessionCollege,
+        category_label: cat.label,
+        log_date: date,
+        manager_name: name,
+        activity,
+        progress_notes: progress,
+      }
+    }).catch(e => console.error('notify-hardcall failed', e));
+  }
+  /* jump the calendar to the month of the entry just filed, so the new dot is visible immediately */
+  dlogCalMonth = new Date(date + 'T00:00:00');
+  loadDailyLogs();
+}
+/* ══════════════════════════════════════════════════════════
+   ── CLASSROOM SNAP (added) ──
+   ══════════════════════════════════════════════════════════ */
+/* Fuzzy-resolve a college's department list the same way resolveRegion() works */
+function resolveDepartmentList(collegeName){
+  const norm = normalizeCollege(collegeName);
+  if(!norm) return [];
+  const keys = Object.keys(COLLEGE_DEPARTMENTS);
+  let hit = keys.find(k => normalizeCollege(k) === norm);
+  if(hit) return COLLEGE_DEPARTMENTS[hit];
+  hit = keys.find(k => { const kn = normalizeCollege(k); return norm.includes(kn) || kn.includes(norm); });
+  if(hit) return COLLEGE_DEPARTMENTS[hit];
+  const normWords = new Set(norm.split(' ').filter(w => w.length > 2));
+  let best = null, bestScore = 0;
+  keys.forEach(k => {
+    const kWords = normalizeCollege(k).split(' ').filter(w => w.length > 2);
+    const overlap = kWords.filter(w => normWords.has(w)).length;
+    const score = overlap / Math.max(kWords.length, 1);
+    if(score > bestScore){ bestScore = score; best = k; }
+  });
+  if(best && bestScore >= 0.6) return COLLEGE_DEPARTMENTS[best];
+  return [];
+}
+
+function populateSnapDepartmentSelect(){
+  const sel = $('snap-department');
+  if(!sel) return;
+  const list = resolveDepartmentList(sessionCollege);
+  sel.innerHTML = list.length
+    ? '<option value="">Select department / class</option>' + list.map(d => `<option value="${escHTML(d)}">${escHTML(d)}</option>`).join('')
+    : '<option value="">No departments configured for this college</option>';
+}
+
+function onSnapPhotoChange(input){
+  const file = input.files && input.files[0];
+  if(!file){ snapSelectedFile = null; hide('snap-photo-preview-wrap'); return; }
+  snapSelectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => { $('snap-photo-preview').src = e.target.result; show('snap-photo-preview-wrap'); };
+  reader.readAsDataURL(file);
+
+  const statusEl = $('snap-location-status');
+  snapLocation = null;
+  if(statusEl) statusEl.textContent = 'Capturing live location…';
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        snapLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+        if(statusEl) statusEl.textContent = `📍 Location captured (±${Math.round(pos.coords.accuracy)}m)`;
+      },
+      err => {
+        console.error('Geolocation failed:', err);
+        if(statusEl) statusEl.textContent = '⚠ Could not capture location — check location permission';
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  } else if(statusEl){
+    statusEl.textContent = '⚠ Location not supported on this device';
+  }
+}
+
+async function enterClassroomSnap(){
+  hide('platform-select-screen');
+  hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen');
+  show('classroom-snap-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  const isManager = sessionRole === 'manager';
+  $('csnap-form-block').classList.toggle('hidden', !isManager);
+  $('csnap-college-filter-block').classList.toggle('hidden', isManager);
+  $('csnap-breadcrumb-college').textContent = isManager ? (sessionCollege || '—') : 'All colleges';
+  snapSelectedFile = null;
+  snapLocation = null;
+  const fileInput = $('snap-photo-input'); if(fileInput) fileInput.value = '';
+  hide('snap-photo-preview-wrap');
+  if($('snap-location-status')) $('snap-location-status').textContent = '';
+  if(isManager){
+    populateSnapDepartmentSelect();
+    ['snap-teacher','snap-course-type','snap-subject',
+     'snap-punctuality','snap-professionalism','snap-class-handling',
+     'snap-skill-development','snap-student-engagement','snap-tasks-followup','snap-notes'
+    ].forEach(id => { const el = $(id); if(el) el.value = ''; });
+  } else {
+    populateSnapCollegeSelect();
+  }
+  loadClassroomSnaps();
+}
+
+function populateSnapCollegeSelect(){
+  const sel = $('csnap-college-select');
+  if(!sel) return;
+  let names = collegeContacts.length ? collegeContacts.map(c => c.college) : COLLEGE_REGION_MAP.map(c => c.college);
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+    names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
+  }
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = '<option value="">All colleges</option>' +
+    uniqueSorted.map(n => `<option value="${escHTML(n)}">${escHTML(n)}</option>`).join('');
+  snapReviewCollege = sel.value || null;
+}
+
+function onSnapCollegeFilterChange(v){
+  snapReviewCollege = v || null;
+  loadClassroomSnaps();
+}
+
+async function loadClassroomSnaps(){
+  const grid = $('csnap-grid');
+  grid.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px 0;">Loading…</div>';
+  try{
+    let query = sb.from('classroom_snaps').select('*').order('created_at', { ascending: false });
+    if(sessionRole === 'manager') query = query.eq('college', sessionCollege);
+    else if(snapReviewCollege) query = query.eq('college', snapReviewCollege);
+    const { data, error } = await query;
+    if(error) throw error;
+    let rows = data || [];
+    if(sessionRole === 'kam' && !snapReviewCollege) rows = rows.filter(r => collegeMatchesSession(r.college));
+    classroomSnaps = rows;
+    renderClassroomSnaps();
+  }catch(e){
+    console.error('Could not load classroom_snaps (has the table/bucket been created?):', e);
+    grid.innerHTML = '';
+    show('csnap-empty');
+    $('csnap-empty').innerHTML = `<p>Couldn't load snaps. Make sure the <b>classroom_snaps</b> table and <b>classroom-snaps</b> storage bucket exist.</p>`;
+  }
+}
+
+const RATING_LABELS = {
+  rating_punctuality: 'Punctuality',
+  rating_professionalism: 'Professionalism',
+  rating_class_handling: 'Class Handling',
+  rating_skill_development: 'Skill Development',
+  rating_student_engagement: 'Student Engagement',
+  rating_tasks_followup: 'Tasks & Follow-up',
+};
+function ratingBadgeTone(v){
+  const n = Number(v);
+  if(!n) return '';
+  if(n >= 4) return 'good';
+  if(n <= 2) return 'warn';
+  return '';
+}
+
+function renderClassroomSnaps(){
+  const grid = $('csnap-grid');
+  if(!classroomSnaps.length){
+    grid.innerHTML = '';
+    show('csnap-empty');
+    $('csnap-empty').innerHTML = '<p>No classroom snaps logged yet.</p>';
+    return;
+  }
+  hide('csnap-empty');
+  const isManager = sessionRole === 'manager';
+  grid.innerHTML = classroomSnaps.map(s => {
+    const reviewBadge = s.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
+      : `<span class="review-badge review-no">☐ Pending</span>`;
+    const reviewBtn = (!isManager && !s.reviewed)
+      ? `<button class="btn btn-ghost" style="margin-top:8px;width:100%;" onclick="markSnapReviewed('${s.id}')">Mark reviewed</button>` : '';
+
+    const ratingFields = Object.keys(RATING_LABELS).filter(k => s[k]);
+    const badgesHtml = ratingFields.length ? `<div class="snap-eval-badges">${ratingFields.map(k =>
+      `<span class="snap-eval-badge ${ratingBadgeTone(s[k])}">${escHTML(RATING_LABELS[k])}: ${escHTML(s[k])}/5</span>`).join('')}</div>` : '';
+
+    const detailFields = [
+      ['Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : null],
+      ['Department', s.department],
+      ['Course', s.course_type],
+      ['Course name', s.course_name || s.subject],
+      ['Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : null],
+      ['Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : null],
+      ['Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : null],
+      ['Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : null],
+      ['Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : null],
+      ['Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : null],
+      ['Remarks', s.notes],
+    ].filter(([,v]) => v);
+    const detailsHtml = detailFields.length ? `
+      <details class="snap-eval-details">
+        <summary>Full evaluation</summary>
+        <div class="snap-eval-grid">
+          ${detailFields.map(([label,val]) => `<div class="snap-eval-row"><b>${escHTML(label)}</b><span>${escHTML(val)}</span></div>`).join('')}
+        </div>
+      </details>` : '';
+
+    return `<div class="snap-card">
+      <img class="snap-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">
+      <div class="snap-body">
+        <div class="snap-top">
+          <span class="snap-class">${s.department ? escHTML(s.department) : '—'}</span>
+          <span class="snap-date">${fmtRel(s.created_at)}</span>
+        </div>
+        ${s.teacher_name ? `<div class="snap-teacher">Mentor: ${escHTML(s.teacher_name)}</div>` : ''}
+        ${s.course_name || s.subject ? `<div class="snap-teacher">${escHTML(s.course_type||'')}${s.course_type?' · ':''}${escHTML(s.course_name||s.subject)}</div>` : ''}
+${s.notes ? `<div class="snap-notes" onclick="event.stopPropagation();openSnapDetailModal('${s.id}')">${escHTML(s.notes)}</div>` : ''}
+${badgesHtml}
+        ${detailsHtml}
+        <div class="snap-foot">
+          <span class="snap-logger">${escHTML(s.manager_name||'—')}${!isManager && s.college ? ' · '+escHTML(s.college) : ''}</span>
+          ${reviewBadge}
+        </div>
+        ${reviewBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+ function snapDetailRow(label, value){
+  const v = (value === null || value === undefined || String(value).trim() === '') ? '' : value;
+  return `<div class="snap-detail-item"><b>${escHTML(label)}</b><span class="${v ? '' : 'empty'}">${v ? escHTML(v) : 'Not recorded'}</span></div>`;
+}
+function openSnapDetailModal(id){
+  const s = classroomSnaps.find(x => x.id === id);
+  if(!s) return;
+  $('snap-detail-title').textContent = s.department ? `Classroom Observation · ${s.department}` : 'Classroom Observation';
+  $('snap-detail-meta').textContent = `${s.college ? s.college + ' · ' : ''}${s.manager_name || '—'} · ${fmtRel(s.created_at)}`;
+  const reviewBadge = s.reviewed
+    ? `<span class="review-badge review-yes">✓ Reviewed${s.reviewed_by ? ' by '+escHTML(s.reviewed_by) : ''}</span>`
+    : `<span class="review-badge review-no">☐ Review pending</span>`;
+  const reviewBtn = (sessionRole !== 'manager' && !s.reviewed)
+    ? `<button class="btn btn-primary" style="margin-top:6px;" onclick="markSnapReviewed('${s.id}');closeSnapDetailModal();">Mark reviewed</button>`
+    : '';
+  $('snap-detail-body').innerHTML = `
+    ${s.photo_url ? `<img class="snap-detail-photo" src="${escHTML(s.photo_url)}" alt="Classroom snap" onclick="openAdminLightbox(this.src)">` : ''}
+    <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">${reviewBadge}</div>
+    <div class="snap-detail-grid">
+      ${snapDetailRow('Observation date', s.observation_date ? new Date(s.observation_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '')}
+      ${snapDetailRow('Mentor', s.teacher_name)}
+      ${snapDetailRow('Department', s.department)}
+      ${snapDetailRow('Course', s.course_type)}
+      ${snapDetailRow('Course Name', s.course_name || s.subject)}
+      ${snapDetailRow('Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : '')}
+      ${snapDetailRow('Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : '')}
+      ${snapDetailRow('Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : '')}
+      ${snapDetailRow('Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : '')}
+      ${snapDetailRow('Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : '')}
+      ${snapDetailRow('Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : '')}
+      <div class="snap-detail-item full">${snapDetailRow('Remarks', s.notes)}</div>
+      ${s.photo_lat ? snapDetailRow('Photo location', `${Number(s.photo_lat).toFixed(5)}, ${Number(s.photo_lng).toFixed(5)}`) : ''}
+    </div>
+    ${reviewBtn}
+  `;
+  show('snap-detail-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeSnapDetailModal(){
+  hide('snap-detail-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('snap-detail-modal') && !$('snap-detail-modal').classList.contains('hidden')){
+    closeSnapDetailModal();
+  }
+});
+ 
+async function saveClassroomSnap(){
+  if(snapSaving) return;
+  if(!snapSelectedFile){ showToast('Please attach a live location photo of the classroom'); return; }
+
+  const teacher      = $('snap-teacher').value.trim();
+  const department    = $('snap-department').value;
+  const courseType    = $('snap-course-type').value;
+  const courseName    = $('snap-subject').value.trim();
+  const punctuality        = $('snap-punctuality').value || null;
+  const professionalism    = $('snap-professionalism').value || null;
+  const classHandling      = $('snap-class-handling').value || null;
+  const skillDevelopment   = $('snap-skill-development').value || null;
+  const studentEngagement  = $('snap-student-engagement').value || null;
+  const tasksFollowup      = $('snap-tasks-followup').value || null;
+  const notes = $('snap-notes').value.trim();
+  const obsDate = new Date().toISOString().slice(0,10);
+
+  if(!department){ showToast('Please select the department / class observed'); return; }
+
+  snapSaving = true;
+  const btn = $('snap-save-btn');
+  btn.disabled = true; btn.textContent = 'Uploading…';
+  try{
+    const ext = (snapSelectedFile.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${sessionCollege || 'unknown'}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('classroom-snaps').upload(path, snapSelectedFile, { cacheControl: '3600', upsert: false });
+    if(upErr) throw upErr;
+    const { data: pub } = sb.storage.from('classroom-snaps').getPublicUrl(path);
+    const rec = collegeContacts.find(c => c.college === sessionCollege);
+    const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+    const payload = {
+      college: sessionCollege,
+      manager_name: name || null,
+      class_name: department || null,
+      subject: courseName || null,
+      teacher_name: teacher || null,
+      mentor_name: teacher || null,
+      notes: notes || null,
+      comments: notes || null,
+      photo_url: pub.publicUrl,
+      observation_date: obsDate,
+      department: department || null,
+      course_type: courseType || null,
+      course_name: courseName || null,
+      photo_lat: snapLocation ? snapLocation.lat : null,
+      photo_lng: snapLocation ? snapLocation.lng : null,
+      photo_location_accuracy: snapLocation ? snapLocation.accuracy : null,
+      rating_punctuality: punctuality,
+      rating_professionalism: professionalism,
+      rating_class_handling: classHandling,
+      rating_skill_development: skillDevelopment,
+      rating_student_engagement: studentEngagement,
+      rating_tasks_followup: tasksFollowup,
+    };
+    const { error } = await sb.from('classroom_snaps').insert(payload);
+    if(error) throw error;
+    $('snap-teacher').value=''; $('snap-course-type').value=''; $('snap-subject').value='';
+    $('snap-punctuality').value=''; $('snap-professionalism').value=''; $('snap-class-handling').value='';
+    $('snap-skill-development').value=''; $('snap-student-engagement').value=''; $('snap-tasks-followup').value='';
+    $('snap-notes').value='';
+    populateSnapDepartmentSelect();
+    $('snap-photo-input').value=''; snapSelectedFile=null; snapLocation=null; hide('snap-photo-preview-wrap');
+    if($('snap-location-status')) $('snap-location-status').textContent = '';
+    const saved = $('snap-saved');
+    saved.style.color='var(--green)'; saved.textContent='✓ Saved'; show('snap-saved');
+    setTimeout(() => hide('snap-saved'), 1800);
+    loadClassroomSnaps();
+  }catch(e){
+    console.error(e);
+    showToast('Could not upload snap: ' + (e.message || 'check console'));
+  }finally{
+    snapSaving = false; btn.disabled = false; btn.textContent = 'Upload snap';
+  }
+}
+
+async function markSnapReviewed(id){
+  const reviewerName = window.prompt("Enter your name to confirm this review:");
+  if(!reviewerName || !reviewerName.trim()){ showToast('Reviewer name is required'); return; }
+  const payload = { reviewed: true, reviewed_by: reviewerName.trim(), reviewed_at: new Date().toISOString() };
+  const { error } = await sb.from('classroom_snaps').update(payload).eq('id', id);
+  if(error){ console.error(error); showToast('Could not mark as reviewed'); return; }
+  classroomSnaps = classroomSnaps.map(s => s.id === id ? { ...s, ...payload } : s);
+  renderClassroomSnaps();
+  showToast('Marked as reviewed');
+}
+  /* ══════════════════════════════════════════════════════════
+   ── REVIEW PANEL (admin only, added) ──
+   ══════════════════════════════════════════════════════════ */
+async function loadCollegePendingCounts(){
+  try{
+    const { data, error } = await sb.from('daily_logs').select('college, reviewed');
+    if(error) throw error;
+    const counts = {};
+    (data || []).forEach(l => {
+      if(!l.reviewed){
+        counts[l.college] = (counts[l.college] || 0) + 1;
+      }
+    });
+    collegePendingCounts = counts;
+  }catch(e){
+    console.error('Could not load pending review counts:', e);
+    collegePendingCounts = {};
+  }
+}
+function populateReviewCollegeSelect(){
+  const sel = $('review-college-select');
+  if(!sel) return;
+  let names = collegeContacts.length
+    ? collegeContacts.map(c => c.college)
+    : COLLEGE_REGION_MAP.map(c => c.college);
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+    names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
+  }
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  const prevValue = sel.value;
+  sel.innerHTML = uniqueSorted.length
+    ? '<option value="" disabled selected>Select college</option>' +
+      uniqueSorted.map(name => {
+        const pending = collegePendingCounts[name] || 0;
+const label = pending > 0 ? `${name} — ${pending} pending` : `${name}`;
+       const style = pending > 0 ? ' style="color:#DC2626;font-weight:600;"' : '';
+        return `<option value="${escHTML(name)}"${style}>${escHTML(label)}</option>`;
+      }).join('')
+    : '<option value="">No colleges configured yet</option>';
+  if(prevValue) sel.value = prevValue;
+}
+ async function enterReviewPanel(){
+  hide('platform-select-screen');
+  hide('admin-screen');
+  hide('dailylog-screen');
+  show('review-panel-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  await loadCollegePendingCounts();
+  populateReviewCollegeSelect();
+  const sel = $('review-college-select');
+  reviewCollege = sel.value || null;
+  $('review-college-name').textContent = reviewCollege || '—';
+  reviewCallFilter = 'all';
+  $('review-filter-select').value = 'all';
+  reviewCalMonth = new Date();
+  if(reviewCollege) loadReviewLogs();
+  else {
+    reviewLogs = [];
+    renderReviewLogs();
+  }
+}
+function reviewCalShift(delta){
+  reviewCalMonth = new Date(reviewCalMonth.getFullYear(), reviewCalMonth.getMonth()+delta, 1);
+  renderReviewCalendar();
+}
+function reviewCalToday(){
+  reviewCalMonth = new Date();
+  renderReviewCalendar();
+}
+function renderReviewCalendar(){
+  const label = $('review-cal-month-label');
+  if(label) label.textContent = reviewCalMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  const filtered = getReviewFiltered();
+  const byDate = {};
+  filtered.forEach(l => {
+    const key = String(l.log_date).slice(0,10);
+    (byDate[key] = byDate[key] || []).push(l);
+  });
+  const year = reviewCalMonth.getFullYear();
+  const month = reviewCalMonth.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  let startOffset = firstOfMonth.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const todayKey = ymd(new Date());
+  const cells = [];
+  for(let i=startOffset; i>0; i--){
+    cells.push({ date: new Date(year, month-1, daysInPrevMonth - i + 1), outside:true });
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push({ date: new Date(year, month, d), outside:false });
+  }
+  while(cells.length % 7 !== 0 || cells.length < 42){
+    const last = cells[cells.length-1].date;
+    cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate()+1), outside:true });
+  }
+  const grid = $('review-cal-grid');
+  if(!grid) return;
+  const maxShow = 3;
+  grid.innerHTML = cells.map(cell => {
+    const key = ymd(cell.date);
+    const dayEntries = byDate[key] || [];
+    const isToday = key === todayKey;
+    const pillsHtml = dayEntries.slice(0, maxShow).map(e => {
+      const cat = DLOG_CATEGORIES.find(c => c.key === e.category);
+      const catLabel = cat ? cat.label : (e.category || 'Uncategorized');
+      const callType = e.call_type || (cat ? cat.callType : 'soft');
+      return `<div class="review-cal-pill" title="${escHTML(catLabel)}">
+        <span class="cal-dot ${callType}"></span>
+        <span>${escHTML(catLabel)}</span>
+        ${e.reviewed ? '<span class="cal-check">✓</span>' : ''}
+      </div>`;
+    }).join('');
+    const moreHtml = dayEntries.length > maxShow ? `<div class="review-cal-more">+${dayEntries.length - maxShow} more</div>` : '';
+    return `<div class="review-cal-cell ${cell.outside ? 'outside' : ''} ${isToday ? 'is-today' : ''}" onclick="openReviewDayModal('${key}')">
+      <span class="review-cal-daynum">${cell.date.getDate()}</span>
+      ${pillsHtml}
+      ${moreHtml}
+    </div>`;
+  }).join('');
+  if(!reviewCollege){
+    show('review-empty');
+    $('review-empty').innerHTML = '<p>Select a college to view its activity log.</p>';
+  } else if(!filtered.length){
+    show('review-empty');
+    $('review-empty').innerHTML = '<p>No entries found for this college / filter.</p>';
+  } else {
+    hide('review-empty');
+  }
+}
+function openReviewDayModal(dateKey){
+  const dayEntries = getReviewFiltered().filter(l => String(l.log_date).slice(0,10) === dateKey);
+  if(!dayEntries.length) return;
+  const dateObj = new Date(dateKey + 'T00:00:00');
+  $('review-day-modal-title').textContent = dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  $('review-day-modal-meta').textContent = `${dayEntries.length} entr${dayEntries.length===1?'y':'ies'} · ${reviewCollege || ''}`;
+  $('review-day-modal-entries').innerHTML = dayEntries.map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const badge = `<span class="dlog-cat-badge ${callType}">${callType === 'hard' ? '✉ Hard call' : 'Soft call'} · ${escHTML(catLabel)}</span>`;
+    const reviewBadge = l.reviewed
+      ? `<span class="review-badge review-yes">✓ Reviewed by ${escHTML(l.reviewed_by||'admin')}</span>`
+      : `<span class="review-badge review-no">☐ Review pending</span>`;
+    const reviewBtn = !l.reviewed
+      ? `<button class="btn btn-primary" style="margin-top:10px;" onclick="markLogReviewed('${l.id}')">Mark reviewed</button>`
+      : `<div style="margin-top:8px;font-size:11px;color:var(--text-faint);">Reviewed on ${l.reviewed_at ? fmtAbs(l.reviewed_at) : '—'}</div>`;
+    return `<div class="dlog-entry">
+      <div class="dlog-entry-top">
+        <span class="dlog-entry-date">${escHTML(l.manager_name||'')}</span>
+      </div>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${badge}${reviewBadge}</div>
+      <div class="dlog-entry-activity" style="margin-top:6px;">${escHTML(l.activity)}</div>
+      ${l.progress_notes ? `<div class="dlog-entry-progress">${escHTML(l.progress_notes)}</div>` : ''}
+      ${reviewBtn}
+    </div>`;
+  }).join('');
+  show('review-day-modal');
+  document.body.style.overflow = 'hidden';
+}
+function closeReviewDayModal(){
+  hide('review-day-modal');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && $('review-day-modal') && !$('review-day-modal').classList.contains('hidden')){
+    closeReviewDayModal();
+  }
+});
+function onReviewCollegeChange(college){
+  reviewCollege = college;
+  $('review-college-name').textContent = college || '—';
+  loadReviewLogs();
+}
+function setReviewLogFilter(v){
+  reviewCallFilter = v;
+  renderReviewLogs();
+}
+async function loadReviewLogs(){
+  const listEl = $('review-cal-grid');
+  if(listEl) listEl.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:10px;">Loading…</div>';
+  try{
+    const { data, error } = await sb.from('daily_logs')
+      .select('*')
+      .eq('college', reviewCollege)
+      .order('log_date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    reviewLogs = data || [];
+    renderReviewLogs();
+  }catch(e){
+    console.error('Could not load daily_logs for review panel:', e);
+    show('review-empty');
+    $('review-empty').innerHTML = `<p>Couldn't load entries. Make sure the <b>daily_logs</b> table has the review columns (reviewed, reviewed_by, reviewed_at).</p>`;
+  }
+}
+function getReviewFiltered(){
+  let list = reviewLogs;
+  if(reviewCallFilter === 'hard')     list = list.filter(l => l.call_type === 'hard');
+  if(reviewCallFilter === 'soft')     list = list.filter(l => l.call_type === 'soft');
+  if(reviewCallFilter === 'pending')  list = list.filter(l => !l.reviewed);
+  if(reviewCallFilter === 'reviewed') list = list.filter(l => !!l.reviewed);
+  return list;
+}
+function renderReviewLogs(){
+  const total    = reviewLogs.length;
+  const hard     = reviewLogs.filter(l => l.call_type === 'hard').length;
+  const soft     = reviewLogs.filter(l => l.call_type === 'soft').length;
+  const reviewed = reviewLogs.filter(l => !!l.reviewed).length;
+  const pending  = total - reviewed;
+  const rate     = total ? Math.round((reviewed/total)*100) : 0;
+  $('review-cnt-all').textContent      = total;
+  $('review-cnt-hard').textContent     = hard;
+  $('review-cnt-soft').textContent     = soft;
+  $('review-cnt-pending').textContent  = pending;
+  $('review-cnt-reviewed').textContent = reviewed;
+  $('review-cnt-rate').textContent     = rate + '%';
+  const ring = document.getElementById('review-rate-ring');
+  if(ring){
+    const circumference = 138.2;
+    ring.style.strokeDashoffset = circumference - (circumference * rate / 100);
+  }
+  renderReviewSparkline();
+  renderMonthSummary('review-month-summary', reviewLogs, reviewCalMonth);
+  renderReviewCalendar();
+}
+async function markLogReviewed(id){
+  const reviewerName = window.prompt('Enter your name to confirm this review:');
+  if(!reviewerName || !reviewerName.trim()){
+    showToast('Reviewer name is required');
+    return;
+  }
+  const payload = {
+    reviewed: true,
+    reviewed_by: reviewerName.trim(),
+    reviewed_at: new Date().toISOString()
+  };
+  const { error } = await sb.from('daily_logs').update(payload).eq('id', id);
+  if(error){
+    console.error(error);
+    showToast('Could not mark as reviewed: ' + (error.message || 'check console'));
+    return;
+  }
+  reviewLogs = reviewLogs.map(l => l.id === id ? { ...l, ...payload } : l);
+  renderReviewLogs();
+  if($('review-day-modal') && !$('review-day-modal').classList.contains('hidden')){
+    const updated = reviewLogs.find(l => l.id === id);
+    if(updated) openReviewDayModal(String(updated.log_date).slice(0,10));
+  }
+  showToast('Marked as reviewed');
+  loadCollegePendingCounts().then(populateReviewCollegeSelect);
+}
+
+/* ── Shared: month summary strip ── */
+function renderMonthSummary(containerId, entries, monthDate){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const y = monthDate.getFullYear(), m = monthDate.getMonth();
+  const monthEntries = entries.filter(l => {
+    const d = new Date(l.log_date);
+    return d.getFullYear()===y && d.getMonth()===m;
+  });
+  const total = monthEntries.length;
+  const hard = monthEntries.filter(l=>l.call_type==='hard').length;
+  const soft = total - hard;
+  const reviewed = monthEntries.filter(l=>!!l.reviewed).length;
+  const pct = total ? Math.round(reviewed/total*100) : 0;
+  const hardPct = total ? (hard/total*100) : 0;
+  const softPct = total ? (soft/total*100) : 0;
+  el.innerHTML = `
+    <div class="ms-item">
+      <span class="ms-label">This month</span>
+      <span class="ms-val">${total} entries</span>
+    </div>
+    <div class="ms-item">
+      <span class="ms-label">Reviewed</span>
+      <span class="ms-val">${pct}%</span>
+    </div>
+    <div class="ms-bar">
+      <div class="ms-bar-track">
+        <div class="ms-bar-hard" style="width:${hardPct}%"></div>
+        <div class="ms-bar-soft" style="width:${softPct}%"></div>
+      </div>
+      <div class="ms-bar-legend">
+        <span>${hard} hard call</span>
+        <span>${soft} soft call</span>
+      </div>
+    </div>`;
+}
+
+/* ── Shared: consecutive-day logging streak ── */
+function computeLoggingStreak(entries){
+  const dates = new Set(entries.map(l => String(l.log_date).slice(0,10)));
+  let streak = 0;
+  let cur = new Date(); cur.setHours(0,0,0,0);
+  while(dates.has(ymd(cur))){
+    streak++;
+    cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+
+/* ── Review Panel: sparkline for Total Entries ── */
+function renderReviewSparkline(){
+  const days = 7;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const counts = new Array(days).fill(0);
+  reviewLogs.forEach(l => {
+    const d = new Date(l.log_date); d.setHours(0,0,0,0);
+    const diff = Math.round((now-d)/86400000);
+    if(diff>=0 && diff<days) counts[days-1-diff]++;
+  });
+  const el = document.getElementById('review-spark-all');
+  if(!el) return;
+  const w=52,h=28;
+  const pts = buildSparkPath(counts,w,h);
+  const areaPts = `0,${h} ${pts} ${w},${h}`;
+  const color = getComputedStyle(document.body).getPropertyValue('--violet').trim() || '#7C3AED';
+  el.innerHTML = `<polyline points="${areaPts}" fill="${color}" opacity="0.12" stroke="none"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>`;
+}
+ let vantaBirdsEffect = null;
+function initVantaBirds(){
+  if(vantaBirdsEffect || typeof VANTA === 'undefined') return;
+  vantaBirdsEffect = VANTA.BIRDS({
+    el: "#platform-vanta-bg", mouseControls: true, touchControls: true, gyroControls: false,
+    minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00,
+    backgroundAlpha: 0.0, color1: 0x7c3aed, color2: 0xf6a968,
+    colorMode: "varianceGradient", birdSize: 1.2, wingSpan: 24,
+    speedLimit: 4, separation: 55, alignment: 45, cohesion: 45, quantity: 3
+  });
+}
+function destroyVantaBirds(){ if(vantaBirdsEffect){ vantaBirdsEffect.destroy(); vantaBirdsEffect = null; } }
+</script>
+</body>
+</html>
