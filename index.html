@@ -1720,8 +1720,8 @@ body[data-theme="dark"] .dlog-topbar {
         <h3 id="platform-second-title">Daily Activity Log</h3>
         <p id="platform-second-desc">Log your daily activities and track your progress over time.</p>
       </button>
-      <button class="platform-card" onclick="selectPlatform('classroomsnap')">
-        <div class="platform-card-top">
+<button class="platform-card" id="platform-card-csnap" onclick="selectPlatform('classroomsnap')">
+ <div class="platform-card-top">
          <div class="platform-icon p-amber">
   <img src="https://rysajbwcuieovbsllaas.supabase.co/storage/v1/object/public/classroom-snaps/St.%20Agnes%20College%20(Autonomous)/classroomobservation.jpg" alt="Classroom Observation Log" class="custom-card-icon" />
 </div>
@@ -2723,6 +2723,22 @@ const DLOG_CATEGORIES = [
   {key: 'Others',       label: 'Other Issues',callType: 'soft' },
 ];
 const ESCALATION_EMAIL = 'escalations@faceprepcampus.in'; // TODO: replace with the real recipient address
+
+/* ── Classroom Observation Log: only visible to these campus managers ── */
+const CLASSROOM_SNAP_ALLOWED_MANAGERS = [
+  'Sanjaykumar','Syed Asrar','Monish','Karthika','Ragul','Dunomine J',
+  'Ramalakshmi B','Ajith kumar','Haripriya','Ramalakshmi','Greeta Paulin',
+  'Gayathri','Aparna','Mohammed Shabeeb','Bavatharani','Santhiya'
+].map(n => n.trim().toLowerCase());
+
+function isClassroomSnapAllowedForSession(){
+  if(sessionRole !== 'manager') return true;
+  const rec = collegeContacts.find(c => c.college === sessionCollege);
+  const name = (rec && rec.campus_manager_name) ? rec.campus_manager_name.trim().toLowerCase() : '';
+  return CLASSROOM_SNAP_ALLOWED_MANAGERS.includes(name);
+}
+
+ 
 const $  = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
@@ -2973,13 +2989,15 @@ $('platform-third-title').textContent = isManager ? 'Classroom Observation Log' 
  $('platform-third-desc').textContent = isManager
     ? 'Snap a photo during classroom visits and log what you observed.'
     : 'Browse classroom visit photos and observations logged by campus managers.';
- show('platform-select-screen');
+show('platform-select-screen');
+  const csnapCard = document.getElementById('platform-card-csnap');
+  if(csnapCard) csnapCard.classList.toggle('hidden', !isClassroomSnapAllowedForSession());
   initPlatformCardTilt();
   initVantaBirds();
   loadPlatformSelectBadges();
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
 }
-/* ── Greeting + live badges + streak on the platform-select screen (added) ── */
+ /* ── Greeting + live badges + streak on the platform-select screen (added) ── */
 function getGreetingName(){
   if(sessionRole === 'manager' && sessionCollege){
     const rec = collegeContacts.find(c => c.college === sessionCollege);
@@ -3082,9 +3100,12 @@ function initPlatformCardTilt(){
   });
 }
 function selectPlatform(which){
+  if(which === 'classroomsnap' && !isClassroomSnapAllowedForSession()){
+    showToast('Classroom Observation Log is not enabled for your account');
+    return;
+  }
   hide('platform-select-screen');
-  destroyVantaBirds();
-  if(which === 'tickets'){
+  destroyVantaBirds();  if(which === 'tickets'){
     enterDashboard();
   } else if(which === 'dailylog'){
     if(sessionRole === 'manager') enterDailyLog();
