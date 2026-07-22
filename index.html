@@ -1976,6 +1976,28 @@ body[data-theme="dark"] .dlog-topbar {
                     </select>
                   </div>
                   <div class="form-group full">
+                    <label class="field-label" title="Whether the mentor conducted the session according to the weekly plan submitted; whether the planned topic was covered; any justified deviations">Session Plan Adherence</label>
+                    <select id="snap-session-plan-adherence">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Fully adhered to the weekly plan; planned topic &amp; activities completed as scheduled</option>
+                      <option value="4">4 — Mostly adhered, only minor deviations that did not affect session objectives</option>
+                      <option value="3">3 — Partially adhered; some planned topics or activities not completed</option>
+                      <option value="2">2 — Limited adherence; significant deviations from planned topic/activities</option>
+                      <option value="1">1 — Did not adhere; session substantially different from submitted plan without valid justification</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label class="field-label" title="Whether study material was shared after the session, covered the topics discussed, and supported revision/assigned activities">Study Material Sharing</label>
+                    <select id="snap-study-material-sharing">
+                      <option value="">Rate 1–5</option>
+                      <option value="5">5 — Shared promptly after the session, fully covering the topics taught</option>
+                      <option value="4">4 — Shared after the session, covered most topics, minor gaps</option>
+                      <option value="3">3 — Shared but incomplete or covered only part of the session content</option>
+                      <option value="2">2 — Shared with significant gaps, difficult for students to revise/complete tasks</option>
+                      <option value="1">1 — Not shared after the session</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
                     <label class="field-label">Additional remarks (optional)</label>
                     <input id="snap-notes" type="text" placeholder="Anything else worth noting" />
                   </div>
@@ -4266,7 +4288,8 @@ async function enterClassroomSnap(){
     populateSnapDepartmentSelect();
     ['snap-teacher','snap-course-type','snap-subject',
      'snap-punctuality','snap-professionalism','snap-class-handling',
-     'snap-skill-development','snap-student-engagement','snap-tasks-followup','snap-notes'
+     'snap-skill-development','snap-student-engagement','snap-tasks-followup',
+     'snap-session-plan-adherence','snap-study-material-sharing','snap-notes'
     ].forEach(id => { const el = $(id); if(el) el.value = ''; });
   } else {
     populateSnapCollegeSelect();
@@ -4320,6 +4343,8 @@ const RATING_LABELS = {
   rating_skill_development: 'Skill Development',
   rating_student_engagement: 'Student Engagement',
   rating_tasks_followup: 'Tasks & Follow-up',
+  rating_session_plan_adherence: 'Session Plan Adherence',
+  rating_study_material_sharing: 'Study Material Sharing',
 };
 function ratingBadgeTone(v){
   const n = Number(v);
@@ -4352,6 +4377,8 @@ function ratingBadgeTone(v){
     ['Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : null],
     ['Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : null],
     ['Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : null],
+    ['Session plan adherence', s.rating_session_plan_adherence ? s.rating_session_plan_adherence+'/5' : null],
+    ['Study material sharing', s.rating_study_material_sharing ? s.rating_study_material_sharing+'/5' : null],
     ['Remarks', s.notes],
   ].filter(([,v]) => v);
   const detailsHtml = detailFields.length ? `
@@ -4510,6 +4537,8 @@ function openSnapDetailModal(id){
       ${snapDetailRow('Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : '')}
       ${snapDetailRow('Student engagement', s.rating_student_engagement ? s.rating_student_engagement+'/5' : '')}
       ${snapDetailRow('Tasks & follow-up', s.rating_tasks_followup ? s.rating_tasks_followup+'/5' : '')}
+      ${snapDetailRow('Session plan adherence', s.rating_session_plan_adherence ? s.rating_session_plan_adherence+'/5' : '')}
+      ${snapDetailRow('Study material sharing', s.rating_study_material_sharing ? s.rating_study_material_sharing+'/5' : '')}
       <div class="snap-detail-item full">${snapDetailRow('Remarks', s.notes)}</div>
       ${s.photo_lat ? snapDetailRow('Photo location', `${Number(s.photo_lat).toFixed(5)}, ${Number(s.photo_lng).toFixed(5)}`) : ''}
     </div>
@@ -4542,6 +4571,8 @@ async function saveClassroomSnap(){
   const skillDevelopment   = $('snap-skill-development').value || null;
   const studentEngagement  = $('snap-student-engagement').value || null;
   const tasksFollowup      = $('snap-tasks-followup').value || null;
+  const sessionPlanAdherence = $('snap-session-plan-adherence').value || null;
+  const studyMaterialSharing = $('snap-study-material-sharing').value || null;
   const notes = $('snap-notes').value.trim();
   const obsDate = new Date().toISOString().slice(0,10);
 
@@ -4581,12 +4612,15 @@ async function saveClassroomSnap(){
       rating_skill_development: skillDevelopment,
       rating_student_engagement: studentEngagement,
       rating_tasks_followup: tasksFollowup,
+      rating_session_plan_adherence: sessionPlanAdherence,
+      rating_study_material_sharing: studyMaterialSharing,
     };
     const { error } = await sb.from('classroom_snaps').insert(payload);
     if(error) throw error;
     $('snap-teacher').value=''; $('snap-course-type').value=''; $('snap-subject').value='';
     $('snap-punctuality').value=''; $('snap-professionalism').value=''; $('snap-class-handling').value='';
     $('snap-skill-development').value=''; $('snap-student-engagement').value=''; $('snap-tasks-followup').value='';
+    $('snap-session-plan-adherence').value=''; $('snap-study-material-sharing').value='';
     $('snap-notes').value='';
     populateSnapDepartmentSelect();
     $('snap-photo-input').value=''; snapSelectedFile=null; snapLocation=null; hide('snap-photo-preview-wrap');
