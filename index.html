@@ -2147,6 +2147,8 @@ body[data-theme="dark"] .dlog-topbar {
       <span><span class="cal-dot" style="background:var(--text-faint)"></span>Soft call</span>
       <span>✓ Reviewed</span>
     </div>
+    <div class="ledger-section-label" style="margin-top:18px;">Recent entries</div>
+    <div id="review-entries"></div>
     <div id="review-empty" class="empty-state hidden"><p>No entries found for this college / filter.</p></div>
   </div>
 </div>
@@ -4885,6 +4887,7 @@ function renderReviewLogs(){
   renderReviewSparkline();
   renderMonthSummary('review-month-summary', reviewLogs, reviewCalMonth);
   renderReviewCalendar();
+  renderReviewEntries();
 }
 async function markLogReviewed(id){
   const reviewerName = window.prompt('Enter your name to confirm this review:');
@@ -4911,6 +4914,53 @@ async function markLogReviewed(id){
   }
   showToast('Marked as reviewed');
   loadCollegePendingCounts().then(populateReviewCollegeSelect);
+}
+
+/* ── Review Panel: recent entries list (added) ── */
+function renderReviewEntries(){
+  const listEl = $('review-entries');
+  if(!listEl) return;
+  const REVIEW_RECENT_LIMIT = 15;
+  const filtered = getReviewFiltered();
+  if(!filtered.length){
+    listEl.innerHTML = '';
+    return;
+  }
+  const sorted = [...filtered].sort((a,b) => {
+    const dateDiff = new Date(b.log_date) - new Date(a.log_date);
+    if(dateDiff !== 0) return dateDiff;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+  listEl.innerHTML = sorted.slice(0, REVIEW_RECENT_LIMIT).map(l => {
+    const cat = DLOG_CATEGORIES.find(c => c.key === l.category);
+    const catLabel = cat ? cat.label : (l.category || 'Uncategorized');
+    const callType = l.call_type || (cat ? cat.callType : 'soft');
+    const dateStr = new Date(l.log_date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const statusHtml = l.reviewed
+      ? `<span class="ledger-row-status reviewed">✓ Reviewed${l.reviewed_by ? ' by '+escHTML(l.reviewed_by) : ''}</span>`
+      : `<span class="ledger-row-status pending">◔ Pending review</span>`;
+    const reviewBtn = !l.reviewed
+      ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px;" onclick="event.stopPropagation();markLogReviewed('${l.id}')">Mark reviewed</button>`
+      : '';
+    const stampRot = (((l.id ? l.id.toString().charCodeAt(0) : sorted.indexOf(l)) % 7) - 3);
+    return `
+    <div class="ledger-row">
+      <span class="ledger-stamp ${callType}" style="transform:rotate(${stampRot}deg);"><span>${callType==='hard'?'Hard':'Soft'}</span><span>Call</span></span>
+      <div class="ledger-row-body">
+        <div class="ledger-row-top">
+          <span class="ledger-row-cat">${escHTML(catLabel)}</span>
+          <span class="ledger-row-date">${dateStr}</span>
+        </div>
+        <div class="ledger-row-activity">${escHTML(l.activity)}</div>
+        ${l.progress_notes ? `<div class="ledger-row-notes">${escHTML(l.progress_notes)}</div>` : ''}
+        <div class="ledger-row-foot">
+          <span class="ledger-row-logger">Logged by ${escHTML(l.manager_name||'—')}</span>
+          ${statusHtml}
+          ${reviewBtn}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ── Shared: month summary strip ── */
