@@ -1852,6 +1852,21 @@ body[data-theme="dark"] .dlog-topbar {
   font-size: 13px; font-weight: 600; color: var(--fpc-ink); cursor: pointer; font-family: inherit;
 }
 #fpc-readiness-screen .fpc-avatar-dropdown button:hover { background: var(--fpc-card-soft); }
+/* ── Fix: Profile Links panel reuses the modal's link classes but lives
+   outside the modal, so it never inherited the styling — broaden scope. ── */
+#fpc-readiness-screen .modal-links{display:flex;flex-direction:column;gap:8px;}
+#fpc-readiness-screen .modal-link{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--fpc-card-soft);border-radius:12px;font-size:13px;text-decoration:none;color:var(--fpc-ink);}
+#fpc-readiness-screen .modal-link:hover{background:var(--fpc-line);}
+#fpc-readiness-screen .modal-link .link-tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--fpc-ink-soft);background:var(--fpc-card);padding:2px 7px;border-radius:6px;font-weight:700;}
+#fpc-readiness-screen .modal-link.unavailable{color:var(--fpc-ink-soft);font-style:italic;}
+
+/* ── Fix: Score Detail table sits in .metric-table-wrap, not .fpc-table-wrap,
+   so it never got table padding/borders — add the same clean look here. ── */
+#fpc-readiness-screen .metric-table-wrap table{width:100%;border-collapse:collapse;font-size:13px;}
+#fpc-readiness-screen .metric-table-wrap thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--fpc-ink-soft);padding:14px 8px;border-bottom:1px solid var(--fpc-line);white-space:nowrap;font-weight:700;}
+#fpc-readiness-screen .metric-table-wrap tbody td{padding:11px 8px;border-bottom:1px solid var(--fpc-line);vertical-align:middle;}
+#fpc-readiness-screen .metric-table-wrap tbody tr:last-child td{border-bottom:none;}
+#fpc-readiness-screen .metric-table-wrap tbody tr:hover{background:var(--fpc-card-soft);}
 </style>
 </head>
 <body>
