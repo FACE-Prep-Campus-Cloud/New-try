@@ -1755,10 +1755,11 @@ body[data-theme="dark"] .dlog-topbar {
 #fpcModalCard .modal-save-error.open{display:block;}
  
 /* View-only lock: hide every edit affordance for KAM / Admin */
+/* View-only lock: hide every edit affordance for Campus Manager / KAM */
 #fpc-readiness-screen.view-only .btn-ghost-light,
 #fpc-readiness-screen.view-only .row-edit-btn,
-#fpcModalOverlay.view-only #fpcBtnEdit{ display:none !important; }
- 
+#fpc-readiness-screen.view-only #fpcStudentHeaderActions,
+#fpcModalOverlay.view-only #fpcBtnEdit{ display:none !important; } 
 #fpc-readiness-screen .lane{width:116px;}
 #fpc-readiness-screen .lane-track{position:relative;height:7px;background:var(--fpc-card-soft);border-radius:4px;overflow:visible;}
 #fpc-readiness-screen .lane-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;background:var(--fpc-gold);}
@@ -6331,8 +6332,8 @@ function enterFpcReadiness(){
   hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
   show('fpc-readiness-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
-  fpcViewOnly = (sessionRole !== 'manager'); // only Campus Managers may edit; KAM & Admin are read-only
-  document.getElementById('fpc-readiness-screen').classList.toggle('view-only', fpcViewOnly);
+fpcViewOnly = (sessionRole !== 'admin'); // only Master Admin may edit/import/add; Campus Manager & KAM are view-only
+ document.getElementById('fpc-readiness-screen').classList.toggle('view-only', fpcViewOnly);
   FPC_STUDENTS = [];
   fpcGoDashboard();
 
