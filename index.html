@@ -9,7 +9,9 @@
 <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
  <style>
- @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+  
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --ui-scale: 1;
@@ -1467,7 +1469,7 @@ body[data-theme="dark"] .dlog-topbar {
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
   gap:16px;
-} display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px; }
+}
 .snap-card { background: var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; }
 .snap-photo { width:100%; height:160px; object-fit:cover; cursor:zoom-in; display:block; background: var(--slate-soft); }
 .snap-body { padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
@@ -1564,8 +1566,9 @@ body[data-theme="dark"] .dlog-topbar {
   color:var(--fpc-ink);
   font-family:'Inter',system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
+}
+#fpc-readiness-screen .fpc-scroll-wrap{
   padding:22px clamp(16px,3.4vw,44px) 70px;
-  flex:1; min-height:0; overflow-y:auto; display:block;
 }
 #fpc-readiness-screen h1, #fpc-readiness-screen h2, #fpc-readiness-screen h3{font-family:'Space Grotesk',sans-serif;margin:0;}
 #fpc-readiness-screen .mono{font-family:'IBM Plex Mono',monospace;}
