@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1536,6 +1537,251 @@ body[data-theme="dark"] .dlog-topbar {
   object-fit: cover;
   border-radius: inherit;
 }
+
+/* ── FPC Readiness Monitor platform-card icon color ── */
+.platform-icon.p-teal { background: linear-gradient(135deg, #4C8B4A, #9CB52A); }
+ 
+/* ── FPC Readiness Monitor — fully scoped styles (safe, cannot leak to rest of app) ── */
+#fpc-readiness-screen{
+  --fpc-card:#FFFFFF; --fpc-card-soft:#F7F9EC; --fpc-line:#E8ECD6; --fpc-ink:#1C2116; --fpc-ink-soft:#6E7660;
+  --fpc-lime:#C7DE3E; --fpc-lime-deep:#9CB52A; --fpc-olive:#5C6B32; --fpc-olive-deep:#3B4522;
+  --fpc-gold:#D98A3D; --fpc-gold-dim:#F7E6CE; --fpc-red:#C6493E; --fpc-red-dim:#FAE1DD;
+  --fpc-green:#4C8B4A; --fpc-green-dim:#E3F0DE; --fpc-radius-xl:26px; --fpc-radius-lg:18px; --fpc-radius-md:12px;
+  --fpc-shadow: 0 2px 4px rgba(59,69,34,.05), 0 14px 34px -18px rgba(59,69,34,.25);
+  background:
+    radial-gradient(1200px 620px at 18% -12%, #EEF4CF 0%, transparent 62%),
+    radial-gradient(900px 500px at 100% 0%, #F1F6DC 0%, transparent 55%),
+    #FBFCF4;
+  color:var(--fpc-ink);
+  font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding:22px clamp(16px,3.4vw,44px) 70px;
+  flex:1; min-height:0; overflow-y:auto; display:block;
+}
+#fpc-readiness-screen h1, #fpc-readiness-screen h2, #fpc-readiness-screen h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+#fpc-readiness-screen .mono{font-family:'IBM Plex Mono',monospace;}
+ 
+#fpc-readiness-screen .topnav{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--fpc-card);border:1px solid var(--fpc-line);border-radius:100px;padding:10px 10px 10px 20px;margin-bottom:22px;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .topnav .brand{display:flex;align-items:center;gap:9px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;}
+#fpc-readiness-screen .brand .dot-mark{width:11px;height:11px;border-radius:4px;background:var(--fpc-lime);box-shadow:0 0 0 4px var(--fpc-card-soft);}
+#fpc-readiness-screen .topnav nav{display:flex;gap:4px;background:var(--fpc-card-soft);border-radius:100px;padding:4px;}
+#fpc-readiness-screen .topnav nav a{font-size:13px;font-weight:600;color:var(--fpc-ink-soft);text-decoration:none;padding:8px 16px;border-radius:100px;cursor:pointer;}
+#fpc-readiness-screen .topnav nav a.active{background:var(--fpc-ink);color:#fff;}
+#fpc-readiness-screen .topnav-right{display:flex;align-items:center;gap:10px;}
+#fpc-readiness-screen .status-pill{display:flex;align-items:center;gap:8px;background:var(--fpc-card-soft);border:1px solid var(--fpc-line);padding:8px 14px;border-radius:100px;font-size:12px;color:var(--fpc-ink-soft);font-weight:600;}
+#fpc-readiness-screen .status-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--fpc-red);box-shadow:0 0 0 3px rgba(198,73,62,.15);}
+#fpc-readiness-screen .status-pill.live .dot{background:var(--fpc-green);box-shadow:0 0 0 3px rgba(76,139,74,.18);}
+#fpc-readiness-screen .status-pill.loading .dot{background:var(--fpc-gold);box-shadow:0 0 0 3px rgba(217,138,61,.18);animation:fpcPulse 1.1s ease-in-out infinite;}
+@keyframes fpcPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+#fpc-readiness-screen .avatar-chip{width:36px;height:36px;border-radius:50%;background:var(--fpc-olive-deep);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;flex-shrink:0;overflow:hidden;}
+#fpc-readiness-screen .avatar-chip img{width:100%;height:100%;object-fit:cover;display:block;}
+#fpc-readiness-screen .avatar-chip.brand-chip{background:var(--fpc-olive-deep);}
+ 
+#fpc-readiness-screen .hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px;}
+#fpc-readiness-screen .hero h1{font-size:27px;font-weight:600;letter-spacing:-0.01em;}
+#fpc-readiness-screen .hero .wave{display:inline-block;transform-origin:70% 70%;}
+#fpc-readiness-screen .hero p{color:var(--fpc-ink-soft);font-size:13.5px;margin-top:6px;max-width:480px;line-height:1.5;}
+#fpc-readiness-screen .hero-stats{display:flex;gap:30px;flex-wrap:wrap;}
+#fpc-readiness-screen .hero-stat{display:flex;align-items:center;gap:10px;}
+#fpc-readiness-screen .hero-stat .icn{width:34px;height:34px;border-radius:10px;background:var(--fpc-card-soft);border:1px solid var(--fpc-line);display:flex;align-items:center;justify-content:center;font-size:15px;}
+#fpc-readiness-screen .hero-stat .num{font-family:'Space Grotesk',sans-serif;font-size:23px;font-weight:700;line-height:1;}
+#fpc-readiness-screen .hero-stat .lbl{font-size:11px;color:var(--fpc-ink-soft);margin-top:3px;}
+ 
+#fpc-readiness-screen #fpcErrorBanner{display:none;background:var(--fpc-red-dim);border:1px solid #EFC1BA;color:#8E332B;border-radius:var(--fpc-radius-lg);padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.5;}
+#fpc-readiness-screen #fpcErrorBanner.open{display:block;}
+#fpc-readiness-screen #fpcErrorBanner strong{display:block;margin-bottom:3px;font-family:'Space Grotesk',sans-serif;}
+ 
+#fpc-readiness-screen #fpcToast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--fpc-ink);color:#fff;padding:12px 20px;border-radius:100px;font-size:13px;box-shadow:0 10px 30px rgba(22,29,38,.25);z-index:200;transition:transform .25s ease;display:flex;align-items:center;gap:10px;}
+#fpc-readiness-screen #fpcToast.show{transform:translateX(-50%) translateY(0);}
+#fpc-readiness-screen #fpcToast.err{background:var(--fpc-red);}
+#fpc-readiness-screen #fpcToast .dotok{width:7px;height:7px;border-radius:50%;background:var(--fpc-lime);flex-shrink:0;}
+#fpc-readiness-screen #fpcToast.err .dotok{background:#fff;}
+ 
+#fpc-readiness-screen .fpc-row-3{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch;}
+@media (max-width:980px){#fpc-readiness-screen .fpc-row-3{grid-template-columns:1fr;}}
+#fpc-readiness-screen .fpc-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+@media (max-width:900px){#fpc-readiness-screen .fpc-row-2{grid-template-columns:1fr;}}
+ 
+#fpc-readiness-screen .panel{background:var(--fpc-card);border:1px solid var(--fpc-line);border-radius:var(--fpc-radius-xl);padding:20px;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .panel-dark{background:linear-gradient(160deg,var(--fpc-olive-deep) 0%, var(--fpc-olive) 100%);color:#fff;border:none;}
+#fpc-readiness-screen .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+#fpc-readiness-screen .panel-head h2{font-size:15px;font-weight:600;}
+#fpc-readiness-screen .panel-head span{font-size:11.5px;color:var(--fpc-ink-soft);}
+#fpc-readiness-screen .panel-dark .panel-head span{color:rgba(255,255,255,.65);}
+#fpc-readiness-screen .fpc-chart-wrap{height:240px;position:relative;}
+ 
+#fpc-readiness-screen .ring-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;}
+#fpc-readiness-screen .ring-wrap{position:relative;width:150px;height:150px;}
+#fpc-readiness-screen .ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg);}
+#fpc-readiness-screen .ring-wrap .ring-track{fill:none;stroke:var(--fpc-card-soft);stroke-width:12;}
+#fpc-readiness-screen .ring-wrap .ring-fill{fill:none;stroke:var(--fpc-lime);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
+#fpc-readiness-screen .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#fpc-readiness-screen .ring-center .val{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;}
+#fpc-readiness-screen .ring-center .cap{font-size:10px;color:var(--fpc-ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+#fpc-readiness-screen .ring-panel h3{font-size:13.5px;font-weight:600;}
+#fpc-readiness-screen .ring-panel p{font-size:11.5px;color:var(--fpc-ink-soft);margin:0;max-width:190px;line-height:1.4;}
+ 
+#fpc-readiness-screen .flag-list{display:flex;flex-direction:column;gap:8px;}
+#fpc-readiness-screen .flag-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:var(--fpc-card-soft);}
+#fpc-readiness-screen .flag-item .avatar-chip{width:28px;height:28px;font-size:11px;background:var(--fpc-red);}
+#fpc-readiness-screen .flag-item .fi-name{font-size:12.5px;font-weight:600;flex:1;}
+#fpc-readiness-screen .flag-item .fi-score{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--fpc-red);font-weight:600;}
+#fpc-readiness-screen .flag-empty{font-size:12px;color:var(--fpc-ink-soft);font-style:italic;padding:8px 2px;}
+ 
+#fpc-readiness-screen .fpc-empty-state{height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--fpc-ink-soft);gap:10px;}
+#fpc-readiness-screen .fpc-empty-state .ring{width:52px;height:52px;border-radius:50%;border:2px dashed var(--fpc-lime-deep);display:flex;align-items:center;justify-content:center;color:var(--fpc-olive);font-size:19px;font-family:'Space Grotesk';}
+#fpc-readiness-screen .fpc-empty-state strong{color:var(--fpc-ink);font-size:13.5px;font-weight:600;}
+#fpc-readiness-screen .fpc-empty-state p{font-size:12px;max-width:280px;line-height:1.5;margin:0;}
+ 
+#fpc-readiness-screen .chip-row{display:flex;flex-direction:column;gap:10px;}
+#fpc-readiness-screen .chip-stat{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;}
+#fpc-readiness-screen .chip-stat .cs-label{font-size:12.5px;font-weight:600;}
+#fpc-readiness-screen .chip-stat .cs-val{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;}
+#fpc-readiness-screen .chip-stat.c-green{background:var(--fpc-green-dim);color:#2E5B2C;}
+#fpc-readiness-screen .chip-stat.c-gold{background:var(--fpc-gold-dim);color:#8A5620;}
+#fpc-readiness-screen .chip-stat.c-red{background:var(--fpc-red-dim);color:#8E332B;}
+ 
+#fpc-readiness-screen .fpc-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+#fpc-readiness-screen .fpc-filters input[type="text"], #fpc-readiness-screen .fpc-filters select{background:var(--fpc-card);border:1px solid var(--fpc-line);color:var(--fpc-ink);padding:9px 13px;border-radius:100px;font-size:13px;font-family:inherit;}
+#fpc-readiness-screen .fpc-filters input[type="text"]{flex:1;min-width:200px;}
+#fpc-readiness-screen .fpc-filters .count{margin-left:auto;color:var(--fpc-ink-soft);font-size:12.5px;}
+ 
+#fpc-readiness-screen .fpc-table-wrap{background:var(--fpc-card);border:1px solid var(--fpc-line);border-radius:var(--fpc-radius-xl);overflow:hidden;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .fpc-table-wrap table{width:100%;border-collapse:collapse;font-size:13px;}
+#fpc-readiness-screen .fpc-table-wrap thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--fpc-ink-soft);padding:14px;border-bottom:1px solid var(--fpc-line);white-space:nowrap;font-weight:700;position:sticky;top:0;background:var(--fpc-card);}
+#fpc-readiness-screen .fpc-table-wrap tbody td{padding:11px 14px;border-bottom:1px solid var(--fpc-line);vertical-align:middle;}
+#fpc-readiness-screen .fpc-table-wrap tbody tr:last-child td{border-bottom:none;}
+#fpc-readiness-screen .fpc-table-wrap tbody tr:hover{background:var(--fpc-card-soft);}
+#fpc-readiness-screen .student-cell{display:flex;align-items:center;gap:10px;}
+#fpc-readiness-screen .student-name{font-weight:600;cursor:pointer;}
+#fpc-readiness-screen .student-name:hover{color:var(--fpc-olive-deep);text-decoration:underline;}
+#fpc-readiness-screen .student-sub{color:var(--fpc-ink-soft);font-size:11px;margin-top:1px;}
+#fpc-readiness-screen .fpc-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;}
+#fpc-readiness-screen .fpc-badge.eligible{background:var(--fpc-green-dim);color:#2E5B2C;}
+#fpc-readiness-screen .fpc-badge.pending{background:var(--fpc-card-soft);color:var(--fpc-ink-soft);}
+#fpc-readiness-screen .fpc-badge.arrears{background:var(--fpc-red-dim);color:#8E332B;font-weight:700;margin-left:6px;}
+#fpc-readiness-screen .row-edit-btn{background:var(--fpc-card-soft);border:1px solid var(--fpc-line);color:var(--fpc-ink);padding:6px 13px;border-radius:100px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;}
+#fpc-readiness-screen .row-edit-btn:hover{background:var(--fpc-line);}
+ 
+#fpcModalOverlay{display:none;position:fixed;inset:0;background:rgba(28,33,22,.45);align-items:center;justify-content:center;z-index:100;padding:20px;}
+#fpcModalOverlay.open{display:flex;}
+#fpcModalCard{background:var(--fpc-card,#fff);border-radius:24px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(28,33,22,.3);font-family:'Inter',system-ui,sans-serif;color:#1C2116;}
+#fpcModalCard .modal-head{padding:22px 26px 16px;border-bottom:1px solid #E8ECD6;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:sticky;top:0;background:#fff;z-index:2;border-radius:24px 24px 0 0;}
+#fpcModalCard .modal-head-left{display:flex;gap:12px;align-items:center;}
+#fpcModalCard .modal-head h3{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;}
+#fpcModalCard .modal-head .modal-sub{color:#6E7660;font-size:12.5px;margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+#fpcModalCard .modal-head-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+#fpcModalCard #fpcModalClose{background:#F7F9EC;border:none;width:30px;height:30px;border-radius:50%;color:#6E7660;font-size:16px;cursor:pointer;flex-shrink:0;line-height:1;}
+#fpcModalCard #fpcModalClose:hover{background:#E8ECD6;color:#1C2116;}
+#fpcModalCard .btn{border:none;border-radius:100px;padding:9px 17px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+#fpcModalCard .btn-edit{background:#1C2116;color:#fff;}
+#fpcModalCard .btn-edit:hover{background:#33392A;}
+#fpcModalCard .btn-save{background:#3B4522;color:#fff;}
+#fpcModalCard .btn-save:hover{background:#2C351A;}
+#fpcModalCard .btn-save:disabled{opacity:.6;cursor:wait;}
+#fpcModalCard .btn-cancel{background:#F7F9EC;color:#1C2116;border:1px solid #E8ECD6;}
+#fpcModalCard .btn-cancel:hover{background:#E8ECD6;}
+#fpcModalCard .modal-body{padding:20px 26px 26px;}
+#fpcModalCard .modal-section{margin-bottom:20px;}
+#fpcModalCard .modal-section:last-child{margin-bottom:0;}
+#fpcModalCard .modal-section-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6E7660;font-weight:700;margin-bottom:10px;}
+#fpcModalCard .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;}
+#fpcModalCard .modal-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+#fpcModalCard .modal-field .f-label{font-size:11.5px;color:#6E7660;margin-bottom:4px;}
+#fpcModalCard .modal-field .f-value{font-size:14px;font-weight:600;}
+#fpcModalCard .modal-field .f-value.mono{font-family:'IBM Plex Mono',monospace;font-weight:500;}
+#fpcModalCard .modal-field input, #fpcModalCard .modal-field select{display:none;width:100%;padding:8px 10px;border:1px solid #E8ECD6;border-radius:9px;font-family:inherit;font-size:13px;background:#F7F9EC;color:#1C2116;}
+#fpcModalCard.editing .f-value{display:none;}
+#fpcModalCard.editing .modal-field input, #fpcModalCard.editing .modal-field select{display:block;}
+#fpcModalCard.editing .modal-link-row{display:none;}
+#fpcModalCard:not(.editing) .btn-save, #fpcModalCard:not(.editing) .btn-cancel{display:none;}
+#fpcModalCard.editing .btn-edit{display:none;}
+#fpcModalCard .modal-links{display:flex;flex-direction:column;gap:8px;}
+#fpcModalCard .modal-link{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#F7F9EC;border-radius:12px;font-size:13px;text-decoration:none;color:#1C2116;}
+#fpcModalCard .modal-link:hover{background:#E8ECD6;}
+#fpcModalCard .modal-link .link-tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#6E7660;background:#fff;padding:2px 7px;border-radius:6px;font-weight:700;}
+#fpcModalCard .modal-link.unavailable{color:#6E7660;font-style:italic;}
+#fpcModalCard .modal-save-error{display:none;background:#FAE1DD;border:1px solid #EFC1BA;color:#8E332B;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-top:14px;line-height:1.5;}
+#fpcModalCard .modal-save-error.open{display:block;}
+ 
+/* View-only lock: hide every edit affordance for KAM / Admin */
+#fpc-readiness-screen.view-only .btn-ghost-light,
+#fpc-readiness-screen.view-only .row-edit-btn,
+#fpcModalOverlay.view-only #fpcBtnEdit{ display:none !important; }
+ 
+#fpc-readiness-screen .lane{width:116px;}
+#fpc-readiness-screen .lane-track{position:relative;height:7px;background:var(--fpc-card-soft);border-radius:4px;overflow:visible;}
+#fpc-readiness-screen .lane-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;background:var(--fpc-gold);}
+#fpc-readiness-screen .lane-fill.teal{background:var(--fpc-olive);}
+#fpc-readiness-screen .lane-threshold{position:absolute;top:-2px;left:50%;width:2px;height:11px;background:#C7CDD5;}
+#fpc-readiness-screen .lane-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--fpc-ink-soft);margin-top:4px;}
+#fpc-readiness-screen .lane-label strong{color:var(--fpc-ink);}
+#fpc-readiness-screen .nqt-empty-cell{color:#9AA3AF;font-size:11.5px;font-style:italic;}
+#fpc-readiness-screen .loading-row td{color:var(--fpc-ink-soft);text-align:center;padding:32px;font-size:13px;}
+#fpc-readiness-screen .fpc-view{display:none;}
+#fpc-readiness-screen .fpc-view.active{display:block;}
+ 
+#fpc-readiness-screen .back-link{display:inline-flex;align-items:center;gap:6px;background:var(--fpc-card);border:1px solid var(--fpc-line);color:var(--fpc-ink);font-size:13px;font-weight:600;padding:9px 16px;border-radius:100px;cursor:pointer;margin-bottom:18px;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .back-link:hover{background:var(--fpc-card-soft);}
+#fpc-readiness-screen .profile-nav-btns{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+#fpc-readiness-screen .profile-step-btn{display:inline-flex;align-items:center;gap:6px;background:var(--fpc-card);border:1px solid var(--fpc-line);color:var(--fpc-ink);font-size:13px;font-weight:600;padding:9px 16px;border-radius:100px;cursor:pointer;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .profile-step-btn:hover{background:var(--fpc-card-soft);}
+#fpc-readiness-screen .profile-step-btn:disabled{opacity:.45;cursor:not-allowed;}
+#fpc-readiness-screen .profile-step-counter{font-size:12.5px;color:var(--fpc-ink-soft);font-weight:600;}
+#fpc-readiness-screen .profile-banner{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--fpc-olive-deep) 0%, var(--fpc-olive) 55%, var(--fpc-lime-deep) 130%);border-radius:var(--fpc-radius-xl);padding:26px 28px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:16px;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .profile-banner::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1.6px, transparent 1.6px);background-size:22px 22px;opacity:.5;pointer-events:none;}
+#fpc-readiness-screen .profile-banner-left{display:flex;align-items:center;gap:16px;position:relative;z-index:1;}
+#fpc-readiness-screen .profile-avatar{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;flex-shrink:0;overflow:hidden;}
+#fpc-readiness-screen .profile-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+#fpc-readiness-screen .profile-banner h2{font-size:22px;font-weight:700;}
+#fpc-readiness-screen .profile-banner .p-loc{font-size:12.5px;opacity:.85;margin-top:4px;display:flex;align-items:center;gap:5px;}
+#fpc-readiness-screen .profile-banner .p-bio{font-size:13px;opacity:.9;margin-top:8px;max-width:460px;line-height:1.5;}
+#fpc-readiness-screen .profile-banner-actions{position:relative;z-index:1;display:flex;gap:8px;flex-shrink:0;}
+#fpc-readiness-screen .btn-ghost-light{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 18px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+#fpc-readiness-screen .btn-ghost-light:hover{background:rgba(255,255,255,.26);}
+#fpc-readiness-screen .profile-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;}
+@media (max-width:820px){#fpc-readiness-screen .profile-stats-row{grid-template-columns:1fr;}}
+#fpc-readiness-screen .pstat-card{background:var(--fpc-card);border:1px solid var(--fpc-line);border-radius:var(--fpc-radius-lg);padding:16px 18px;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .pstat-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+#fpc-readiness-screen .pstat-icn{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--fpc-card-soft);border:1px solid var(--fpc-line);}
+#fpc-readiness-screen .pstat-num{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;line-height:1;}
+#fpc-readiness-screen .pstat-tag{font-size:10.5px;color:var(--fpc-ink-soft);font-weight:600;}
+#fpc-readiness-screen .pstat-title{font-size:13.5px;font-weight:700;margin-bottom:3px;}
+#fpc-readiness-screen .pstat-desc{font-size:11.5px;color:var(--fpc-ink-soft);line-height:1.4;}
+#fpc-readiness-screen .profile-row{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch;}
+@media (max-width:980px){#fpc-readiness-screen .profile-row{grid-template-columns:1fr;}}
+#fpc-readiness-screen .donut-wrap{position:relative;width:170px;height:170px;margin:6px auto 4px;}
+#fpc-readiness-screen .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#fpc-readiness-screen .donut-center .val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;}
+#fpc-readiness-screen .donut-center .cap{font-size:10px;color:var(--fpc-ink-soft);}
+#fpc-readiness-screen .donut-legend{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+#fpc-readiness-screen .donut-legend-row{display:flex;align-items:center;gap:8px;font-size:12.5px;}
+#fpc-readiness-screen .donut-legend-row .sw{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+#fpc-readiness-screen .donut-legend-row .lbl{flex:1;color:var(--fpc-ink-soft);}
+#fpc-readiness-screen .donut-legend-row .val{font-weight:700;font-family:'IBM Plex Mono',monospace;}
+#fpc-readiness-screen .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;}
+#fpc-readiness-screen .detail-item{padding:10px 0;border-bottom:1px dashed var(--fpc-line);}
+#fpc-readiness-screen .detail-item:nth-last-child(-n+2){border-bottom:none;}
+#fpc-readiness-screen .detail-item .d-label{font-size:11px;color:var(--fpc-ink-soft);margin-bottom:3px;}
+#fpc-readiness-screen .detail-item .d-val{font-size:13.5px;font-weight:600;}
+#fpc-readiness-screen .metric-table-wrap{margin-bottom:16px;}
+#fpc-readiness-screen .metric-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;}
+#fpc-readiness-screen .metric-badge.ok{background:var(--fpc-green-dim);color:#2E5B2C;}
+#fpc-readiness-screen .metric-badge.warn{background:var(--fpc-gold-dim);color:#8A5620;}
+#fpc-readiness-screen .metric-badge.risk{background:var(--fpc-red-dim);color:#8E332B;}
+#fpc-readiness-screen .metric-badge.na{background:var(--fpc-card-soft);color:var(--fpc-ink-soft);}
+#fpc-readiness-screen .cat-tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--fpc-card-soft);color:var(--fpc-ink-soft);}
+ 
+#fpc-readiness-screen .reports-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+#fpc-readiness-screen .reports-head h1{font-size:24px;font-weight:600;}
+#fpc-readiness-screen .reports-head p{color:var(--fpc-ink-soft);font-size:13px;margin-top:5px;}
+#fpc-readiness-screen .reports-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+@media (max-width:900px){#fpc-readiness-screen .reports-summary{grid-template-columns:repeat(2,1fr);}}
+#fpc-readiness-screen .rsum-card{background:var(--fpc-card);border:1px solid var(--fpc-line);border-radius:var(--fpc-radius-lg);padding:15px 17px;box-shadow:var(--fpc-shadow);}
+#fpc-readiness-screen .rsum-card .rs-lbl{font-size:11px;color:var(--fpc-ink-soft);font-weight:600;margin-bottom:6px;}
+#fpc-readiness-screen .rsum-card .rs-val{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;}
+
+  
 </style>
 </head>
 <body>
@@ -1730,6 +1976,16 @@ body[data-theme="dark"] .dlog-topbar {
         <h3 id="platform-third-title">Classroom Observation Log</h3>
         <p id="platform-third-desc">Observations during classroom visits and log what you observed.</p>
       </button>
+     <button class="platform-card" id="platform-card-fpc" onclick="selectPlatform('fpcreadiness')">
+  <div class="platform-card-top">
+    <div class="platform-icon p-teal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+    </div>
+  </div>
+  <h3 id="platform-fpc-title">FPC Readiness Monitor</h3>
+  <p id="platform-fpc-desc">HIRE Score % and FPC NQT Assessment readiness for your students.</p>
+</button>
+
     </div>
     <div class="platform-streak hidden" id="platform-streak">
       <span aria-hidden="true">🔥</span> <span id="platform-streak-text"></span>
@@ -2034,6 +2290,308 @@ body[data-theme="dark"] .dlog-topbar {
     <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
   </div>
  </div>
+
+ <div id="fpc-readiness-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="dlog-topbar" style="flex-shrink:0;">
+    <div class="breadcrumb">FPC Readiness Monitor / <b id="fpc-breadcrumb-college">—</b></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <!-- ============================== FPC DASHBOARD VIEW ============================== -->
+  <div class="fpc-view active" id="fpcViewDashboard">
+    <div class="topnav">
+      <div class="brand"><span class="dot-mark"></span>FPC · Placement Cell</div>
+      <nav>
+        <a class="fpc-nav-link active" data-view="dashboard" onclick="fpcGoDashboard(); return false;">Dashboard</a>
+        <a class="fpc-nav-link" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
+        <a class="fpc-nav-link" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
+      </nav>
+      <div class="topnav-right">
+        <div class="status-pill loading" id="fpcStatusPill">
+          <span class="dot" id="fpcStatusDot"></span>
+          <span id="fpcStatusText">Connecting to Supabase…</span>
+        </div>
+        <div class="avatar-chip brand-chip">FP</div>
+      </div>
+    </div>
+ 
+    <div class="hero">
+      <div>
+        <h1>Good Morning <span class="wave">👋</span></h1>
+        <p>Live tracking of HIRE Score % (FOP / DSA / Aptitude) and FPC NQT Assessment averages for <span id="fpcHeroCollegeName">your college</span>.</p>
+      </div>
+      <div class="hero-stats" id="fpcHeroStats"></div>
+    </div>
+ 
+    <div id="fpcErrorBanner">
+      <strong>Couldn't load data from Supabase</strong>
+      <span id="fpcErrorDetail"></span>
+    </div>
+ 
+    <div class="fpc-row-3">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>HIRE Score % — Overall, by student</h2>
+          <span id="fpcHireAsOf">&nbsp;</span>
+        </div>
+        <div class="fpc-chart-wrap"><canvas id="fpcHireChart"></canvas></div>
+      </div>
+      <div class="panel ring-panel">
+        <h3>Cohort HIRE Readiness</h3>
+        <div class="ring-wrap">
+          <svg viewBox="0 0 140 140">
+            <circle class="ring-track" cx="70" cy="70" r="58"></circle>
+            <circle class="ring-fill" id="fpcRingFill" cx="70" cy="70" r="58" stroke-dasharray="364" stroke-dashoffset="364"></circle>
+          </svg>
+          <div class="ring-center">
+            <div class="val" id="fpcRingValue">—</div>
+            <div class="cap">avg overall</div>
+          </div>
+        </div>
+        <p>Average HIRE overall score. 60%+ is on track, below 35% needs intervention.</p>
+      </div>
+    </div>
+ 
+    <div class="fpc-row-2">
+      <div class="panel" id="fpcNqtPanel">
+        <div class="panel-head">
+          <h2>FPC NQT Assessment</h2>
+          <span id="fpcNqtMeta"></span>
+        </div>
+        <div id="fpcNqtBody"></div>
+      </div>
+      <div class="panel panel-dark">
+        <div class="panel-head">
+          <h2>Below Readiness Line</h2>
+          <span>HIRE overall &lt; 35%</span>
+        </div>
+        <div class="flag-list" id="fpcFlaggedList"></div>
+      </div>
+    </div>
+ 
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head"><h2>Eligibility Overview</h2><span id="fpcEligMeta"></span></div>
+      <div class="chip-row" id="fpcEligChips" style="flex-direction:row;flex-wrap:wrap;"></div>
+    </div>
+  </div>
+ 
+  <!-- ============================== FPC STUDENTS VIEW ============================== -->
+  <div class="fpc-view" id="fpcViewStudents">
+    <div class="topnav">
+      <div class="brand"><span class="dot-mark"></span>FPC · Placement Cell</div>
+      <nav>
+        <a class="fpc-nav-link" data-view="dashboard" onclick="fpcGoDashboard(); return false;">Dashboard</a>
+        <a class="fpc-nav-link active" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
+        <a class="fpc-nav-link" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
+      </nav>
+      <div class="topnav-right">
+        <div class="status-pill live" id="fpcStatusPill2"><span class="dot"></span><span>Live</span></div>
+      </div>
+    </div>
+    <div class="reports-head">
+      <div><h1>Students</h1><p>Full student roster — search, filter, and click a name to open their profile.</p></div>
+    </div>
+    <div class="fpc-filters">
+      <input type="text" id="fpcSearchBox" placeholder="Search by name, reg. no. or email…" oninput="fpcRenderTable()">
+      <select id="fpcDeptFilter" onchange="fpcRenderTable()"><option value="">All departments</option></select>
+      <select id="fpcEligFilter" onchange="fpcRenderTable()">
+        <option value="">All eligibility</option>
+        <option value="Eligible">Eligible</option>
+        <option value="Pending">Pending review</option>
+      </select>
+      <select id="fpcSortSelect" onchange="fpcRenderTable()">
+        <option value="s_no">Sort: Roll order</option>
+        <option value="hire_overall_desc">Sort: HIRE Overall ↓</option>
+        <option value="hire_overall_asc">Sort: HIRE Overall ↑</option>
+        <option value="nqt_overall_desc">Sort: NQT Overall ↓</option>
+      </select>
+      <span class="count" id="fpcRowCount"></span>
+    </div>
+    <div class="fpc-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Student</th><th>Eligibility</th><th>Comm. Level</th><th>FOP</th><th>DSA</th><th>Aptitude</th><th>HIRE Overall</th><th>FPC NQT Overall</th><th></th></tr>
+        </thead>
+        <tbody id="fpcTableBody"><tr class="loading-row"><td colspan="9">Loading students…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- ============================== FPC STUDENT PROFILE VIEW ============================== -->
+  <div class="fpc-view" id="fpcViewProfile">
+    <div class="profile-nav-btns">
+      <div class="back-link" onclick="fpcGoBackFromProfile()">← Back</div>
+      <button class="profile-step-btn" id="fpcBtnPrevStudent" onclick="fpcStepProfile(-1)">‹ Previous</button>
+      <span class="profile-step-counter" id="fpcProfileStepCounter"></span>
+      <button class="profile-step-btn" id="fpcBtnNextStudent" onclick="fpcStepProfile(1)">Next ›</button>
+    </div>
+    <div class="profile-banner">
+      <div class="profile-banner-left">
+        <div class="profile-avatar" id="fpcPAvatar"></div>
+        <div>
+          <h2 id="fpcPName">—</h2>
+          <div class="p-loc">📍 <span id="fpcPLoc">—</span></div>
+          <div class="p-bio" id="fpcPBio">—</div>
+        </div>
+      </div>
+      <div class="profile-banner-actions">
+        <button class="btn-ghost-light" onclick="fpcOpenModal(fpcCurrentProfileRegNo, true)">Edit Student</button>
+      </div>
+    </div>
+    <div class="profile-stats-row">
+      <div class="pstat-card">
+        <div class="pstat-top"><div class="pstat-icn">📊</div><div><div class="pstat-num" id="fpcPHireOverall">—</div><div class="pstat-tag">HIRE Overall</div></div></div>
+        <div class="pstat-title">HIRE Score</div>
+        <div class="pstat-desc">Combined FOP, DSA &amp; Aptitude readiness score.</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-top"><div class="pstat-icn">🧠</div><div><div class="pstat-num" id="fpcPNqtOverall">—</div><div class="pstat-tag">NQT Overall</div></div></div>
+        <div class="pstat-title">FPC NQT Assessment</div>
+        <div class="pstat-desc" id="fpcPNqtDesc">Average across all NQT assessment rounds.</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-top"><div class="pstat-icn">✅</div><div><div class="pstat-num" id="fpcPEligibility" style="font-size:16px;">—</div><div class="pstat-tag">Eligibility</div></div></div>
+        <div class="pstat-title">Placement Eligibility</div>
+        <div class="pstat-desc" id="fpcPEligDesc">Based on academics, arrears &amp; communication level.</div>
+      </div>
+    </div>
+    <div class="profile-row">
+      <div class="panel">
+        <div class="panel-head"><h2>Score Detail</h2><span>HIRE &amp; FPC NQT breakdown</span></div>
+        <div class="metric-table-wrap">
+          <table><thead><tr><th>Metric</th><th>Category</th><th>Score</th><th>Status</th></tr></thead><tbody id="fpcPMetricBody"></tbody></table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>HIRE Breakdown</h2><span>&nbsp;</span></div>
+        <div class="donut-wrap"><canvas id="fpcPDonut"></canvas><div class="donut-center"><div class="val" id="fpcPDonutVal">—</div><div class="cap">overall</div></div></div>
+        <div class="donut-legend" id="fpcPDonutLegend"></div>
+      </div>
+    </div>
+    <div class="fpc-row-2">
+      <div class="panel"><div class="panel-head"><h2>Profile</h2><span>&nbsp;</span></div><div class="detail-grid" id="fpcPProfileGrid"></div></div>
+      <div class="panel"><div class="panel-head"><h2>Profile Links</h2><span>&nbsp;</span></div><div class="modal-links" id="fpcPLinks"></div></div>
+    </div>
+  </div>
+ 
+  <!-- ============================== FPC REPORTS VIEW ============================== -->
+  <div class="fpc-view" id="fpcViewReports">
+    <div class="topnav">
+      <div class="brand"><span class="dot-mark"></span>FPC · Placement Cell</div>
+      <nav>
+        <a class="fpc-nav-link" data-view="dashboard" onclick="fpcGoDashboard(); return false;">Dashboard</a>
+        <a class="fpc-nav-link" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
+        <a class="fpc-nav-link active" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
+      </nav>
+    </div>
+    <div class="reports-head">
+      <div><h1>Reports</h1><p>Full HIRE &amp; FPC NQT score listing. Filter, sort and drill into any student.</p></div>
+    </div>
+    <div class="reports-summary" id="fpcReportsSummary"></div>
+    <div class="fpc-filters">
+      <input type="text" id="fpcReportsSearchBox" placeholder="Search by name, reg. no. or email…" oninput="fpcRenderReportsTable()">
+      <select id="fpcReportsDeptFilter" onchange="fpcRenderReportsTable()"><option value="">All departments</option></select>
+      <select id="fpcReportsEligFilter" onchange="fpcRenderReportsTable()">
+        <option value="">All eligibility</option>
+        <option value="Eligible">Eligible</option>
+        <option value="Pending">Pending review</option>
+      </select>
+      <select id="fpcReportsSortSelect" onchange="fpcRenderReportsTable()">
+        <option value="s_no">Sort: Roll order</option>
+        <option value="hire_overall_desc">Sort: HIRE Overall ↓</option>
+        <option value="hire_overall_asc">Sort: HIRE Overall ↑</option>
+        <option value="nqt_overall_desc">Sort: NQT Overall ↓</option>
+      </select>
+      <span class="count" id="fpcReportsRowCount"></span>
+    </div>
+    <div class="fpc-table-wrap">
+      <table>
+        <thead><tr><th>Student</th><th>Eligibility</th><th>Comm. Level</th><th>FOP</th><th>DSA</th><th>Aptitude</th><th>HIRE Overall</th><th>FPC NQT Overall</th><th></th></tr></thead>
+        <tbody id="fpcReportsTableBody"><tr class="loading-row"><td colspan="9">Loading students…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- ============================== FPC EDIT MODAL ============================== -->
+  <div id="fpcModalOverlay" onclick="if(event.target===this) fpcCloseModal()">
+    <div id="fpcModalCard">
+      <div class="modal-head">
+        <div class="modal-head-left">
+          <div class="avatar-chip" id="fpcModalAvatar"></div>
+          <div><h3 id="fpcModalName">—</h3><div class="modal-sub" id="fpcModalSub">—</div></div>
+        </div>
+        <div class="modal-head-actions">
+          <button class="btn btn-edit" id="fpcBtnEdit" onclick="fpcEnterEditMode()">Edit</button>
+          <button class="btn btn-save" id="fpcBtnSave" onclick="fpcSaveEdit()">Save changes</button>
+          <button class="btn btn-cancel" id="fpcBtnCancel" onclick="fpcCancelEdit()">Cancel</button>
+          <button id="fpcModalClose" onclick="fpcCloseModal()">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <div class="modal-section-label">Profile</div>
+          <div class="modal-grid">
+            <div class="modal-field"><div class="f-label">Full name</div><div class="f-value" id="fpc_mName">—</div><input type="text" id="fpc_eName"></div>
+            <div class="modal-field"><div class="f-label">Department</div><div class="f-value" id="fpc_mDept">—</div><input type="text" id="fpc_eDept"></div>
+            <div class="modal-field"><div class="f-label">Email ID</div><div class="f-value mono" id="fpc_mEmail">—</div><input type="text" id="fpc_eEmail"></div>
+            <div class="modal-field"><div class="f-label">Registration number</div><div class="f-value mono" id="fpc_mRegNo">—</div></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Eligibility &amp; academics</div>
+          <div class="modal-grid">
+            <div class="modal-field"><div class="f-label">Eligibility status</div><div class="f-value" id="fpc_mEligibility">—</div>
+              <select id="fpc_eEligibility"><option value="">Pending / not set</option><option value="Eligible">Eligible</option></select></div>
+            <div class="modal-field"><div class="f-label">Communication level</div><div class="f-value" id="fpc_mCommLevel">—</div><input type="text" id="fpc_eCommLevel" placeholder="e.g. B1(Intermediate)"></div>
+            <div class="modal-field"><div class="f-label">Current arrears</div><div class="f-value" id="fpc_mCurrentArrears">—</div><input type="number" id="fpc_eCurrentArrears" min="0" step="1"></div>
+            <div class="modal-field"><div class="f-label">History of arrears</div><div class="f-value" id="fpc_mHistoryArrears">—</div><input type="number" id="fpc_eHistoryArrears" min="0" step="1"></div>
+            <div class="modal-field"><div class="f-label">10th mark</div><div class="f-value" id="fpc_mTenth">—</div><input type="number" id="fpc_eTenth" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">12th mark</div><div class="f-value" id="fpc_mTwelfth">—</div><input type="number" id="fpc_eTwelfth" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">UG degree %</div><div class="f-value" id="fpc_mUg">—</div><input type="number" id="fpc_eUg" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">PG degree %</div><div class="f-value" id="fpc_mPg">—</div><input type="number" id="fpc_ePg" min="0" max="100" step="0.01"></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">HIRE Score %</div>
+          <div class="modal-grid cols-3">
+            <div class="modal-field"><div class="f-label">FOP</div><div class="f-value" id="fpc_mFop">—</div><input type="number" id="fpc_eFop" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">DSA</div><div class="f-value" id="fpc_mDsa">—</div><input type="number" id="fpc_eDsa" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Aptitude</div><div class="f-value" id="fpc_mAptitude">—</div><input type="number" id="fpc_eAptitude" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Overall</div><div class="f-value" id="fpc_mHireOverall">—</div><input type="number" id="fpc_eHireOverall" min="0" max="100" step="0.01"></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">FPC NQT Assessment</div>
+          <div class="modal-grid cols-3">
+            <div class="modal-field"><div class="f-label">Assessments conducted</div><div class="f-value" id="fpc_mNqtCount">—</div><input type="number" id="fpc_eNqtCount" min="0" step="1"></div>
+            <div class="modal-field"><div class="f-label">Verbal ability</div><div class="f-value" id="fpc_mVerbal">—</div><input type="number" id="fpc_eVerbal" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Numerical ability</div><div class="f-value" id="fpc_mNumerical">—</div><input type="number" id="fpc_eNumerical" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Reasoning ability</div><div class="f-value" id="fpc_mReasoning">—</div><input type="number" id="fpc_eReasoning" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Adv. quant reasoning</div><div class="f-value" id="fpc_mAdvQuant">—</div><input type="number" id="fpc_eAdvQuant" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Coding</div><div class="f-value" id="fpc_mCoding">—</div><input type="number" id="fpc_eCoding" min="0" max="100" step="0.01"></div>
+            <div class="modal-field"><div class="f-label">Overall</div><div class="f-value" id="fpc_mNqtOverall">—</div><input type="number" id="fpc_eNqtOverall" min="0" max="100" step="0.01"></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Profile links</div>
+          <div class="modal-links" id="fpc_mLinks"></div>
+          <div class="modal-grid" style="margin-top:12px;">
+            <div class="modal-field"><div class="f-label">LinkedIn URL</div><input type="text" id="fpc_eLinkedin" placeholder="https://…"></div>
+            <div class="modal-field"><div class="f-label">Resume URL</div><input type="text" id="fpc_eResume" placeholder="https://…"></div>
+            <div class="modal-field"><div class="f-label">GitHub URL</div><input type="text" id="fpc_eGithub" placeholder="https://…"></div>
+            <div class="modal-field"><div class="f-label">EF SET certificate URL</div><input type="text" id="fpc_eEfset" placeholder="https://…"></div>
+          </div>
+        </div>
+        <div class="modal-save-error" id="fpcModalSaveError"></div>
+      </div>
+    </div>
+  </div>
+ 
+  <div id="fpcToast"><span class="dotok"></span><span id="fpcToastText"></span></div>
+</div>
+
 
 <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
@@ -3008,6 +3566,7 @@ function showPlatformSelect(){
   hide('dailylog-screen');
   hide('review-panel-screen');
   hide('classroom-snap-screen');
+ hide('fpc-readiness-screen');
   const isManager = sessionRole === 'manager';
   const isKam = sessionRole === 'kam';
   renderPlatformGreeting();
@@ -3145,15 +3704,19 @@ function selectPlatform(which){
   } else if(which === 'dailylog'){
     if(sessionRole === 'manager') enterDailyLog();
     else enterReviewPanel();
-  } else if(which === 'classroomsnap'){
+} else if(which === 'classroomsnap'){
     enterClassroomSnap();
+  } else if(which === 'fpcreadiness'){
+    enterFpcReadiness();
   }
 }
-function backToPlatformSelect(){
+   
+   function backToPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
   hide('review-panel-screen');
   hide('classroom-snap-screen');
+  hide('fpc-readiness-screen');
   destroyVantaBirds();
   showPlatformSelect();
 }
@@ -3209,6 +3772,8 @@ function fuzzyMatch(b){
   hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
   hide('classroom-snap-screen');
   classroomSnaps = []; snapReviewCollege = null;
+  hide('fpc-readiness-screen');
+  FPC_STUDENTS = []; fpcCurrentEditRegNo = null; fpcCurrentProfileRegNo = null;
   show('auth-screen');
   hide('pin-error');
   const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
@@ -5043,5 +5608,477 @@ function initVantaBirds(){
 }
 function destroyVantaBirds(){ if(vantaBirdsEffect){ vantaBirdsEffect.destroy(); vantaBirdsEffect = null; } }
 </script>
+ <script>
+/* ============================================================
+   FPC READINESS MONITOR — connects to its OWN Supabase project
+   (separate from the help-desk's ticket database above).
+   Only students whose `college` column matches the logged-in
+   Campus Manager's college (or, for KAM, one of their region's
+   colleges) are ever fetched. Right now only
+   "TERFs College of Arts and Science" has rows — every other
+   college will correctly show an empty "no students yet" state.
+   ============================================================ */
+const FPC_SUPABASE_URL = 'https://rfzhifhvtopdayhaiuct.supabase.co';
+const FPC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemhpZmh2dG9wZGF5aGFpdWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4ODEyNzYsImV4cCI6MjEwMDQ1NzI3Nn0.X3vTyKA0f--0lQ4_CreXDAMVSHcvOBiWxFAVi2sGHmw';
+ 
+let FPC_STUDENTS = [];
+let fpcHireChartInstance = null;
+let fpcNqtChartInstance = null;
+let fpcDonutInstance = null;
+let fpcCurrentEditRegNo = null;
+let fpcCurrentProfileRegNo = null;
+let fpcProfileReturnView = 'fpcViewDashboard';
+let fpcViewOnly = false;
+ 
+function fpcSbHeaders(extraPrefer){
+  const h = { apikey: FPC_SUPABASE_ANON_KEY, Authorization: `Bearer ${FPC_SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
+  if(extraPrefer) h['Prefer'] = extraPrefer;
+  return h;
+}
+function fpcSetStatus(state, label){
+  const pill = document.getElementById('fpcStatusPill');
+  if(!pill) return;
+  pill.classList.remove('live','loading');
+  if(state) pill.classList.add(state);
+  document.getElementById('fpcStatusText').textContent = label;
+}
+function fpcShowError(message){
+  document.getElementById('fpcErrorBanner').classList.add('open');
+  document.getElementById('fpcErrorDetail').textContent = message;
+  document.getElementById('fpcTableBody').innerHTML = `<tr class="loading-row"><td colspan="9">No data to display.</td></tr>`;
+}
+function fpcShowToast(message, isError){
+  const t = document.getElementById('fpcToast');
+  document.getElementById('fpcToastText').textContent = message;
+  t.classList.toggle('err', !!isError);
+  t.classList.add('show');
+  clearTimeout(fpcShowToast._timer);
+  fpcShowToast._timer = setTimeout(()=> t.classList.remove('show'), 3800);
+}
+ 
+/* Builds the college scope for the current session, reusing the help-desk's own
+   sessionRole / sessionCollege / sessionAllowedColleges globals. */
+function fpcCollegeQueryParam(){
+  if(sessionRole === 'manager' && sessionCollege){
+    return `&college=eq.${encodeURIComponent(sessionCollege)}`;
+  }
+  if(sessionRole === 'kam' && sessionAllowedColleges && sessionAllowedColleges.length){
+    const list = sessionAllowedColleges.map(c => `"${c.replace(/"/g,'\\"')}"`).join(',');
+    return `&college=in.(${list})`;
+  }
+  return ''; // admin / master admin: no filter, sees every college
+}
+ 
+async function fpcLoadStudents(){
+  fpcSetStatus('loading', 'Connecting to Supabase…');
+  try{
+    const url = `${FPC_SUPABASE_URL}/rest/v1/student_monitor_view?select=*${fpcCollegeQueryParam()}&order=s_no.asc`;
+    const res = await fetch(url, { headers:{ apikey: FPC_SUPABASE_ANON_KEY, Authorization: `Bearer ${FPC_SUPABASE_ANON_KEY}` } });
+    if(!res.ok){
+      const body = await res.text().catch(()=> '');
+      throw new Error(`Supabase responded ${res.status}. ${body}`.trim());
+    }
+    const rows = await res.json();
+    FPC_STUDENTS = Array.isArray(rows) ? rows : [];
+    document.getElementById('fpcErrorBanner').classList.remove('open');
+    fpcSetStatus('live', FPC_STUDENTS.length ? 'Live · connected to Supabase' : 'Live · no students on file yet');
+    fpcRenderAll();
+  }catch(e){
+    fpcSetStatus(null, 'Connection failed');
+    fpcShowError(e.message);
+  }
+}
+ 
+function fpcFmt(v){ return (v===null || v===undefined || isNaN(v)) ? null : Number(v); }
+function fpcScoreColor(v){ if(v===null) return '#9AA3AF'; if(v>=60) return 'var(--fpc-green,#4C8B4A)'; if(v>=35) return 'var(--fpc-gold,#D98A3D)'; return 'var(--fpc-red,#C6493E)'; }
+ 
+/* Reuses the help-desk's own initials()/avatarColor() helpers already defined above. */
+function fpcAvatarImgHtml(name){
+  const bg = (typeof avatarColor === 'function') ? avatarColor(name) : '#3B4522';
+  const txt = (typeof initials === 'function') ? initials(name) : '?';
+  return `<div style="width:100%;height:100%;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;">${txt}</div>`;
+}
+ 
+function fpcSetActiveNav(view){
+  document.querySelectorAll('#fpc-readiness-screen .fpc-nav-link').forEach(a=>{ a.classList.toggle('active', a.dataset.view===view); });
+}
+function fpcShowView(id){
+  document.querySelectorAll('#fpc-readiness-screen .fpc-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function fpcGoDashboard(){ fpcShowView('fpcViewDashboard'); fpcSetActiveNav('dashboard'); }
+function fpcGoStudents(){ fpcShowView('fpcViewStudents'); fpcSetActiveNav('students'); fpcRenderTable(); }
+function fpcGoReports(){ fpcShowView('fpcViewReports'); fpcSetActiveNav('reports'); fpcRenderReportsTable(); }
+function fpcGoBackFromProfile(){
+  fpcShowView(fpcProfileReturnView);
+  if(fpcProfileReturnView === 'fpcViewStudents'){ fpcSetActiveNav('students'); fpcRenderTable(); }
+  else if(fpcProfileReturnView === 'fpcViewReports'){ fpcSetActiveNav('reports'); fpcRenderReportsTable(); }
+  else{ fpcSetActiveNav('dashboard'); }
+}
+ 
+function fpcRenderHero(){
+  const total = FPC_STUDENTS.length;
+  const eligible = FPC_STUDENTS.filter(s=>s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible').length;
+  const hireVals = FPC_STUDENTS.map(s=>fpcFmt(s.hire_overall)).filter(v=>v!==null);
+  const avgHire = hireVals.length ? (hireVals.reduce((a,b)=>a+b,0)/hireVals.length) : null;
+  const stats = [ {icn:'🎓', num:total, lbl:'Cohort size'}, {icn:'✅', num:eligible, lbl:'Eligible'}, {icn:'📊', num:(avgHire!==null? avgHire.toFixed(0)+'%':'—'), lbl:'Avg HIRE'} ];
+  document.getElementById('fpcHeroStats').innerHTML = stats.map(s=>`
+    <div class="hero-stat"><div class="icn">${s.icn}</div><div><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div></div>`).join('');
+  document.getElementById('fpcHeroCollegeName').textContent = sessionRole === 'manager' ? (sessionCollege || 'your college') : 'your colleges';
+  const pct = avgHire!==null ? Math.min(100, Math.max(0, avgHire)) : 0;
+  const circumference = 364;
+  const ring = document.getElementById('fpcRingFill');
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = circumference - (pct/100)*circumference;
+  ring.style.stroke = pct>=60 ? '#C7DE3E' : pct>=35 ? '#D98A3D' : '#C6493E';
+  document.getElementById('fpcRingValue').textContent = avgHire!==null ? avgHire.toFixed(1)+'%' : '—';
+}
+function fpcRenderFlagged(){
+  const flagged = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<35;})
+    .sort((a,b)=> (fpcFmt(a.hire_overall)||0)-(fpcFmt(b.hire_overall)||0)).slice(0,6);
+  const box = document.getElementById('fpcFlaggedList');
+  if(!FPC_STUDENTS.length){
+    box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">No student data on file for this college yet.</div>`;
+    return;
+  }
+  if(flagged.length===0){
+    box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">No students currently below the 35% readiness line 🎉</div>`;
+    return;
+  }
+  box.innerHTML = flagged.map(s=>`
+    <div class="flag-item" style="background:rgba(255,255,255,.12);cursor:pointer;" onclick="fpcViewProfile('${s.registration_number}')">
+      <div class="avatar-chip">${fpcAvatarImgHtml(s.student_name)}</div>
+      <div class="fi-name" style="color:#fff;">${s.student_name}</div>
+      <div class="fi-score" style="color:#FFD9C7;">${fpcFmt(s.hire_overall)}%</div>
+    </div>`).join('');
+}
+function fpcRenderEligChips(){
+  const total = FPC_STUDENTS.length;
+  const eligible = FPC_STUDENTS.filter(s=>s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible').length;
+  const pending = total - eligible;
+  const withArrears = FPC_STUDENTS.filter(s=>s.current_arrears>0).length;
+  document.getElementById('fpcEligMeta').textContent = `${total} students tracked`;
+  if(!total){ document.getElementById('fpcEligChips').innerHTML = `<div style="font-size:12.5px;color:var(--fpc-ink-soft);">Nothing to show yet — no students on file for this college.</div>`; return; }
+  const chips = [
+    {label:'Eligible', val:`${Math.round(eligible/total*100)}%`, cls:'c-green'},
+    {label:'Pending review', val:`${Math.round(pending/total*100)}%`, cls:'c-gold'},
+    {label:'With current arrears', val:withArrears, cls:'c-red'},
+  ];
+  document.getElementById('fpcEligChips').innerHTML = chips.map(c=>`
+    <div class="chip-stat ${c.cls}" style="flex:1;min-width:170px;"><span class="cs-label">${c.label}</span><span class="cs-val">${c.val}</span></div>`).join('');
+}
+function fpcRenderHireChart(){
+  const ctx = document.getElementById('fpcHireChart').getContext('2d');
+  const sorted = [...FPC_STUDENTS].sort((a,b)=> (fpcFmt(b.hire_overall)||0)-(fpcFmt(a.hire_overall)||0));
+  const labels = sorted.map(s=>s.student_name.split(' ')[0]);
+  const data = sorted.map(s=>fpcFmt(s.hire_overall)||0);
+  const colors = data.map(v=> v>=60 ? '#4C8B4A' : v>=35 ? '#D98A3D' : '#C6493E');
+  if(fpcHireChartInstance) fpcHireChartInstance.destroy();
+  fpcHireChartInstance = new Chart(ctx, {
+    type:'bar', data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:6, maxBarThickness:22 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>`Overall: ${c.raw}%`}} },
+      scales:{ y:{ beginAtZero:true, max:100, grid:{color:'#EEF1DF'}, ticks:{color:'#6E7660', font:{size:10.5}} },
+                x:{ grid:{display:false}, ticks:{color:'#6E7660', font:{size:10.5}, maxRotation:60, minRotation:60} } } }
+  });
+}
+function fpcRenderNqtPanel(){
+  const withData = FPC_STUDENTS.filter(s=>fpcFmt(s.nqt_overall)!==null);
+  document.getElementById('fpcNqtMeta').textContent = withData.length ? `${withData.length} of ${FPC_STUDENTS.length} assessed` : (FPC_STUDENTS.length ? 'Not yet conducted' : '');
+  const body = document.getElementById('fpcNqtBody');
+  if(withData.length === 0){
+    body.innerHTML = `<div class="fpc-empty-state"><div class="ring">◌</div><strong>No FPC NQT scores recorded yet</strong>
+      <p>${FPC_STUDENTS.length ? 'Verbal, Numerical, Reasoning, Advanced Quant & Coding averages will populate here once a round is entered — use Edit on any student.' : 'No students on file for this college yet.'}</p></div>`;
+    return;
+  }
+  const dims = [ ['Verbal','nqt_verbal_ability'],['Numerical','nqt_numerical_ability'],['Reasoning','nqt_reasoning_ability'],['Adv. Quant','nqt_advanced_quant_reasoning'],['Coding','nqt_coding'] ];
+  const avg = dims.map(([label,key])=>{ const vals = withData.map(s=>fpcFmt(s[key])).filter(v=>v!==null); const a = vals.length? vals.reduce((x,y)=>x+y,0)/vals.length : 0; return {label, a}; });
+  body.innerHTML = `<div class="fpc-chart-wrap" style="height:230px;"><canvas id="fpcNqtChart"></canvas></div>`;
+  if(fpcNqtChartInstance) fpcNqtChartInstance.destroy();
+  fpcNqtChartInstance = new Chart(document.getElementById('fpcNqtChart').getContext('2d'), {
+    type:'bar', data:{ labels:avg.map(a=>a.label), datasets:[{data:avg.map(a=>a.a.toFixed(1)), backgroundColor:'#5C6B32', borderRadius:6}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{beginAtZero:true,max:100, grid:{color:'#EEF1DF'}, ticks:{color:'#6E7660'}}, y:{grid:{display:false}, ticks:{color:'#6E7660'}} } }
+  });
+}
+function fpcLaneBar(value, colorClass){
+  const v = fpcFmt(value);
+  if(v===null){ return `<span class="nqt-empty-cell">— pending</span>`; }
+  const pct = Math.min(100, Math.max(0, v));
+  return `<div class="lane"><div class="lane-track"><div class="lane-fill ${colorClass||''}" style="width:${pct}%; background:${fpcScoreColor(v)}"></div><div class="lane-threshold"></div></div><div class="lane-label"><strong>${v}%</strong></div></div>`;
+}
+function fpcPopulateFilters(){
+  const depts = [...new Set(FPC_STUDENTS.map(s=>s.department).filter(Boolean))];
+  [document.getElementById('fpcDeptFilter'), document.getElementById('fpcReportsDeptFilter')].forEach(sel=>{
+    if(!sel) return; const prev = sel.value;
+    sel.innerHTML = '<option value="">All departments</option>' + depts.map(d=>`<option value="${d}">${d}</option>`).join('');
+    sel.value = prev;
+  });
+}
+function fpcFilterSortStudents(qId, deptId, eligId, sortId){
+  const q = document.getElementById(qId).value.trim().toLowerCase();
+  const dept = document.getElementById(deptId).value;
+  const elig = document.getElementById(eligId).value;
+  const sortMode = document.getElementById(sortId).value;
+  let rows = FPC_STUDENTS.filter(s=>{
+    const matchesQ = !q || s.student_name.toLowerCase().includes(q) || (s.registration_number||'').toLowerCase().includes(q) || (s.email||'').toLowerCase().includes(q);
+    const matchesDept = !dept || s.department===dept;
+    const isEligible = s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible';
+    const matchesElig = !elig || (elig==='Eligible' ? isEligible : !isEligible);
+    return matchesQ && matchesDept && matchesElig;
+  });
+  rows.sort((a,b)=>{
+    if(sortMode==='hire_overall_desc') return (fpcFmt(b.hire_overall)||0)-(fpcFmt(a.hire_overall)||0);
+    if(sortMode==='hire_overall_asc') return (fpcFmt(a.hire_overall)||0)-(fpcFmt(b.hire_overall)||0);
+    if(sortMode==='nqt_overall_desc') return (fpcFmt(b.nqt_overall)||0)-(fpcFmt(a.nqt_overall)||0);
+    return (a.s_no||0)-(b.s_no||0);
+  });
+  return rows;
+}
+function fpcStudentRowHtml(s){
+  const isEligible = s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible';
+  const collegeBit = (sessionRole !== 'manager' && s.college) ? ` · ${s.college}` : '';
+  return `<tr>
+    <td><div class="student-cell"><div class="avatar-chip" style="width:32px;height:32px;">${fpcAvatarImgHtml(s.student_name)}</div>
+      <div><div class="student-name" onclick="fpcViewProfile('${s.registration_number}')">${s.student_name}</div>
+      <div class="student-sub mono">${s.registration_number||''} · ${s.department||''}${collegeBit}</div></div></div></td>
+    <td><span class="fpc-badge ${isEligible?'eligible':'pending'}">${isEligible?'Eligible':'Pending'}</span>${s.current_arrears>0 ? `<span class="fpc-badge arrears">${s.current_arrears} arrear${s.current_arrears>1?'s':''}</span>`:''}</td>
+    <td>${s.communication_skill_level||'—'}</td>
+    <td>${fpcLaneBar(s.hire_fop)}</td><td>${fpcLaneBar(s.hire_dsa)}</td><td>${fpcLaneBar(s.hire_aptitude)}</td>
+    <td>${fpcLaneBar(s.hire_overall)}</td><td>${fpcLaneBar(s.nqt_overall,'teal')}</td>
+    <td><button class="row-edit-btn" onclick="event.stopPropagation(); fpcOpenModal('${s.registration_number}', true)">Edit</button></td>
+  </tr>`;
+}
+function fpcRenderTable(){
+  const rows = fpcFilterSortStudents('fpcSearchBox','fpcDeptFilter','fpcEligFilter','fpcSortSelect');
+  document.getElementById('fpcRowCount').textContent = `${rows.length} of ${FPC_STUDENTS.length} students`;
+  document.getElementById('fpcTableBody').innerHTML = rows.length ? rows.map(fpcStudentRowHtml).join('')
+    : `<tr class="loading-row"><td colspan="9">${FPC_STUDENTS.length ? 'No students match this filter.' : 'No students on file for this college yet.'}</td></tr>`;
+}
+function fpcRenderReportsSummary(){
+  const total = FPC_STUDENTS.length;
+  const eligible = FPC_STUDENTS.filter(s=>s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible').length;
+  const hireVals = FPC_STUDENTS.map(s=>fpcFmt(s.hire_overall)).filter(v=>v!==null);
+  const avgHire = hireVals.length ? (hireVals.reduce((a,b)=>a+b,0)/hireVals.length) : null;
+  const nqtVals = FPC_STUDENTS.map(s=>fpcFmt(s.nqt_overall)).filter(v=>v!==null);
+  const avgNqt = nqtVals.length ? (nqtVals.reduce((a,b)=>a+b,0)/nqtVals.length) : null;
+  const belowLine = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<35;}).length;
+  const cards = [ {lbl:'Cohort size', val:total}, {lbl:'Eligible', val:`${eligible} (${total?Math.round(eligible/total*100):0}%)`},
+    {lbl:'Avg HIRE overall', val: avgHire!==null? avgHire.toFixed(1)+'%':'—'}, {lbl:'Avg NQT overall', val: avgNqt!==null? avgNqt.toFixed(1)+'%':'—'} ];
+  document.getElementById('fpcReportsSummary').innerHTML = cards.map(c=>`<div class="rsum-card"><div class="rs-lbl">${c.lbl}</div><div class="rs-val">${c.val}</div></div>`).join('')
+    + (belowLine>0 ? `<div class="rsum-card" style="border-color:#EFC1BA;"><div class="rs-lbl" style="color:#8E332B;">Below readiness line</div><div class="rs-val" style="color:#C6493E;">${belowLine}</div></div>` : '');
+}
+function fpcRenderReportsTable(){
+  fpcRenderReportsSummary();
+  const rows = fpcFilterSortStudents('fpcReportsSearchBox','fpcReportsDeptFilter','fpcReportsEligFilter','fpcReportsSortSelect');
+  document.getElementById('fpcReportsRowCount').textContent = `${rows.length} of ${FPC_STUDENTS.length} students`;
+  document.getElementById('fpcReportsTableBody').innerHTML = rows.length ? rows.map(fpcStudentRowHtml).join('')
+    : `<tr class="loading-row"><td colspan="9">${FPC_STUDENTS.length ? 'No students match this filter.' : 'No students on file for this college yet.'}</td></tr>`;
+}
+function fpcRenderAll(){
+  fpcRenderHero(); fpcRenderHireChart(); fpcRenderNqtPanel(); fpcRenderFlagged(); fpcRenderEligChips();
+  fpcPopulateFilters(); fpcRenderTable(); fpcRenderReportsTable();
+}
+ 
+function fpcMetricBadge(v){
+  if(v===null) return `<span class="metric-badge na">Pending</span>`;
+  if(v>=60) return `<span class="metric-badge ok">On track</span>`;
+  if(v>=35) return `<span class="metric-badge warn">Watch</span>`;
+  return `<span class="metric-badge risk">At risk</span>`;
+}
+function fpcCurrentProfileList(){
+  if(fpcProfileReturnView === 'fpcViewReports') return fpcFilterSortStudents('fpcReportsSearchBox','fpcReportsDeptFilter','fpcReportsEligFilter','fpcReportsSortSelect');
+  if(fpcProfileReturnView === 'fpcViewStudents') return fpcFilterSortStudents('fpcSearchBox','fpcDeptFilter','fpcEligFilter','fpcSortSelect');
+  return FPC_STUDENTS;
+}
+function fpcUpdateProfileStepControls(){
+  const list = fpcCurrentProfileList();
+  const idx = list.findIndex(s => s.registration_number === fpcCurrentProfileRegNo);
+  const counter = document.getElementById('fpcProfileStepCounter');
+  const prevBtn = document.getElementById('fpcBtnPrevStudent'); const nextBtn = document.getElementById('fpcBtnNextStudent');
+  if(idx === -1 || list.length === 0){ counter.textContent = ''; prevBtn.disabled = true; nextBtn.disabled = true; return; }
+  counter.textContent = `${idx+1} of ${list.length}`; prevBtn.disabled = idx <= 0; nextBtn.disabled = idx >= list.length - 1;
+}
+function fpcStepProfile(dir){
+  const list = fpcCurrentProfileList();
+  const idx = list.findIndex(s => s.registration_number === fpcCurrentProfileRegNo);
+  if(idx === -1) return;
+  const nextIdx = idx + dir; if(nextIdx < 0 || nextIdx >= list.length) return;
+  fpcViewProfile(list[nextIdx].registration_number, fpcProfileReturnView);
+}
+function fpcViewProfile(regNo, fromView){
+  const s = FPC_STUDENTS.find(x => x.registration_number === regNo);
+  if(!s) return;
+  fpcCurrentProfileRegNo = regNo;
+  if(fromView) fpcProfileReturnView = fromView;
+  else { const active = document.querySelector('#fpc-readiness-screen .fpc-view.active'); if(active) fpcProfileReturnView = active.id; }
+  const isEligible = s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible';
+  document.getElementById('fpcPAvatar').innerHTML = fpcAvatarImgHtml(s.student_name);
+  document.getElementById('fpcPName').textContent = s.student_name || '—';
+  document.getElementById('fpcPLoc').textContent = `${s.department || '—'} · ${s.registration_number || '—'}${(sessionRole!=='manager' && s.college) ? ' · '+s.college : ''}`;
+  document.getElementById('fpcPBio').textContent = `${s.email || 'Email not on file'}. Communication level: ${s.communication_skill_level || 'not assessed'}. ${s.current_arrears>0 ? s.current_arrears+' current arrear(s) on record.' : 'No current arrears.'}`;
+  document.getElementById('fpcPHireOverall').textContent = fpcFmt(s.hire_overall)!==null ? fpcFmt(s.hire_overall)+'%' : '—';
+  document.getElementById('fpcPNqtOverall').textContent = fpcFmt(s.nqt_overall)!==null ? fpcFmt(s.nqt_overall)+'%' : '—';
+  document.getElementById('fpcPNqtDesc').textContent = fpcFmt(s.nqt_assessment_count)!==null ? `Based on ${s.nqt_assessment_count} assessment round(s).` : 'Average across all NQT assessment rounds.';
+  document.getElementById('fpcPEligibility').textContent = isEligible ? 'Eligible' : (s.eligibility_status || 'Pending');
+  document.getElementById('fpcPEligDesc').textContent = s.current_arrears>0 ? `Has ${s.current_arrears} current arrear(s) — may affect eligibility.` : 'Based on academics, arrears & communication level.';
+  const rowsData = [ ['FOP','HIRE', s.hire_fop],['DSA','HIRE', s.hire_dsa],['Aptitude','HIRE', s.hire_aptitude],['Overall','HIRE', s.hire_overall],
+    ['Verbal Ability','NQT', s.nqt_verbal_ability],['Numerical Ability','NQT', s.nqt_numerical_ability],['Reasoning Ability','NQT', s.nqt_reasoning_ability],
+    ['Adv. Quant Reasoning','NQT', s.nqt_advanced_quant_reasoning],['Coding','NQT', s.nqt_coding],['Overall','NQT', s.nqt_overall] ];
+  document.getElementById('fpcPMetricBody').innerHTML = rowsData.map(([label,cat,val])=>{
+    const v = fpcFmt(val);
+    return `<tr><td style="font-weight:600;">${label}</td><td><span class="cat-tag">${cat}</span></td><td class="mono">${v!==null? v+'%':'—'}</td><td>${fpcMetricBadge(v)}</td></tr>`;
+  }).join('');
+  const fop = fpcFmt(s.hire_fop)||0, dsa = fpcFmt(s.hire_dsa)||0, apt = fpcFmt(s.hire_aptitude)||0;
+  const donutCtx = document.getElementById('fpcPDonut').getContext('2d');
+  if(fpcDonutInstance) fpcDonutInstance.destroy();
+  const hasAny = (fpcFmt(s.hire_fop)!==null || fpcFmt(s.hire_dsa)!==null || fpcFmt(s.hire_aptitude)!==null);
+  fpcDonutInstance = new Chart(donutCtx, { type:'doughnut',
+    data:{ labels:['FOP','DSA','Aptitude'], datasets:[{ data: hasAny ? [fop,dsa,apt] : [1,1,1], backgroundColor:['#C7DE3E','#5C6B32','#D98A3D'], borderWidth:0 }] },
+    options:{ cutout:'72%', plugins:{legend:{display:false}, tooltip:{enabled:hasAny}} } });
+  document.getElementById('fpcPDonutVal').textContent = fpcFmt(s.hire_overall)!==null ? fpcFmt(s.hire_overall)+'%' : '—';
+  document.getElementById('fpcPDonutLegend').innerHTML = [ ['#C7DE3E','FOP', s.hire_fop],['#5C6B32','DSA', s.hire_dsa],['#D98A3D','Aptitude', s.hire_aptitude] ]
+    .map(([color,label,val])=>{ const v = fpcFmt(val); return `<div class="donut-legend-row"><span class="sw" style="background:${color}"></span><span class="lbl">${label}</span><span class="val">${v!==null?v+'%':'—'}</span></div>`; }).join('');
+  const details = [ ['10th mark', fpcPctTextSafe(s.tenth_mark)], ['12th mark', fpcPctTextSafe(s.twelfth_mark)], ['UG degree %', fpcPctTextSafe(s.ug_percentage)],
+    ['PG degree %', fpcPctTextSafe(s.pg_percentage)], ['Current arrears', fpcNumTextSafe(s.current_arrears)], ['History of arrears', fpcNumTextSafe(s.history_of_arrears)] ];
+  document.getElementById('fpcPProfileGrid').innerHTML = details.map(([label,val])=>`<div class="detail-item"><div class="d-label">${label}</div><div class="d-val">${val}</div></div>`).join('');
+  document.getElementById('fpcPLinks').innerHTML = fpcLinkRow('LinkedIn', s.linkedin_url) + fpcLinkRow('Resume', s.resume_url) + fpcLinkRow('GitHub', s.github_url) + fpcLinkRow('EF SET', s.efset_certificate_url);
+  fpcShowView('fpcViewProfile'); fpcSetActiveNav('');
+  fpcUpdateProfileStepControls();
+}
+function fpcPctTextSafe(v){ const n=fpcFmt(v); return n===null?'—':`${n}%`; }
+function fpcNumTextSafe(v){ const n=fpcFmt(v); return n===null?'—':`${n}`; }
+function fpcPctText(v){ return fpcPctTextSafe(v); }
+function fpcNumText(v){ return fpcNumTextSafe(v); }
+function fpcLinkRow(tag, url){
+  const valid = url && /^https?:\/\//i.test(url.trim());
+  if(!valid) return `<div class="modal-link unavailable modal-link-row"><span class="link-tag">${tag}</span> ${url ? url : 'Not provided'}</div>`;
+  return `<a class="modal-link modal-link-row" href="${url}" target="_blank" rel="noopener"><span class="link-tag">${tag}</span> ${url}</a>`;
+}
+function fpcSetInputVal(id, v){ document.getElementById(id).value = (v===null || v===undefined) ? '' : v; }
+ 
+function fpcOpenModal(regNo, startInEdit){
+  if(fpcViewOnly) startInEdit = false; // KAM / Admin: never allowed into edit mode
+  const s = FPC_STUDENTS.find(x => x.registration_number === regNo);
+  if(!s) return;
+  fpcCurrentEditRegNo = regNo;
+  const isEligible = s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible';
+  document.getElementById('fpcModalAvatar').innerHTML = fpcAvatarImgHtml(s.student_name);
+  document.getElementById('fpcModalName').textContent = s.student_name;
+  document.getElementById('fpcModalSub').textContent = `${s.registration_number || '—'} · ${s.department || '—'}`;
+  document.getElementById('fpc_mName').textContent = s.student_name || '—';
+  document.getElementById('fpc_mDept').textContent = s.department || '—';
+  document.getElementById('fpc_mEmail').textContent = s.email || '—';
+  document.getElementById('fpc_mRegNo').textContent = s.registration_number || '—';
+  document.getElementById('fpc_mEligibility').innerHTML = `<span class="fpc-badge ${isEligible?'eligible':'pending'}">${s.eligibility_status || 'Pending review'}</span>`;
+  document.getElementById('fpc_mCommLevel').textContent = s.communication_skill_level || '—';
+  document.getElementById('fpc_mCurrentArrears').textContent = fpcNumText(s.current_arrears);
+  document.getElementById('fpc_mHistoryArrears').textContent = fpcNumText(s.history_of_arrears);
+  document.getElementById('fpc_mTenth').textContent = fpcPctText(s.tenth_mark);
+  document.getElementById('fpc_mTwelfth').textContent = fpcPctText(s.twelfth_mark);
+  document.getElementById('fpc_mUg').textContent = fpcPctText(s.ug_percentage);
+  document.getElementById('fpc_mPg').textContent = fpcPctText(s.pg_percentage);
+  document.getElementById('fpc_mFop').textContent = fpcPctText(s.hire_fop);
+  document.getElementById('fpc_mDsa').textContent = fpcPctText(s.hire_dsa);
+  document.getElementById('fpc_mAptitude').textContent = fpcPctText(s.hire_aptitude);
+  document.getElementById('fpc_mHireOverall').textContent = fpcPctText(s.hire_overall);
+  document.getElementById('fpc_mNqtCount').textContent = fpcNumText(s.nqt_assessment_count);
+  document.getElementById('fpc_mVerbal').textContent = fpcPctText(s.nqt_verbal_ability);
+  document.getElementById('fpc_mNumerical').textContent = fpcPctText(s.nqt_numerical_ability);
+  document.getElementById('fpc_mReasoning').textContent = fpcPctText(s.nqt_reasoning_ability);
+  document.getElementById('fpc_mAdvQuant').textContent = fpcPctText(s.nqt_advanced_quant_reasoning);
+  document.getElementById('fpc_mCoding').textContent = fpcPctText(s.nqt_coding);
+  document.getElementById('fpc_mNqtOverall').textContent = fpcPctText(s.nqt_overall);
+  document.getElementById('fpc_mLinks').innerHTML = fpcLinkRow('LinkedIn', s.linkedin_url) + fpcLinkRow('Resume', s.resume_url) + fpcLinkRow('GitHub', s.github_url);
+  fpcSetInputVal('fpc_eName', s.student_name); fpcSetInputVal('fpc_eDept', s.department); fpcSetInputVal('fpc_eEmail', s.email);
+  fpcSetInputVal('fpc_eEligibility', isEligible ? 'Eligible' : '');
+  fpcSetInputVal('fpc_eCommLevel', s.communication_skill_level);
+  fpcSetInputVal('fpc_eCurrentArrears', s.current_arrears ?? 0); fpcSetInputVal('fpc_eHistoryArrears', s.history_of_arrears ?? 0);
+  fpcSetInputVal('fpc_eTenth', s.tenth_mark); fpcSetInputVal('fpc_eTwelfth', s.twelfth_mark); fpcSetInputVal('fpc_eUg', s.ug_percentage); fpcSetInputVal('fpc_ePg', s.pg_percentage);
+  fpcSetInputVal('fpc_eFop', s.hire_fop); fpcSetInputVal('fpc_eDsa', s.hire_dsa); fpcSetInputVal('fpc_eAptitude', s.hire_aptitude); fpcSetInputVal('fpc_eHireOverall', s.hire_overall);
+  fpcSetInputVal('fpc_eNqtCount', s.nqt_assessment_count); fpcSetInputVal('fpc_eVerbal', s.nqt_verbal_ability); fpcSetInputVal('fpc_eNumerical', s.nqt_numerical_ability);
+  fpcSetInputVal('fpc_eReasoning', s.nqt_reasoning_ability); fpcSetInputVal('fpc_eAdvQuant', s.nqt_advanced_quant_reasoning); fpcSetInputVal('fpc_eCoding', s.nqt_coding); fpcSetInputVal('fpc_eNqtOverall', s.nqt_overall);
+  fpcSetInputVal('fpc_eLinkedin', s.linkedin_url); fpcSetInputVal('fpc_eResume', s.resume_url); fpcSetInputVal('fpc_eGithub', s.github_url); fpcSetInputVal('fpc_eEfset', s.efset_certificate_url);
+  document.getElementById('fpcModalSaveError').classList.remove('open');
+  document.getElementById('fpcModalCard').classList.toggle('editing', !!startInEdit);
+  document.getElementById('fpcModalOverlay').classList.toggle('view-only', fpcViewOnly);
+  document.getElementById('fpcModalOverlay').classList.add('open');
+}
+function fpcCloseModal(){
+  document.getElementById('fpcModalOverlay').classList.remove('open');
+  document.getElementById('fpcModalCard').classList.remove('editing');
+  fpcCurrentEditRegNo = null;
+}
+function fpcEnterEditMode(){ if(fpcViewOnly) return; document.getElementById('fpcModalCard').classList.add('editing'); }
+function fpcCancelEdit(){ const regNo = fpcCurrentEditRegNo; document.getElementById('fpcModalCard').classList.remove('editing'); fpcOpenModal(regNo, false); }
+function fpcNumVal(id){ const raw = document.getElementById(id).value; return raw === '' ? null : Number(raw); }
+function fpcIntVal(id){ const raw = document.getElementById(id).value; return raw === '' ? 0 : parseInt(raw, 10); }
+function fpcTextVal(id){ const raw = document.getElementById(id).value.trim(); return raw === '' ? null : raw; }
+ 
+async function fpcSaveEdit(){
+  if(fpcViewOnly) return;
+  const s = FPC_STUDENTS.find(x => x.registration_number === fpcCurrentEditRegNo);
+  if(!s) return;
+  const btn = document.getElementById('fpcBtnSave');
+  const errBox = document.getElementById('fpcModalSaveError');
+  errBox.classList.remove('open');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const studentsPayload = {
+      student_name: fpcTextVal('fpc_eName') || s.student_name, department: fpcTextVal('fpc_eDept'), email: fpcTextVal('fpc_eEmail'),
+      eligibility_status: fpcTextVal('fpc_eEligibility'), communication_skill_level: fpcTextVal('fpc_eCommLevel'),
+      current_arrears: fpcIntVal('fpc_eCurrentArrears'), history_of_arrears: fpcIntVal('fpc_eHistoryArrears'),
+      tenth_mark: fpcNumVal('fpc_eTenth'), twelfth_mark: fpcNumVal('fpc_eTwelfth'), ug_percentage: fpcNumVal('fpc_eUg'), pg_percentage: fpcNumVal('fpc_ePg'),
+      linkedin_url: fpcTextVal('fpc_eLinkedin'), resume_url: fpcTextVal('fpc_eResume'), github_url: fpcTextVal('fpc_eGithub'), efset_certificate_url: fpcTextVal('fpc_eEfset')
+    };
+    const r1 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/students?id=eq.${s.id}`, { method: 'PATCH', headers: fpcSbHeaders('return=representation'), body: JSON.stringify(studentsPayload) });
+    if(!r1.ok) throw new Error(`students update failed (${r1.status}): ${await r1.text()}`);
+ 
+    const hireDate = s.hire_assessment_date || new Date().toISOString().slice(0,10);
+    const hirePayload = { student_id: s.id, assessment_date: hireDate, fop: fpcNumVal('fpc_eFop'), dsa: fpcNumVal('fpc_eDsa'), aptitude: fpcNumVal('fpc_eAptitude'), overall: fpcNumVal('fpc_eHireOverall') };
+    const r2 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/hire_scores?on_conflict=student_id,assessment_date`, { method: 'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'), body: JSON.stringify(hirePayload) });
+    if(!r2.ok) throw new Error(`hire_scores update failed (${r2.status}): ${await r2.text()}`);
+ 
+    const nqtPayload = { student_id: s.id, assessment_count: fpcNumVal('fpc_eNqtCount'), verbal_ability: fpcNumVal('fpc_eVerbal'), numerical_ability: fpcNumVal('fpc_eNumerical'),
+      reasoning_ability: fpcNumVal('fpc_eReasoning'), advanced_quant_reasoning: fpcNumVal('fpc_eAdvQuant'), coding: fpcNumVal('fpc_eCoding'), overall: fpcNumVal('fpc_eNqtOverall') };
+    const r3 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/fpc_nqt_assessment?on_conflict=student_id`, { method: 'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'), body: JSON.stringify(nqtPayload) });
+    if(!r3.ok) throw new Error(`fpc_nqt_assessment update failed (${r3.status}): ${await r3.text()}`);
+ 
+    const wasProfileView = document.getElementById('fpcViewProfile').classList.contains('active');
+    const profileRegNo = fpcCurrentProfileRegNo;
+    const savedReturnView = fpcProfileReturnView;
+    await fpcLoadStudents();
+    fpcCloseModal();
+    if(wasProfileView && profileRegNo) fpcViewProfile(profileRegNo, savedReturnView);
+    fpcShowToast('Saved — dashboard updated.', false);
+  }catch(e){
+    errBox.textContent = e.message + ' — if this mentions row-level security / permission denied, the anon key isn\'t allowed to write.';
+    errBox.classList.add('open');
+    fpcShowToast('Save failed. See details in the panel.', true);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save changes';
+  }
+}
+ 
+/* Entry point — called from selectPlatform('fpcreadiness') */
+function enterFpcReadiness(){
+  hide('platform-select-screen');
+  hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
+  show('fpc-readiness-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  fpcViewOnly = (sessionRole !== 'manager'); // only Campus Managers may edit; KAM & Admin are read-only
+  document.getElementById('fpc-readiness-screen').classList.toggle('view-only', fpcViewOnly);
+  document.getElementById('fpc-breadcrumb-college').textContent =
+    sessionRole === 'manager' ? (sessionCollege || '—') :
+    sessionRole === 'kam' ? `${sessionKamName} — all colleges in your region` : 'All colleges';
+  FPC_STUDENTS = [];
+  fpcGoDashboard();
+  fpcLoadStudents();
+}
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && document.getElementById('fpcModalOverlay') && document.getElementById('fpcModalOverlay').classList.contains('open')) fpcCloseModal();
+});
+</script>
+
 </body>
 </html>
