@@ -1835,6 +1835,23 @@ body[data-theme="dark"] .dlog-topbar {
   border-color: var(--fpc-line) !important;
   color: var(--fpc-ink) !important;
 } 
+  /* Hide the outer switch/logout bar on FPC Readiness Monitor — nav lives in the pill bar below */
+#fpc-readiness-screen > .dlog-topbar { display: none !important; }
+
+/* Avatar account menu (Switch platform / Log out) */
+#fpc-readiness-screen .fpc-avatar-menu-wrap { position: relative; }
+#fpc-readiness-screen .avatar-chip.brand-chip { cursor: pointer; }
+#fpc-readiness-screen .fpc-avatar-dropdown {
+  display: none; position: absolute; top: 44px; right: 0; min-width: 172px;
+  background: var(--fpc-card); border: 1px solid var(--fpc-line); border-radius: 14px;
+  box-shadow: var(--fpc-shadow); padding: 6px; z-index: 50; flex-direction: column;
+}
+#fpc-readiness-screen .fpc-avatar-dropdown.open { display: flex; }
+#fpc-readiness-screen .fpc-avatar-dropdown button {
+  background: none; border: none; text-align: left; padding: 9px 12px; border-radius: 9px;
+  font-size: 13px; font-weight: 600; color: var(--fpc-ink); cursor: pointer; font-family: inherit;
+}
+#fpc-readiness-screen .fpc-avatar-dropdown button:hover { background: var(--fpc-card-soft); }
 </style>
 </head>
 <body>
@@ -2361,14 +2378,19 @@ body[data-theme="dark"] .dlog-topbar {
         <a class="fpc-nav-link" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
         <a class="fpc-nav-link" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
       </nav>
-      <div class="topnav-right">
-        <div class="status-pill loading" id="fpcStatusPill">
-          <span class="dot" id="fpcStatusDot"></span>
-          <span id="fpcStatusText">Connecting to Supabase…</span>
-        </div>
-        <div class="avatar-chip brand-chip">FP</div>
-      </div>
+<div class="topnav-right">
+  <div class="status-pill loading fpc-status-pill" id="fpcStatusPill">
+    <span class="dot"></span>
+    <span class="fpc-status-text">Connecting to Supabase…</span>
+  </div>
+  <div class="fpc-avatar-menu-wrap">
+    <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
+    <div class="fpc-avatar-dropdown">
+      <button type="button" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button type="button" onclick="logout()">Log out</button>
     </div>
+  </div>
+</div>    </div>
  
     <div class="hero">
       <div>
@@ -2444,10 +2466,16 @@ body[data-theme="dark"] .dlog-topbar {
         <a class="fpc-nav-link active" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
         <a class="fpc-nav-link" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
       </nav>
-      <div class="topnav-right">
-        <div class="status-pill live" id="fpcStatusPill2"><span class="dot"></span><span>Live</span></div>
-      </div>
+<div class="topnav-right">
+  <div class="status-pill live fpc-status-pill" id="fpcStatusPill2"><span class="dot"></span><span class="fpc-status-text">Live</span></div>
+  <div class="fpc-avatar-menu-wrap">
+    <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
+    <div class="fpc-avatar-dropdown">
+      <button type="button" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button type="button" onclick="logout()">Log out</button>
     </div>
+  </div>
+</div>    </div>
     <div class="reports-head">
       <div><h1>Students</h1><p>Full student roster — search, filter, and click a name to open their profile.</p></div>
     </div>
@@ -2541,11 +2569,22 @@ body[data-theme="dark"] .dlog-topbar {
       <nav>
         <a class="fpc-nav-link" data-view="dashboard" onclick="fpcGoDashboard(); return false;">Dashboard</a>
         <a class="fpc-nav-link" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
-        <a class="fpc-nav-link active" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
+<a class="fpc-nav-link active" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
       </nav>
+      <div class="topnav-right">
+        <div class="status-pill live fpc-status-pill"><span class="dot"></span><span class="fpc-status-text">Live</span></div>
+        <div class="fpc-avatar-menu-wrap">
+          <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
+          <div class="fpc-avatar-dropdown">
+            <button type="button" onclick="backToPlatformSelect()">← Switch platform</button>
+            <button type="button" onclick="logout()">Log out</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="reports-head">
-      <div><h1>Reports</h1><p>Full HIRE &amp; FPC NQT score listing. Filter, sort and drill into any student.</p></div>
+      <div><h1>Reports</h1>
+       <p>Full HIRE &amp; FPC NQT score listing. Filter, sort and drill into any student.</p></div>
     </div>
     <div class="reports-summary" id="fpcReportsSummary"></div>
     <div class="fpc-filters">
@@ -5694,13 +5733,25 @@ function fpcSbHeaders(extraPrefer){
   return h;
 }
 function fpcSetStatus(state, label){
-  const pill = document.getElementById('fpcStatusPill');
-  if(!pill) return;
-  pill.classList.remove('live','loading');
-  if(state) pill.classList.add(state);
-  document.getElementById('fpcStatusText').textContent = label;
+  document.querySelectorAll('#fpc-readiness-screen .fpc-status-pill').forEach(pill => {
+    pill.classList.remove('live','loading');
+    if(state) pill.classList.add(state);
+    const txt = pill.querySelector('.fpc-status-text');
+    if(txt) txt.textContent = label;
+  });
 }
-function fpcShowError(message){
+function fpcToggleAvatarMenu(el){
+  const dd = el.nextElementSibling;
+  const isOpen = dd.classList.contains('open');
+  document.querySelectorAll('#fpc-readiness-screen .fpc-avatar-dropdown.open').forEach(d => d.classList.remove('open'));
+  if(!isOpen) dd.classList.add('open');
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('.fpc-avatar-menu-wrap')){
+    document.querySelectorAll('#fpc-readiness-screen .fpc-avatar-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+  function fpcShowError(message){
   document.getElementById('fpcErrorBanner').classList.add('open');
   document.getElementById('fpcErrorDetail').textContent = message;
   document.getElementById('fpcTableBody').innerHTML = `<tr class="loading-row"><td colspan="9">No data to display.</td></tr>`;
@@ -5786,11 +5837,8 @@ function fpcScoreColor(v){ if(v===null) return '#9AA3AF'; if(v>=60) return 'var(
  
 /* Reuses the help-desk's own initials()/avatarColor() helpers already defined above. */
 function fpcAvatarImgHtml(name){
-  const bg = (typeof avatarColor === 'function') ? avatarColor(name) : '#3B4522';
-  const txt = (typeof initials === 'function') ? initials(name) : '?';
-  return `<div style="width:100%;height:100%;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;">${txt}</div>`;
-}
- 
+  return `<img src="boy.png" alt="${escHTML(name||'Student')}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">`;
+} 
 function fpcSetActiveNav(view){
   document.querySelectorAll('#fpc-readiness-screen .fpc-nav-link').forEach(a=>{ a.classList.toggle('active', a.dataset.view===view); });
 }
