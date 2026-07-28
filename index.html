@@ -1793,7 +1793,48 @@ body[data-theme="dark"] .dlog-topbar {
 #fpc-readiness-screen .rsum-card .rs-lbl{font-size:11px;color:var(--fpc-ink-soft);font-weight:600;margin-bottom:6px;}
 #fpc-readiness-screen .rsum-card .rs-val{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;}
 
-  
+ /* ── FPC Readiness Monitor: make the outer app bar match the FPC theme ── */
+#fpc-readiness-screen > .dlog-topbar {
+  background: var(--fpc-card) !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--fpc-line) !important;
+  box-shadow: var(--fpc-shadow) !important;
+  border-radius: 100px !important;
+}
+#fpc-readiness-screen > .dlog-topbar::after {
+  display: none !important; /* removes the pink/violet gradient underline */
+}
+#fpc-readiness-screen > .dlog-topbar .breadcrumb {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  color: var(--fpc-ink) !important;
+  gap: 9px !important;
+}
+#fpc-readiness-screen > .dlog-topbar .breadcrumb b {
+  font-weight: 700;
+  color: var(--fpc-ink);
+}
+#fpc-readiness-screen > .dlog-topbar .breadcrumb::before {
+  content: '' !important;
+  width: 11px !important; height: 11px !important; border-radius: 4px !important;
+  background: var(--fpc-lime) !important;
+  -webkit-mask-image: none !important; mask-image: none !important;
+  box-shadow: 0 0 0 4px var(--fpc-card-soft) !important;
+}
+#fpc-readiness-screen > .dlog-topbar .btn-ghost {
+  background: var(--fpc-card-soft) !important;
+  border: 1px solid var(--fpc-line) !important;
+  color: var(--fpc-ink) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+#fpc-readiness-screen > .dlog-topbar .btn-ghost:hover {
+  background: var(--fpc-line) !important;
+  border-color: var(--fpc-line) !important;
+  color: var(--fpc-ink) !important;
+} 
 </style>
 </head>
 <body>
