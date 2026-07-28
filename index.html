@@ -2334,11 +2334,16 @@ body[data-theme="dark"] .dlog-topbar {
         <h1>Good Morning <span class="wave">👋</span></h1>
         <p>Live tracking of HIRE Score % (FOP / DSA / Aptitude) and FPC NQT Assessment averages for <span id="fpcHeroCollegeName">your college</span>.</p>
       </div>
-      <div class="hero-stats" id="fpcHeroStats"></div>
+<div class="hero-stats" id="fpcHeroStats"></div>
     </div>
- 
+
+    <div class="fpc-filters" id="fpcCollegeFilterRow" style="display:none;">
+      <label style="font-size:13px;font-weight:600;color:var(--fpc-ink-soft);white-space:nowrap;">Viewing data for</label>
+      <select id="fpcCollegeSelect" onchange="onFpcCollegeChange(this.value)" style="min-width:280px;"></select>
+    </div>
+
     <div id="fpcErrorBanner">
-      <strong>Couldn't load data from Supabase</strong>
+     <strong>Couldn't load data from Supabase</strong>
       <span id="fpcErrorDetail"></span>
     </div>
  
@@ -3786,8 +3791,7 @@ function fuzzyMatch(b){
   hide('classroom-snap-screen');
   classroomSnaps = []; snapReviewCollege = null;
   hide('fpc-readiness-screen');
-  FPC_STUDENTS = []; fpcCurrentEditRegNo = null; fpcCurrentProfileRegNo = null;
-  show('auth-screen');
+FPC_STUDENTS = []; fpcCurrentEditRegNo = null; fpcCurrentProfileRegNo = null; fpcSelectedCollege = null;  show('auth-screen');
   hide('pin-error');
   const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
   const kamPin = $('kam-pin-input'); if(kamPin) kamPin.value = '';
@@ -5642,7 +5646,7 @@ let fpcCurrentEditRegNo = null;
 let fpcCurrentProfileRegNo = null;
 let fpcProfileReturnView = 'fpcViewDashboard';
 let fpcViewOnly = false;
- 
+let fpcSelectedCollege = null; // KAM / Master Admin: which single college's data is currently shown 
 function fpcSbHeaders(extraPrefer){
   const h = { apikey: FPC_SUPABASE_ANON_KEY, Authorization: `Bearer ${FPC_SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
   if(extraPrefer) h['Prefer'] = extraPrefer;
@@ -5675,13 +5679,47 @@ function fpcCollegeQueryParam(){
   if(sessionRole === 'manager' && sessionCollege){
     return `&college=eq.${encodeURIComponent(sessionCollege)}`;
   }
-  if(sessionRole === 'kam' && sessionAllowedColleges && sessionAllowedColleges.length){
-    const list = sessionAllowedColleges.map(c => `"${c.replace(/"/g,'\\"')}"`).join(',');
-    return `&college=in.(${list})`;
+  // KAM and Master Admin now pick a single college from the dropdown before any data loads
+  if((sessionRole === 'kam' || sessionRole === 'admin') && fpcSelectedCollege){
+    return `&college=eq.${encodeURIComponent(fpcSelectedCollege)}`;
   }
-  return ''; // admin / master admin: no filter, sees every college
+  return ''; // nothing selected yet — fpcLoadStudents() isn't called in this state
 }
- 
+
+  /* KAM -> only colleges in their region. Master Admin -> every college on file. */
+function fpcGetCollegeOptions(){
+  if(sessionRole === 'manager') return sessionCollege ? [sessionCollege] : [];
+  let names = collegeContacts.length ? collegeContacts.map(c => c.college) : COLLEGE_REGION_MAP.map(c => c.college);
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+    names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
+  }
+  return [...new Set(names)].sort((a,b) => a.localeCompare(b));
+}
+function populateFpcCollegeSelect(){
+  const sel = document.getElementById('fpcCollegeSelect');
+  if(!sel) return;
+  const names = fpcGetCollegeOptions();
+  sel.innerHTML = '<option value="" disabled selected>Select college</option>' +
+    names.map(n => `<option value="${escHTML(n)}">${escHTML(n)}</option>`).join('');
+  if(fpcSelectedCollege && names.includes(fpcSelectedCollege)) sel.value = fpcSelectedCollege;
+}
+function onFpcCollegeChange(v){
+  fpcSelectedCollege = v || null;
+  const crumb = document.getElementById('fpc-breadcrumb-college');
+  if(crumb) crumb.textContent = fpcSelectedCollege || (sessionRole === 'kam' ? `${sessionKamName} — select a college` : 'Select a college');
+  FPC_STUDENTS = [];
+  if(fpcSelectedCollege){
+    fpcLoadStudents();
+  } else {
+    fpcRenderAll();
+    fpcSetStatus(null, 'Select a college to view data');
+  }
+}
+function fpcNoCollegeSelected(){
+  return (sessionRole === 'kam' || sessionRole === 'admin') && !fpcSelectedCollege;
+}
+  
 async function fpcLoadStudents(){
   fpcSetStatus('loading', 'Connecting to Supabase…');
   try{
@@ -5737,8 +5775,9 @@ function fpcRenderHero(){
   const stats = [ {icn:'🎓', num:total, lbl:'Cohort size'}, {icn:'✅', num:eligible, lbl:'Eligible'}, {icn:'📊', num:(avgHire!==null? avgHire.toFixed(0)+'%':'—'), lbl:'Avg HIRE'} ];
   document.getElementById('fpcHeroStats').innerHTML = stats.map(s=>`
     <div class="hero-stat"><div class="icn">${s.icn}</div><div><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div></div>`).join('');
-  document.getElementById('fpcHeroCollegeName').textContent = sessionRole === 'manager' ? (sessionCollege || 'your college') : 'your colleges';
-  const pct = avgHire!==null ? Math.min(100, Math.max(0, avgHire)) : 0;
+document.getElementById('fpcHeroCollegeName').textContent =
+    sessionRole === 'manager' ? (sessionCollege || 'your college') :
+    (fpcSelectedCollege || 'your colleges');  const pct = avgHire!==null ? Math.min(100, Math.max(0, avgHire)) : 0;
   const circumference = 364;
   const ring = document.getElementById('fpcRingFill');
   ring.style.strokeDasharray = circumference;
@@ -5750,11 +5789,12 @@ function fpcRenderFlagged(){
   const flagged = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<35;})
     .sort((a,b)=> (fpcFmt(a.hire_overall)||0)-(fpcFmt(b.hire_overall)||0)).slice(0,6);
   const box = document.getElementById('fpcFlaggedList');
-  if(!FPC_STUDENTS.length){
-    box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">No student data on file for this college yet.</div>`;
+if(!FPC_STUDENTS.length){
+    const msg = fpcNoCollegeSelected() ? 'Select a college above to view its data.' : 'No student data on file for this college yet.';
+    box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">${msg}</div>`;
     return;
   }
-  if(flagged.length===0){
+ if(flagged.length===0){
     box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">No students currently below the 35% readiness line 🎉</div>`;
     return;
   }
@@ -5799,9 +5839,12 @@ function fpcRenderNqtPanel(){
   const withData = FPC_STUDENTS.filter(s=>fpcFmt(s.nqt_overall)!==null);
   document.getElementById('fpcNqtMeta').textContent = withData.length ? `${withData.length} of ${FPC_STUDENTS.length} assessed` : (FPC_STUDENTS.length ? 'Not yet conducted' : '');
   const body = document.getElementById('fpcNqtBody');
-  if(withData.length === 0){
+if(withData.length === 0){
+    const emptyMsg = fpcNoCollegeSelected()
+      ? 'Select a college above to view its data.'
+      : (FPC_STUDENTS.length ? 'Verbal, Numerical, Reasoning, Advanced Quant & Coding averages will populate here once a round is entered — use Edit on any student.' : 'No students on file for this college yet.');
     body.innerHTML = `<div class="fpc-empty-state"><div class="ring">◌</div><strong>No FPC NQT scores recorded yet</strong>
-      <p>${FPC_STUDENTS.length ? 'Verbal, Numerical, Reasoning, Advanced Quant & Coding averages will populate here once a round is entered — use Edit on any student.' : 'No students on file for this college yet.'}</p></div>`;
+      <p>${emptyMsg}</p></div>`;
     return;
   }
   const dims = [ ['Verbal','nqt_verbal_ability'],['Numerical','nqt_numerical_ability'],['Reasoning','nqt_reasoning_ability'],['Adv. Quant','nqt_advanced_quant_reasoning'],['Coding','nqt_coding'] ];
@@ -5865,9 +5908,8 @@ function fpcStudentRowHtml(s){
 function fpcRenderTable(){
   const rows = fpcFilterSortStudents('fpcSearchBox','fpcDeptFilter','fpcEligFilter','fpcSortSelect');
   document.getElementById('fpcRowCount').textContent = `${rows.length} of ${FPC_STUDENTS.length} students`;
-  document.getElementById('fpcTableBody').innerHTML = rows.length ? rows.map(fpcStudentRowHtml).join('')
-    : `<tr class="loading-row"><td colspan="9">${FPC_STUDENTS.length ? 'No students match this filter.' : 'No students on file for this college yet.'}</td></tr>`;
-}
+document.getElementById('fpcTableBody').innerHTML = rows.length ? rows.map(fpcStudentRowHtml).join('')
+    : `<tr class="loading-row"><td colspan="9">${fpcNoCollegeSelected() ? 'Select a college above to view students.' : (FPC_STUDENTS.length ? 'No students match this filter.' : 'No students on file for this college yet.')}</td></tr>`;}
 function fpcRenderReportsSummary(){
   const total = FPC_STUDENTS.length;
   const eligible = FPC_STUDENTS.filter(s=>s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible').length;
@@ -5885,9 +5927,8 @@ function fpcRenderReportsTable(){
   fpcRenderReportsSummary();
   const rows = fpcFilterSortStudents('fpcReportsSearchBox','fpcReportsDeptFilter','fpcReportsEligFilter','fpcReportsSortSelect');
   document.getElementById('fpcReportsRowCount').textContent = `${rows.length} of ${FPC_STUDENTS.length} students`;
-  document.getElementById('fpcReportsTableBody').innerHTML = rows.length ? rows.map(fpcStudentRowHtml).join('')
-    : `<tr class="loading-row"><td colspan="9">${FPC_STUDENTS.length ? 'No students match this filter.' : 'No students on file for this college yet.'}</td></tr>`;
-}
+document.getElementById('fpcReportsTableBody').innerHTML = rows.length ? rows.map(fpcStudentRowHtml).join('')
+    : `<tr class="loading-row"><td colspan="9">${fpcNoCollegeSelected() ? 'Select a college above to view students.' : (FPC_STUDENTS.length ? 'No students match this filter.' : 'No students on file for this college yet.')}</td></tr>`;}
 function fpcRenderAll(){
   fpcRenderHero(); fpcRenderHireChart(); fpcRenderNqtPanel(); fpcRenderFlagged(); fpcRenderEligChips();
   fpcPopulateFilters(); fpcRenderTable(); fpcRenderReportsTable();
@@ -6081,14 +6122,26 @@ function enterFpcReadiness(){
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
   fpcViewOnly = (sessionRole !== 'manager'); // only Campus Managers may edit; KAM & Admin are read-only
   document.getElementById('fpc-readiness-screen').classList.toggle('view-only', fpcViewOnly);
-  document.getElementById('fpc-breadcrumb-college').textContent =
-    sessionRole === 'manager' ? (sessionCollege || '—') :
-    sessionRole === 'kam' ? `${sessionKamName} — all colleges in your region` : 'All colleges';
   FPC_STUDENTS = [];
   fpcGoDashboard();
-  fpcLoadStudents();
+
+  const filterRow = document.getElementById('fpcCollegeFilterRow');
+  if(sessionRole === 'manager'){
+    if(filterRow) filterRow.style.display = 'none';
+    fpcSelectedCollege = null;
+    document.getElementById('fpc-breadcrumb-college').textContent = sessionCollege || '—';
+    fpcLoadStudents();
+  } else {
+    if(filterRow) filterRow.style.display = '';
+    fpcSelectedCollege = null;
+    populateFpcCollegeSelect();
+    document.getElementById('fpc-breadcrumb-college').textContent =
+      sessionRole === 'kam' ? `${sessionKamName} — select a college` : 'Select a college';
+    fpcRenderAll();
+    fpcSetStatus(null, 'Select a college to view data');
+  }
 }
-document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape' && document.getElementById('fpcModalOverlay') && document.getElementById('fpcModalOverlay').classList.contains('open')) fpcCloseModal();
 });
 </script>
