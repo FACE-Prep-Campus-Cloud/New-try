@@ -2688,44 +2688,7 @@ body[data-theme="dark"] .dlog-topbar {
           <button id="fpcModalClose" onclick="fpcCloseModal()">✕</button>
         </div>
       </div>
-     <div id="fpcImportModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(28,33,22,.45);align-items:center;justify-content:center;z-index:110;padding:20px;" onclick="if(event.target===this) fpcCloseImportModal()">
-  <div style="background:#fff;border-radius:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(28,33,22,.3);font-family:'Inter',system-ui,sans-serif;color:#1C2116;padding:26px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-      <div>
-        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;">Import students (CSV)</h3>
-        <p style="font-size:12.5px;color:#6E7660;margin-top:4px;">Upload a CSV with the fixed columns below. Existing registration numbers will be updated; new ones will be added.</p>
-      </div>
-      <button onclick="fpcCloseImportModal()" style="background:#F7F9EC;border:none;width:30px;height:30px;border-radius:50%;color:#6E7660;font-size:16px;cursor:pointer;">✕</button>
-    </div>
 
-    <button class="fpc-btn-soft" style="margin:10px 0;" onclick="fpcDownloadTemplate()">⬇ Download CSV template</button>
-
-    <div style="font-size:11.5px;color:#6E7660;background:#F7F9EC;border:1px solid #E8ECD6;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;">
-      <b>Required column:</b> registration_number<br>
-      <b>Other columns:</b> student_name, department, email, eligibility_status (Eligible / blank), communication_skill_level,
-      current_arrears, history_of_arrears, tenth_mark, twelfth_mark, ug_percentage, pg_percentage,
-      hire_fop, hire_dsa, hire_aptitude, hire_overall, nqt_assessment_count, nqt_verbal_ability, nqt_numerical_ability,
-      nqt_reasoning_ability, nqt_advanced_quant_reasoning, nqt_coding, nqt_overall, linkedin_url, resume_url, github_url, efset_certificate_url
-    </div>
-
-    <input type="file" id="fpcImportFileInput" accept=".csv" onchange="fpcHandleImportFile(this)" style="margin-bottom:14px;">
-
-    <div id="fpcImportPreviewWrap" style="display:none;">
-      <div style="font-size:12.5px;font-weight:700;color:#6E7660;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Preview (<span id="fpcImportRowCount">0</span> rows)</div>
-      <div style="max-height:260px;overflow:auto;border:1px solid #E8ECD6;border-radius:12px;">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;">
-          <thead id="fpcImportPreviewHead" style="background:#F7F9EC;position:sticky;top:0;"></thead>
-          <tbody id="fpcImportPreviewBody"></tbody>
-        </table>
-      </div>
-      <div id="fpcImportError" style="display:none;background:#FAE1DD;border:1px solid #EFC1BA;color:#8E332B;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-top:12px;"></div>
-      <div style="display:flex;gap:10px;margin-top:16px;">
-        <button class="fpc-btn-dark" id="fpcImportConfirmBtn" onclick="fpcConfirmImport()">Import rows</button>
-        <button class="fpc-btn-soft" onclick="fpcCloseImportModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
       <div class="modal-body">
         <div class="modal-section">
           <div class="modal-section-label">Profile</div>
@@ -2785,7 +2748,46 @@ body[data-theme="dark"] .dlog-topbar {
       </div>
     </div>
   </div>
- 
+
+     <div id="fpcImportModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(28,33,22,.45);align-items:center;justify-content:center;z-index:110;padding:20px;" onclick="if(event.target===this) fpcCloseImportModal()">
+  <div style="background:#fff;border-radius:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(28,33,22,.3);font-family:'Inter',system-ui,sans-serif;color:#1C2116;padding:26px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+      <div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;">Import students (CSV)</h3>
+        <p style="font-size:12.5px;color:#6E7660;margin-top:4px;">Upload a CSV with the fixed columns below. Existing registration numbers will be updated; new ones will be added.</p>
+      </div>
+      <button onclick="fpcCloseImportModal()" style="background:#F7F9EC;border:none;width:30px;height:30px;border-radius:50%;color:#6E7660;font-size:16px;cursor:pointer;">✕</button>
+    </div>
+
+    <button class="fpc-btn-soft" style="margin:10px 0;" onclick="fpcDownloadTemplate()">⬇ Download CSV template</button>
+
+    <div style="font-size:11.5px;color:#6E7660;background:#F7F9EC;border:1px solid #E8ECD6;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;">
+      <b>Required column:</b> registration_number<br>
+      <b>Other columns:</b> student_name, department, email, eligibility_status (Eligible / blank), communication_skill_level,
+      current_arrears, history_of_arrears, tenth_mark, twelfth_mark, ug_percentage, pg_percentage,
+      hire_fop, hire_dsa, hire_aptitude, hire_overall, nqt_assessment_count, nqt_verbal_ability, nqt_numerical_ability,
+      nqt_reasoning_ability, nqt_advanced_quant_reasoning, nqt_coding, nqt_overall, linkedin_url, resume_url, github_url, efset_certificate_url
+    </div>
+
+    <input type="file" id="fpcImportFileInput" accept=".csv" onchange="fpcHandleImportFile(this)" style="margin-bottom:14px;">
+
+    <div id="fpcImportPreviewWrap" style="display:none;">
+      <div style="font-size:12.5px;font-weight:700;color:#6E7660;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Preview (<span id="fpcImportRowCount">0</span> rows)</div>
+      <div style="max-height:260px;overflow:auto;border:1px solid #E8ECD6;border-radius:12px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead id="fpcImportPreviewHead" style="background:#F7F9EC;position:sticky;top:0;"></thead>
+          <tbody id="fpcImportPreviewBody"></tbody>
+        </table>
+      </div>
+      <div id="fpcImportError" style="display:none;background:#FAE1DD;border:1px solid #EFC1BA;color:#8E332B;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-top:12px;"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="fpc-btn-dark" id="fpcImportConfirmBtn" onclick="fpcConfirmImport()">Import rows</button>
+        <button class="fpc-btn-soft" onclick="fpcCloseImportModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
   <div id="fpcToast"><span class="dotok"></span><span id="fpcToastText"></span></div>
 </div>
 
