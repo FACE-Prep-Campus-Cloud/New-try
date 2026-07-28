@@ -1653,8 +1653,46 @@ body[data-theme="dark"] .dlog-topbar {
 #fpc-readiness-screen .chip-stat.c-gold{background:var(--fpc-gold-dim);color:#8A5620;}
 #fpc-readiness-screen .chip-stat.c-red{background:var(--fpc-red-dim);color:#8E332B;}
  
-#fpc-readiness-screen .fpc-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
-#fpc-readiness-screen .fpc-filters input[type="text"], #fpc-readiness-screen .fpc-filters select{background:var(--fpc-card);border:1px solid var(--fpc-line);color:var(--fpc-ink);padding:9px 13px;border-radius:100px;font-size:13px;font-family:inherit;}
+#fpc-readiness-screen .fpc-filters{
+  display:flex;
+  gap:10px;
+  flex-wrap:nowrap;
+  align-items:center;
+  margin-bottom:14px;
+}
+#fpc-readiness-screen .fpc-filters input[type="text"]{
+  flex:1 1 240px;
+  min-width:160px;
+  max-width:420px;
+}
+#fpc-readiness-screen .fpc-filters select{
+  flex:0 0 auto;
+  width:auto;
+  min-width:130px;
+  white-space:nowrap;
+}
+#fpc-readiness-screen .fpc-filters .count{
+  flex:0 0 auto;
+  margin-left:auto;
+  white-space:nowrap;
+}
+/* only stack on genuinely small screens */
+@media (max-width:680px){
+  #fpc-readiness-screen .fpc-filters{ flex-wrap:wrap; }
+  #fpc-readiness-screen .fpc-filters input[type="text"]{ max-width:none; }
+}
+#fpc-readiness-screen .fpc-header-actions{ display:flex; gap:8px; flex-shrink:0; }
+#fpc-readiness-screen .fpc-btn-soft{
+  background:var(--fpc-card-soft); border:1px solid var(--fpc-line); color:var(--fpc-ink);
+  padding:9px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
+}
+#fpc-readiness-screen .fpc-btn-soft:hover{ background:var(--fpc-line); }
+#fpc-readiness-screen .fpc-btn-dark{
+  background:var(--fpc-ink); color:#fff; border:none;
+  padding:9px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
+}
+#fpc-readiness-screen .fpc-btn-dark:hover{ background:#33392A; }
+  #fpc-readiness-screen .fpc-filters input[type="text"], #fpc-readiness-screen .fpc-filters select{background:var(--fpc-card);border:1px solid var(--fpc-line);color:var(--fpc-ink);padding:9px 13px;border-radius:100px;font-size:13px;font-family:inherit;}
 #fpc-readiness-screen .fpc-filters input[type="text"]{flex:1;min-width:200px;}
 #fpc-readiness-screen .fpc-filters .count{margin-left:auto;color:var(--fpc-ink-soft);font-size:12.5px;}
  
@@ -2394,6 +2432,8 @@ body[data-theme="dark"] .dlog-topbar {
         <a class="fpc-nav-link" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
       </nav>
 <div class="topnav-right">
+   <button class="fpc-btn-soft" onclick="backToPlatformSelect()">⇄ Switch platform</button>
+
   <div class="status-pill loading fpc-status-pill" id="fpcStatusPill">
     <span class="dot"></span>
     <span class="fpc-status-text">Connecting to Supabase…</span>
@@ -2491,10 +2531,13 @@ body[data-theme="dark"] .dlog-topbar {
     </div>
   </div>
 </div>    </div>
-    <div class="reports-head">
-      <div><h1>Students</h1><p>Full student roster — search, filter, and click a name to open their profile.</p></div>
-    </div>
-    <div class="fpc-filters">
+<div class="reports-head">
+  <div><h1>Students</h1><p>Full student roster — search, filter, and click a name to open their profile.</p></div>
+  <div class="fpc-header-actions" id="fpcStudentHeaderActions">
+    <button class="fpc-btn-soft" onclick="fpcOpenImportModal()">⬆ Import CSV</button>
+    <button class="fpc-btn-dark" onclick="fpcOpenAddStudentModal()">+ Add student</button>
+  </div>
+</div>    <div class="fpc-filters">
       <input type="text" id="fpcSearchBox" placeholder="Search by name, reg. no. or email…" oninput="fpcRenderTable()">
       <select id="fpcDeptFilter" onchange="fpcRenderTable()"><option value="">All departments</option></select>
       <select id="fpcEligFilter" onchange="fpcRenderTable()">
@@ -2642,6 +2685,44 @@ body[data-theme="dark"] .dlog-topbar {
           <button id="fpcModalClose" onclick="fpcCloseModal()">✕</button>
         </div>
       </div>
+     <div id="fpcImportModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(28,33,22,.45);align-items:center;justify-content:center;z-index:110;padding:20px;" onclick="if(event.target===this) fpcCloseImportModal()">
+  <div style="background:#fff;border-radius:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(28,33,22,.3);font-family:'Inter',system-ui,sans-serif;color:#1C2116;padding:26px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+      <div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;">Import students (CSV)</h3>
+        <p style="font-size:12.5px;color:#6E7660;margin-top:4px;">Upload a CSV with the fixed columns below. Existing registration numbers will be updated; new ones will be added.</p>
+      </div>
+      <button onclick="fpcCloseImportModal()" style="background:#F7F9EC;border:none;width:30px;height:30px;border-radius:50%;color:#6E7660;font-size:16px;cursor:pointer;">✕</button>
+    </div>
+
+    <button class="fpc-btn-soft" style="margin:10px 0;" onclick="fpcDownloadTemplate()">⬇ Download CSV template</button>
+
+    <div style="font-size:11.5px;color:#6E7660;background:#F7F9EC;border:1px solid #E8ECD6;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;">
+      <b>Required column:</b> registration_number<br>
+      <b>Other columns:</b> student_name, department, email, eligibility_status (Eligible / blank), communication_skill_level,
+      current_arrears, history_of_arrears, tenth_mark, twelfth_mark, ug_percentage, pg_percentage,
+      hire_fop, hire_dsa, hire_aptitude, hire_overall, nqt_assessment_count, nqt_verbal_ability, nqt_numerical_ability,
+      nqt_reasoning_ability, nqt_advanced_quant_reasoning, nqt_coding, nqt_overall, linkedin_url, resume_url, github_url, efset_certificate_url
+    </div>
+
+    <input type="file" id="fpcImportFileInput" accept=".csv" onchange="fpcHandleImportFile(this)" style="margin-bottom:14px;">
+
+    <div id="fpcImportPreviewWrap" style="display:none;">
+      <div style="font-size:12.5px;font-weight:700;color:#6E7660;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Preview (<span id="fpcImportRowCount">0</span> rows)</div>
+      <div style="max-height:260px;overflow:auto;border:1px solid #E8ECD6;border-radius:12px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead id="fpcImportPreviewHead" style="background:#F7F9EC;position:sticky;top:0;"></thead>
+          <tbody id="fpcImportPreviewBody"></tbody>
+        </table>
+      </div>
+      <div id="fpcImportError" style="display:none;background:#FAE1DD;border:1px solid #EFC1BA;color:#8E332B;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-top:12px;"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="fpc-btn-dark" id="fpcImportConfirmBtn" onclick="fpcConfirmImport()">Import rows</button>
+        <button class="fpc-btn-soft" onclick="fpcCloseImportModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
       <div class="modal-body">
         <div class="modal-section">
           <div class="modal-section-label">Profile</div>
@@ -6175,25 +6256,46 @@ function fpcTextVal(id){ const raw = document.getElementById(id).value.trim(); r
  
 async function fpcSaveEdit(){
   if(fpcViewOnly) return;
-  const s = FPC_STUDENTS.find(x => x.registration_number === fpcCurrentEditRegNo);
-  if(!s) return;
+  const isNew = !fpcCurrentEditRegNo;
+  let s = isNew ? null : FPC_STUDENTS.find(x => x.registration_number === fpcCurrentEditRegNo);
+  if(!isNew && !s) return;
+
+  const regNoInput = document.getElementById('fpc_eRegNoNew');
+  const newRegNo = isNew ? (regNoInput ? regNoInput.value.trim() : '') : null;
+  if(isNew && !newRegNo){
+    document.getElementById('fpcModalSaveError').textContent = 'Registration number is required.';
+    document.getElementById('fpcModalSaveError').classList.add('open');
+    return;
+  }
+
   const btn = document.getElementById('fpcBtnSave');
   const errBox = document.getElementById('fpcModalSaveError');
   errBox.classList.remove('open');
   btn.disabled = true; btn.textContent = 'Saving…';
   try{
+    const college = sessionRole === 'manager' ? sessionCollege : fpcSelectedCollege;
     const studentsPayload = {
-      student_name: fpcTextVal('fpc_eName') || s.student_name, department: fpcTextVal('fpc_eDept'), email: fpcTextVal('fpc_eEmail'),
+      registration_number: isNew ? newRegNo : (s.registration_number),
+      college: isNew ? college : undefined,
+      student_name: fpcTextVal('fpc_eName') || (isNew ? newRegNo : s.student_name), department: fpcTextVal('fpc_eDept'), email: fpcTextVal('fpc_eEmail'),
       eligibility_status: fpcTextVal('fpc_eEligibility'), communication_skill_level: fpcTextVal('fpc_eCommLevel'),
       current_arrears: fpcIntVal('fpc_eCurrentArrears'), history_of_arrears: fpcIntVal('fpc_eHistoryArrears'),
       tenth_mark: fpcNumVal('fpc_eTenth'), twelfth_mark: fpcNumVal('fpc_eTwelfth'), ug_percentage: fpcNumVal('fpc_eUg'), pg_percentage: fpcNumVal('fpc_ePg'),
       linkedin_url: fpcTextVal('fpc_eLinkedin'), resume_url: fpcTextVal('fpc_eResume'), github_url: fpcTextVal('fpc_eGithub'), efset_certificate_url: fpcTextVal('fpc_eEfset')
     };
-    const r1 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/students?id=eq.${s.id}`, { method: 'PATCH', headers: fpcSbHeaders('return=representation'), body: JSON.stringify(studentsPayload) });
-    if(!r1.ok) throw new Error(`students update failed (${r1.status}): ${await r1.text()}`);
- 
-    const hireDate = s.hire_assessment_date || new Date().toISOString().slice(0,10);
-    const hirePayload = { student_id: s.id, assessment_date: hireDate, fop: fpcNumVal('fpc_eFop'), dsa: fpcNumVal('fpc_eDsa'), aptitude: fpcNumVal('fpc_eAptitude'), overall: fpcNumVal('fpc_eHireOverall') };
+    Object.keys(studentsPayload).forEach(k => studentsPayload[k] === undefined && delete studentsPayload[k]);
+
+    const url = isNew
+      ? `${FPC_SUPABASE_URL}/rest/v1/students?on_conflict=registration_number`
+      : `${FPC_SUPABASE_URL}/rest/v1/students?id=eq.${s.id}`;
+    const method = isNew ? 'POST' : 'PATCH';
+    const prefer = isNew ? 'resolution=merge-duplicates,return=representation' : 'return=representation';
+    const r1 = await fetch(url, { method, headers: fpcSbHeaders(prefer), body: JSON.stringify(studentsPayload) });
+    if(!r1.ok) throw new Error(`students save failed (${r1.status}): ${await r1.text()}`);
+    const savedStudent = (await r1.json())[0];
+    const studentId = savedStudent.id;
+    const hireDate = (s && s.hire_assessment_date) || new Date().toISOString().slice(0,10);
+   const hirePayload = { student_id: s.id, assessment_date: hireDate, fop: fpcNumVal('fpc_eFop'), dsa: fpcNumVal('fpc_eDsa'), aptitude: fpcNumVal('fpc_eAptitude'), overall: fpcNumVal('fpc_eHireOverall') };
     const r2 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/hire_scores?on_conflict=student_id,assessment_date`, { method: 'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'), body: JSON.stringify(hirePayload) });
     if(!r2.ok) throw new Error(`hire_scores update failed (${r2.status}): ${await r2.text()}`);
  
@@ -6202,13 +6304,13 @@ async function fpcSaveEdit(){
     const r3 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/fpc_nqt_assessment?on_conflict=student_id`, { method: 'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'), body: JSON.stringify(nqtPayload) });
     if(!r3.ok) throw new Error(`fpc_nqt_assessment update failed (${r3.status}): ${await r3.text()}`);
  
-    const wasProfileView = document.getElementById('fpcViewProfile').classList.contains('active');
-    const profileRegNo = fpcCurrentProfileRegNo;
-    const savedReturnView = fpcProfileReturnView;
-    await fpcLoadStudents();
+await fpcLoadStudents();
     fpcCloseModal();
-    if(wasProfileView && profileRegNo) fpcViewProfile(profileRegNo, savedReturnView);
-    fpcShowToast('Saved — dashboard updated.', false);
+    if(!isNew){
+      const wasProfileView = document.getElementById('fpcViewProfile').classList.contains('active');
+      if(wasProfileView && fpcCurrentProfileRegNo) fpcViewProfile(fpcCurrentProfileRegNo, fpcProfileReturnView);
+    }
+    fpcShowToast(isNew ? 'Student added.' : 'Saved — dashboard updated.', false);
   }catch(e){
     errBox.textContent = e.message + ' — if this mentions row-level security / permission denied, the anon key isn\'t allowed to write.';
     errBox.classList.add('open');
@@ -6217,7 +6319,10 @@ async function fpcSaveEdit(){
     btn.disabled = false; btn.textContent = 'Save changes';
   }
 }
- 
+ function fpcSyncHeaderActionsVisibility(){
+  const el = document.getElementById('fpcStudentHeaderActions');
+  if(el) el.style.display = fpcViewOnly ? 'none' : 'flex';
+}
 /* Entry point — called from selectPlatform('fpcreadiness') */
 function enterFpcReadiness(){
   hide('platform-select-screen');
@@ -6248,6 +6353,239 @@ function enterFpcReadiness(){
   document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape' && document.getElementById('fpcModalOverlay') && document.getElementById('fpcModalOverlay').classList.contains('open')) fpcCloseModal();
 });
+  /* ============================================================
+   IMPORT CSV — fixed-field template importer
+   ============================================================ */
+const FPC_IMPORT_COLUMNS = [
+  'registration_number','student_name','department','email','eligibility_status',
+  'communication_skill_level','current_arrears','history_of_arrears',
+  'tenth_mark','twelfth_mark','ug_percentage','pg_percentage',
+  'hire_fop','hire_dsa','hire_aptitude','hire_overall',
+  'nqt_assessment_count','nqt_verbal_ability','nqt_numerical_ability',
+  'nqt_reasoning_ability','nqt_advanced_quant_reasoning','nqt_coding','nqt_overall',
+  'linkedin_url','resume_url','github_url','efset_certificate_url'
+];
+let fpcImportRows = [];
+
+function fpcDownloadTemplate(){
+  const csv = FPC_IMPORT_COLUMNS.join(',') + '\n';
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'fpc_student_import_template.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function fpcOpenImportModal(){
+  if(fpcViewOnly){ fpcShowToast('Import is only available to Campus Managers', true); return; }
+  fpcImportRows = [];
+  document.getElementById('fpcImportFileInput').value = '';
+  document.getElementById('fpcImportPreviewWrap').style.display = 'none';
+  document.getElementById('fpcImportError').style.display = 'none';
+  document.getElementById('fpcImportModalOverlay').style.display = 'flex';
+}
+function fpcCloseImportModal(){
+  document.getElementById('fpcImportModalOverlay').style.display = 'none';
+}
+
+/* Minimal CSV parser handling quoted commas */
+function fpcParseCSV(text){
+  const lines = text.replace(/\r/g,'').split('\n').filter(l => l.trim() !== '');
+  if(!lines.length) return [];
+  const splitLine = (line) => {
+    const out = []; let cur=''; let inQuotes=false;
+    for(let i=0;i<line.length;i++){
+      const c = line[i];
+      if(c === '"'){ inQuotes = !inQuotes; continue; }
+      if(c === ',' && !inQuotes){ out.push(cur); cur=''; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out.map(v => v.trim());
+  };
+  const headers = splitLine(lines[0]).map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = splitLine(line);
+    const row = {};
+    headers.forEach((h,i) => row[h] = vals[i] !== undefined ? vals[i] : '');
+    return row;
+  });
+}
+
+function fpcHandleImportFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const rows = fpcParseCSV(e.target.result);
+    const errBox = document.getElementById('fpcImportError');
+    if(!rows.length){
+      errBox.style.display='block'; errBox.textContent = 'No rows found in this file.';
+      document.getElementById('fpcImportPreviewWrap').style.display='none';
+      return;
+    }
+    const missingRegNo = rows.filter(r => !r.registration_number || !r.registration_number.trim());
+    if(missingRegNo.length){
+      errBox.style.display='block';
+      errBox.textContent = `${missingRegNo.length} row(s) are missing "registration_number" and will be skipped on import.`;
+    } else {
+      errBox.style.display='none';
+    }
+    fpcImportRows = rows;
+    fpcRenderImportPreview(rows);
+  };
+  reader.readAsText(file);
+}
+
+function fpcRenderImportPreview(rows){
+  document.getElementById('fpcImportRowCount').textContent = rows.length;
+  const head = document.getElementById('fpcImportPreviewHead');
+  const body = document.getElementById('fpcImportPreviewBody');
+  const cols = ['registration_number','student_name','department','hire_overall','nqt_overall'];
+  head.innerHTML = `<tr>${cols.map(c=>`<th style="padding:8px;text-align:left;">${c}</th>`).join('')}</tr>`;
+  body.innerHTML = rows.slice(0,50).map(r => `<tr>${cols.map(c=>`<td style="padding:7px 8px;border-top:1px solid #E8ECD6;">${(r[c]||'').toString().replace(/</g,'&lt;')}</td>`).join('')}</tr>`).join('');
+  document.getElementById('fpcImportPreviewWrap').style.display = 'block';
+}
+
+function fpcNumOrNull(v){
+  if(v === undefined || v === null || String(v).trim() === '') return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+function fpcIntOrZero(v){
+  if(v === undefined || v === null || String(v).trim() === '') return 0;
+  const n = parseInt(v,10);
+  return isNaN(n) ? 0 : n;
+}
+
+async function fpcConfirmImport(){
+  const rows = fpcImportRows.filter(r => r.registration_number && r.registration_number.trim());
+  if(!rows.length){ fpcShowToast('Nothing to import', true); return; }
+  const college = sessionRole === 'manager' ? sessionCollege : fpcSelectedCollege;
+  if(!college){ fpcShowToast('Select a college before importing', true); return; }
+
+  const btn = document.getElementById('fpcImportConfirmBtn');
+  btn.disabled = true; btn.textContent = `Importing 0 / ${rows.length}…`;
+  let success = 0, failed = 0;
+
+  for(let i=0; i<rows.length; i++){
+    const r = rows[i];
+    btn.textContent = `Importing ${i+1} / ${rows.length}…`;
+    try{
+      const studentsPayload = {
+        registration_number: r.registration_number.trim(),
+        college: college,
+        student_name: r.student_name || r.registration_number,
+        department: r.department || null,
+        email: r.email || null,
+        eligibility_status: r.eligibility_status || null,
+        communication_skill_level: r.communication_skill_level || null,
+        current_arrears: fpcIntOrZero(r.current_arrears),
+        history_of_arrears: fpcIntOrZero(r.history_of_arrears),
+        tenth_mark: fpcNumOrNull(r.tenth_mark),
+        twelfth_mark: fpcNumOrNull(r.twelfth_mark),
+        ug_percentage: fpcNumOrNull(r.ug_percentage),
+        pg_percentage: fpcNumOrNull(r.pg_percentage),
+        linkedin_url: r.linkedin_url || null,
+        resume_url: r.resume_url || null,
+        github_url: r.github_url || null,
+        efset_certificate_url: r.efset_certificate_url || null,
+      };
+      const rStu = await fetch(`${FPC_SUPABASE_URL}/rest/v1/students?on_conflict=registration_number`, {
+        method:'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'),
+        body: JSON.stringify(studentsPayload)
+      });
+      if(!rStu.ok) throw new Error(await rStu.text());
+      const stuRows = await rStu.json();
+      const studentId = stuRows[0].id;
+
+      const hirePayload = {
+        student_id: studentId,
+        assessment_date: new Date().toISOString().slice(0,10),
+        fop: fpcNumOrNull(r.hire_fop), dsa: fpcNumOrNull(r.hire_dsa),
+        aptitude: fpcNumOrNull(r.hire_aptitude), overall: fpcNumOrNull(r.hire_overall)
+      };
+      const rHire = await fetch(`${FPC_SUPABASE_URL}/rest/v1/hire_scores?on_conflict=student_id,assessment_date`, {
+        method:'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'),
+        body: JSON.stringify(hirePayload)
+      });
+      if(!rHire.ok) throw new Error(await rHire.text());
+
+      const nqtPayload = {
+        student_id: studentId,
+        assessment_count: fpcNumOrNull(r.nqt_assessment_count),
+        verbal_ability: fpcNumOrNull(r.nqt_verbal_ability),
+        numerical_ability: fpcNumOrNull(r.nqt_numerical_ability),
+        reasoning_ability: fpcNumOrNull(r.nqt_reasoning_ability),
+        advanced_quant_reasoning: fpcNumOrNull(r.nqt_advanced_quant_reasoning),
+        coding: fpcNumOrNull(r.nqt_coding),
+        overall: fpcNumOrNull(r.nqt_overall)
+      };
+      const rNqt = await fetch(`${FPC_SUPABASE_URL}/rest/v1/fpc_nqt_assessment?on_conflict=student_id`, {
+        method:'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'),
+        body: JSON.stringify(nqtPayload)
+      });
+      if(!rNqt.ok) throw new Error(await rNqt.text());
+
+      success++;
+    }catch(e){
+      console.error('Import row failed:', r.registration_number, e);
+      failed++;
+    }
+  }
+
+  btn.disabled = false; btn.textContent = 'Import rows';
+  fpcShowToast(`Import done — ${success} saved${failed ? `, ${failed} failed` : ''}.`, failed > 0 && success === 0);
+  await fpcLoadStudents();
+  if(failed === 0) fpcCloseImportModal();
+}
+
+/* ============================================================
+   MANUAL ADD — single new student via the existing modal
+   ============================================================ */
+function fpcOpenAddStudentModal(){
+  if(fpcViewOnly){ fpcShowToast('Only Campus Managers can add students', true); return; }
+  const college = sessionRole === 'manager' ? sessionCollege : fpcSelectedCollege;
+  if(!college){ fpcShowToast('Select a college first', true); return; }
+
+  fpcCurrentEditRegNo = null; // signals "new student" to fpcSaveEdit
+
+  document.getElementById('fpcModalAvatar').innerHTML = fpcAvatarImgHtml('New Student');
+  document.getElementById('fpcModalName').textContent = 'New student';
+  document.getElementById('fpcModalSub').textContent = college;
+
+  // blank out every display + input field
+  ['fpc_mName','fpc_mDept','fpc_mEmail','fpc_mRegNo','fpc_mCommLevel','fpc_mCurrentArrears','fpc_mHistoryArrears',
+   'fpc_mTenth','fpc_mTwelfth','fpc_mUg','fpc_mPg','fpc_mFop','fpc_mDsa','fpc_mAptitude','fpc_mHireOverall',
+   'fpc_mNqtCount','fpc_mVerbal','fpc_mNumerical','fpc_mReasoning','fpc_mAdvQuant','fpc_mCoding','fpc_mNqtOverall'
+  ].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; });
+  document.getElementById('fpc_mEligibility').innerHTML = `<span class="fpc-badge pending">Pending review</span>`;
+  document.getElementById('fpc_mLinks').innerHTML = '';
+
+  // add (or reuse) a registration-number input for new students
+  let regInput = document.getElementById('fpc_eRegNoNew');
+  if(!regInput){
+    regInput = document.createElement('input');
+    regInput.type = 'text'; regInput.id = 'fpc_eRegNoNew';
+    regInput.placeholder = 'Registration number (required)';
+    regInput.style.cssText = 'width:100%;padding:8px 10px;border:1px solid #E8ECD6;border-radius:9px;font-size:13px;margin-bottom:10px;';
+    document.getElementById('fpc_mRegNo').parentElement.appendChild(regInput);
+  }
+  regInput.value = '';
+  regInput.style.display = 'block';
+
+  ['fpc_eName','fpc_eDept','fpc_eEmail','fpc_eEligibility','fpc_eCommLevel','fpc_eCurrentArrears','fpc_eHistoryArrears',
+   'fpc_eTenth','fpc_eTwelfth','fpc_eUg','fpc_ePg','fpc_eFop','fpc_eDsa','fpc_eAptitude','fpc_eHireOverall',
+   'fpc_eNqtCount','fpc_eVerbal','fpc_eNumerical','fpc_eReasoning','fpc_eAdvQuant','fpc_eCoding','fpc_eNqtOverall',
+   'fpc_eLinkedin','fpc_eResume','fpc_eGithub','fpc_eEfset'
+  ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+
+  document.getElementById('fpcModalSaveError').classList.remove('open');
+  document.getElementById('fpcModalCard').classList.add('editing');
+  document.getElementById('fpcModalOverlay').classList.remove('view-only');
+  document.getElementById('fpcModalOverlay').classList.add('open');
+}
 </script>
 
 </body>
