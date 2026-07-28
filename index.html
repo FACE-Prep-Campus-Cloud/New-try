@@ -2307,6 +2307,7 @@ body[data-theme="dark"] .dlog-topbar {
       <button class="btn btn-ghost" onclick="logout()">Log out</button>
     </div>
   </div>
+    <div class="fpc-scroll-wrap" style="flex:1;min-height:0;overflow-y:auto;">
   <!-- ============================== FPC DASHBOARD VIEW ============================== -->
   <div class="fpc-view active" id="fpcViewDashboard">
     <div class="topnav">
@@ -2521,7 +2522,8 @@ body[data-theme="dark"] .dlog-topbar {
       </table>
     </div>
   </div>
- 
+   </div>
+
   <!-- ============================== FPC EDIT MODAL ============================== -->
   <div id="fpcModalOverlay" onclick="if(event.target===this) fpcCloseModal()">
     <div id="fpcModalCard">
