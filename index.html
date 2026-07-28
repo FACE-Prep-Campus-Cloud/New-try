@@ -2522,9 +2522,10 @@ body[data-theme="dark"] .dlog-topbar {
         <a class="fpc-nav-link" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
       </nav>
 <div class="topnav-right">
+  <button class="fpc-btn-soft" onclick="backToPlatformSelect()">⇄ Switch platform</button>
   <div class="status-pill live fpc-status-pill" id="fpcStatusPill2"><span class="dot"></span><span class="fpc-status-text">Live</span></div>
   <div class="fpc-avatar-menu-wrap">
-    <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
+   <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
     <div class="fpc-avatar-dropdown">
       <button type="button" onclick="backToPlatformSelect()">← Switch platform</button>
       <button type="button" onclick="logout()">Log out</button>
@@ -2629,10 +2630,11 @@ body[data-theme="dark"] .dlog-topbar {
         <a class="fpc-nav-link" data-view="students" onclick="fpcGoStudents(); return false;">Students</a>
 <a class="fpc-nav-link active" data-view="reports" onclick="fpcGoReports(); return false;">Reports</a>
       </nav>
-      <div class="topnav-right">
-        <div class="status-pill live fpc-status-pill"><span class="dot"></span><span class="fpc-status-text">Live</span></div>
-        <div class="fpc-avatar-menu-wrap">
-          <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
+<div class="topnav-right">
+  <button class="fpc-btn-soft" onclick="backToPlatformSelect()">⇄ Switch platform</button>
+  <div class="status-pill live fpc-status-pill"><span class="dot"></span><span class="fpc-status-text">Live</span></div>
+  <div class="fpc-avatar-menu-wrap">
+   <div class="avatar-chip brand-chip" onclick="fpcToggleAvatarMenu(this)" title="Account">FP</div>
           <div class="fpc-avatar-dropdown">
             <button type="button" onclick="backToPlatformSelect()">← Switch platform</button>
             <button type="button" onclick="logout()">Log out</button>
