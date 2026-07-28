@@ -806,8 +806,8 @@ body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
 .platform-box { width: 100%; max-width: 1080px; text-align: center; position: relative; z-index: 1; animation: authRise .65s cubic-bezier(.16,1,.3,1) both; }
 .platform-box h1 { font-family: 'Poppins','Inter',sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.015em; }
 .platform-box p.sub { font-size: 14px; color: var(--text-light); margin-bottom: 34px; }
-.platform-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; perspective: 1200px; }
-.platform-card {
+.platform-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; perspective: 1200px; }
+  .platform-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 34px 24px;
   cursor: pointer; box-shadow: var(--shadow-md); transition: box-shadow .2s, border-color .2s;
   display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
@@ -830,8 +830,9 @@ body[data-theme="dark"] .platform-float-icon { opacity: 0.22; }
 .platform-card h3 { font-family: 'Poppins','Inter',sans-serif; font-size: 17px; font-weight: 700; position: relative; transform: translateZ(20px); }
 .platform-card p { font-size: 12.5px; color: var(--text-light); line-height: 1.55; position: relative; transform: translateZ(15px); }
 .platform-back { margin-top: 30px; position: relative; z-index: 1; }
-@media (max-width: 640px) { .platform-cards { grid-template-columns: 1fr; } }
-
+@media (max-width: 640px) {
+  .platform-cards .platform-card { flex: 1 1 100%; max-width: 320px; }
+}
 /* ── DAILY LOG SCREEN (added) ── */
 .dlog-form-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
@@ -1452,8 +1453,16 @@ body[data-theme="dark"] .dlog-topbar {
 .ledger-stamp.hard { background: var(--amber-soft); }
 .ledger-stamp.soft { background: var(--slate-soft); }
 .platform-icon.p-amber { background: linear-gradient(135deg, var(--amber), #EF6E5C); }
-.platform-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
-  
+.platform-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+}
+.platform-cards .platform-card {
+  flex: 0 1 240px;
+  max-width: 240px;
+}  
 .snap-grid {
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
