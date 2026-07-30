@@ -2478,7 +2478,7 @@ body[data-theme="dark"] .dlog-topbar {
         <div class="fpc-chart-wrap"><canvas id="fpcHireChart"></canvas></div>
       </div>
       <div class="panel ring-panel">
-        <h3>Cohort HIRE Readiness</h3>
+        <h3>Students HIRE Readiness</h3>
         <div class="ring-wrap">
           <svg viewBox="0 0 140 140">
             <circle class="ring-track" cx="70" cy="70" r="58"></circle>
@@ -6031,7 +6031,7 @@ function fpcRenderHero(){
   const eligible = FPC_STUDENTS.filter(s=>s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible').length;
   const hireVals = FPC_STUDENTS.map(s=>fpcFmt(s.hire_overall)).filter(v=>v!==null);
   const avgHire = hireVals.length ? (hireVals.reduce((a,b)=>a+b,0)/hireVals.length) : null;
-const stats = [ {icn:'🎓', num:total, lbl:'Cohort size'}, {icn:'✅', num:eligible, lbl:'Eligible'}, {icn:'📊', num:(avgHire!==null? avgHire.toFixed(0):'—'), lbl:'Avg HIRE'} ];
+const stats = [ {icn:'🎓', num:total, lbl:'Students'}, {icn:'✅', num:eligible, lbl:'Eligible'}, {icn:'📌', num:(avgHire!==null? avgHire.toFixed(0):'—'), lbl:'Avg HIRE'} ];
  document.getElementById('fpcHeroStats').innerHTML = stats.map(s=>`
     <div class="hero-stat"><div class="icn">${s.icn}</div><div><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div></div>`).join('');
 document.getElementById('fpcHeroCollegeName').textContent =
