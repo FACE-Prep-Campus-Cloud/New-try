@@ -1,0 +1,6 @@
+{
+  "name": "hire-score-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CORS-enabled proxy for the HIRE score lookup API, deployed as a Vercel serverless function."
+}
