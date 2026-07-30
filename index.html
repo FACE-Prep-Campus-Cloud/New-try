@@ -2454,7 +2454,7 @@ body[data-theme="dark"] .dlog-topbar {
     <div class="hero">
       <div>
         <h1>Good Morning <span class="wave">👋</span></h1>
-        <p>Live tracking of HIRE Score % (FOP / DSA / Aptitude) and FPC NQT Assessment averages for <span id="fpcHeroCollegeName">your college</span>.</p>
+<p>Live tracking of HIRE Score (Marks: FOP / DSA / Aptitude) and FPC NQT Assessment averages for <span id="fpcHeroCollegeName">your college</span>.</p>
       </div>
 <div class="hero-stats" id="fpcHeroStats"></div>
     </div>
@@ -2472,8 +2472,8 @@ body[data-theme="dark"] .dlog-topbar {
     <div class="fpc-row-3">
       <div class="panel">
         <div class="panel-head">
-          <h2>HIRE Score % — Overall, by student</h2>
-          <span id="fpcHireAsOf">&nbsp;</span>
+<h2>HIRE Score — Overall, by student</h2>
+         <span id="fpcHireAsOf">&nbsp;</span>
         </div>
         <div class="fpc-chart-wrap"><canvas id="fpcHireChart"></canvas></div>
       </div>
@@ -2489,7 +2489,7 @@ body[data-theme="dark"] .dlog-topbar {
             <div class="cap">avg overall</div>
           </div>
         </div>
-        <p>Average HIRE overall score. 60%+ is on track, below 35% needs intervention.</p>
+<p>Average HIRE overall score. 60+ is on track, below 35 needs intervention.</p>
       </div>
     </div>
  
@@ -2718,8 +2718,8 @@ body[data-theme="dark"] .dlog-topbar {
         </div>
 
        <div class="modal-section">
-          <div class="modal-section-label">HIRE Score % <span class="link-tag" style="margin-left:8px;">Live from HIRE API — not editable here</span></div>
-          <div class="modal-grid cols-3">
+<div class="modal-section-label">HIRE Score (Marks) <span class="link-tag" style="margin-left:8px;">Live from HIRE API — not editable here</span></div>
+        <div class="modal-grid cols-3">
             <div class="modal-field locked"><div class="f-label">FOP</div><div class="f-value" id="fpc_mFop">—</div></div>
             <div class="modal-field locked"><div class="f-label">DSA</div><div class="f-value" id="fpc_mDsa">—</div></div>
             <div class="modal-field locked"><div class="f-label">Aptitude</div><div class="f-value" id="fpc_mAptitude">—</div></div>
@@ -6031,8 +6031,8 @@ function fpcRenderHero(){
   const eligible = FPC_STUDENTS.filter(s=>s.eligibility_status && s.eligibility_status.toLowerCase()==='eligible').length;
   const hireVals = FPC_STUDENTS.map(s=>fpcFmt(s.hire_overall)).filter(v=>v!==null);
   const avgHire = hireVals.length ? (hireVals.reduce((a,b)=>a+b,0)/hireVals.length) : null;
-  const stats = [ {icn:'🎓', num:total, lbl:'Cohort size'}, {icn:'✅', num:eligible, lbl:'Eligible'}, {icn:'📊', num:(avgHire!==null? avgHire.toFixed(0)+'%':'—'), lbl:'Avg HIRE'} ];
-  document.getElementById('fpcHeroStats').innerHTML = stats.map(s=>`
+const stats = [ {icn:'🎓', num:total, lbl:'Cohort size'}, {icn:'✅', num:eligible, lbl:'Eligible'}, {icn:'📊', num:(avgHire!==null? avgHire.toFixed(0):'—'), lbl:'Avg HIRE'} ];
+ document.getElementById('fpcHeroStats').innerHTML = stats.map(s=>`
     <div class="hero-stat"><div class="icn">${s.icn}</div><div><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div></div>`).join('');
 document.getElementById('fpcHeroCollegeName').textContent =
     sessionRole === 'manager' ? (sessionCollege || 'your college') :
@@ -6042,7 +6042,7 @@ document.getElementById('fpcHeroCollegeName').textContent =
   ring.style.strokeDasharray = circumference;
   ring.style.strokeDashoffset = circumference - (pct/100)*circumference;
   ring.style.stroke = pct>=60 ? '#C7DE3E' : pct>=35 ? '#D98A3D' : '#C6493E';
-  document.getElementById('fpcRingValue').textContent = avgHire!==null ? avgHire.toFixed(1)+'%' : '—';
+document.getElementById('fpcRingValue').textContent = avgHire!==null ? avgHire.toFixed(1) : '—';
 }
 function fpcRenderFlagged(){
   const flagged = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<35;})
@@ -6061,8 +6061,8 @@ if(!FPC_STUDENTS.length){
     <div class="flag-item" style="background:rgba(255,255,255,.12);cursor:pointer;" onclick="fpcViewProfile('${s.registration_number}')">
       <div class="avatar-chip">${fpcAvatarImgHtml(s.student_name)}</div>
       <div class="fi-name" style="color:#fff;">${s.student_name}</div>
-      <div class="fi-score" style="color:#FFD9C7;">${fpcFmt(s.hire_overall)}%</div>
-    </div>`).join('');
+<div class="fi-score" style="color:#FFD9C7;">${fpcFmt(s.hire_overall)}</div>
+</div>`).join('');
 }
 function fpcRenderEligChips(){
   const total = FPC_STUDENTS.length;
@@ -6116,13 +6116,14 @@ if(withData.length === 0){
       scales:{ x:{beginAtZero:true,max:100, grid:{color:'#EEF1DF'}, ticks:{color:'#6E7660'}}, y:{grid:{display:false}, ticks:{color:'#6E7660'}} } }
   });
 }
-function fpcLaneBar(value, colorClass){
+function fpcLaneBar(value, colorClass, showPercent){
   const v = fpcFmt(value);
   if(v===null){ return `<span class="nqt-empty-cell">— pending</span>`; }
   const pct = Math.min(100, Math.max(0, v));
-  return `<div class="lane"><div class="lane-track"><div class="lane-fill ${colorClass||''}" style="width:${pct}%; background:${fpcScoreColor(v)}"></div><div class="lane-threshold"></div></div><div class="lane-label"><strong>${v}%</strong></div></div>`;
+  const suffix = showPercent === false ? '' : '%';
+  return `<div class="lane"><div class="lane-track"><div class="lane-fill ${colorClass||''}" style="width:${pct}%; background:${fpcScoreColor(v)}"></div><div class="lane-threshold"></div></div><div class="lane-label"><strong>${v}${suffix}</strong></div></div>`;
 }
-function fpcPopulateFilters(){
+  function fpcPopulateFilters(){
   const depts = [...new Set(FPC_STUDENTS.map(s=>s.department).filter(Boolean))];
   [document.getElementById('fpcDeptFilter'), document.getElementById('fpcReportsDeptFilter')].forEach(sel=>{
     if(!sel) return; const prev = sel.value;
@@ -6159,8 +6160,8 @@ function fpcStudentRowHtml(s){
       <div class="student-sub mono">${s.registration_number||''} · ${s.department||''}${collegeBit}</div></div></div></td>
     <td><span class="fpc-badge ${isEligible?'eligible':'pending'}">${isEligible?'Eligible':'Pending'}</span>${s.current_arrears>0 ? `<span class="fpc-badge arrears">${s.current_arrears} arrear${s.current_arrears>1?'s':''}</span>`:''}</td>
     <td>${s.communication_skill_level||'—'}</td>
-    <td>${fpcLaneBar(s.hire_fop)}</td><td>${fpcLaneBar(s.hire_dsa)}</td><td>${fpcLaneBar(s.hire_aptitude)}</td>
-    <td>${fpcLaneBar(s.hire_overall)}</td><td>${fpcLaneBar(s.nqt_overall,'teal')}</td>
+<td>${fpcLaneBar(s.hire_fop, '', false)}</td><td>${fpcLaneBar(s.hire_dsa, '', false)}</td><td>${fpcLaneBar(s.hire_aptitude, '', false)}</td>
+    <td>${fpcLaneBar(s.hire_overall, '', false)}</td><td>${fpcLaneBar(s.nqt_overall,'teal')}</td>
     <td><button class="row-edit-btn" onclick="event.stopPropagation(); fpcOpenModal('${s.registration_number}', true)">Edit</button></td>
   </tr>`;
 }
@@ -6178,8 +6179,8 @@ function fpcRenderReportsSummary(){
   const avgNqt = nqtVals.length ? (nqtVals.reduce((a,b)=>a+b,0)/nqtVals.length) : null;
   const belowLine = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<35;}).length;
   const cards = [ {lbl:'Cohort size', val:total}, {lbl:'Eligible', val:`${eligible} (${total?Math.round(eligible/total*100):0}%)`},
-    {lbl:'Avg HIRE overall', val: avgHire!==null? avgHire.toFixed(1)+'%':'—'}, {lbl:'Avg NQT overall', val: avgNqt!==null? avgNqt.toFixed(1)+'%':'—'} ];
-  document.getElementById('fpcReportsSummary').innerHTML = cards.map(c=>`<div class="rsum-card"><div class="rs-lbl">${c.lbl}</div><div class="rs-val">${c.val}</div></div>`).join('')
+{lbl:'Avg HIRE overall', val: avgHire!==null? avgHire.toFixed(1):'—'}, {lbl:'Avg NQT overall', val: avgNqt!==null? avgNqt.toFixed(1)+'%':'—'} ];
+ document.getElementById('fpcReportsSummary').innerHTML = cards.map(c=>`<div class="rsum-card"><div class="rs-lbl">${c.lbl}</div><div class="rs-val">${c.val}</div></div>`).join('')
     + (belowLine>0 ? `<div class="rsum-card" style="border-color:#EFC1BA;"><div class="rs-lbl" style="color:#8E332B;">Below readiness line</div><div class="rs-val" style="color:#C6493E;">${belowLine}</div></div>` : '');
 }
 function fpcRenderReportsTable(){
@@ -6230,29 +6231,30 @@ function fpcViewProfile(regNo, fromView){
   document.getElementById('fpcPName').textContent = s.student_name || '—';
   document.getElementById('fpcPLoc').textContent = `${s.department || '—'} · ${s.registration_number || '—'}${(sessionRole!=='manager' && s.college) ? ' · '+s.college : ''}`;
   document.getElementById('fpcPBio').textContent = `${s.email || 'Email not on file'}. Communication level: ${s.communication_skill_level || 'not assessed'}. ${s.current_arrears>0 ? s.current_arrears+' current arrear(s) on record.' : 'No current arrears.'}`;
-  document.getElementById('fpcPHireOverall').textContent = fpcFmt(s.hire_overall)!==null ? fpcFmt(s.hire_overall)+'%' : '—';
-  document.getElementById('fpcPNqtOverall').textContent = fpcFmt(s.nqt_overall)!==null ? fpcFmt(s.nqt_overall)+'%' : '—';
+document.getElementById('fpcPHireOverall').textContent = fpcFmt(s.hire_overall)!==null ? fpcFmt(s.hire_overall) : '—';
+ document.getElementById('fpcPNqtOverall').textContent = fpcFmt(s.nqt_overall)!==null ? fpcFmt(s.nqt_overall)+'%' : '—';
   document.getElementById('fpcPNqtDesc').textContent = fpcFmt(s.nqt_assessment_count)!==null ? `Based on ${s.nqt_assessment_count} assessment round(s).` : 'Average across all NQT assessment rounds.';
   document.getElementById('fpcPEligibility').textContent = isEligible ? 'Eligible' : (s.eligibility_status || 'Pending');
   document.getElementById('fpcPEligDesc').textContent = s.current_arrears>0 ? `Has ${s.current_arrears} current arrear(s) — may affect eligibility.` : 'Based on academics, arrears & communication level.';
   const rowsData = [ ['FOP','HIRE', s.hire_fop],['DSA','HIRE', s.hire_dsa],['Aptitude','HIRE', s.hire_aptitude],['Overall','HIRE', s.hire_overall],
     ['Verbal Ability','NQT', s.nqt_verbal_ability],['Numerical Ability','NQT', s.nqt_numerical_ability],['Reasoning Ability','NQT', s.nqt_reasoning_ability],
     ['Adv. Quant Reasoning','NQT', s.nqt_advanced_quant_reasoning],['Coding','NQT', s.nqt_coding],['Overall','NQT', s.nqt_overall] ];
-  document.getElementById('fpcPMetricBody').innerHTML = rowsData.map(([label,cat,val])=>{
+document.getElementById('fpcPMetricBody').innerHTML = rowsData.map(([label,cat,val])=>{
     const v = fpcFmt(val);
-    return `<tr><td style="font-weight:600;">${label}</td><td><span class="cat-tag">${cat}</span></td><td class="mono">${v!==null? v+'%':'—'}</td><td>${fpcMetricBadge(v)}</td></tr>`;
+    const suffix = cat === 'HIRE' ? '' : '%';
+    return `<tr><td style="font-weight:600;">${label}</td><td><span class="cat-tag">${cat}</span></td><td class="mono">${v!==null? v+suffix:'—'}</td><td>${fpcMetricBadge(v)}</td></tr>`;
   }).join('');
-  const fop = fpcFmt(s.hire_fop)||0, dsa = fpcFmt(s.hire_dsa)||0, apt = fpcFmt(s.hire_aptitude)||0;
+ const fop = fpcFmt(s.hire_fop)||0, dsa = fpcFmt(s.hire_dsa)||0, apt = fpcFmt(s.hire_aptitude)||0;
   const donutCtx = document.getElementById('fpcPDonut').getContext('2d');
   if(fpcDonutInstance) fpcDonutInstance.destroy();
   const hasAny = (fpcFmt(s.hire_fop)!==null || fpcFmt(s.hire_dsa)!==null || fpcFmt(s.hire_aptitude)!==null);
   fpcDonutInstance = new Chart(donutCtx, { type:'doughnut',
     data:{ labels:['FOP','DSA','Aptitude'], datasets:[{ data: hasAny ? [fop,dsa,apt] : [1,1,1], backgroundColor:['#C7DE3E','#5C6B32','#D98A3D'], borderWidth:0 }] },
     options:{ cutout:'72%', plugins:{legend:{display:false}, tooltip:{enabled:hasAny}} } });
-  document.getElementById('fpcPDonutVal').textContent = fpcFmt(s.hire_overall)!==null ? fpcFmt(s.hire_overall)+'%' : '—';
+document.getElementById('fpcPDonutVal').textContent = fpcFmt(s.hire_overall)!==null ? fpcFmt(s.hire_overall) : '—';
   document.getElementById('fpcPDonutLegend').innerHTML = [ ['#C7DE3E','FOP', s.hire_fop],['#5C6B32','DSA', s.hire_dsa],['#D98A3D','Aptitude', s.hire_aptitude] ]
-    .map(([color,label,val])=>{ const v = fpcFmt(val); return `<div class="donut-legend-row"><span class="sw" style="background:${color}"></span><span class="lbl">${label}</span><span class="val">${v!==null?v+'%':'—'}</span></div>`; }).join('');
-  const details = [ ['10th mark', fpcPctTextSafe(s.tenth_mark)], ['12th mark', fpcPctTextSafe(s.twelfth_mark)], ['UG degree %', fpcPctTextSafe(s.ug_percentage)],
+    .map(([color,label,val])=>{ const v = fpcFmt(val); return `<div class="donut-legend-row"><span class="sw" style="background:${color}"></span><span class="lbl">${label}</span><span class="val">${v!==null?v:'—'}</span></div>`; }).join('');
+ const details = [ ['10th mark', fpcPctTextSafe(s.tenth_mark)], ['12th mark', fpcPctTextSafe(s.twelfth_mark)], ['UG degree %', fpcPctTextSafe(s.ug_percentage)],
     ['PG degree %', fpcPctTextSafe(s.pg_percentage)], ['Current arrears', fpcNumTextSafe(s.current_arrears)], ['History of arrears', fpcNumTextSafe(s.history_of_arrears)] ];
   document.getElementById('fpcPProfileGrid').innerHTML = details.map(([label,val])=>`<div class="detail-item"><div class="d-label">${label}</div><div class="d-val">${val}</div></div>`).join('');
   document.getElementById('fpcPLinks').innerHTML = fpcLinkRow('LinkedIn', s.linkedin_url) + fpcLinkRow('Resume', s.resume_url) + fpcLinkRow('GitHub', s.github_url) + fpcLinkRow('EF SET', s.efset_certificate_url);
@@ -6291,11 +6293,11 @@ function fpcOpenModal(regNo, startInEdit){
   document.getElementById('fpc_mTwelfth').textContent = fpcPctText(s.twelfth_mark);
   document.getElementById('fpc_mUg').textContent = fpcPctText(s.ug_percentage);
   document.getElementById('fpc_mPg').textContent = fpcPctText(s.pg_percentage);
- document.getElementById('fpc_mFop').textContent = s.hire_matched ? fpcPctText(s.hire_fop) : 'No API match';
-  document.getElementById('fpc_mDsa').textContent = s.hire_matched ? fpcPctText(s.hire_dsa) : 'No API match';
-  document.getElementById('fpc_mAptitude').textContent = s.hire_matched ? fpcPctText(s.hire_aptitude) : 'No API match';
-  document.getElementById('fpc_mHireOverall').textContent = s.hire_matched ? fpcPctText(s.hire_overall) : 'No API match';
-  document.getElementById('fpc_mNqtCount').textContent = fpcNumText(s.nqt_assessment_count);
+document.getElementById('fpc_mFop').textContent = s.hire_matched ? fpcNumText(s.hire_fop) : 'No API match';
+  document.getElementById('fpc_mDsa').textContent = s.hire_matched ? fpcNumText(s.hire_dsa) : 'No API match';
+  document.getElementById('fpc_mAptitude').textContent = s.hire_matched ? fpcNumText(s.hire_aptitude) : 'No API match';
+  document.getElementById('fpc_mHireOverall').textContent = s.hire_matched ? fpcNumText(s.hire_overall) : 'No API match';
+ document.getElementById('fpc_mNqtCount').textContent = fpcNumText(s.nqt_assessment_count);
   document.getElementById('fpc_mVerbal').textContent = fpcPctText(s.nqt_verbal_ability);
   document.getElementById('fpc_mNumerical').textContent = fpcPctText(s.nqt_numerical_ability);
   document.getElementById('fpc_mReasoning').textContent = fpcPctText(s.nqt_reasoning_ability);
