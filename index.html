@@ -6090,11 +6090,11 @@ function fpcRenderHireChart(){
     type:'bar', data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:6, maxBarThickness:22 }] },
     options:{ responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>`Overall: ${c.raw}%`}} },
-      scales:{ y:{ beginAtZero:true, max:100, grid:{color:'#EEF1DF'}, ticks:{color:'#6E7660', font:{size:10.5}} },
+      scales:{ y:{ beginAtZero:true, max:900, grid:{color:'#EEF1DF'}, ticks:{color:'#6E7660', font:{size:10.5}} },
                 x:{ grid:{display:false}, ticks:{color:'#6E7660', font:{size:10.5}, maxRotation:60, minRotation:60} } } }
   });
 }
-function fpcRenderNqtPanel(){
+  function fpcRenderNqtPanel(){
   const withData = FPC_STUDENTS.filter(s=>fpcFmt(s.nqt_overall)!==null);
   document.getElementById('fpcNqtMeta').textContent = withData.length ? `${withData.length} of ${FPC_STUDENTS.length} assessed` : (FPC_STUDENTS.length ? 'Not yet conducted' : '');
   const body = document.getElementById('fpcNqtBody');
