@@ -2501,11 +2501,11 @@ body[data-theme="dark"] .dlog-topbar {
         </div>
         <div id="fpcNqtBody"></div>
       </div>
-      <div class="panel panel-dark">
-        <div class="panel-head">
-          <h2>Below Readiness Line</h2>
-          <span>HIRE overall &lt; 35%</span>
-        </div>
+<div class="panel panel-dark">
+  <div class="panel-head">
+    <h2>Below Readiness Line</h2>
+    <span>HIRE overall &lt; 300</span>
+  </div>
         <div class="flag-list" id="fpcFlaggedList"></div>
       </div>
     </div>
@@ -6045,8 +6045,8 @@ document.getElementById('fpcHeroCollegeName').textContent =
 document.getElementById('fpcRingValue').textContent = avgHire!==null ? avgHire.toFixed(1) : '—';
 }
 function fpcRenderFlagged(){
-  const flagged = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<35;})
-    .sort((a,b)=> (fpcFmt(a.hire_overall)||0)-(fpcFmt(b.hire_overall)||0)).slice(0,6);
+  const flagged = FPC_STUDENTS.filter(s=>{const v=fpcFmt(s.hire_overall); return v!==null && v<300;})
+  .sort((a,b)=> (fpcFmt(a.hire_overall)||0)-(fpcFmt(b.hire_overall)||0)).slice(0,6);
   const box = document.getElementById('fpcFlaggedList');
 if(!FPC_STUDENTS.length){
     const msg = fpcNoCollegeSelected() ? 'Select a college above to view its data.' : 'No student data on file for this college yet.';
@@ -6054,8 +6054,8 @@ if(!FPC_STUDENTS.length){
     return;
   }
  if(flagged.length===0){
-    box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">No students currently below the 35% readiness line 🎉</div>`;
-    return;
+box.innerHTML = `<div class="flag-empty" style="color:rgba(255,255,255,.75);">No students currently below the 300 readiness line 🎉</div>`;
+  return;
   }
   box.innerHTML = flagged.map(s=>`
     <div class="flag-item" style="background:rgba(255,255,255,.12);cursor:pointer;" onclick="fpcViewProfile('${s.registration_number}')">
@@ -6081,15 +6081,17 @@ function fpcRenderEligChips(){
 }
 function fpcRenderHireChart(){
   const ctx = document.getElementById('fpcHireChart').getContext('2d');
-  const sorted = [...FPC_STUDENTS].sort((a,b)=> (fpcFmt(b.hire_overall)||0)-(fpcFmt(a.hire_overall)||0));
+  const sorted = [...FPC_STUDENTS]
+    .sort((a,b)=> (fpcFmt(b.hire_overall)||0)-(fpcFmt(a.hire_overall)||0))
+    .slice(0, 15);
   const labels = sorted.map(s=>s.student_name.split(' ')[0]);
   const data = sorted.map(s=>fpcFmt(s.hire_overall)||0);
-  const colors = data.map(v=> v>=60 ? '#4C8B4A' : v>=35 ? '#D98A3D' : '#C6493E');
+  const colors = data.map(v=> v>=540 ? '#4C8B4A' : v>=315 ? '#D98A3D' : '#C6493E');
   if(fpcHireChartInstance) fpcHireChartInstance.destroy();
   fpcHireChartInstance = new Chart(ctx, {
     type:'bar', data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:6, maxBarThickness:22 }] },
     options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>`Overall: ${c.raw}%`}} },
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>`Overall: ${c.raw}`}} },
       scales:{ y:{ beginAtZero:true, max:900, grid:{color:'#EEF1DF'}, ticks:{color:'#6E7660', font:{size:10.5}} },
                 x:{ grid:{display:false}, ticks:{color:'#6E7660', font:{size:10.5}, maxRotation:60, minRotation:60} } } }
   });
