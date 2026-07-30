@@ -1743,6 +1743,9 @@ body[data-theme="dark"] .dlog-topbar {
 #fpcModalCard .modal-field input, #fpcModalCard .modal-field select{display:none;width:100%;padding:8px 10px;border:1px solid #E8ECD6;border-radius:9px;font-family:inherit;font-size:13px;background:#F7F9EC;color:#1C2116;}
 #fpcModalCard.editing .f-value{display:none;}
 #fpcModalCard.editing .modal-field input, #fpcModalCard.editing .modal-field select{display:block;}
+#fpcModalCard.editing .modal-field.locked .f-value{display:block;}
+#fpcModalCard.editing .modal-field.locked input, #fpcModalCard.editing .modal-field.locked select{display:none;}
+  
 #fpcModalCard.editing .modal-link-row{display:none;}
 #fpcModalCard:not(.editing) .btn-save, #fpcModalCard:not(.editing) .btn-cancel{display:none;}
 #fpcModalCard.editing .btn-edit{display:none;}
@@ -2713,15 +2716,17 @@ body[data-theme="dark"] .dlog-topbar {
             <div class="modal-field"><div class="f-label">PG degree %</div><div class="f-value" id="fpc_mPg">—</div><input type="number" id="fpc_ePg" min="0" max="100" step="0.01"></div>
           </div>
         </div>
-        <div class="modal-section">
-          <div class="modal-section-label">HIRE Score %</div>
+
+       <div class="modal-section">
+          <div class="modal-section-label">HIRE Score % <span class="link-tag" style="margin-left:8px;">Live from HIRE API — not editable here</span></div>
           <div class="modal-grid cols-3">
-            <div class="modal-field"><div class="f-label">FOP</div><div class="f-value" id="fpc_mFop">—</div><input type="number" id="fpc_eFop" min="0" max="100" step="0.01"></div>
-            <div class="modal-field"><div class="f-label">DSA</div><div class="f-value" id="fpc_mDsa">—</div><input type="number" id="fpc_eDsa" min="0" max="100" step="0.01"></div>
-            <div class="modal-field"><div class="f-label">Aptitude</div><div class="f-value" id="fpc_mAptitude">—</div><input type="number" id="fpc_eAptitude" min="0" max="100" step="0.01"></div>
-            <div class="modal-field"><div class="f-label">Overall</div><div class="f-value" id="fpc_mHireOverall">—</div><input type="number" id="fpc_eHireOverall" min="0" max="100" step="0.01"></div>
+            <div class="modal-field locked"><div class="f-label">FOP</div><div class="f-value" id="fpc_mFop">—</div></div>
+            <div class="modal-field locked"><div class="f-label">DSA</div><div class="f-value" id="fpc_mDsa">—</div></div>
+            <div class="modal-field locked"><div class="f-label">Aptitude</div><div class="f-value" id="fpc_mAptitude">—</div></div>
+            <div class="modal-field locked"><div class="f-label">Overall</div><div class="f-value" id="fpc_mHireOverall">—</div></div>
           </div>
         </div>
+       
         <div class="modal-section">
           <div class="modal-section-label">FPC NQT Assessment</div>
           <div class="modal-grid cols-3">
@@ -5818,7 +5823,54 @@ function destroyVantaBirds(){ if(vantaBirdsEffect){ vantaBirdsEffect.destroy(); 
    ============================================================ */
 const FPC_SUPABASE_URL = 'https://rfzhifhvtopdayhaiuct.supabase.co';
 const FPC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemhpZmh2dG9wZGF5aGFpdWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4ODEyNzYsImV4cCI6MjEwMDQ1NzI3Nn0.X3vTyKA0f--0lQ4_CreXDAMVSHcvOBiWxFAVi2sGHmw';
- 
+
+/* FOP / DSA / Aptitude / HIRE Overall are sourced live from this API,
+   matched onto each Supabase student by registration_number. */
+const HIRE_API_BASE = 'https://hirescore-xi.vercel.app/api/scores/';
+let FPC_HIRE_API_MAP = new Map();
+let fpcHireApiErrorMessage = null;
+
+function fpcNormRegNo(v){ return String(v || '').trim().toLowerCase(); }
+
+async function fpcLoadHireApiScores(){
+  try{
+    const res = await fetch(HIRE_API_BASE);
+    if(!res.ok) throw new Error(`HIRE API responded ${res.status}`);
+    const rows = await res.json();
+    const list = Array.isArray(rows) ? rows : (Array.isArray(rows?.records) ? rows.records : []);
+    FPC_HIRE_API_MAP = new Map(list.map(r => [fpcNormRegNo(r.registrationNumber), r]));
+    fpcHireApiErrorMessage = null;
+  }catch(e){
+    FPC_HIRE_API_MAP = new Map();
+    fpcHireApiErrorMessage = e.message;
+  }
+}
+
+function fpcNumOrNullApi(v){
+  return (v===null || v===undefined || v==='' || isNaN(Number(v))) ? null : Number(v);
+}
+
+/* Overwrites hire_fop / hire_dsa / hire_aptitude / hire_overall on every
+   FPC_STUDENTS row with live values from the HIRE API. Supabase's own
+   hire_scores table is no longer read for these four fields. */
+function fpcMergeHireApiScores(){
+  FPC_STUDENTS.forEach(s=>{
+    const rec = FPC_HIRE_API_MAP.get(fpcNormRegNo(s.registration_number));
+    if(rec){
+      s.hire_fop = fpcNumOrNullApi(rec.scores?.fopAssessment);
+      s.hire_dsa = fpcNumOrNullApi(rec.scores?.dsaAssessment);
+      s.hire_aptitude = fpcNumOrNullApi(rec.computedScores?.aptitudeTotal);
+      s.hire_overall = fpcNumOrNullApi(rec.computedScores?.hireScore);
+      s.hire_matched = true;
+    } else {
+      s.hire_fop = null;
+      s.hire_dsa = null;
+      s.hire_aptitude = null;
+      s.hire_overall = null;
+      s.hire_matched = false;
+    }
+  });
+} 
 let FPC_STUDENTS = [];
 let fpcHireChartInstance = null;
 let fpcNqtChartInstance = null;
@@ -5914,7 +5966,7 @@ function fpcNoCollegeSelected(){
 }
   
 async function fpcLoadStudents(){
-  fpcSetStatus('loading', 'Connecting to Supabase…');
+  fpcSetStatus('loading', 'Loading roster + HIRE scores…');
   try{
     const url = `${FPC_SUPABASE_URL}/rest/v1/student_monitor_view?select=*${fpcCollegeQueryParam()}&order=s_no.asc`;
     const res = await fetch(url, { headers:{ apikey: FPC_SUPABASE_ANON_KEY, Authorization: `Bearer ${FPC_SUPABASE_ANON_KEY}` } });
@@ -5924,15 +5976,32 @@ async function fpcLoadStudents(){
     }
     const rows = await res.json();
     FPC_STUDENTS = Array.isArray(rows) ? rows : [];
+
+    // FOP / DSA / Aptitude / HIRE Overall now come live from the HIRE API,
+    // matched onto each Supabase row by registration_number.
+    await fpcLoadHireApiScores();
+    fpcMergeHireApiScores();
+
     document.getElementById('fpcErrorBanner').classList.remove('open');
-    fpcSetStatus('live', FPC_STUDENTS.length ? 'Live · connected to Supabase' : 'Live · no students on file yet');
+
+    if(fpcHireApiErrorMessage){
+      fpcSetStatus('loading', 'Roster live · HIRE API unreachable');
+      document.getElementById('fpcErrorBanner').classList.add('open');
+      document.getElementById('fpcErrorDetail').textContent =
+        `Student roster loaded from Supabase, but HIRE scores could not be fetched from ${HIRE_API_BASE} (${fpcHireApiErrorMessage}). FOP/DSA/Aptitude/Overall will show as "—" until this is reachable.`;
+    } else {
+      const unmatched = FPC_STUDENTS.filter(s=>!s.hire_matched).length;
+      fpcSetStatus('live', FPC_STUDENTS.length
+        ? (unmatched ? `Live · ${unmatched} student(s) have no HIRE API match` : 'Live · roster + HIRE scores connected')
+        : 'Live · no students on file yet');
+    }
+
     fpcRenderAll();
   }catch(e){
     fpcSetStatus(null, 'Connection failed');
     fpcShowError(e.message);
   }
-}
- 
+} 
 function fpcFmt(v){ return (v===null || v===undefined || isNaN(v)) ? null : Number(v); }
 function fpcScoreColor(v){ if(v===null) return '#9AA3AF'; if(v>=60) return 'var(--fpc-green,#4C8B4A)'; if(v>=35) return 'var(--fpc-gold,#D98A3D)'; return 'var(--fpc-red,#C6493E)'; }
  
@@ -6222,10 +6291,10 @@ function fpcOpenModal(regNo, startInEdit){
   document.getElementById('fpc_mTwelfth').textContent = fpcPctText(s.twelfth_mark);
   document.getElementById('fpc_mUg').textContent = fpcPctText(s.ug_percentage);
   document.getElementById('fpc_mPg').textContent = fpcPctText(s.pg_percentage);
-  document.getElementById('fpc_mFop').textContent = fpcPctText(s.hire_fop);
-  document.getElementById('fpc_mDsa').textContent = fpcPctText(s.hire_dsa);
-  document.getElementById('fpc_mAptitude').textContent = fpcPctText(s.hire_aptitude);
-  document.getElementById('fpc_mHireOverall').textContent = fpcPctText(s.hire_overall);
+ document.getElementById('fpc_mFop').textContent = s.hire_matched ? fpcPctText(s.hire_fop) : 'No API match';
+  document.getElementById('fpc_mDsa').textContent = s.hire_matched ? fpcPctText(s.hire_dsa) : 'No API match';
+  document.getElementById('fpc_mAptitude').textContent = s.hire_matched ? fpcPctText(s.hire_aptitude) : 'No API match';
+  document.getElementById('fpc_mHireOverall').textContent = s.hire_matched ? fpcPctText(s.hire_overall) : 'No API match';
   document.getElementById('fpc_mNqtCount').textContent = fpcNumText(s.nqt_assessment_count);
   document.getElementById('fpc_mVerbal').textContent = fpcPctText(s.nqt_verbal_ability);
   document.getElementById('fpc_mNumerical').textContent = fpcPctText(s.nqt_numerical_ability);
@@ -6239,7 +6308,6 @@ function fpcOpenModal(regNo, startInEdit){
   fpcSetInputVal('fpc_eCommLevel', s.communication_skill_level);
   fpcSetInputVal('fpc_eCurrentArrears', s.current_arrears ?? 0); fpcSetInputVal('fpc_eHistoryArrears', s.history_of_arrears ?? 0);
   fpcSetInputVal('fpc_eTenth', s.tenth_mark); fpcSetInputVal('fpc_eTwelfth', s.twelfth_mark); fpcSetInputVal('fpc_eUg', s.ug_percentage); fpcSetInputVal('fpc_ePg', s.pg_percentage);
-  fpcSetInputVal('fpc_eFop', s.hire_fop); fpcSetInputVal('fpc_eDsa', s.hire_dsa); fpcSetInputVal('fpc_eAptitude', s.hire_aptitude); fpcSetInputVal('fpc_eHireOverall', s.hire_overall);
   fpcSetInputVal('fpc_eNqtCount', s.nqt_assessment_count); fpcSetInputVal('fpc_eVerbal', s.nqt_verbal_ability); fpcSetInputVal('fpc_eNumerical', s.nqt_numerical_ability);
   fpcSetInputVal('fpc_eReasoning', s.nqt_reasoning_ability); fpcSetInputVal('fpc_eAdvQuant', s.nqt_advanced_quant_reasoning); fpcSetInputVal('fpc_eCoding', s.nqt_coding); fpcSetInputVal('fpc_eNqtOverall', s.nqt_overall);
   fpcSetInputVal('fpc_eLinkedin', s.linkedin_url); fpcSetInputVal('fpc_eResume', s.resume_url); fpcSetInputVal('fpc_eGithub', s.github_url); fpcSetInputVal('fpc_eEfset', s.efset_certificate_url);
@@ -6299,10 +6367,6 @@ async function fpcSaveEdit(){
     if(!r1.ok) throw new Error(`students save failed (${r1.status}): ${await r1.text()}`);
     const savedStudent = (await r1.json())[0];
     const studentId = savedStudent.id;
-    const hireDate = (s && s.hire_assessment_date) || new Date().toISOString().slice(0,10);
-   const hirePayload = { student_id: s.id, assessment_date: hireDate, fop: fpcNumVal('fpc_eFop'), dsa: fpcNumVal('fpc_eDsa'), aptitude: fpcNumVal('fpc_eAptitude'), overall: fpcNumVal('fpc_eHireOverall') };
-    const r2 = await fetch(`${FPC_SUPABASE_URL}/rest/v1/hire_scores?on_conflict=student_id,assessment_date`, { method: 'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'), body: JSON.stringify(hirePayload) });
-    if(!r2.ok) throw new Error(`hire_scores update failed (${r2.status}): ${await r2.text()}`);
  
     const nqtPayload = { student_id: s.id, assessment_count: fpcNumVal('fpc_eNqtCount'), verbal_ability: fpcNumVal('fpc_eVerbal'), numerical_ability: fpcNumVal('fpc_eNumerical'),
       reasoning_ability: fpcNumVal('fpc_eReasoning'), advanced_quant_reasoning: fpcNumVal('fpc_eAdvQuant'), coding: fpcNumVal('fpc_eCoding'), overall: fpcNumVal('fpc_eNqtOverall') };
@@ -6365,11 +6429,11 @@ const FPC_IMPORT_COLUMNS = [
   'registration_number','student_name','department','email','eligibility_status',
   'communication_skill_level','current_arrears','history_of_arrears',
   'tenth_mark','twelfth_mark','ug_percentage','pg_percentage',
-  'hire_fop','hire_dsa','hire_aptitude','hire_overall',
   'nqt_assessment_count','nqt_verbal_ability','nqt_numerical_ability',
   'nqt_reasoning_ability','nqt_advanced_quant_reasoning','nqt_coding','nqt_overall',
   'linkedin_url','resume_url','github_url','efset_certificate_url'
 ];
+  
 let fpcImportRows = [];
 
 function fpcDownloadTemplate(){
@@ -6505,17 +6569,6 @@ async function fpcConfirmImport(){
       const stuRows = await rStu.json();
       const studentId = stuRows[0].id;
 
-      const hirePayload = {
-        student_id: studentId,
-        assessment_date: new Date().toISOString().slice(0,10),
-        fop: fpcNumOrNull(r.hire_fop), dsa: fpcNumOrNull(r.hire_dsa),
-        aptitude: fpcNumOrNull(r.hire_aptitude), overall: fpcNumOrNull(r.hire_overall)
-      };
-      const rHire = await fetch(`${FPC_SUPABASE_URL}/rest/v1/hire_scores?on_conflict=student_id,assessment_date`, {
-        method:'POST', headers: fpcSbHeaders('resolution=merge-duplicates,return=representation'),
-        body: JSON.stringify(hirePayload)
-      });
-      if(!rHire.ok) throw new Error(await rHire.text());
 
       const nqtPayload = {
         student_id: studentId,
@@ -6580,12 +6633,12 @@ function fpcOpenAddStudentModal(){
   regInput.value = '';
   regInput.style.display = 'block';
 
-  ['fpc_eName','fpc_eDept','fpc_eEmail','fpc_eEligibility','fpc_eCommLevel','fpc_eCurrentArrears','fpc_eHistoryArrears',
-   'fpc_eTenth','fpc_eTwelfth','fpc_eUg','fpc_ePg','fpc_eFop','fpc_eDsa','fpc_eAptitude','fpc_eHireOverall',
+['fpc_eName','fpc_eDept','fpc_eEmail','fpc_eEligibility','fpc_eCommLevel','fpc_eCurrentArrears','fpc_eHistoryArrears',
+   'fpc_eTenth','fpc_eTwelfth','fpc_eUg','fpc_ePg',
    'fpc_eNqtCount','fpc_eVerbal','fpc_eNumerical','fpc_eReasoning','fpc_eAdvQuant','fpc_eCoding','fpc_eNqtOverall',
    'fpc_eLinkedin','fpc_eResume','fpc_eGithub','fpc_eEfset'
   ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-
+ 
   document.getElementById('fpcModalSaveError').classList.remove('open');
   document.getElementById('fpcModalCard').classList.add('editing');
   document.getElementById('fpcModalOverlay').classList.remove('view-only');
