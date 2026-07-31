@@ -1909,7 +1909,19 @@ body[data-theme="dark"] .dlog-topbar {
 #fpc-readiness-screen .metric-table-wrap tbody td{padding:11px 8px;border-bottom:1px solid var(--fpc-line);vertical-align:middle;}
 #fpc-readiness-screen .metric-table-wrap tbody tr:last-child td{border-bottom:none;}
 #fpc-readiness-screen .metric-table-wrap tbody tr:hover{background:var(--fpc-card-soft);}
-</style>
+/* ── Fix: keep every calendar cell the same size, regardless of content ── */
+.review-cal-cell {
+  height: 104px;        /* fixed size instead of growing with content */
+  min-height: 0;        /* cancels the earlier min-height so height wins */
+  overflow: hidden;     /* clips extra pills — the "+N more" tag already covers this */
+}
+.review-cal-grid {
+  align-items: stretch; /* every cell in a row matches the row's track height */
+}
+.review-cal-pill {
+  padding: 2px 6px;     /* slightly tighter so pills fit cleanly */
+}
+ </style>
 </head>
 <body>
 <div id="scale-root">
