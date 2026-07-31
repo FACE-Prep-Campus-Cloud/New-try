@@ -5857,21 +5857,18 @@ function fpcMergeHireApiScores(){
   FPC_STUDENTS.forEach(s=>{
     const rec = FPC_HIRE_API_MAP.get(fpcNormRegNo(s.registration_number));
     if(rec){
-      s.hire_fop = fpcNumOrNullApi(rec.scores?.fopAssessment);
-      s.hire_dsa = fpcNumOrNullApi(rec.scores?.dsaAssessment);
-      s.hire_aptitude = fpcNumOrNullApi(rec.computedScores?.aptitudeTotal);
-      s.hire_overall = fpcNumOrNullApi(rec.computedScores?.hireScore);
+      s.hire_fop = fpcNumOrNullApi(rec.fopPercentage);
+      s.hire_dsa = fpcNumOrNullApi(rec.dsaPercentage);
+      s.hire_aptitude = fpcNumOrNullApi(rec.aptitudePercentage);
+      s.hire_overall = fpcNumOrNullApi(rec.hireOverall);
       s.hire_matched = true;
     } else {
-      s.hire_fop = null;
-      s.hire_dsa = null;
-      s.hire_aptitude = null;
-      s.hire_overall = null;
+      s.hire_fop = null; s.hire_dsa = null; s.hire_aptitude = null; s.hire_overall = null;
       s.hire_matched = false;
     }
   });
-} 
-let FPC_STUDENTS = [];
+}
+  let FPC_STUDENTS = [];
 let fpcHireChartInstance = null;
 let fpcNqtChartInstance = null;
 let fpcDonutInstance = null;
