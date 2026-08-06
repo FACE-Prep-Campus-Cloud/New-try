@@ -4635,8 +4635,8 @@ async function saveClassroomSnap(){
   const tasksFollowup      = $('snap-tasks-followup').value || null;
   const sessionPlanAdherence = $('snap-session-plan-adherence').value || null;
   const studyMaterialSharing = $('snap-study-material-sharing').value || null;
-  const notes = $('snap-notes').value.trim();
-  const obsDate = new Date().toISOString().slice(0,10);
+const notes = $('snap-satisfaction-remarks').value.trim();
+ const obsDate = new Date().toISOString().slice(0,10);
  const overallRating = $('snap-overall-rating').value;
   const satisfactionEl = document.querySelector('input[name="snap-satisfaction"]:checked');
   const satisfaction = satisfactionEl ? satisfactionEl.value : '';
