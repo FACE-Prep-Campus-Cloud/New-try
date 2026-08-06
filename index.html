@@ -1922,17 +1922,6 @@ body[data-theme="dark"] .dlog-topbar {
               <div class="snap-eval-toggle-body">
                 <div class="snap-form-grid" style="margin-top:8px;">
                   <div class="form-group">
-                    <label class="field-label" title="Reports to class on time and prepared before session begins">Punctuality</label>
-                    <select id="snap-punctuality">
-                      <option value="">Rate 1–5</option>
-                      <option value="5">5 — Always on time, fully prepared</option>
-                      <option value="4">4 — Usually on time, minor delays</option>
-                      <option value="3">3 — Sometimes late, occasionally affects session</option>
-                      <option value="2">2 — Frequently late, needs reminders</option>
-                      <option value="1">1 — Consistently late/absent without notice</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
                     <label class="field-label" title="Attire, grooming, courtesy, professional conduct">Professionalism (Attire &amp; Behaviour)</label>
                     <select id="snap-professionalism">
                       <option value="">Rate 1–5</option>
@@ -2922,8 +2911,8 @@ function onSnapSatisfactionChange(val){
 function updateSnapRemarksWordCount(){
   const n = countWords($('snap-satisfaction-remarks').value);
   const label = $('snap-remarks-wordcount');
-  label.textContent = `${n} / 40 words`;
-  label.style.color = n >= 40 ? 'var(--green)' : 'var(--red)';
+label.textContent = `${n} / 20 words`;
+label.style.color = n >= 20 ? 'var(--green)' : 'var(--red)';
 }
 /* ── Role tabs ── */
 function setAuthRole(role){
@@ -4349,7 +4338,7 @@ async function enterClassroomSnap(){
   if(isManager){
     populateSnapDepartmentSelect();
     ['snap-teacher','snap-course-type','snap-subject',
-     'snap-punctuality','snap-professionalism','snap-class-handling',
+     'snap-professionalism','snap-class-handling',
      'snap-skill-development','snap-student-engagement','snap-tasks-followup',
      'snap-session-plan-adherence','snap-study-material-sharing','snap-notes'
     ].forEach(id => { const el = $(id); if(el) el.value = ''; });
@@ -4399,7 +4388,6 @@ async function loadClassroomSnaps(){
 }
  
 const RATING_LABELS = {
-  rating_punctuality: 'Punctuality',
   rating_professionalism: 'Professionalism',
   rating_class_handling: 'Class Handling',
   rating_skill_development: 'Skill Development',
@@ -4433,7 +4421,6 @@ function ratingBadgeTone(v){
     ['Department', s.department],
     ['Course', s.course_type],
     ['Course name', s.course_name || s.subject],
-    ['Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : null],
     ['Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : null],
     ['Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : null],
     ['Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : null],
@@ -4593,7 +4580,6 @@ function openSnapDetailModal(id){
       ${snapDetailRow('Department', s.department)}
       ${snapDetailRow('Course', s.course_type)}
       ${snapDetailRow('Course Name', s.course_name || s.subject)}
-      ${snapDetailRow('Punctuality', s.rating_punctuality ? s.rating_punctuality+'/5' : '')}
       ${snapDetailRow('Professionalism', s.rating_professionalism ? s.rating_professionalism+'/5' : '')}
       ${snapDetailRow('Class handling', s.rating_class_handling ? s.rating_class_handling+'/5' : '')}
       ${snapDetailRow('Skill development', s.rating_skill_development ? s.rating_skill_development+'/5' : '')}
@@ -4627,7 +4613,6 @@ async function saveClassroomSnap(){
   const department    = $('snap-department').value;
   const courseType    = $('snap-course-type').value;
   const courseName    = $('snap-subject').value.trim();
-  const punctuality        = $('snap-punctuality').value || null;
   const professionalism    = $('snap-professionalism').value || null;
   const classHandling      = $('snap-class-handling').value || null;
   const skillDevelopment   = $('snap-skill-development').value || null;
@@ -4653,11 +4638,11 @@ const notes = $('snap-satisfaction-remarks').value.trim();
     showToast('Please select Satisfied or Not Satisfied');
     return;
   }
-  if(countWords(satisfactionRemarks) < 40){
-    showToast('Remarks must be at least 40 words');
+if(countWords(satisfactionRemarks) < 20){
+    showToast('Remarks must be at least 20 words');
     return;
   }
-  snapSaving = true;
+ snapSaving = true;
   const btn = $('snap-save-btn');
   btn.disabled = true; btn.textContent = 'Uploading…';
   try{
@@ -4667,6 +4652,7 @@ const notes = $('snap-satisfaction-remarks').value.trim();
     if(upErr) throw upErr;
     const { data: pub } = sb.storage.from('classroom-snaps').getPublicUrl(path);
     const rec = collegeContacts.find(c => c.college === sessionCollege);
+   const seniorManagerEmail = rec ? rec.senior_manager_email : null;
     const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
     const payload = {
       college: sessionCollege,
@@ -4700,7 +4686,7 @@ rating_session_plan_adherence: sessionPlanAdherence,
 const { error } = await sb.from('classroom_snaps').insert(payload);
     if(error) throw error;
 
-    if(satisfaction === 'not_satisfied'){
+if(satisfaction === 'not_satisfied'){
       sb.functions.invoke('notify-not-satisfied', {
         body: {
           college: sessionCollege,
@@ -4709,12 +4695,12 @@ const { error } = await sb.from('classroom_snaps').insert(payload);
           manager: name,
           remarks: satisfactionRemarks,
           observationDate: obsDate,
+          recipientEmail: seniorManagerEmail,
         }
       }).catch(e => console.error('notify-not-satisfied failed', e));
     }
-
     $('snap-teacher').value=''; $('snap-course-type').value=''; $('snap-subject').value='';
-   $('snap-punctuality').value=''; $('snap-professionalism').value=''; $('snap-class-handling').value='';
+    $('snap-professionalism').value=''; $('snap-class-handling').value='';
     $('snap-skill-development').value=''; $('snap-student-engagement').value=''; $('snap-tasks-followup').value='';
 $('snap-session-plan-adherence').value=''; $('snap-study-material-sharing').value='';
     $('snap-overall-rating').value = '';
