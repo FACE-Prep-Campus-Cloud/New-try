@@ -464,7 +464,12 @@ body[data-theme="dark"] .auth-footnote { color: rgba(255,255,255,0.45); }
 }
 .insight-block h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); margin-bottom: 12px; }
 .insight-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-.insight-bar-label { width: 118px; flex-shrink: 0; font-size: 12px; color: var(--text-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.insight-bar-row.insight-bar-clickable { cursor: pointer; padding: 3px 6px; margin: 0 -6px 6px; border-radius: 8px; transition: background .12s; }
+.insight-bar-row.insight-bar-clickable:hover { background: var(--slate-soft); }
+.insight-bar-row.insight-bar-active { background: var(--blue-soft) !important; }
+.insight-panel-actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+.insight-scope-label { font-weight: 500; color: var(--text-light); font-size: 11.5px; }
+ .insight-bar-label { width: 118px; flex-shrink: 0; font-size: 12px; color: var(--text-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .insight-bar-track { flex: 1; height: 8px; border-radius: 999px; background: var(--slate-soft); overflow: hidden; }
 .insight-bar-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.16,1,.3,1); }
 .insight-bar-val { width: 26px; text-align: right; flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--text); }
@@ -2379,17 +2384,21 @@ body[data-theme="dark"] .dlog-topbar {
         </div>
       </div>
       <div class="page-body">
-        <div class="insights-panel hidden" id="insights-panel">
+<div class="insights-panel hidden" id="insights-panel">
           <div class="insight-block">
-            <h4>Tickets by category</h4>
+            <h4>Tickets by campus</h4>
+            <div id="insight-campus"></div>
+          </div>
+          <div class="insight-block">
+            <h4>Category breakdown <span class="insight-scope-label" id="insight-campus-label"></span></h4>
             <div id="insight-category"></div>
           </div>
-          <div class="insight-block">
-            <h4>Tickets by region</h4>
-            <div id="insight-region"></div>
+          <div class="insight-panel-actions">
+            <span class="insight-scope-label">Click a campus to filter the category breakdown</span>
+            <button class="btn btn-ghost" onclick="downloadInsightsCSV()">⬇ Download insights CSV</button>
           </div>
         </div>
-        <div class="stats-row">
+       <div class="stats-row">
           <button class="stat-card" data-filter="all" onclick="setStatusFilter('all')">
             <div class="stat-icon i-slate"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><line x1="4.5" y1="5.5" x2="11.5" y2="5.5"/><line x1="4.5" y1="8" x2="11.5" y2="8"/></svg></div>
             <div class="stat-body">
@@ -2770,6 +2779,7 @@ const DLOG_CATEGORIES = [
   { key: 'examinations',         label: 'Examinations',                                    callType: 'hard' },
   { key: 'infrastructure',       label: 'Infrastructure',                                  callType: 'soft' },
   { key: 'fee',                  label: 'Fee',                                             callType: 'soft' },
+ { key: 'mentor_requirement',   label: 'Mentor Requirement',                              callType: 'hard' },
   { key: 'disciplinary_student', label: 'Disciplinary Actions in Students',                 callType: 'hard' },
   { key: 'disciplinary_mentor',  label: 'Disciplinary Actions in Mentors',                  callType: 'hard' },
   { key: 'events',               label: 'Events',                                          callType: 'soft' },
@@ -3496,30 +3506,90 @@ function renderSparklines(){
   drawInto('spark-open', createdCounts,  getComputedStyle(document.body).getPropertyValue('--red').trim() || '#DC2626');
   drawInto('spark-res',  resolvedCounts, getComputedStyle(document.body).getPropertyValue('--green').trim() || '#16A34A');
 }
-function renderInsightBars(containerId, counts, colorMap, defaultColor){
+/* ── Insights: campus → category drill-down ── */
+let insightsSelectedCampus = null;
+
+function renderInsightBars(containerId, counts, colorMap, defaultColor, clickable){
   const el = $(containerId);
-  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,10);
   const max = Math.max(...entries.map(e=>e[1]), 1);
-  el.innerHTML = entries.map(([label, val]) => `
-    <div class="insight-bar-row">
+  el.innerHTML = entries.map(([label, val]) => {
+    const isActive = clickable && insightsSelectedCampus === label;
+    const rowClass = 'insight-bar-row' + (clickable ? ' insight-bar-clickable' : '') + (isActive ? ' insight-bar-active' : '');
+    const dataAttr = clickable ? ` data-campus="${escHTML(label)}"` : '';
+    return `
+    <div class="${rowClass}"${dataAttr}>
       <span class="insight-bar-label" title="${escHTML(label)}">${escHTML(label)}</span>
       <span class="insight-bar-track"><span class="insight-bar-fill" style="width:${(val/max)*100}%;background:${colorMap[label]||defaultColor}"></span></span>
       <span class="insight-bar-val">${val}</span>
-    </div>`).join('') || '<div style="font-size:12px;color:var(--text-faint)">No data yet</div>';
+    </div>`;
+  }).join('') || '<div style="font-size:12px;color:var(--text-faint)">No data yet</div>';
 }
+
 function renderInsights(){
   if($('insights-panel').classList.contains('hidden')) return;
+
+  // Campus (college) counts across all tickets
+  const byCampus = {};
+  tickets.forEach(t => { const c = t.college || 'Unknown'; byCampus[c] = (byCampus[c]||0) + 1; });
+  renderInsightBars('insight-campus', byCampus, {}, 'var(--blue)', true);
+
+  // If the previously selected campus no longer has tickets, clear the selection
+  if(insightsSelectedCampus && !byCampus[insightsSelectedCampus]) insightsSelectedCampus = null;
+
+  // Category counts, scoped to the selected campus (or all campuses if none selected)
+  const scoped = insightsSelectedCampus
+    ? tickets.filter(t => (t.college || 'Unknown') === insightsSelectedCampus)
+    : tickets;
   const byCategory = {};
-  tickets.forEach(t => { byCategory[t.category||'Other'] = (byCategory[t.category||'Other']||0) + 1; });
-  renderInsightBars('insight-category', byCategory, {}, 'var(--blue)');
-  const byRegion = {};
-  tickets.forEach(t => { const info = getRegionInfo(t.college); byRegion[info.label] = (byRegion[info.label]||0) + 1; });
-  const regionColorMap = {};
-  Object.keys(REGION_DEFS).forEach(k => regionColorMap[REGION_DEFS[k].label] = REGION_HEX[k]);
-  regionColorMap['Unmapped'] = REGION_HEX.unmapped;
-  renderInsightBars('insight-region', byRegion, regionColorMap, 'var(--violet)');
+  scoped.forEach(t => { byCategory[t.category||'Other'] = (byCategory[t.category||'Other']||0) + 1; });
+  renderInsightBars('insight-category', byCategory, {}, 'var(--violet)');
+
+  const scopeLabel = $('insight-campus-label');
+  if(scopeLabel) scopeLabel.textContent = insightsSelectedCampus ? '— ' + insightsSelectedCampus : '— all campuses';
 }
-function cycleAvgResView(){
+
+/* Click a campus bar to filter the category breakdown to that campus; click again to clear */
+document.addEventListener('click', e => {
+  const row = e.target.closest('#insight-campus .insight-bar-row[data-campus]');
+  if(!row) return;
+  const campus = row.getAttribute('data-campus');
+  insightsSelectedCampus = (insightsSelectedCampus === campus) ? null : campus;
+  renderInsights();
+});
+
+/* Download campus × category ticket-count matrix as CSV */
+function downloadInsightsCSV(){
+  if(!tickets.length){ showToast('No tickets to export'); return; }
+  const matrix = {};
+  tickets.forEach(t => {
+    const campus = t.college || 'Unknown';
+    const cat = t.category || 'Other';
+    matrix[campus] = matrix[campus] || {};
+    matrix[campus][cat] = (matrix[campus][cat] || 0) + 1;
+  });
+  const rows = [['Campus','Category','Ticket Count']];
+  Object.keys(matrix).sort((a,b)=>a.localeCompare(b)).forEach(campus => {
+    const cats = matrix[campus];
+    Object.keys(cats).sort((a,b)=>a.localeCompare(b)).forEach(cat => {
+      rows.push([campus, cat, cats[cat]]);
+    });
+  });
+  const csv = rows.map(r => r.map(v => {
+    v = String(v);
+    if(v.includes(',') || v.includes('"') || v.includes('\n')) v = '"' + v.replace(/"/g,'""') + '"';
+    return v;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `facePrep-insights-campus-category-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Insights CSV exported');
+}
+ function cycleAvgResView(){
   const order = ['overall', 'region', 'priority'];
   const idx = order.indexOf(avgResView);
   avgResView = order[(idx + 1) % order.length];
