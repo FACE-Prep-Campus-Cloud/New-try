@@ -2950,6 +2950,7 @@ let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed
 let reviewCalMonth = new Date();
 /* ── College pending-review counts (for review-college dropdown, added) ── */
 let collegePendingCounts = {}; // { collegeName: pendingCount }
+ let reportCollegePendingCounts = {}; // { collegeName: count of reports awaiting KAM decision (stage 2) }
 /* ══════════════════════════════════════════════════════════
    ── CLASSROOM SNAP (added) ──
    ══════════════════════════════════════════════════════════ */
@@ -5045,6 +5046,22 @@ async function loadCollegePendingCounts(){
     collegePendingCounts = {};
   }
 }
+ async function loadReportCollegePendingCounts(){
+  try{
+    const { data, error } = await sb.from('report_approvals').select('college, stage');
+    if(error) throw error;
+    const counts = {};
+    (data || []).forEach(r => {
+      if(r.stage === 2){ // awaiting KAM review/decision
+        counts[r.college] = (counts[r.college] || 0) + 1;
+      }
+    });
+    reportCollegePendingCounts = counts;
+  }catch(e){
+    console.error('Could not load report pending counts:', e);
+    reportCollegePendingCounts = {};
+  }
+}
 function populateReviewCollegeSelect(){
   const sel = $('review-college-select');
   if(!sel) return;
@@ -5389,16 +5406,24 @@ function populateReportCollegeSelect(){
     names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
   }
   const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  const prevValue = sel.value;
   sel.innerHTML = '<option value="" disabled selected>Select college</option>' +
-    uniqueSorted.map(n => `<option value="${escHTML(n)}">${escHTML(n)}</option>`).join('');
+    uniqueSorted.map(name => {
+      const pending = reportCollegePendingCounts[name] || 0;
+      const label = pending > 0 ? `${name} — ${pending} pending review` : name;
+      const style = pending > 0 ? ' style="color:#DC2626;font-weight:600;"' : '';
+      return `<option value="${escHTML(name)}"${style}>${escHTML(label)}</option>`;
+    }).join('');
+  if(prevValue) sel.value = prevValue;
 }
 async function enterReportMonitor(){
   hide('platform-select-screen');
   hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
   show('report-monitor-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  await loadReportCollegePendingCounts();
   populateReportCollegeSelect();
-  const sel = $('rm-college-select');
+ const sel = $('rm-college-select');
   reportMonitorCollege = sessionRole === 'manager' ? sessionCollege : (sel.value || null);
   reportMonitorMonth = currentMonthStr();
   rmCalYear = new Date().getFullYear();
