@@ -5637,23 +5637,23 @@ function renderReportMonitor(){
       <div class="ledger-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
           <div>
-            <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · Confirmation</div>
-            <div style="font-size:13.5px;">Did Arun share the visual report?</div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · Campus Manager</div>
+            <div style="font-size:13.5px;">Have you received the visual report from Arun by mail?</div>
           </div>
           <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
         </div>
         ${stage<2 ? `<div class="rm-lock">Locked until the spreadsheet link is shared in Step 1.</div>` : ''}
-        ${stage===2 && canReview ? `
+        ${stage===2 && isManager ? `
           <div class="modal-actions" style="padding-top:6px;">
             <button class="btn btn-primary" style="background:var(--green);" onclick="confirmArunShared(true)">Yes, shared</button>
             <button class="btn btn-primary" style="background:var(--red);" onclick="confirmArunShared(false)">Not yet</button>
           </div>
         ` : ''}
-        ${stage===2 && !canReview ? `<div class="rm-lock" style="margin-top:6px;">Waiting on confirmation.</div>` : ''}
+        ${stage===2 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm receipt.</div>` : ''}
         ${stage>2 && rec && rec.arun_shared_by ? `<div class="rm-lock" style="margin-top:6px;">Confirmed by ${escHTML(rec.arun_shared_by)} on ${rec.arun_shared_at ? fmtAbs(rec.arun_shared_at) : '—'}.</div>` : ''}
       </div>
     </div>
-
+    
     <div class="rm-step ${s3.node==='locked'?'locked':''}">
       <div class="rm-node ${s3.node}">3</div>
       <div class="ledger-card">
@@ -5845,8 +5845,8 @@ async function sendReportToKAM(){
 }
 
 async function confirmArunShared(shared){
-  if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
-  const reviewer = window.prompt('Enter your name to confirm:');
+  if(sessionRole !== 'manager' || !reportRecord) return;
+ const reviewer = window.prompt('Enter your name to confirm:');
   if(!reviewer || !reviewer.trim()){ showToast('Your name is required'); return; }
   const historyEntry = { type:'arun_shared', at:new Date().toISOString(), by:reviewer.trim(), remark: shared ? 'Yes' : 'Not yet' };
   const history = [historyEntry, ...(reportRecord.history||[])];
