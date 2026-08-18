@@ -1553,6 +1553,39 @@ body[data-theme="dark"] .dlog-topbar {
 .review-cal-pill {
   padding: 2px 6px;     /* slightly tighter so pills fit cleanly */
 }
+  
+/* ══════════════════════════════════════════════════════════
+   ── MONTHLY REPORT MONITOR (added) ──
+   ══════════════════════════════════════════════════════════ */
+.platform-icon.p-violet { background: linear-gradient(135deg, var(--violet), var(--blue)); }
+.rm-rail{position:relative;padding-left:34px;margin-top:10px;}
+.rm-rail-line{position:absolute;left:14px;top:8px;bottom:8px;width:2px;background:var(--border);}
+.rm-step{position:relative;margin-bottom:16px;}
+.rm-step.locked{opacity:.6;}
+.rm-node{position:absolute;left:-34px;top:18px;width:30px;height:30px;border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);z-index:2;}
+.rm-node.ok{border-color:var(--green);color:var(--green);background:var(--green-soft);}
+.rm-node.warn{border-color:var(--amber);color:var(--amber);background:var(--amber-soft);}
+.rm-node.active{border-color:var(--blue);color:var(--blue);background:var(--blue-soft);}
+.rm-node.locked{border-color:var(--border);color:var(--text-faint);}
+.rm-pill{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:4px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.rm-pill .dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.rm-pill.ok{background:var(--green-soft);color:var(--green);}
+.rm-pill.ok .dot{background:var(--green);}
+.rm-pill.warn{background:var(--amber-soft);color:var(--amber);}
+.rm-pill.warn .dot{background:var(--amber);}
+.rm-pill.bad{background:var(--red-soft);color:var(--red);}
+.rm-pill.bad .dot{background:var(--red);}
+.rm-pill.neutral{background:var(--slate-soft);color:var(--text-light);}
+.rm-pill.neutral .dot{background:var(--text-faint);}
+.rm-hist-item{display:flex;gap:10px;padding:8px 0;font-size:12.5px;border-bottom:1px dashed var(--border);}
+.rm-hist-item:last-child{border-bottom:none;}
+.rm-hist-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.rm-hist-dot.sent{background:var(--blue);}
+.rm-hist-dot.approve{background:var(--green);}
+.rm-hist-dot.reject{background:var(--red);}
+.rm-hist-dot.shared{background:var(--green);}
+.rm-remark{margin-top:4px;background:var(--red-soft);color:var(--red);border-radius:6px;padding:6px 9px;font-family:'JetBrains Mono',monospace;font-size:11.5px;white-space:pre-wrap;}
+.rm-lock{font-size:11.5px;color:var(--text-faint);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;}
 </style>
 </head>
 <body>
@@ -1746,6 +1779,16 @@ body[data-theme="dark"] .dlog-topbar {
         </div>
         <h3 id="platform-third-title">Classroom Observation Log</h3>
         <p id="platform-third-desc">Observations during classroom visits and log what you observed.</p>
+      </button>
+     <button class="platform-card" id="platform-card-reportmonitor" onclick="selectPlatform('reportmonitor')">
+        <div class="platform-card-top">
+          <div class="platform-icon p-violet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/><path d="M9 13l2 2 4-4"/></svg>
+          </div>
+          <span class="platform-count-badge pending hidden" id="platform-report-badge"></span>
+        </div>
+        <h3>Monthly Report Monitor</h3>
+        <p>Send, review and track approval of each college's monthly report.</p>
       </button>
     </div>
     <div class="platform-streak hidden" id="platform-streak">
@@ -2065,7 +2108,49 @@ body[data-theme="dark"] .dlog-topbar {
     <div id="csnap-empty" class="empty-state hidden"><p>No classroom snaps logged yet.</p></div>
   </div>
  </div>
+<!-- ── MONTHLY REPORT MONITOR SCREEN (added) ── -->
+<div id="report-monitor-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="sky-clouds-bg" id="rm-skywrap">
+    <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+      <path fill="#BFE0F5"><animate attributeName="d" dur="10s" repeatCount="indefinite" values="M0,55 Q75,40 150,55 T300,55 V100 H0 Z;M0,50 Q75,65 150,50 T300,50 V100 H0 Z;M0,55 Q75,40 150,55 T300,55 V100 H0 Z"/></path>
+      <path fill="#D8ECFA" opacity="0.85"><animate attributeName="d" dur="7s" repeatCount="indefinite" values="M0,70 Q75,58 150,70 T300,70 V100 H0 Z;M0,65 Q75,80 150,65 T300,65 V100 H0 Z;M0,70 Q75,58 150,70 T300,70 V100 H0 Z"/></path>
+    </svg>
+  </div>
+  <div class="dlog-topbar">
+    <div class="breadcrumb">Monthly Report Monitor / <b id="rm-breadcrumb-college">—</b></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <div class="dlog-body">
+    <div class="ledger-head">
+      <div>
+        <div class="ledger-eyebrow">Report approval</div>
+        <div class="ledger-title" id="rm-college-name">—</div>
+      </div>
+      <div class="ledger-meta">
+        Revision <span id="rm-revision-badge">1</span>
+      </div>
+    </div>
 
+    <div class="dlog-form-card">
+      <h3>Report details</h3>
+      <div class="form-grid" style="margin-bottom:0;">
+        <div class="form-group">
+          <label class="field-label">College</label>
+          <select id="rm-college-select" onchange="onReportCollegeChange(this.value)"></select>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Report month</label>
+          <input id="rm-month-select" type="month" onchange="onReportMonthChange(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div id="rm-body"></div>
+  </div>
+</div>
 <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
   <div class="sky-clouds-bg" id="review-skywrap">
@@ -2769,6 +2854,10 @@ let snapSaving = false;
 let snapReviewCollege = null;
 let snapLocation = null; 
  let csnapCalMonth = new Date();
+ /* ── Monthly Report Monitor state (added) ── */
+let reportMonitorCollege = null;
+let reportMonitorMonth   = null;
+let reportRecord         = null;
  // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
@@ -3056,7 +3145,8 @@ function showPlatformSelect(){
   hide('dailylog-screen');
   hide('review-panel-screen');
   hide('classroom-snap-screen');
-  const isManager = sessionRole === 'manager';
+  hide('report-monitor-screen');
+ const isManager = sessionRole === 'manager';
   const isKam = sessionRole === 'kam';
   renderPlatformGreeting();
   $('platform-tickets-desc').textContent = isManager
@@ -3161,6 +3251,27 @@ async function loadPlatformSelectBadges(){
       else hide('platform-snap-badge');
     }
   }catch(e){ console.error('Could not load classroom_snaps pending count:', e); }
+
+  /* ── NEW: Monthly Report Monitor pending badge ── */
+  try{
+    const { data, error } = await sb.from('report_approvals').select('id,college,stage,revision');
+    if(error) throw error;
+    let repRows = data || [];
+    if(sessionRole === 'manager' || sessionRole === 'kam'){
+      repRows = repRows.filter(r => collegeMatchesSession(r.college));
+    }
+    let repPending = 0;
+    if(sessionRole === 'manager'){
+      repPending = repRows.filter(r => r.college === sessionCollege && r.stage === 1 && (r.revision||1) > 1).length;
+    } else {
+      repPending = repRows.filter(r => r.stage === 2).length;
+    }
+    const repBadge = $('platform-report-badge');
+    if(repBadge){
+      if(repPending > 0){ repBadge.textContent = `${repPending} pending`; show('platform-report-badge'); }
+      else hide('platform-report-badge');
+    }
+  }catch(e){ console.error('Could not load report_approvals pending count:', e); }
 }
  /* ── Subtle 3D tilt-on-hover for the platform-select cards ── */
 function initPlatformCardTilt(){
@@ -3195,17 +3306,21 @@ function selectPlatform(which){
     else enterReviewPanel();
   } else if(which === 'classroomsnap'){
     enterClassroomSnap();
+  } else if(which === 'reportmonitor'){
+    enterReportMonitor();
   }
-}
+}  
+
 function backToPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
   hide('review-panel-screen');
   hide('classroom-snap-screen');
+  hide('report-monitor-screen');
   destroyVantaBirds();
   showPlatformSelect();
 }
-function enterDashboard(){
+ function enterDashboard(){
   hide('platform-select-screen');
   hide('dailylog-screen');
   show('admin-screen');
@@ -3253,11 +3368,12 @@ function fuzzyMatch(b){
   }
   return true;
 }
- function logout(){
+function logout(){
   hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
-  hide('classroom-snap-screen');
+  hide('classroom-snap-screen'); hide('report-monitor-screen');
   classroomSnaps = []; snapReviewCollege = null;
-  show('auth-screen');
+  reportMonitorCollege = null; reportMonitorMonth = null; reportRecord = null;
+ show('auth-screen');
   hide('pin-error');
   const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
   const kamPin = $('kam-pin-input'); if(kamPin) kamPin.value = '';
@@ -5136,6 +5252,271 @@ function initVantaBirds(){
   });
 }
 function destroyVantaBirds(){ if(vantaBirdsEffect){ vantaBirdsEffect.destroy(); vantaBirdsEffect = null; } }
+
+/* ══════════════════════════════════════════════════════════
+   ── MONTHLY REPORT MONITOR (added) ──
+   Requires a `report_approvals` table in Supabase — see the
+   SQL at the top of the integration patch this code came from.
+   Flow: Campus Manager sends → KAM approves / sends back with
+   remarks (revision +1, loops back to step 1) → Campus Manager
+   confirms it was shared with the stakeholder.
+   ══════════════════════════════════════════════════════════ */
+function currentMonthStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function populateReportCollegeSelect(){
+  const sel = $('rm-college-select');
+  if(!sel) return;
+  if(sessionRole === 'manager'){
+    sel.innerHTML = `<option value="${escHTML(sessionCollege)}">${escHTML(sessionCollege)}</option>`;
+    sel.value = sessionCollege;
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  let names = collegeContacts.length ? collegeContacts.map(c => c.college) : COLLEGE_REGION_MAP.map(c => c.college);
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+    names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
+  }
+  const uniqueSorted = [...new Set(names)].sort((a,b) => a.localeCompare(b));
+  sel.innerHTML = '<option value="" disabled selected>Select college</option>' +
+    uniqueSorted.map(n => `<option value="${escHTML(n)}">${escHTML(n)}</option>`).join('');
+}
+async function enterReportMonitor(){
+  hide('platform-select-screen');
+  hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
+  show('report-monitor-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  populateReportCollegeSelect();
+  const sel = $('rm-college-select');
+  reportMonitorCollege = sessionRole === 'manager' ? sessionCollege : (sel.value || null);
+  reportMonitorMonth = currentMonthStr();
+  $('rm-month-select').value = reportMonitorMonth;
+  $('rm-college-name').textContent = reportMonitorCollege || '—';
+  $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
+  if(reportMonitorCollege) loadReportRecord();
+  else { reportRecord = null; renderReportMonitor(); }
+}
+function onReportCollegeChange(v){
+  reportMonitorCollege = v || null;
+  $('rm-college-name').textContent = reportMonitorCollege || '—';
+  $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
+  if(reportMonitorCollege) loadReportRecord();
+  else { reportRecord = null; renderReportMonitor(); }
+}
+function onReportMonthChange(v){
+  reportMonitorMonth = v;
+  if(reportMonitorCollege) loadReportRecord();
+}
+async function loadReportRecord(){
+  const body = $('rm-body');
+  if(body) body.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:20px 0;">Loading…</div>';
+  try{
+    const { data, error } = await sb.from('report_approvals')
+      .select('*')
+      .eq('college', reportMonitorCollege)
+      .eq('report_month', reportMonitorMonth)
+      .maybeSingle();
+    if(error) throw error;
+    reportRecord = data || null;
+    renderReportMonitor();
+  }catch(e){
+    console.error('Could not load report_approvals (has the table been created?):', e);
+    if(body) body.innerHTML = `<div class="empty-state"><p>Couldn't load report status. Make sure the <b>report_approvals</b> table exists in Supabase.</p></div>`;
+  }
+}
+function reportStepStatus(stage, revision, n){
+  if(n===1){
+    if(stage===1) return {node:'active', pill:'warn', label: revision>1 ? `Needs resend · Rev ${revision}` : 'Not sent yet'};
+    return {node:'ok', pill:'ok', label:`Sent · Rev ${revision}`};
+  }
+  if(n===2){
+    if(stage<2) return {node:'locked', pill:'neutral', label:'Waiting on step 1'};
+    if(stage===2) return {node:'active', pill:'warn', label:'Awaiting KAM decision'};
+    return {node:'ok', pill:'ok', label:'Approved'};
+  }
+  if(n===3){
+    if(stage<3) return {node:'locked', pill:'neutral', label:'Waiting on KAM approval'};
+    if(stage===4) return {node:'ok', pill:'ok', label:'Shared with stakeholder'};
+    return {node:'active', pill:'warn', label:'Ready to share'};
+  }
+}
+function renderReportMonitor(){
+  const body = $('rm-body');
+  if(!body) return;
+  if(!reportMonitorCollege){
+    body.innerHTML = `<div class="empty-state"><p>Select a college to view its report status.</p></div>`;
+    return;
+  }
+  const rec = reportRecord;
+  const stage = rec ? (rec.stage||1) : 1;
+  const revision = rec ? (rec.revision||1) : 1;
+  $('rm-revision-badge').textContent = revision;
+  const isManager = sessionRole === 'manager';
+  const canReview = sessionRole === 'admin' || sessionRole === 'kam';
+  const s1 = reportStepStatus(stage, revision, 1), s2 = reportStepStatus(stage, revision, 2), s3 = reportStepStatus(stage, revision, 3);
+  const history = (rec && Array.isArray(rec.history)) ? rec.history : [];
+  const lastReject = history.find(h => h.type === 'reject');
+
+  let html = `<div class="rm-rail">
+    <div class="rm-rail-line"></div>
+    <div class="rm-step ${s1.node==='locked'?'locked':''}">
+      <div class="rm-node ${s1.node}">1</div>
+      <div class="ledger-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 1 · Campus Manager</div>
+            <div style="font-size:13.5px;">Send the monthly report presentation to the KAM for approval.</div>
+            ${revision>1 ? `<div style="font-size:12px;color:var(--text-faint);margin-top:4px;">This is revision ${revision} — make the changes noted below, then resend.</div>` : ''}
+          </div>
+          <span class="rm-pill ${s1.pill}"><span class="dot"></span>${s1.label}</span>
+        </div>
+        ${lastReject && stage===1 ? `<div class="rm-remark">${escHTML(lastReject.remark||'')}</div>` : ''}
+        ${isManager && stage===1 ? `<div class="modal-actions" style="padding-top:6px;"><button class="btn btn-primary" onclick="sendReportToKAM()">${revision>1?'Resend to KAM':'Send to KAM'}</button></div>` : ''}
+        ${!isManager ? `<div class="rm-lock" style="margin-top:6px;">Only the campus manager can send this step.</div>` : ''}
+      </div>
+    </div>
+
+    <div class="rm-step ${s2.node==='locked'?'locked':''}">
+      <div class="rm-node ${s2.node}">2</div>
+      <div class="ledger-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · KAM</div>
+            <div style="font-size:13.5px;">Review the report. Approve it, or send it back with remarks.</div>
+          </div>
+          <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
+        </div>
+        ${stage<2 ? `<div class="rm-lock">Locked until the report is sent in Step 1.</div>` : ''}
+        ${stage===2 && canReview ? `
+          <div class="modal-actions" style="padding-top:6px;">
+            <button class="btn btn-primary" style="background:var(--green);" onclick="approveReportKAM()">Approve</button>
+            <button class="btn btn-primary" style="background:var(--red);" onclick="rejectReportKAM()">Send back with remarks</button>
+          </div>
+          <label class="field-label" style="margin-top:10px;display:block;">Remarks (required if sending back)</label>
+          <textarea id="rm-remark-input" rows="3" placeholder="What needs to change before this can be approved..." style="width:100%;margin-top:6px;"></textarea>
+        ` : ''}
+        ${stage===2 && !canReview ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the KAM's decision.</div>` : ''}
+        ${stage>2 ? `<div class="rm-lock">Approved on ${rec && rec.decided_at ? fmtAbs(rec.decided_at) : '—'}${rec && rec.decided_by ? ' by '+escHTML(rec.decided_by) : ''}.</div>` : ''}
+      </div>
+    </div>
+
+    <div class="rm-step ${s3.node==='locked'?'locked':''}">
+      <div class="rm-node ${s3.node}">3</div>
+      <div class="ledger-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 3 · Campus Manager</div>
+            <div style="font-size:13.5px;">Has the report been shared with the college stakeholder?</div>
+          </div>
+          <span class="rm-pill ${s3.pill}"><span class="dot"></span>${s3.label}</span>
+        </div>
+        ${stage<3 ? `<div class="rm-lock">Locked until the KAM approves the report in Step 2.</div>` : ''}
+        ${stage===3 && isManager ? `<div class="modal-actions" style="padding-top:6px;"><button class="btn btn-primary" style="background:var(--green);" onclick="shareReportWithStakeholder()">Yes — shared</button></div>` : ''}
+        ${stage===3 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm sharing.</div>` : ''}
+        ${stage===4 ? `<div class="rm-lock">Shared with the stakeholder on ${rec && rec.shared_at ? fmtAbs(rec.shared_at) : '—'}. Cycle complete.</div>` : ''}
+      </div>
+    </div>
+  </div>`;
+
+  if(history.length){
+    const typeMap = {
+      sent:    {dot:'sent',    label: h => `Sent to KAM for review (Rev ${h.rev})`},
+      approve: {dot:'approve', label: h => `KAM approved (Rev ${h.rev})`},
+      reject:  {dot:'reject',  label: h => `KAM sent back with remarks (Rev ${h.rev})`},
+      shared:  {dot:'shared',  label: h => `Shared with stakeholder`}
+    };
+    html += `<div class="ledger-card" style="margin-top:6px;">
+      <div class="ledger-card-title">Activity log</div>
+      ${history.map(h => {
+        const m = typeMap[h.type] || {dot:'sent', label: () => h.type};
+        return `<div class="rm-hist-item">
+          <span class="rm-hist-dot ${m.dot}"></span>
+          <div>
+            <strong style="display:block;font-weight:600;">${m.label(h)}</strong>
+            <span style="color:var(--text-faint);">${fmtAbs(h.at)}${h.by ? ' · '+escHTML(h.by) : ''}</span>
+            ${h.remark ? `<div class="rm-remark">${escHTML(h.remark)}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+  body.innerHTML = html;
+}
+async function sendReportToKAM(){
+  if(sessionRole !== 'manager' || !reportMonitorCollege) return;
+  const rec = collegeContacts.find(c => c.college === reportMonitorCollege);
+  const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+  const revision = reportRecord ? (reportRecord.revision||1) : 1;
+  const historyEntry = { type:'sent', at:new Date().toISOString(), rev:revision, by:name };
+  const history = [historyEntry, ...((reportRecord && reportRecord.history) || [])];
+  const payload = {
+    college: reportMonitorCollege, report_month: reportMonitorMonth,
+    stage: 2, revision, sent_at: new Date().toISOString(), sent_by: name,
+    decision: null, decided_at: null, decided_by: null,
+    shared: false, shared_at: null, shared_by: null,
+    history, updated_at: new Date().toISOString()
+  };
+  const { data, error } = await sb.from('report_approvals')
+    .upsert(payload, { onConflict: 'college,report_month' }).select().maybeSingle();
+  if(error){ console.error(error); showToast('Could not send report: '+(error.message||'check console')); return; }
+  reportRecord = data || payload;
+  renderReportMonitor();
+  showToast('Report sent to KAM for review');
+  if(rec && rec.senior_manager_email){
+    const subject = encodeURIComponent(`[Report Approval] ${reportMonitorCollege} — Rev ${revision} sent for review`);
+    const mailBody = encodeURIComponent(`Campus: ${reportMonitorCollege}\nReport month: ${reportMonitorMonth}\nRevision: ${revision}\n\nThe monthly report presentation has been sent for your review and approval.`);
+    window.open(`mailto:${rec.senior_manager_email}?subject=${subject}&body=${mailBody}`, '_blank');
+  }
+}
+async function approveReportKAM(){
+  if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
+  const reviewer = window.prompt('Enter your name to confirm approval:');
+  if(!reviewer || !reviewer.trim()){ showToast('Reviewer name is required'); return; }
+  const historyEntry = { type:'approve', at:new Date().toISOString(), rev:reportRecord.revision||1, by:reviewer.trim() };
+  const history = [historyEntry, ...(reportRecord.history||[])];
+  const payload = { stage:3, decision:'approved', decided_at:new Date().toISOString(), decided_by:reviewer.trim(), history, updated_at:new Date().toISOString() };
+  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
+  if(error){ console.error(error); showToast('Could not approve: '+(error.message||'check console')); return; }
+  reportRecord = data;
+  renderReportMonitor();
+  showToast('Report approved');
+}
+async function rejectReportKAM(){
+  if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
+  const ta = $('rm-remark-input');
+  const remark = ta ? ta.value.trim() : '';
+  if(!remark){ showToast('Please add remarks before sending back'); if(ta) ta.focus(); return; }
+  const reviewer = window.prompt('Enter your name to confirm this decision:');
+  if(!reviewer || !reviewer.trim()){ showToast('Reviewer name is required'); return; }
+  const prevRevision = reportRecord.revision || 1;
+  const historyEntry = { type:'reject', at:new Date().toISOString(), rev:prevRevision, by:reviewer.trim(), remark };
+  const history = [historyEntry, ...(reportRecord.history||[])];
+  const payload = {
+    stage:1, revision: prevRevision+1, sent_at:null, sent_by:null,
+    decision:null, decided_at:null, decided_by:null, history, updated_at:new Date().toISOString()
+  };
+  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
+  if(error){ console.error(error); showToast('Could not send back: '+(error.message||'check console')); return; }
+  reportRecord = data;
+  renderReportMonitor();
+  showToast('Sent back to campus manager with remarks');
+}
+async function shareReportWithStakeholder(){
+  if(sessionRole !== 'manager' || !reportRecord) return;
+  const rec = collegeContacts.find(c => c.college === reportMonitorCollege);
+  const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+  const historyEntry = { type:'shared', at:new Date().toISOString(), rev:reportRecord.revision||1, by:name };
+  const history = [historyEntry, ...(reportRecord.history||[])];
+  const payload = { stage:4, shared:true, shared_at:new Date().toISOString(), shared_by:name, history, updated_at:new Date().toISOString() };
+  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
+  if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
+  reportRecord = data;
+  renderReportMonitor();
+  showToast('Marked as shared with stakeholder');
+}
 </script>
 </body>
 </html>
