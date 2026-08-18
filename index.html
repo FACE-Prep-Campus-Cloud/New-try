@@ -5821,11 +5821,11 @@ async function sendReportToKAM(){
   rmSelectedFile = null;
   const fileInput = $('rm-file-input'); if(fileInput) fileInput.value = '';
   renderReportMonitor();
-     loadReportCollegeHistory();
-  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);();
+  loadReportCollegeHistory();
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
 
   showToast('Report sent to KAM for review');
-  if(rec && rec.senior_manager_email){
+ if(rec && rec.senior_manager_email){
     const subject = encodeURIComponent(`[Report Approval] ${reportMonitorCollege} — Rev ${revision} sent for review`);
     const mailBody = encodeURIComponent(`Campus: ${reportMonitorCollege}\nReport month: ${reportMonitorMonth}\nRevision: ${revision}\nReport: ${reportUrl}\n\nThe monthly report presentation has been sent for your review and approval.`);
     window.open(`mailto:${rec.senior_manager_email}?subject=${subject}&body=${mailBody}`, '_blank');
