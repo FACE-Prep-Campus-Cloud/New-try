@@ -1869,8 +1869,8 @@ body[data-theme="dark"] .dlog-topbar {
           </div>
           <span class="platform-count-badge pending hidden" id="platform-report-badge"></span>
         </div>
-        <h3>Monthly Report Monitor</h3>
-        <p>Send, review and track approval of each college's monthly report.</p>
+        <h3 id="platform-fourth-title">Monthly Report Monitor</h3>
+        <p id="platform-fourth-desc">Send, review and track approval of each college's monthly report.</p>
       </button>
     </div>
     <div class="platform-streak hidden" id="platform-streak">
@@ -3269,8 +3269,12 @@ $('platform-third-title').textContent = isManager ? 'Classroom Observation Log' 
  $('platform-third-desc').textContent = isManager
     ? 'Snap a photo during classroom visits and log what you observed.'
     : 'Browse classroom visit photos and observations logged by campus managers.';
+$('platform-fourth-title').textContent = isManager ? 'Monthly Report Log' : 'Monthly Report Monitor';
+ $('platform-fourth-desc').textContent = isManager
+    ? 'Log and track the approval status of your college\'s monthly report.'
+    : 'Send, review and track approval of each college\'s monthly report.';
 show('platform-select-screen');
-  const csnapCard = document.getElementById('platform-card-csnap');
+ const csnapCard = document.getElementById('platform-card-csnap');
   if(csnapCard) csnapCard.classList.toggle('hidden', !isClassroomSnapAllowedForSession());
   initPlatformCardTilt();
   initVantaBirds();
