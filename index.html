@@ -5521,15 +5521,17 @@ function rmMonthCellStatus(rec){
     </button>`;
   }).join('');
 }
-function selectReportMonthFromCalendar(key){
+async function selectReportMonthFromCalendar(key){
   reportMonitorMonth = key;
   rmCalYear = parseInt(key.slice(0,4), 10);
   const sel = $('rm-month-select');
   if(sel) sel.value = key;
+  await loadReportCollegeStages(reportMonitorMonth);
+  populateReportCollegeSelect();
   if(reportMonitorCollege) loadReportRecord();
   renderReportMonthCalendar();
 }
-function reportStepStatus(stage, revision, n){
+ function reportStepStatus(stage, revision, n){
   if(n===1){ // KAM shares spreadsheet link
     if(stage===1) return {node:'active', pill:'warn', label:'Not shared yet'};
     return {node:'ok', pill:'ok', label:'Link shared'};
