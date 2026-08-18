@@ -2198,24 +2198,6 @@ body[data-theme="dark"] .dlog-topbar {
 
     <div class="dlog-layout">
       <div>
-        <div class="dlog-form-card">
-          <h3>Report details</h3>
-          <div class="form-grid" style="margin-bottom:0;">
-            <div class="form-group">
-              <label class="field-label">College</label>
-              <select id="rm-college-select" onchange="onReportCollegeChange(this.value)"></select>
-            </div>
-            <div class="form-group">
-              <label class="field-label">Report month</label>
-              <input id="rm-month-select" type="month" onchange="onReportMonthChange(this.value)">
-            </div>
-          </div>
-        </div>
-
-        <div id="rm-body"></div>
-      </div>
-
-      <div>
         <div class="review-cal-topbar">
           <span style="font-size:14px;color:var(--text-light);font-weight:600;">Submission calendar</span>
           <div class="review-cal-nav">
@@ -2233,6 +2215,24 @@ body[data-theme="dark"] .dlog-topbar {
           <span><span class="cal-dot" style="background:var(--red)"></span>Changes requested</span>
         </div>
         <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a month to jump to that report.</div>
+      </div>
+
+      <div>
+        <div class="dlog-form-card">
+          <h3>Report details</h3>
+          <div class="form-grid" style="margin-bottom:0;">
+            <div class="form-group">
+              <label class="field-label">College</label>
+              <select id="rm-college-select" onchange="onReportCollegeChange(this.value)"></select>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Report month</label>
+              <input id="rm-month-select" type="month" onchange="onReportMonthChange(this.value)">
+            </div>
+          </div>
+        </div>
+
+        <div id="rm-body"></div>
       </div>
     </div>
   </div>
