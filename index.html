@@ -5721,24 +5721,28 @@ async function sendReportToKAM(){
     window.open(`mailto:${rec.senior_manager_email}?subject=${subject}&body=${mailBody}`, '_blank');
   }
 }
- async function approveReportKAM(){
+async function approveReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
   const reviewer = window.prompt('Enter your name to confirm approval:');
   if(!reviewer || !reviewer.trim()){ showToast('Reviewer name is required'); return; }
   const historyEntry = { type:'approve', at:new Date().toISOString(), rev:reportRecord.revision||1, by:reviewer.trim() };
   const history = [historyEntry, ...(reportRecord.history||[])];
   const payload = {
-    stage:1, revision: prevRevision+1, sent_at:null, sent_by:null, report_url:null,
-    decision:null, decided_at:null, decided_by:null, history, updated_at:new Date().toISOString()
+    stage: 3,
+    decision: 'approved',
+    decided_at: new Date().toISOString(),
+    decided_by: reviewer.trim(),
+    history,
+    updated_at: new Date().toISOString()
   };
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not approve: '+(error.message||'check console')); return; }
-   reportRecord = data;
+  reportRecord = data;
   renderReportMonitor();
   loadReportCollegeHistory();
   showToast('Report approved');
 }
-async function rejectReportKAM(){
+ async function rejectReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
   const ta = $('rm-remark-input');
   const remark = ta ? ta.value.trim() : '';
