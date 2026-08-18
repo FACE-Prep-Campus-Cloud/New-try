@@ -1585,8 +1585,28 @@ body[data-theme="dark"] .dlog-topbar {
 .rm-remark{margin-top:4px;background:var(--red-soft);color:var(--red);border-radius:6px;padding:6px 9px;font-family:'JetBrains Mono',monospace;font-size:11.5px;white-space:pre-wrap;}
 .rm-lock{font-size:11.5px;color:var(--text-faint);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;}
 
-  #report-monitor-screen .dlog-body{ max-width:1180px; margin:0 auto; }
-.rm-month-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+#report-monitor-screen .dlog-body{
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 40px 24px;
+}
+
+#report-monitor-screen .dlog-layout{
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(420px, 1fr);
+  gap: 32px;
+  align-items: start;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1100px){
+  #report-monitor-screen .dlog-layout{
+    grid-template-columns: 1fr;
+  }
+}
+  .rm-month-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .rm-month-cell{
   border-radius:12px; padding:11px 10px; background:var(--card); border:1px solid var(--border);
   cursor:pointer; text-align:left; transition:transform .15s, box-shadow .15s, border-color .15s;
@@ -1845,7 +1865,7 @@ body[data-theme="dark"] .dlog-topbar {
      <button class="platform-card" id="platform-card-reportmonitor" onclick="selectPlatform('reportmonitor')">
         <div class="platform-card-top">
           <div class="platform-icon p-violet">
-            <img src="https://rysajbwcuieovbsllaas.supabase.co/storage/v1/object/sign/Images/preview.webp?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZTQ3YzJiZi0xZmZlLTQ5MjctOGZlNy1iMDE1M2MyYTg2ZWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvcHJldmlldy53ZWJwIiwic2NvcGUiOiJkb3dubG9hZCIsImlhdCI6MTc4NzAzOTI1OSwiZXhwIjoxODE4NTc1MjU5fQ.HuxhiJsPBKZ1PVo4MKbJ01UYUQy8QkdaaLKVANoeC8k" alt="Monthly Report Monitor" class="custom-card-icon" />
+            <img src="https://rysajbwcuieovbsllaas.supabase.co/storage/v1/object/sign/Images/1055644.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZTQ3YzJiZi0xZmZlLTQ5MjctOGZlNy1iMDE1M2MyYTg2ZWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvMTA1NTY0NC5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg3MDQwMTYyLCJleHAiOjE4MTg1NzYxNjJ9.cqb5NSPI6emMMMWO-VmMZJr00kEapZJHucsdMMnsvyQ" alt="Monthly Report Monitor" class="custom-card-icon" />
           </div>
           <span class="platform-count-badge pending hidden" id="platform-report-badge"></span>
         </div>
