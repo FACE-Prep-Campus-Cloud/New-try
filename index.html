@@ -2950,10 +2950,7 @@ let reviewCallFilter = 'all'; // 'all' | 'hard' | 'soft' | 'pending' | 'reviewed
 let reviewCalMonth = new Date();
 /* ── College pending-review counts (for review-college dropdown, added) ── */
 let collegePendingCounts = {}; // { collegeName: pendingCount }
- let reportCollegePendingCounts = {}; // { collegeName: count of reports awaiting KAM decision (stage 2) }
-/* ══════════════════════════════════════════════════════════
-   ── CLASSROOM SNAP (added) ──
-   ══════════════════════════════════════════════════════════ */
+ let reportCollegeStageMap = {}; // { collegeName: { stage, revision } } for the currently selected report month
 let classroomSnaps = [];
 let snapSelectedFile = null;
 let snapSaving = false;
@@ -5046,23 +5043,32 @@ async function loadCollegePendingCounts(){
     collegePendingCounts = {};
   }
 }
- async function loadReportCollegePendingCounts(){
+ async function loadReportCollegeStages(month){
   try{
-    const { data, error } = await sb.from('report_approvals').select('college, stage');
+    const { data, error } = await sb.from('report_approvals').select('college, stage, revision').eq('report_month', month);
     if(error) throw error;
-    const counts = {};
-    (data || []).forEach(r => {
-      if(r.stage === 2){ // awaiting KAM review/decision
-        counts[r.college] = (counts[r.college] || 0) + 1;
-      }
-    });
-    reportCollegePendingCounts = counts;
+    const map = {};
+    (data || []).forEach(r => { map[r.college] = { stage: r.stage || 1, revision: r.revision || 1 }; });
+    reportCollegeStageMap = map;
   }catch(e){
-    console.error('Could not load report pending counts:', e);
-    reportCollegePendingCounts = {};
+    console.error('Could not load report stages:', e);
+    reportCollegeStageMap = {};
   }
 }
-function populateReviewCollegeSelect(){
+
+// Short label for a given stage, reused by the dropdown and the status strip
+function rmStepShortLabel(stage, revision){
+  const labels = {
+    1: 'Step 1 · Sheet link pending',
+    2: 'Step 2 · Awaiting confirmation',
+    3: (revision||1) > 1 ? `Step 3 · Changes requested` : 'Step 3 · Not sent yet',
+    4: 'Step 4 · With KAM',
+    5: 'Step 5 · Ready to share',
+    6: 'Done · Shared'
+  };
+  return labels[stage] || 'Not started';
+}
+ function populateReviewCollegeSelect(){
   const sel = $('review-college-select');
   if(!sel) return;
   let names = collegeContacts.length
@@ -5409,9 +5415,11 @@ function populateReportCollegeSelect(){
   const prevValue = sel.value;
   sel.innerHTML = '<option value="" disabled selected>Select college</option>' +
     uniqueSorted.map(name => {
-      const pending = reportCollegePendingCounts[name] || 0;
-      const label = pending > 0 ? `${name} — ${pending} pending review` : name;
-      const style = pending > 0 ? ' style="color:#DC2626;font-weight:600;"' : '';
+      const rec = reportCollegeStageMap[name];
+      const stepLabel = rec ? rmStepShortLabel(rec.stage, rec.revision) : 'Not started';
+      const label = `${name} — ${stepLabel}`;
+      const isDone = rec && rec.stage === 6;
+      const style = isDone ? ' style="color:#16A34A;"' : (rec ? ' style="color:#D9840C;font-weight:600;"' : '');
       return `<option value="${escHTML(name)}"${style}>${escHTML(label)}</option>`;
     }).join('');
   if(prevValue) sel.value = prevValue;
@@ -5421,19 +5429,19 @@ async function enterReportMonitor(){
   hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
   show('report-monitor-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
-  await loadReportCollegePendingCounts();
+  reportMonitorMonth = currentMonthStr();
+  await loadReportCollegeStages(reportMonitorMonth);
   populateReportCollegeSelect();
  const sel = $('rm-college-select');
   reportMonitorCollege = sessionRole === 'manager' ? sessionCollege : (sel.value || null);
-  reportMonitorMonth = currentMonthStr();
-  rmCalYear = new Date().getFullYear();
+ rmCalYear = new Date().getFullYear();
   $('rm-month-select').value = reportMonitorMonth;
   $('rm-college-name').textContent = reportMonitorCollege || '—';
   $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
   if(reportMonitorCollege) loadReportRecord();
   else { reportRecord = null; renderReportMonitor(); }
   loadReportCollegeHistory();
-}
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);}
 function onReportCollegeChange(v){
   reportMonitorCollege = v || null;
   $('rm-college-name').textContent = reportMonitorCollege || '—';
@@ -5441,12 +5449,14 @@ function onReportCollegeChange(v){
   if(reportMonitorCollege) loadReportRecord();
   else { reportRecord = null; renderReportMonitor(); }
   loadReportCollegeHistory();
-}
-function onReportMonthChange(v){
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);}
+async function onReportMonthChange(v){
   reportMonitorMonth = v;
+  await loadReportCollegeStages(reportMonitorMonth);
+  populateReportCollegeSelect();
   if(reportMonitorCollege) loadReportRecord();
 }
-async function loadReportRecord(){
+ async function loadReportRecord(){
   const body = $('rm-body');
   if(body) body.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:20px 0;">Loading…</div>';
   try{
@@ -5811,7 +5821,8 @@ async function sendReportToKAM(){
   rmSelectedFile = null;
   const fileInput = $('rm-file-input'); if(fileInput) fileInput.value = '';
   renderReportMonitor();
-   loadReportCollegeHistory();
+     loadReportCollegeHistory();
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);();
 
   showToast('Report sent to KAM for review');
   if(rec && rec.senior_manager_email){
@@ -5841,7 +5852,7 @@ async function sendReportToKAM(){
   reportRecord = data || payload;
   renderReportMonitor();
   loadReportCollegeHistory();
-  showToast('Spreadsheet link shared');
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Spreadsheet link shared');
 }
 
 async function confirmArunShared(shared){
@@ -5862,7 +5873,7 @@ async function confirmArunShared(shared){
   reportRecord = data;
   renderReportMonitor();
   loadReportCollegeHistory();
-  showToast(shared ? 'Confirmed — moving to next step' : 'Marked as not shared yet');
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast(shared ? 'Confirmed — moving to next step' : 'Marked as not shared yet');
 }
 async function approveReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
@@ -5883,7 +5894,8 @@ async function approveReportKAM(){
   reportRecord = data;
   renderReportMonitor();
   loadReportCollegeHistory();
-  showToast('Report approved');
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
+ showToast('Report approved');
 }
  async function rejectReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
@@ -5904,7 +5916,7 @@ async function approveReportKAM(){
    reportRecord = data;
   renderReportMonitor();
   loadReportCollegeHistory();
-  showToast('Sent back to campus manager with remarks');
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Sent back to campus manager with remarks');
 }
 async function shareReportWithStakeholder(){
   if(sessionRole !== 'manager' || !reportRecord) return;
@@ -5918,7 +5930,7 @@ async function shareReportWithStakeholder(){
   reportRecord = data;
   renderReportMonitor();
   loadReportCollegeHistory();
-  showToast('Marked as shared with stakeholder');
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Marked as shared with stakeholder');
 }</script>
 </body>
 </html>
