@@ -2963,7 +2963,8 @@ let reportMonitorCollege = null;
 let reportMonitorMonth   = null;
 let reportRecord         = null;
 let rmSelectedFile       = null;
-let rmCalYear            = new Date().getFullYear();
+let rmProofFile          = null;
+ let rmCalYear            = new Date().getFullYear();
 let rmCollegeHistory     = []; // every report_approvals row for the selected college, any month
  // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
@@ -5744,10 +5745,29 @@ function renderReportMonitor(){
           <span class="rm-pill ${s5.pill}"><span class="dot"></span>${s5.label}</span>
         </div>
         ${stage<5 ? `<div class="rm-lock">Locked until the KAM approves the report in Step 4.</div>` : ''}
-        ${stage===5 && isManager ? `<div class="modal-actions" style="padding-top:6px;"><button class="btn btn-primary" style="background:var(--green);" onclick="shareReportWithStakeholder()">Yes — shared</button></div>` : ''}
+        ${stage===5 && isManager ? `
+          <div class="rm-submission-box">
+            <div class="rm-submission-row">
+              <label class="rm-file-input-label" for="rm-proof-file-input">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8M4.5 6.5 8 3l3.5 3.5"/><path d="M2.5 11v1.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V11"/></svg>
+                <span id="rm-proof-file-label-text">Attach proof image</span>
+              </label>
+              <input id="rm-proof-file-input" type="file" accept="image/*" onchange="onProofFileChange(this)" />
+            </div>
+            <div id="rm-proof-preview-wrap" class="hidden" style="margin-top:10px;">
+              <img id="rm-proof-preview" style="max-height:140px;border-radius:10px;border:1px solid var(--border);display:block;" />
+            </div>
+          </div>
+          <div class="modal-actions" style="padding-top:10px;">
+            <button class="btn btn-primary" style="background:var(--green);" onclick="shareReportWithStakeholder()">Yes — shared</button>
+          </div>
+        ` : ''}
         ${stage===5 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm sharing.</div>` : ''}
-        ${stage===6 ? `<div class="rm-lock">Shared with the stakeholder on ${rec && rec.shared_at ? fmtAbs(rec.shared_at) : '—'}. Cycle complete.</div>` : ''}
-      </div>
+        ${stage===6 ? `
+          <div class="rm-lock">Shared with the stakeholder on ${rec && rec.shared_at ? fmtAbs(rec.shared_at) : '—'}. Cycle complete.</div>
+          ${rec && rec.shared_proof_url ? `<img src="${escHTML(rec.shared_proof_url)}" alt="Proof of sharing" style="max-width:100%;max-height:280px;border-radius:10px;border:1px solid var(--border);margin-top:10px;cursor:zoom-in;display:block;" onclick="openAdminLightbox(this.src)">` : ''}
+        ` : ''}
+        </div>
     </div>
   </div>`;
 
@@ -5777,13 +5797,28 @@ function renderReportMonitor(){
   }
   body.innerHTML = html;
 }
- function onReportFileChange(input){
+function onReportFileChange(input){
   const file = input.files && input.files[0];
   rmSelectedFile = file || null;
   const label = $('rm-file-label-text');
   if(label) label.textContent = file ? file.name : 'Attach file';
 }
-async function sendReportToKAM(){
+function onProofFileChange(input){
+  const file = input.files && input.files[0];
+  rmProofFile = file || null;
+  const label = $('rm-proof-file-label-text');
+  if(label) label.textContent = file ? file.name : 'Attach proof image';
+  const wrap = $('rm-proof-preview-wrap');
+  const img = $('rm-proof-preview');
+  if(file && wrap && img){
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; wrap.classList.remove('hidden'); };
+    reader.readAsDataURL(file);
+  } else if(wrap){
+    wrap.classList.add('hidden');
+  }
+}
+ async function sendReportToKAM(){
   if(sessionRole !== 'manager' || !reportMonitorCollege) return;
   const linkInput = $('rm-link-input');
   const linkVal = linkInput ? linkInput.value.trim() : '';
@@ -5927,17 +5962,36 @@ async function approveReportKAM(){
 }
 async function shareReportWithStakeholder(){
   if(sessionRole !== 'manager' || !reportRecord) return;
+  if(!rmProofFile){ showToast('Please attach a proof image before confirming'); return; }
   const rec = collegeContacts.find(c => c.college === reportMonitorCollege);
   const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
+
+  let proofUrl = null;
+  try{
+    const ext = (rmProofFile.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `report-approvals/${reportMonitorCollege}/${reportMonitorMonth}/proof_${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('classroom-snaps').upload(path, rmProofFile, { cacheControl: '3600', upsert: false });
+    if(upErr) throw upErr;
+    const { data: pub } = sb.storage.from('classroom-snaps').getPublicUrl(path);
+    proofUrl = pub.publicUrl;
+  }catch(e){
+    console.error(e);
+    const msg = /bucket/i.test(e.message||'') ? 'Storage bucket not found — check the bucket name in Supabase Storage.' : (e.message || 'check console');
+    showToast('Could not upload proof image: ' + msg);
+    return;
+  }
+
   const historyEntry = { type:'shared', at:new Date().toISOString(), rev:reportRecord.revision||1, by:name };
   const history = [historyEntry, ...(reportRecord.history||[])];
-  const payload = { stage:6, shared:true, shared_at:new Date().toISOString(), shared_by:name, history, updated_at:new Date().toISOString() };
+  const payload = { stage:6, shared:true, shared_at:new Date().toISOString(), shared_by:name, shared_proof_url: proofUrl, history, updated_at:new Date().toISOString() };
  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
   reportRecord = data;
+  rmProofFile = null;
   renderReportMonitor();
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Marked as shared with stakeholder');
-}</script>
+}
+</script>
 </body>
 </html>
