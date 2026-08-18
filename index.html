@@ -1584,6 +1584,50 @@ body[data-theme="dark"] .dlog-topbar {
 .rm-hist-dot.shared{background:var(--green);}
 .rm-remark{margin-top:4px;background:var(--red-soft);color:var(--red);border-radius:6px;padding:6px 9px;font-family:'JetBrains Mono',monospace;font-size:11.5px;white-space:pre-wrap;}
 .rm-lock{font-size:11.5px;color:var(--text-faint);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;}
+
+/* ── Monthly Report Monitor: status strip + submission box (added) ── */
+.rm-status-strip{
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px 20px;
+  margin-bottom:18px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
+}
+.rm-status-strip::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--brand-gradient); }
+.rm-status-strip-main{ display:flex; align-items:center; gap:14px; }
+.rm-status-icon{
+  width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  background:var(--brand-gradient); box-shadow:0 8px 18px -8px rgba(209,26,179,.45);
+}
+.rm-status-icon svg{ width:22px; height:22px; }
+.rm-status-title{ font-family:'Poppins','Inter',sans-serif; font-weight:700; font-size:15px; }
+.rm-status-sub{ font-size:12.5px; color:var(--text-light); margin-top:2px; }
+.rm-status-big-pill{
+  font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; padding:7px 16px; border-radius:999px;
+  display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.rm-status-big-pill.warn{ background:var(--amber-soft); color:var(--amber); }
+.rm-status-big-pill.ok{ background:var(--green-soft); color:var(--green); }
+.rm-status-big-pill .dot{ width:7px; height:7px; border-radius:50%; background:currentColor; }
+
+.rm-submission-box{
+  margin-top:12px; border:1px dashed var(--border); border-radius:12px; padding:14px 16px; background:var(--slate-soft);
+}
+.rm-submission-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.rm-submission-row .form-group{ flex:1; min-width:220px; margin-bottom:0; }
+.rm-submission-or{ font-size:11.5px; color:var(--text-faint); font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:0 4px; }
+.rm-submission-link{
+  display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:var(--blue);
+  background:var(--blue-soft); border-radius:10px; padding:9px 14px; text-decoration:none; margin-top:10px;
+  transition:background .12s;
+}
+.rm-submission-link:hover{ background:rgba(52,87,232,0.22); }
+.rm-submission-link svg{ width:14px; height:14px; flex-shrink:0; }
+.rm-file-input-label{
+  display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--text-light);
+  background:var(--card); border:1px solid var(--border); border-radius:9px; padding:9px 14px; cursor:pointer;
+  transition:border-color .12s,color .12s;
+}
+.rm-file-input-label:hover{ border-color:#C7CCD3; color:var(--text); }
+.rm-file-input-label input{ display:none; }
 </style>
 </head>
 <body>
@@ -2856,6 +2900,7 @@ let snapLocation = null;
 let reportMonitorCollege = null;
 let reportMonitorMonth   = null;
 let reportRecord         = null;
+let rmSelectedFile       = null;
  // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
@@ -5341,6 +5386,12 @@ function reportStepStatus(stage, revision, n){
     return {node:'active', pill:'warn', label:'Ready to share'};
   }
 }
+function reportStatusIcon(stage){
+  if(stage===4) return '<path d="M5 12.5 10 17 19 7"/>';
+  if(stage===3) return '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>';
+  if(stage===2) return '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>';
+  return '<path d="M4 4h16v12H8l-4 4V4z"/>';
+}
 function renderReportMonitor(){
   const body = $('rm-body');
   if(!body) return;
@@ -5358,7 +5409,33 @@ function renderReportMonitor(){
   const history = (rec && Array.isArray(rec.history)) ? rec.history : [];
   const lastReject = history.find(h => h.type === 'reject');
 
-  let html = `<div class="rm-rail">
+  const stageLabels = {
+    1: revision>1 ? 'Changes requested' : 'Awaiting submission',
+    2: 'Awaiting KAM review',
+    3: 'Approved — ready to share',
+    4: 'Cycle complete'
+  };
+  const stagePillClass = (stage===4 || stage===3) ? 'ok' : 'warn';
+
+  const submissionLinkHtml = (url) => url ? `
+    <a class="rm-submission-link" href="${escHTML(url)}" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l4-4M6 5h4v4"/><path d="M13 8.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4.5"/></svg>
+      Open submitted report
+    </a>` : '';
+
+  let html = `
+    <div class="rm-status-strip">
+      <div class="rm-status-strip-main">
+        <div class="rm-status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${reportStatusIcon(stage)}</svg></div>
+        <div>
+          <div class="rm-status-title">${escHTML(reportMonitorCollege)}</div>
+          <div class="rm-status-sub">${escHTML(reportMonitorMonth)} · Revision ${revision}</div>
+        </div>
+      </div>
+      <span class="rm-status-big-pill ${stagePillClass}"><span class="dot"></span>${stageLabels[stage]}</span>
+    </div>
+
+    <div class="rm-rail">
     <div class="rm-rail-line"></div>
     <div class="rm-step ${s1.node==='locked'?'locked':''}">
       <div class="rm-node ${s1.node}">1</div>
@@ -5366,14 +5443,33 @@ function renderReportMonitor(){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
           <div>
             <div class="ledger-card-title" style="margin-bottom:4px;">Step 1 · Campus Manager</div>
-            <div style="font-size:13.5px;">Send the monthly report presentation to the KAM for approval.</div>
+            <div style="font-size:13.5px;">Send the monthly report presentation to the KAM for approval — paste a Drive link or attach the file.</div>
             ${revision>1 ? `<div style="font-size:12px;color:var(--text-faint);margin-top:4px;">This is revision ${revision} — make the changes noted below, then resend.</div>` : ''}
           </div>
           <span class="rm-pill ${s1.pill}"><span class="dot"></span>${s1.label}</span>
         </div>
         ${lastReject && stage===1 ? `<div class="rm-remark">${escHTML(lastReject.remark||'')}</div>` : ''}
-        ${isManager && stage===1 ? `<div class="modal-actions" style="padding-top:6px;"><button class="btn btn-primary" onclick="sendReportToKAM()">${revision>1?'Resend to KAM':'Send to KAM'}</button></div>` : ''}
-        ${!isManager ? `<div class="rm-lock" style="margin-top:6px;">Only the campus manager can send this step.</div>` : ''}
+        ${isManager && stage===1 ? `
+          <div class="rm-submission-box">
+            <div class="rm-submission-row">
+              <div class="form-group">
+                <label class="field-label">Drive / file link</label>
+                <input id="rm-link-input" type="url" placeholder="https://drive.google.com/..." />
+              </div>
+              <span class="rm-submission-or">or</span>
+              <label class="rm-file-input-label" for="rm-file-input">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8M4.5 6.5 8 3l3.5 3.5"/><path d="M2.5 11v1.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V11"/></svg>
+                <span id="rm-file-label-text">Attach file</span>
+              </label>
+              <input id="rm-file-input" type="file" onchange="onReportFileChange(this)" />
+            </div>
+          </div>
+          <div class="modal-actions" style="padding-top:10px;">
+            <button class="btn btn-primary" onclick="sendReportToKAM()">${revision>1?'Resend to KAM':'Send to KAM'}</button>
+          </div>
+        ` : ''}
+        ${!isManager && stage===1 ? `<div class="rm-lock" style="margin-top:6px;">Only the campus manager can send this step.</div>` : ''}
+        ${isManager && stage>1 && rec && rec.report_url ? submissionLinkHtml(rec.report_url) : ''}
       </div>
     </div>
 
@@ -5383,13 +5479,14 @@ function renderReportMonitor(){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
           <div>
             <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · KAM</div>
-            <div style="font-size:13.5px;">Review the report. Approve it, or send it back with remarks.</div>
+            <div style="font-size:13.5px;">Review the submitted report. Approve it, or send it back with remarks.</div>
           </div>
           <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
         </div>
         ${stage<2 ? `<div class="rm-lock">Locked until the report is sent in Step 1.</div>` : ''}
+        ${stage>=2 && rec && rec.report_url ? submissionLinkHtml(rec.report_url) : ''}
         ${stage===2 && canReview ? `
-          <div class="modal-actions" style="padding-top:6px;">
+          <div class="modal-actions" style="padding-top:10px;">
             <button class="btn btn-primary" style="background:var(--green);" onclick="approveReportKAM()">Approve</button>
             <button class="btn btn-primary" style="background:var(--red);" onclick="rejectReportKAM()">Send back with remarks</button>
           </div>
@@ -5443,16 +5540,46 @@ function renderReportMonitor(){
   }
   body.innerHTML = html;
 }
+function onReportFileChange(input){
+  const file = input.files && input.files[0];
+  rmSelectedFile = file || null;
+  const label = $('rm-file-label-text');
+  if(label) label.textContent = file ? file.name : 'Attach file';
+}
 async function sendReportToKAM(){
   if(sessionRole !== 'manager' || !reportMonitorCollege) return;
+  const linkInput = $('rm-link-input');
+  const linkVal = linkInput ? linkInput.value.trim() : '';
+  if(!linkVal && !rmSelectedFile){
+    showToast('Paste a Drive link or attach a file before sending');
+    return;
+  }
   const rec = collegeContacts.find(c => c.college === reportMonitorCollege);
   const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
   const revision = reportRecord ? (reportRecord.revision||1) : 1;
+
+  let reportUrl = linkVal;
+  try{
+    if(rmSelectedFile){
+      const ext = (rmSelectedFile.name.split('.').pop() || 'file').toLowerCase();
+      const path = `${reportMonitorCollege}/${reportMonitorMonth}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('report-approvals').upload(path, rmSelectedFile, { cacheControl: '3600', upsert: false });
+      if(upErr) throw upErr;
+      const { data: pub } = sb.storage.from('report-approvals').getPublicUrl(path);
+      reportUrl = pub.publicUrl;
+    }
+  }catch(e){
+    console.error(e);
+    showToast('Could not upload file: ' + (e.message || 'check console'));
+    return;
+  }
+
   const historyEntry = { type:'sent', at:new Date().toISOString(), rev:revision, by:name };
   const history = [historyEntry, ...((reportRecord && reportRecord.history) || [])];
   const payload = {
     college: reportMonitorCollege, report_month: reportMonitorMonth,
     stage: 2, revision, sent_at: new Date().toISOString(), sent_by: name,
+    report_url: reportUrl,
     decision: null, decided_at: null, decided_by: null,
     shared: false, shared_at: null, shared_by: null,
     history, updated_at: new Date().toISOString()
@@ -5461,21 +5588,26 @@ async function sendReportToKAM(){
     .upsert(payload, { onConflict: 'college,report_month' }).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not send report: '+(error.message||'check console')); return; }
   reportRecord = data || payload;
+  rmSelectedFile = null;
+  const fileInput = $('rm-file-input'); if(fileInput) fileInput.value = '';
   renderReportMonitor();
   showToast('Report sent to KAM for review');
   if(rec && rec.senior_manager_email){
     const subject = encodeURIComponent(`[Report Approval] ${reportMonitorCollege} — Rev ${revision} sent for review`);
-    const mailBody = encodeURIComponent(`Campus: ${reportMonitorCollege}\nReport month: ${reportMonitorMonth}\nRevision: ${revision}\n\nThe monthly report presentation has been sent for your review and approval.`);
+    const mailBody = encodeURIComponent(`Campus: ${reportMonitorCollege}\nReport month: ${reportMonitorMonth}\nRevision: ${revision}\nReport: ${reportUrl}\n\nThe monthly report presentation has been sent for your review and approval.`);
     window.open(`mailto:${rec.senior_manager_email}?subject=${subject}&body=${mailBody}`, '_blank');
   }
 }
-async function approveReportKAM(){
+ async function approveReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
   const reviewer = window.prompt('Enter your name to confirm approval:');
   if(!reviewer || !reviewer.trim()){ showToast('Reviewer name is required'); return; }
   const historyEntry = { type:'approve', at:new Date().toISOString(), rev:reportRecord.revision||1, by:reviewer.trim() };
   const history = [historyEntry, ...(reportRecord.history||[])];
-  const payload = { stage:3, decision:'approved', decided_at:new Date().toISOString(), decided_by:reviewer.trim(), history, updated_at:new Date().toISOString() };
+  const payload = {
+    stage:1, revision: prevRevision+1, sent_at:null, sent_by:null, report_url:null,
+    decision:null, decided_at:null, decided_by:null, history, updated_at:new Date().toISOString()
+  };
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not approve: '+(error.message||'check console')); return; }
   reportRecord = data;
