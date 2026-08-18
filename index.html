@@ -3371,11 +3371,11 @@ async function loadPlatformSelectBadges(){
     }
     let repPending = 0;
     if(sessionRole === 'manager'){
-      repPending = repRows.filter(r => r.college === sessionCollege && r.stage === 1 && (r.revision||1) > 1).length;
+      repPending = repRows.filter(r => r.college === sessionCollege && r.stage === 3 && (r.revision||1) > 1).length;
     } else {
-      repPending = repRows.filter(r => r.stage === 2).length;
+      repPending = repRows.filter(r => r.stage === 4).length;
     }
-    const repBadge = $('platform-report-badge');
+   const repBadge = $('platform-report-badge');
     if(repBadge){
       if(repPending > 0){ repBadge.textContent = `${repPending} pending`; show('platform-report-badge'); }
       else hide('platform-report-badge');
@@ -5798,13 +5798,13 @@ async function sendReportToKAM(){
   const history = [historyEntry, ...((reportRecord && reportRecord.history) || [])];
   const payload = {
     college: reportMonitorCollege, report_month: reportMonitorMonth,
-    stage: 2, revision, sent_at: new Date().toISOString(), sent_by: name,
+    stage: 4, revision, sent_at: new Date().toISOString(), sent_by: name,
     report_url: reportUrl,
     decision: null, decided_at: null, decided_by: null,
     shared: false, shared_at: null, shared_by: null,
     history, updated_at: new Date().toISOString()
   };
-  const { data, error } = await sb.from('report_approvals')
+ const { data, error } = await sb.from('report_approvals')
     .upsert(payload, { onConflict: 'college,report_month' }).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not send report: '+(error.message||'check console')); return; }
   reportRecord = data || payload;
@@ -5871,14 +5871,14 @@ async function approveReportKAM(){
   const historyEntry = { type:'approve', at:new Date().toISOString(), rev:reportRecord.revision||1, by:reviewer.trim() };
   const history = [historyEntry, ...(reportRecord.history||[])];
   const payload = {
-    stage: 3,
+    stage: 5,
     decision: 'approved',
     decided_at: new Date().toISOString(),
     decided_by: reviewer.trim(),
     history,
     updated_at: new Date().toISOString()
   };
-  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
+ const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not approve: '+(error.message||'check console')); return; }
   reportRecord = data;
   renderReportMonitor();
@@ -5896,7 +5896,7 @@ async function approveReportKAM(){
   const historyEntry = { type:'reject', at:new Date().toISOString(), rev:prevRevision, by:reviewer.trim(), remark };
   const history = [historyEntry, ...(reportRecord.history||[])];
   const payload = {
-    stage:1, revision: prevRevision+1, sent_at:null, sent_by:null,
+    stage:3, revision: prevRevision+1, sent_at:null, sent_by:null,
     decision:null, decided_at:null, decided_by:null, history, updated_at:new Date().toISOString()
   };
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
@@ -5912,8 +5912,8 @@ async function shareReportWithStakeholder(){
   const name = (rec && (rec.campus_manager_name || rec.senior_manager_name)) || '';
   const historyEntry = { type:'shared', at:new Date().toISOString(), rev:reportRecord.revision||1, by:name };
   const history = [historyEntry, ...(reportRecord.history||[])];
-  const payload = { stage:4, shared:true, shared_at:new Date().toISOString(), shared_by:name, history, updated_at:new Date().toISOString() };
-  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
+  const payload = { stage:6, shared:true, shared_at:new Date().toISOString(), shared_by:name, history, updated_at:new Date().toISOString() };
+ const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
   reportRecord = data;
   renderReportMonitor();
