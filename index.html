@@ -5483,13 +5483,15 @@ function rmYearShift(delta){
 }
 function rmMonthCellStatus(rec){
   if(!rec) return { cls:'none', label:'Not started' };
-  if(rec.stage === 4) return { cls:'ok', label:'Shared' };
-  if(rec.stage === 3) return { cls:'ok', label:'Approved' };
-  if(rec.stage === 2) return { cls:'warn', label:'With KAM' };
-  if(rec.stage === 1 && (rec.revision||1) > 1) return { cls:'bad', label:'Changes requested' };
-  return { cls:'none', label:'Not sent' };
+  if(rec.stage === 6) return { cls:'ok', label:'Shared' };
+  if(rec.stage === 5) return { cls:'ok', label:'Approved' };
+  if(rec.stage === 4) return { cls:'warn', label:'With KAM' };
+  if(rec.stage === 3 && (rec.revision||1) > 1) return { cls:'bad', label:'Changes requested' };
+  if(rec.stage === 3) return { cls:'none', label:'Not sent' };
+  if(rec.stage === 2) return { cls:'warn', label:'Confirm visual report' };
+  return { cls:'warn', label:'Sheet link pending' }; // stage 1
 }
-function renderReportMonthCalendar(){
+ function renderReportMonthCalendar(){
   const wrap = $('rm-month-grid');
   const label = $('rm-cal-year-label');
   if(!wrap) return;
@@ -5517,26 +5519,38 @@ function selectReportMonthFromCalendar(key){
   renderReportMonthCalendar();
 }
 function reportStepStatus(stage, revision, n){
-  if(n===1){
-    if(stage===1) return {node:'active', pill:'warn', label: revision>1 ? `Needs resend · Rev ${revision}` : 'Not sent yet'};
+  if(n===1){ // KAM shares spreadsheet link
+    if(stage===1) return {node:'active', pill:'warn', label:'Not shared yet'};
+    return {node:'ok', pill:'ok', label:'Link shared'};
+  }
+  if(n===2){ // Confirm Arun shared the visual report
+    if(stage<2) return {node:'locked', pill:'neutral', label:'Waiting on step 1'};
+    if(stage===2) return {node:'active', pill:'warn', label:'Awaiting confirmation'};
+    return {node:'ok', pill:'ok', label:'Confirmed'};
+  }
+  if(n===3){ // Campus manager sends report
+    if(stage<3) return {node:'locked', pill:'neutral', label:'Waiting on step 2'};
+    if(stage===3) return {node:'active', pill:'warn', label: revision>1 ? `Needs resend · Rev ${revision}` : 'Not sent yet'};
     return {node:'ok', pill:'ok', label:`Sent · Rev ${revision}`};
   }
-  if(n===2){
-    if(stage<2) return {node:'locked', pill:'neutral', label:'Waiting on step 1'};
-    if(stage===2) return {node:'active', pill:'warn', label:'Awaiting KAM decision'};
+  if(n===4){ // KAM review
+    if(stage<4) return {node:'locked', pill:'neutral', label:'Waiting on step 3'};
+    if(stage===4) return {node:'active', pill:'warn', label:'Awaiting KAM decision'};
     return {node:'ok', pill:'ok', label:'Approved'};
   }
-  if(n===3){
-    if(stage<3) return {node:'locked', pill:'neutral', label:'Waiting on KAM approval'};
-    if(stage===4) return {node:'ok', pill:'ok', label:'Shared with stakeholder'};
+  if(n===5){ // Share with stakeholder
+    if(stage<5) return {node:'locked', pill:'neutral', label:'Waiting on step 4'};
+    if(stage===6) return {node:'ok', pill:'ok', label:'Shared with stakeholder'};
     return {node:'active', pill:'warn', label:'Ready to share'};
   }
 }
 function reportStatusIcon(stage){
-  if(stage===4) return '<path d="M5 12.5 10 17 19 7"/>';
-  if(stage===3) return '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>';
-  if(stage===2) return '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>';
-  return '<path d="M4 4h16v12H8l-4 4V4z"/>';
+  if(stage===6) return '<path d="M5 12.5 10 17 19 7"/>';
+  if(stage===5) return '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>';
+  if(stage===4) return '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>';
+  if(stage===3) return '<path d="M4 4h16v12H8l-4 4V4z"/>';
+  if(stage===2) return '<circle cx="12" cy="12" r="8"/><path d="M9 12l2 2 4-4"/>';
+  return '<path d="M9 12a3 3 0 1 0 4.24 4.24l3-3a3 3 0 0 0-4.24-4.24"/><path d="M15 12a3 3 0 1 0-4.24-4.24l-3 3a3 3 0 0 0 4.24 4.24"/>';
 }
 function renderReportMonitor(){
   const body = $('rm-body');
@@ -5551,22 +5565,28 @@ function renderReportMonitor(){
   $('rm-revision-badge').textContent = revision;
   const isManager = sessionRole === 'manager';
   const canReview = sessionRole === 'admin' || sessionRole === 'kam';
-  const s1 = reportStepStatus(stage, revision, 1), s2 = reportStepStatus(stage, revision, 2), s3 = reportStepStatus(stage, revision, 3);
+  const s1 = reportStepStatus(stage, revision, 1);
+  const s2 = reportStepStatus(stage, revision, 2);
+  const s3 = reportStepStatus(stage, revision, 3);
+  const s4 = reportStepStatus(stage, revision, 4);
+  const s5 = reportStepStatus(stage, revision, 5);
   const history = (rec && Array.isArray(rec.history)) ? rec.history : [];
   const lastReject = history.find(h => h.type === 'reject');
 
   const stageLabels = {
-    1: revision>1 ? 'Changes requested' : 'Awaiting submission',
-    2: 'Awaiting KAM review',
-    3: 'Approved — ready to share',
-    4: 'Cycle complete'
+    1: 'Awaiting spreadsheet link',
+    2: 'Awaiting confirmation',
+    3: revision>1 ? 'Changes requested' : 'Awaiting submission',
+    4: 'Awaiting KAM review',
+    5: 'Approved — ready to share',
+    6: 'Cycle complete'
   };
-  const stagePillClass = (stage===4 || stage===3) ? 'ok' : 'warn';
+  const stagePillClass = (stage===6 || stage===5) ? 'ok' : 'warn';
 
-  const submissionLinkHtml = (url) => url ? `
+  const submissionLinkHtml = (url, label) => url ? `
     <a class="rm-submission-link" href="${escHTML(url)}" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l4-4M6 5h4v4"/><path d="M13 8.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4.5"/></svg>
-      Open submitted report
+      ${escHTML(label || 'Open link')}
     </a>` : '';
 
   let html = `
@@ -5583,19 +5603,70 @@ function renderReportMonitor(){
 
     <div class="rm-rail">
     <div class="rm-rail-line"></div>
+
     <div class="rm-step ${s1.node==='locked'?'locked':''}">
       <div class="rm-node ${s1.node}">1</div>
       <div class="ledger-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
           <div>
-            <div class="ledger-card-title" style="margin-bottom:4px;">Step 1 · Campus Manager</div>
-            <div style="font-size:13.5px;">Send the monthly report presentation to the KAM for approval — paste a Drive link or attach the file.</div>
-            ${revision>1 ? `<div style="font-size:12px;color:var(--text-faint);margin-top:4px;">This is revision ${revision} — make the changes noted below, then resend.</div>` : ''}
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 1 · KAM</div>
+            <div style="font-size:13.5px;">Share the spreadsheet link for this month's report.</div>
           </div>
           <span class="rm-pill ${s1.pill}"><span class="dot"></span>${s1.label}</span>
         </div>
-        ${lastReject && stage===1 ? `<div class="rm-remark">${escHTML(lastReject.remark||'')}</div>` : ''}
-        ${isManager && stage===1 ? `
+        ${stage===1 && canReview ? `
+          <div class="rm-submission-box">
+            <div class="rm-submission-row">
+              <div class="form-group">
+                <label class="field-label">Spreadsheet link</label>
+                <input id="rm-sheet-link-input" type="url" placeholder="https://docs.google.com/spreadsheets/..." />
+              </div>
+            </div>
+          </div>
+          <div class="modal-actions" style="padding-top:10px;">
+            <button class="btn btn-primary" onclick="sendKamSheetLink()">Share link</button>
+          </div>
+        ` : ''}
+        ${stage===1 && !canReview ? `<div class="rm-lock">Waiting on the KAM to share the spreadsheet link.</div>` : ''}
+        ${stage>1 && rec && rec.kam_sheet_link ? submissionLinkHtml(rec.kam_sheet_link, 'Open spreadsheet') : ''}
+      </div>
+    </div>
+
+    <div class="rm-step ${s2.node==='locked'?'locked':''}">
+      <div class="rm-node ${s2.node}">2</div>
+      <div class="ledger-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · Confirmation</div>
+            <div style="font-size:13.5px;">Did Arun share the visual report?</div>
+          </div>
+          <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
+        </div>
+        ${stage<2 ? `<div class="rm-lock">Locked until the spreadsheet link is shared in Step 1.</div>` : ''}
+        ${stage===2 && canReview ? `
+          <div class="modal-actions" style="padding-top:6px;">
+            <button class="btn btn-primary" style="background:var(--green);" onclick="confirmArunShared(true)">Yes, shared</button>
+            <button class="btn btn-primary" style="background:var(--red);" onclick="confirmArunShared(false)">Not yet</button>
+          </div>
+        ` : ''}
+        ${stage===2 && !canReview ? `<div class="rm-lock" style="margin-top:6px;">Waiting on confirmation.</div>` : ''}
+        ${stage>2 && rec && rec.arun_shared_by ? `<div class="rm-lock" style="margin-top:6px;">Confirmed by ${escHTML(rec.arun_shared_by)} on ${rec.arun_shared_at ? fmtAbs(rec.arun_shared_at) : '—'}.</div>` : ''}
+      </div>
+    </div>
+
+    <div class="rm-step ${s3.node==='locked'?'locked':''}">
+      <div class="rm-node ${s3.node}">3</div>
+      <div class="ledger-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 3 · Campus Manager</div>
+            <div style="font-size:13.5px;">Send the monthly report presentation to the KAM for approval — paste a Drive link or attach the file.</div>
+            ${revision>1 ? `<div style="font-size:12px;color:var(--text-faint);margin-top:4px;">This is revision ${revision} — make the changes noted below, then resend.</div>` : ''}
+          </div>
+          <span class="rm-pill ${s3.pill}"><span class="dot"></span>${s3.label}</span>
+        </div>
+        ${lastReject && stage===3 ? `<div class="rm-remark">${escHTML(lastReject.remark||'')}</div>` : ''}
+        ${isManager && stage===3 ? `
           <div class="rm-submission-box">
             <div class="rm-submission-row">
               <div class="form-group">
@@ -5614,24 +5685,25 @@ function renderReportMonitor(){
             <button class="btn btn-primary" onclick="sendReportToKAM()">${revision>1?'Resend to KAM':'Send to KAM'}</button>
           </div>
         ` : ''}
-        ${!isManager && stage===1 ? `<div class="rm-lock" style="margin-top:6px;">Only the campus manager can send this step.</div>` : ''}
-        ${isManager && stage>1 && rec && rec.report_url ? submissionLinkHtml(rec.report_url) : ''}
+        ${stage<3 ? `<div class="rm-lock">Locked until Step 2 is confirmed.</div>` : ''}
+        ${!isManager && stage===3 ? `<div class="rm-lock" style="margin-top:6px;">Only the campus manager can send this step.</div>` : ''}
+        ${isManager && stage>3 && rec && rec.report_url ? submissionLinkHtml(rec.report_url, 'Open submitted report') : ''}
       </div>
     </div>
 
-    <div class="rm-step ${s2.node==='locked'?'locked':''}">
-      <div class="rm-node ${s2.node}">2</div>
+    <div class="rm-step ${s4.node==='locked'?'locked':''}">
+      <div class="rm-node ${s4.node}">4</div>
       <div class="ledger-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
           <div>
-            <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · KAM</div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 4 · KAM</div>
             <div style="font-size:13.5px;">Review the submitted report. Approve it, or send it back with remarks.</div>
           </div>
-          <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
+          <span class="rm-pill ${s4.pill}"><span class="dot"></span>${s4.label}</span>
         </div>
-        ${stage<2 ? `<div class="rm-lock">Locked until the report is sent in Step 1.</div>` : ''}
-        ${stage>=2 && rec && rec.report_url ? submissionLinkHtml(rec.report_url) : ''}
-        ${stage===2 && canReview ? `
+        ${stage<4 ? `<div class="rm-lock">Locked until the report is sent in Step 3.</div>` : ''}
+        ${stage>=4 && rec && rec.report_url ? submissionLinkHtml(rec.report_url, 'Open submitted report') : ''}
+        ${stage===4 && canReview ? `
           <div class="modal-actions" style="padding-top:10px;">
             <button class="btn btn-primary" style="background:var(--green);" onclick="approveReportKAM()">Approve</button>
             <button class="btn btn-primary" style="background:var(--red);" onclick="rejectReportKAM()">Send back with remarks</button>
@@ -5639,31 +5711,33 @@ function renderReportMonitor(){
           <label class="field-label" style="margin-top:10px;display:block;">Remarks (required if sending back)</label>
           <textarea id="rm-remark-input" rows="3" placeholder="What needs to change before this can be approved..." style="width:100%;margin-top:6px;"></textarea>
         ` : ''}
-        ${stage===2 && !canReview ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the KAM's decision.</div>` : ''}
-        ${stage>2 ? `<div class="rm-lock">Approved on ${rec && rec.decided_at ? fmtAbs(rec.decided_at) : '—'}${rec && rec.decided_by ? ' by '+escHTML(rec.decided_by) : ''}.</div>` : ''}
+        ${stage===4 && !canReview ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the KAM's decision.</div>` : ''}
+        ${stage>4 ? `<div class="rm-lock">Approved on ${rec && rec.decided_at ? fmtAbs(rec.decided_at) : '—'}${rec && rec.decided_by ? ' by '+escHTML(rec.decided_by) : ''}.</div>` : ''}
       </div>
     </div>
 
-    <div class="rm-step ${s3.node==='locked'?'locked':''}">
-      <div class="rm-node ${s3.node}">3</div>
+    <div class="rm-step ${s5.node==='locked'?'locked':''}">
+      <div class="rm-node ${s5.node}">5</div>
       <div class="ledger-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
           <div>
-            <div class="ledger-card-title" style="margin-bottom:4px;">Step 3 · Campus Manager</div>
+            <div class="ledger-card-title" style="margin-bottom:4px;">Step 5 · Campus Manager</div>
             <div style="font-size:13.5px;">Has the report been shared with the college stakeholder?</div>
           </div>
-          <span class="rm-pill ${s3.pill}"><span class="dot"></span>${s3.label}</span>
+          <span class="rm-pill ${s5.pill}"><span class="dot"></span>${s5.label}</span>
         </div>
-        ${stage<3 ? `<div class="rm-lock">Locked until the KAM approves the report in Step 2.</div>` : ''}
-        ${stage===3 && isManager ? `<div class="modal-actions" style="padding-top:6px;"><button class="btn btn-primary" style="background:var(--green);" onclick="shareReportWithStakeholder()">Yes — shared</button></div>` : ''}
-        ${stage===3 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm sharing.</div>` : ''}
-        ${stage===4 ? `<div class="rm-lock">Shared with the stakeholder on ${rec && rec.shared_at ? fmtAbs(rec.shared_at) : '—'}. Cycle complete.</div>` : ''}
+        ${stage<5 ? `<div class="rm-lock">Locked until the KAM approves the report in Step 4.</div>` : ''}
+        ${stage===5 && isManager ? `<div class="modal-actions" style="padding-top:6px;"><button class="btn btn-primary" style="background:var(--green);" onclick="shareReportWithStakeholder()">Yes — shared</button></div>` : ''}
+        ${stage===5 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm sharing.</div>` : ''}
+        ${stage===6 ? `<div class="rm-lock">Shared with the stakeholder on ${rec && rec.shared_at ? fmtAbs(rec.shared_at) : '—'}. Cycle complete.</div>` : ''}
       </div>
     </div>
   </div>`;
 
   if(history.length){
     const typeMap = {
+      sheet_shared: {dot:'sent',    label: h => `KAM shared spreadsheet link`},
+      arun_shared:  {dot:'sent',    label: h => `Arun's visual report — ${h.remark}`},
       sent:    {dot:'sent',    label: h => `Sent to KAM for review (Rev ${h.rev})`},
       approve: {dot:'approve', label: h => `KAM approved (Rev ${h.rev})`},
       reject:  {dot:'reject',  label: h => `KAM sent back with remarks (Rev ${h.rev})`},
@@ -5678,7 +5752,7 @@ function renderReportMonitor(){
           <div>
             <strong style="display:block;font-weight:600;">${m.label(h)}</strong>
             <span style="color:var(--text-faint);">${fmtAbs(h.at)}${h.by ? ' · '+escHTML(h.by) : ''}</span>
-            ${h.remark ? `<div class="rm-remark">${escHTML(h.remark)}</div>` : ''}
+            ${h.remark && h.type==='reject' ? `<div class="rm-remark">${escHTML(h.remark)}</div>` : ''}
           </div>
         </div>`;
       }).join('')}
@@ -5686,7 +5760,7 @@ function renderReportMonitor(){
   }
   body.innerHTML = html;
 }
-function onReportFileChange(input){
+ function onReportFileChange(input){
   const file = input.files && input.files[0];
   rmSelectedFile = file || null;
   const label = $('rm-file-label-text');
@@ -5745,6 +5819,50 @@ async function sendReportToKAM(){
     const mailBody = encodeURIComponent(`Campus: ${reportMonitorCollege}\nReport month: ${reportMonitorMonth}\nRevision: ${revision}\nReport: ${reportUrl}\n\nThe monthly report presentation has been sent for your review and approval.`);
     window.open(`mailto:${rec.senior_manager_email}?subject=${subject}&body=${mailBody}`, '_blank');
   }
+}
+ async function sendKamSheetLink(){
+  if(!(sessionRole==='admin'||sessionRole==='kam') || !reportMonitorCollege) return;
+  const input = $('rm-sheet-link-input');
+  const link = input ? input.value.trim() : '';
+  if(!link){ showToast('Paste the spreadsheet link before sending'); return; }
+  const reviewer = window.prompt('Enter your name to confirm you are sharing this link:');
+  if(!reviewer || !reviewer.trim()){ showToast('Your name is required'); return; }
+  const historyEntry = { type:'sheet_shared', at:new Date().toISOString(), by:reviewer.trim() };
+  const history = [historyEntry, ...((reportRecord && reportRecord.history) || [])];
+  const payload = {
+    college: reportMonitorCollege, report_month: reportMonitorMonth,
+    stage: 2, revision: (reportRecord && reportRecord.revision) || 1,
+    kam_sheet_link: link, sheet_shared_at: new Date().toISOString(), sheet_shared_by: reviewer.trim(),
+    history, updated_at: new Date().toISOString()
+  };
+  const { data, error } = await sb.from('report_approvals')
+    .upsert(payload, { onConflict: 'college,report_month' }).select().maybeSingle();
+  if(error){ console.error(error); showToast('Could not save link: '+(error.message||'check console')); return; }
+  reportRecord = data || payload;
+  renderReportMonitor();
+  loadReportCollegeHistory();
+  showToast('Spreadsheet link shared');
+}
+
+async function confirmArunShared(shared){
+  if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
+  const reviewer = window.prompt('Enter your name to confirm:');
+  if(!reviewer || !reviewer.trim()){ showToast('Your name is required'); return; }
+  const historyEntry = { type:'arun_shared', at:new Date().toISOString(), by:reviewer.trim(), remark: shared ? 'Yes' : 'Not yet' };
+  const history = [historyEntry, ...(reportRecord.history||[])];
+  const payload = {
+    arun_shared: !!shared,
+    arun_shared_at: new Date().toISOString(),
+    arun_shared_by: reviewer.trim(),
+    history, updated_at: new Date().toISOString()
+  };
+  if(shared) payload.stage = 3;
+  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
+  if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
+  reportRecord = data;
+  renderReportMonitor();
+  loadReportCollegeHistory();
+  showToast(shared ? 'Confirmed — moving to next step' : 'Marked as not shared yet');
 }
 async function approveReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
