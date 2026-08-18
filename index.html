@@ -1585,6 +1585,26 @@ body[data-theme="dark"] .dlog-topbar {
 .rm-remark{margin-top:4px;background:var(--red-soft);color:var(--red);border-radius:6px;padding:6px 9px;font-family:'JetBrains Mono',monospace;font-size:11.5px;white-space:pre-wrap;}
 .rm-lock{font-size:11.5px;color:var(--text-faint);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;}
 
+  #report-monitor-screen .dlog-body{ max-width:1180px; margin:0 auto; }
+.rm-month-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.rm-month-cell{
+  border-radius:12px; padding:11px 10px; background:var(--card); border:1px solid var(--border);
+  cursor:pointer; text-align:left; transition:transform .15s, box-shadow .15s, border-color .15s;
+  display:flex; flex-direction:column; gap:6px; font-family:inherit;
+}
+.rm-month-cell:hover{ transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+.rm-month-cell.active{ border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
+.rm-month-cell.is-current-month{ outline:1.5px dashed var(--brand-2); outline-offset:-4px; }
+.rm-month-name{ font-size:12.5px; font-weight:700; color:var(--text); }
+.rm-month-status{
+  font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px;
+  display:inline-flex; align-items:center; gap:4px; width:fit-content; white-space:nowrap;
+}
+.rm-month-status .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.rm-month-status.none{ background:var(--slate-soft); color:var(--text-faint); }
+.rm-month-status.warn{ background:var(--amber-soft); color:var(--amber); }
+.rm-month-status.ok{ background:var(--green-soft); color:var(--green); }
+.rm-month-status.bad{ background:var(--red-soft); color:var(--red); }
 /* ── Monthly Report Monitor: status strip + submission box (added) ── */
 .rm-status-strip{
   display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
@@ -2176,24 +2196,47 @@ body[data-theme="dark"] .dlog-topbar {
       </div>
     </div>
 
-    <div class="dlog-form-card">
-      <h3>Report details</h3>
-      <div class="form-grid" style="margin-bottom:0;">
-        <div class="form-group">
-          <label class="field-label">College</label>
-          <select id="rm-college-select" onchange="onReportCollegeChange(this.value)"></select>
+    <div class="dlog-layout">
+      <div>
+        <div class="dlog-form-card">
+          <h3>Report details</h3>
+          <div class="form-grid" style="margin-bottom:0;">
+            <div class="form-group">
+              <label class="field-label">College</label>
+              <select id="rm-college-select" onchange="onReportCollegeChange(this.value)"></select>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Report month</label>
+              <input id="rm-month-select" type="month" onchange="onReportMonthChange(this.value)">
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="field-label">Report month</label>
-          <input id="rm-month-select" type="month" onchange="onReportMonthChange(this.value)">
+
+        <div id="rm-body"></div>
+      </div>
+
+      <div>
+        <div class="review-cal-topbar">
+          <span style="font-size:14px;color:var(--text-light);font-weight:600;">Submission calendar</span>
+          <div class="review-cal-nav">
+            <button class="review-cal-nav-btn" onclick="rmYearShift(-1)" aria-label="Previous year">‹</button>
+            <span class="review-cal-month-label" id="rm-cal-year-label">—</span>
+            <button class="review-cal-nav-btn" onclick="rmYearShift(1)" aria-label="Next year">›</button>
+          </div>
         </div>
+        <div class="review-calendar">
+          <div class="rm-month-grid" id="rm-month-grid"></div>
+        </div>
+        <div class="review-cal-legend">
+          <span><span class="cal-dot" style="background:var(--green)"></span>Approved / shared</span>
+          <span><span class="cal-dot" style="background:var(--amber)"></span>With KAM</span>
+          <span><span class="cal-dot" style="background:var(--red)"></span>Changes requested</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">Click a month to jump to that report.</div>
       </div>
     </div>
-
-    <div id="rm-body"></div>
   </div>
-</div>
-<!-- ── REVIEW PANEL (admin only) ── -->
+ <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
   <div class="sky-clouds-bg" id="review-skywrap">
     <svg viewBox="0 0 300 100" preserveAspectRatio="none">
@@ -2901,6 +2944,8 @@ let reportMonitorCollege = null;
 let reportMonitorMonth   = null;
 let reportRecord         = null;
 let rmSelectedFile       = null;
+let rmCalYear            = new Date().getFullYear();
+let rmCollegeHistory     = []; // every report_approvals row for the selected college, any month
  // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
@@ -5336,11 +5381,13 @@ async function enterReportMonitor(){
   const sel = $('rm-college-select');
   reportMonitorCollege = sessionRole === 'manager' ? sessionCollege : (sel.value || null);
   reportMonitorMonth = currentMonthStr();
+  rmCalYear = new Date().getFullYear();
   $('rm-month-select').value = reportMonitorMonth;
   $('rm-college-name').textContent = reportMonitorCollege || '—';
   $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
   if(reportMonitorCollege) loadReportRecord();
   else { reportRecord = null; renderReportMonitor(); }
+  loadReportCollegeHistory();
 }
 function onReportCollegeChange(v){
   reportMonitorCollege = v || null;
@@ -5348,6 +5395,7 @@ function onReportCollegeChange(v){
   $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
   if(reportMonitorCollege) loadReportRecord();
   else { reportRecord = null; renderReportMonitor(); }
+  loadReportCollegeHistory();
 }
 function onReportMonthChange(v){
   reportMonitorMonth = v;
@@ -5369,6 +5417,59 @@ async function loadReportRecord(){
     console.error('Could not load report_approvals (has the table been created?):', e);
     if(body) body.innerHTML = `<div class="empty-state"><p>Couldn't load report status. Make sure the <b>report_approvals</b> table exists in Supabase.</p></div>`;
   }
+}
+ async function loadReportCollegeHistory(){
+  if(!reportMonitorCollege){ rmCollegeHistory = []; renderReportMonthCalendar(); return; }
+  try{
+    const { data, error } = await sb.from('report_approvals')
+      .select('report_month,stage,revision,shared')
+      .eq('college', reportMonitorCollege);
+    if(error) throw error;
+    rmCollegeHistory = data || [];
+  }catch(e){
+    console.error('Could not load report history for calendar:', e);
+    rmCollegeHistory = [];
+  }
+  renderReportMonthCalendar();
+}
+function rmYearShift(delta){
+  rmCalYear += delta;
+  renderReportMonthCalendar();
+}
+function rmMonthCellStatus(rec){
+  if(!rec) return { cls:'none', label:'Not started' };
+  if(rec.stage === 4) return { cls:'ok', label:'Shared' };
+  if(rec.stage === 3) return { cls:'ok', label:'Approved' };
+  if(rec.stage === 2) return { cls:'warn', label:'With KAM' };
+  if(rec.stage === 1 && (rec.revision||1) > 1) return { cls:'bad', label:'Changes requested' };
+  return { cls:'none', label:'Not sent' };
+}
+function renderReportMonthCalendar(){
+  const wrap = $('rm-month-grid');
+  const label = $('rm-cal-year-label');
+  if(!wrap) return;
+  if(label) label.textContent = rmCalYear;
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const nowKey = currentMonthStr();
+  wrap.innerHTML = monthNames.map((name, i) => {
+    const key = rmCalYear + '-' + String(i+1).padStart(2,'0');
+    const rec = rmCollegeHistory.find(r => r.report_month === key);
+    const st = rmMonthCellStatus(rec);
+    const isActive = key === reportMonitorMonth;
+    const isCurrent = key === nowKey;
+    return `<button type="button" class="rm-month-cell ${isActive?'active':''} ${isCurrent?'is-current-month':''}" onclick="selectReportMonthFromCalendar('${key}')">
+      <span class="rm-month-name">${name}</span>
+      <span class="rm-month-status ${st.cls}"><span class="dot"></span>${st.label}</span>
+    </button>`;
+  }).join('');
+}
+function selectReportMonthFromCalendar(key){
+  reportMonitorMonth = key;
+  rmCalYear = parseInt(key.slice(0,4), 10);
+  const sel = $('rm-month-select');
+  if(sel) sel.value = key;
+  if(reportMonitorCollege) loadReportRecord();
+  renderReportMonthCalendar();
 }
 function reportStepStatus(stage, revision, n){
   if(n===1){
@@ -5560,20 +5661,20 @@ async function sendReportToKAM(){
 
   let reportUrl = linkVal;
   try{
-    if(rmSelectedFile){
+ if(rmSelectedFile){
       const ext = (rmSelectedFile.name.split('.').pop() || 'file').toLowerCase();
-      const path = `${reportMonitorCollege}/${reportMonitorMonth}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
-      const { error: upErr } = await sb.storage.from('report-approvals').upload(path, rmSelectedFile, { cacheControl: '3600', upsert: false });
+      const path = `report-approvals/${reportMonitorCollege}/${reportMonitorMonth}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('classroom-snaps').upload(path, rmSelectedFile, { cacheControl: '3600', upsert: false });
       if(upErr) throw upErr;
-      const { data: pub } = sb.storage.from('report-approvals').getPublicUrl(path);
+      const { data: pub } = sb.storage.from('classroom-snaps').getPublicUrl(path);
       reportUrl = pub.publicUrl;
     }
   }catch(e){
     console.error(e);
-    showToast('Could not upload file: ' + (e.message || 'check console'));
+    const msg = /bucket/i.test(e.message||'') ? 'Storage bucket not found — check the bucket name in Supabase Storage.' : (e.message || 'check console');
+    showToast('Could not upload file: ' + msg);
     return;
   }
-
   const historyEntry = { type:'sent', at:new Date().toISOString(), rev:revision, by:name };
   const history = [historyEntry, ...((reportRecord && reportRecord.history) || [])];
   const payload = {
@@ -5591,6 +5692,8 @@ async function sendReportToKAM(){
   rmSelectedFile = null;
   const fileInput = $('rm-file-input'); if(fileInput) fileInput.value = '';
   renderReportMonitor();
+   loadReportCollegeHistory();
+
   showToast('Report sent to KAM for review');
   if(rec && rec.senior_manager_email){
     const subject = encodeURIComponent(`[Report Approval] ${reportMonitorCollege} — Rev ${revision} sent for review`);
@@ -5610,8 +5713,9 @@ async function sendReportToKAM(){
   };
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not approve: '+(error.message||'check console')); return; }
-  reportRecord = data;
+   reportRecord = data;
   renderReportMonitor();
+  loadReportCollegeHistory();
   showToast('Report approved');
 }
 async function rejectReportKAM(){
@@ -5630,8 +5734,9 @@ async function rejectReportKAM(){
   };
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not send back: '+(error.message||'check console')); return; }
-  reportRecord = data;
+   reportRecord = data;
   renderReportMonitor();
+  loadReportCollegeHistory();
   showToast('Sent back to campus manager with remarks');
 }
 async function shareReportWithStakeholder(){
@@ -5645,8 +5750,8 @@ async function shareReportWithStakeholder(){
   if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
   reportRecord = data;
   renderReportMonitor();
+  loadReportCollegeHistory();
   showToast('Marked as shared with stakeholder');
-}
-</script>
+}</script>
 </body>
 </html>
