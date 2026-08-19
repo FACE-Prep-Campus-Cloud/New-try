@@ -5860,6 +5860,13 @@ function onProofFileChange(input){
     .upsert(payload, { onConflict: 'college,report_month' }).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not send report: '+(error.message||'check console')); return; }
   reportRecord = data || payload;
+  sb.functions.invoke('report-flow-notify', {
+    body: {
+      step: 'report_sent', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
+      to: rec?.senior_manager_email, cc: rec?.campus_manager_email,
+      by: name, revision, reportUrl, history: reportRecord.history,
+    }
+  }).catch(e => console.error('notify report_sent failed', e));
   rmSelectedFile = null;
   const fileInput = $('rm-file-input'); if(fileInput) fileInput.value = '';
   renderReportMonitor();
@@ -5867,11 +5874,6 @@ function onProofFileChange(input){
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
 
   showToast('Report sent to KAM for review');
- if(rec && rec.senior_manager_email){
-    const subject = encodeURIComponent(`[Report Approval] ${reportMonitorCollege} — Rev ${revision} sent for review`);
-    const mailBody = encodeURIComponent(`Campus: ${reportMonitorCollege}\nReport month: ${reportMonitorMonth}\nRevision: ${revision}\nReport: ${reportUrl}\n\nThe monthly report presentation has been sent for your review and approval.`);
-    window.open(`mailto:${rec.senior_manager_email}?subject=${subject}&body=${mailBody}`, '_blank');
-  }
 }
  async function sendKamSheetLink(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportMonitorCollege) return;
@@ -5892,11 +5894,18 @@ function onProofFileChange(input){
     .upsert(payload, { onConflict: 'college,report_month' }).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not save link: '+(error.message||'check console')); return; }
   reportRecord = data || payload;
+  const rec2a = collegeContacts.find(c => c.college === reportMonitorCollege);
+  sb.functions.invoke('report-flow-notify', {
+    body: {
+      step: 'sheet_shared', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
+      to: rec2a?.campus_manager_email, cc: rec2a?.senior_manager_email,
+      by: reviewer.trim(), link, history: reportRecord.history,
+    }
+  }).catch(e => console.error('notify sheet_shared failed', e));
   renderReportMonitor();
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Spreadsheet link shared');
 }
-
 async function confirmArunShared(shared){
   if(sessionRole !== 'manager' || !reportRecord) return;
  const reviewer = window.prompt('Enter your name to confirm:');
@@ -5913,11 +5922,19 @@ async function confirmArunShared(shared){
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
   reportRecord = data;
+  const rec2b = collegeContacts.find(c => c.college === reportMonitorCollege);
+  sb.functions.invoke('report-flow-notify', {
+    body: {
+      step: 'arun_shared', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
+      to: rec2b?.senior_manager_email, cc: rec2b?.campus_manager_email,
+      by: reviewer.trim(), shared, history: reportRecord.history,
+    }
+  }).catch(e => console.error('notify arun_shared failed', e));
   renderReportMonitor();
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast(shared ? 'Confirmed — moving to next step' : 'Marked as not shared yet');
 }
-async function approveReportKAM(){
+ async function approveReportKAM(){
   if(!(sessionRole==='admin'||sessionRole==='kam') || !reportRecord) return;
   const reviewer = window.prompt('Enter your name to confirm approval:');
   if(!reviewer || !reviewer.trim()){ showToast('Reviewer name is required'); return; }
@@ -5934,6 +5951,14 @@ async function approveReportKAM(){
  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not approve: '+(error.message||'check console')); return; }
   reportRecord = data;
+  const rec2c = collegeContacts.find(c => c.college === reportMonitorCollege);
+  sb.functions.invoke('report-flow-notify', {
+    body: {
+      step: 'report_approved', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
+      to: rec2c?.campus_manager_email, cc: rec2c?.senior_manager_email,
+      by: reviewer.trim(), history: reportRecord.history,
+    }
+  }).catch(e => console.error('notify report_approved failed', e));
   renderReportMonitor();
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
@@ -5956,11 +5981,19 @@ async function approveReportKAM(){
   const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not send back: '+(error.message||'check console')); return; }
    reportRecord = data;
+  const rec2d = collegeContacts.find(c => c.college === reportMonitorCollege);
+  sb.functions.invoke('report-flow-notify', {
+    body: {
+      step: 'report_rejected', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
+      to: rec2d?.campus_manager_email, cc: rec2d?.senior_manager_email,
+      by: reviewer.trim(), remark, revision: prevRevision + 1, history: reportRecord.history,
+    }
+  }).catch(e => console.error('notify report_rejected failed', e));
   renderReportMonitor();
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Sent back to campus manager with remarks');
 }
-async function shareReportWithStakeholder(){
+ async function shareReportWithStakeholder(){
   if(sessionRole !== 'manager' || !reportRecord) return;
   if(!rmProofFile){ showToast('Please attach a proof image before confirming'); return; }
   const rec = collegeContacts.find(c => c.college === reportMonitorCollege);
@@ -5987,6 +6020,13 @@ async function shareReportWithStakeholder(){
  const { data, error } = await sb.from('report_approvals').update(payload).eq('id', reportRecord.id).select().maybeSingle();
   if(error){ console.error(error); showToast('Could not save: '+(error.message||'check console')); return; }
   reportRecord = data;
+  sb.functions.invoke('report-flow-notify', {
+    body: {
+      step: 'shared_with_stakeholder', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
+      to: rec?.senior_manager_email, cc: rec?.campus_manager_email,
+      by: name, proofUrl, history: reportRecord.history,
+    }
+  }).catch(e => console.error('notify shared_with_stakeholder failed', e));
   rmProofFile = null;
   renderReportMonitor();
   loadReportCollegeHistory();
