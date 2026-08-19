@@ -1584,7 +1584,19 @@ body[data-theme="dark"] .dlog-topbar {
 .rm-hist-dot.shared{background:var(--green);}
 .rm-remark{margin-top:4px;background:var(--red-soft);color:var(--red);border-radius:6px;padding:6px 9px;font-family:'JetBrains Mono',monospace;font-size:11.5px;white-space:pre-wrap;}
 .rm-lock{font-size:11.5px;color:var(--text-faint);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;}
-
+.rm-step2-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:600;color:var(--text-faint);
+  background:var(--slate-soft);border-radius:999px;padding:4px 10px;
+  margin-bottom:8px;
+}
+.rm-step2-badge .rm-step2-badge-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--amber);
+  animation: rmPulseDot 1.6s ease-in-out infinite;
+}
+@keyframes rmPulseDot{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+.rm-step2-cooling .btn{ opacity:0.55; }
+.rm-step2-cooling .btn:hover{ opacity:0.8; }
 #report-monitor-screen .dlog-body{
   max-width: none;
   width: 100%;
@@ -3430,6 +3442,7 @@ function backToPlatformSelect(){
   hide('classroom-snap-screen');
   hide('report-monitor-screen');
   destroyVantaBirds();
+  stopStep2Ticker();
   showPlatformSelect();
 }
  function enterDashboard(){
@@ -3485,8 +3498,9 @@ function logout(){
   hide('classroom-snap-screen'); hide('report-monitor-screen');
   classroomSnaps = []; snapReviewCollege = null;
   reportMonitorCollege = null; reportMonitorMonth = null; reportRecord = null;
+  stopStep2Ticker();
  show('auth-screen');
-  hide('pin-error');
+ hide('pin-error');
   const pinInput = $('manager-pin-input'); if(pinInput) pinInput.value = '';
   const kamPin = $('kam-pin-input'); if(kamPin) kamPin.value = '';
   setAuthRole('admin');
@@ -5536,6 +5550,56 @@ async function selectReportMonthFromCalendar(key){
   if(reportMonitorCollege) loadReportRecord();
   renderReportMonthCalendar();
 }
+const RM_STEP2_WAIT_MS = 60 * 60 * 1000; // 1 hour
+
+function getStep2WaitState(rec){
+  if(!rec || rec.arun_shared !== false || !rec.arun_shared_at) return { waiting:false };
+  const targetTime = new Date(rec.arun_shared_at).getTime() + RM_STEP2_WAIT_MS;
+  const remainingMs = targetTime - Date.now();
+  if(remainingMs <= 0) return { waiting:false };
+  return { waiting:true, targetTime };
+}
+function fmtCountdown(ms){
+  const totalSec = Math.max(0, Math.ceil(ms/1000));
+  const m = Math.floor(totalSec/60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+function renderStep2Action(rec){
+  const wait = getStep2WaitState(rec);
+  const coolingClass = wait.waiting ? 'rm-step2-cooling' : '';
+  const badgeHtml = wait.waiting
+    ? `<div class="rm-step2-badge" id="rm-step2-countdown" data-target="${wait.targetTime}">
+         <span class="rm-step2-badge-dot"></span>
+         Ask again in <span id="rm-step2-countdown-text">${fmtCountdown(wait.targetTime - Date.now())}</span>
+       </div>`
+    : '';
+  return `
+    ${badgeHtml}
+    <div class="modal-actions ${coolingClass}" style="padding-top:6px;">
+      <button class="btn btn-primary" style="background:var(--green);" onclick="confirmArunShared(true)">Yes, shared</button>
+      <button class="btn btn-primary" style="background:var(--red);" onclick="confirmArunShared(false)">Not yet</button>
+    </div>`;
+}
+let rmStep2Ticker = null;
+function startStep2Ticker(){
+  if(rmStep2Ticker) clearInterval(rmStep2Ticker);
+  rmStep2Ticker = setInterval(() => {
+    const badge = document.getElementById('rm-step2-countdown');
+    if(!badge) return;
+    const target = parseInt(badge.dataset.target, 10);
+    const remaining = target - Date.now();
+    if(remaining <= 0){
+      renderReportMonitor();
+      return;
+    }
+    const textEl = document.getElementById('rm-step2-countdown-text');
+    if(textEl) textEl.textContent = fmtCountdown(remaining);
+  }, 1000);
+}
+function stopStep2Ticker(){
+  if(rmStep2Ticker){ clearInterval(rmStep2Ticker); rmStep2Ticker = null; }
+}
  function reportStepStatus(stage, revision, n){
   if(n===1){ // KAM shares spreadsheet link
     if(stage===1) return {node:'active', pill:'warn', label:'Not shared yet'};
@@ -5661,12 +5725,7 @@ function renderReportMonitor(){
           <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
         </div>
         ${stage<2 ? `<div class="rm-lock">Locked until the spreadsheet link is shared in Step 1.</div>` : ''}
-        ${stage===2 && isManager ? `
-          <div class="modal-actions" style="padding-top:6px;">
-            <button class="btn btn-primary" style="background:var(--green);" onclick="confirmArunShared(true)">Yes, shared</button>
-            <button class="btn btn-primary" style="background:var(--red);" onclick="confirmArunShared(false)">Not yet</button>
-          </div>
-        ` : ''}
+        ${stage===2 && isManager ? renderStep2Action(rec) : ''}
         ${stage===2 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm receipt.</div>` : ''}
         ${stage>2 && rec && rec.arun_shared_by ? `<div class="rm-lock" style="margin-top:6px;">Confirmed by ${escHTML(rec.arun_shared_by)} on ${rec.arun_shared_at ? fmtAbs(rec.arun_shared_at) : '—'}.</div>` : ''}
       </div>
@@ -5796,9 +5855,10 @@ function renderReportMonitor(){
     </div>`;
   }
   body.innerHTML = html;
+  startStep2Ticker();
 }
 function onReportFileChange(input){
-  const file = input.files && input.files[0];
+ const file = input.files && input.files[0];
   rmSelectedFile = file || null;
   const label = $('rm-file-label-text');
   if(label) label.textContent = file ? file.name : 'Attach file';
