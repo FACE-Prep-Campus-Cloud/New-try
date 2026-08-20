@@ -1914,7 +1914,7 @@ body[data-theme="dark"] .dlog-topbar {
           </div>
         </div>
         <h3>E Audit</h3>
-        <p>Coming soon.</p>
+        <p>Log skill development, coursework, attendance and internal audit reviews.</p>
       </button>
     </div>
    <div class="platform-streak hidden" id="platform-streak">
@@ -2308,11 +2308,22 @@ body[data-theme="dark"] .dlog-topbar {
     <span id="rm-broadcast-saved" class="saved-msg hidden">✓ Sent</span>
   </div>
 </div>
-        <div id="rm-body"></div>
-      </div>
+      <div id="rm-body"></div>
     </div>
   </div>
 </div>
+<!-- ── E AUDIT SCREEN (added) ── -->
+<div id="eaudit-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
+  <div class="dlog-topbar">
+    <div class="breadcrumb">E Audit</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="backToPlatformSelect()">← Switch platform</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>
+    </div>
+  </div>
+  <iframe id="eaudit-iframe" title="E Audit" style="flex:1;width:100%;border:none;"></iframe>
+</div>
+ <!-- ── REVIEW PANEL (admin only) ── --></div>
  <!-- ── REVIEW PANEL (admin only) ── -->
 <div id="review-panel-screen" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh / var(--ui-scale));overflow:hidden;">
  <div class="sky-clouds-bg" id="review-skywrap">
@@ -3310,8 +3321,9 @@ function showPlatformSelect(){
   hide('review-panel-screen');
   hide('classroom-snap-screen');
   hide('report-monitor-screen');
+  hide('eaudit-screen');
  const isManager = sessionRole === 'manager';
-  const isKam = sessionRole === 'kam';
+ const isKam = sessionRole === 'kam';
   renderPlatformGreeting();
   $('platform-tickets-desc').textContent = isManager
     ? 'View and manage student help-desk tickets raised by your college.'
@@ -3462,10 +3474,6 @@ function initPlatformCardTilt(){
   });
 }
 function selectPlatform(which){
-  if(which === 'eaudit'){
-    showToast('E Audit is coming soon!');
-    return;
-  }
   if(which === 'classroomsnap' && !isClassroomSnapAllowedForSession()){
     showToast('Classroom Observation Log is not enabled for your account');
     return;
@@ -3480,15 +3488,18 @@ function selectPlatform(which){
     enterClassroomSnap();
   } else if(which === 'reportmonitor'){
     enterReportMonitor();
+  } else if(which === 'eaudit'){
+    enterEAudit();
   }
-}  
-
+}
+ 
 function backToPlatformSelect(){
   hide('admin-screen');
   hide('dailylog-screen');
   hide('review-panel-screen');
   hide('classroom-snap-screen');
   hide('report-monitor-screen');
+  hide('eaudit-screen');
   destroyVantaBirds();
   showPlatformSelect();
 }
@@ -3542,7 +3553,7 @@ function fuzzyMatch(b){
 }
 function logout(){
   hide('admin-screen'); hide('platform-select-screen'); hide('dailylog-screen'); hide('review-panel-screen');
-  hide('classroom-snap-screen'); hide('report-monitor-screen');
+  hide('classroom-snap-screen'); hide('report-monitor-screen'); hide('eaudit-screen');
   classroomSnaps = []; snapReviewCollege = null;
   reportMonitorCollege = null; reportMonitorMonth = null; reportRecord = null;
  show('auth-screen');
@@ -5677,6 +5688,16 @@ async function sendKamSheetLinkMulti(){
     ? `Link sent to ${successCount} college${successCount!==1?'s':''}`
     : `Sent to ${successCount}/${colleges.length} colleges — check console for errors`);
 }
+function enterEAudit(){
+  hide('platform-select-screen');
+  hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen');
+  hide('classroom-snap-screen'); hide('report-monitor-screen');
+  show('eaudit-screen');
+  if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+  const frame = document.getElementById('eaudit-iframe');
+  if(frame && !frame.src) frame.src = 'eaudit.html'; // ← change path if hosted elsewhere
+}
+
 async function enterReportMonitor(){
   hide('platform-select-screen');
   hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
