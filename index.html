@@ -3167,9 +3167,9 @@ async function loadCollegeContactsForLogin(){
   populateCollegeDropdown();
   populateKamDropdown();
   try{
-    const { data, error } = await sb.from('college_contacts')
-      .select('college,senior_manager_name, senior_manager_pin, campus_manager_name, campus_manager_pin, zone');
-    if(error) throw error;
+const { data, error } = await sb.from('college_contacts')
+      .select('college,senior_manager_name, senior_manager_pin, senior_manager_email, campus_manager_name, campus_manager_pin, campus_manager_email, zone');
+   if(error) throw error;
     collegeContacts = data || [];
     populateCollegeDropdown();
     populateKamDropdown();
