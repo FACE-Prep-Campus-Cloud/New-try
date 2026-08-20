@@ -5707,6 +5707,14 @@ function reportStatusIcon(stage){
   if(stage===2) return '<circle cx="12" cy="12" r="8"/><path d="M9 12l2 2 4-4"/>';
   return '<path d="M9 12a3 3 0 1 0 4.24 4.24l3-3a3 3 0 0 0-4.24-4.24"/><path d="M15 12a3 3 0 1 0-4.24-4.24l-3 3a3 3 0 0 0 4.24 4.24"/>';
 }
+const ARUN_RETRY_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
+function fmtCooldownRemaining(ms){
+  const totalMin = Math.ceil(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if(h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 function renderReportMonitor(){
   const body = $('rm-body');
   if(!body) return;
@@ -5717,7 +5725,11 @@ function renderReportMonitor(){
   const rec = reportRecord;
   const stage = rec ? (rec.stage||1) : 1;
   const revision = rec ? (rec.revision||1) : 1;
-  $('rm-revision-badge').textContent = revision;
+  const arunLastAttemptAt = (rec && rec.arun_shared_at && !rec.arun_shared) ? new Date(rec.arun_shared_at).getTime() : null;
+  const arunElapsed = arunLastAttemptAt ? (Date.now() - arunLastAttemptAt) : Infinity;
+  const arunCanRetry = arunElapsed >= ARUN_RETRY_COOLDOWN_MS;
+  const arunCooldownRemainingMs = arunCanRetry ? 0 : (ARUN_RETRY_COOLDOWN_MS - arunElapsed);
+ $('rm-revision-badge').textContent = revision;
   const isManager = sessionRole === 'manager';
   const canReview = sessionRole === 'admin' || sessionRole === 'kam';
   const s1 = reportStepStatus(stage, revision, 1);
@@ -5786,10 +5798,15 @@ ${stage>1 && rec && rec.kam_sheet_link ? submissionLinkHtml(rec.kam_sheet_link, 
           <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
         </div>
         ${stage<2 ? `<div class="rm-lock">Locked until the spreadsheet link is shared in Step 1.</div>` : ''}
-        ${stage===2 && isManager ? `
+        ${stage===2 && isManager && arunCanRetry ? `
           <div class="modal-actions" style="padding-top:6px;">
             <button class="btn btn-primary" style="background:var(--green);" onclick="confirmArunShared(true)">Yes, shared</button>
             <button class="btn btn-primary" style="background:var(--red);" onclick="confirmArunShared(false)">Not yet</button>
+          </div>
+        ` : ''}
+        ${stage===2 && isManager && !arunCanRetry ? `
+          <div class="rm-lock" style="margin-top:6px;">
+            You marked this as "Not yet" recently. You can check again in <b>${fmtCooldownRemaining(arunCooldownRemainingMs)}</b>.
           </div>
         ` : ''}
         ${stage===2 && !isManager ? `<div class="rm-lock" style="margin-top:6px;">Waiting on the campus manager to confirm receipt.</div>` : ''}
