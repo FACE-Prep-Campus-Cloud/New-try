@@ -5906,6 +5906,8 @@ function onProofFileChange(input){
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Spreadsheet link shared');
 }
+const ARUN_EMAIL = 'arun.senthil@faceprep.in';
+
 async function confirmArunShared(shared){
   if(sessionRole !== 'manager' || !reportRecord) return;
  const reviewer = window.prompt('Enter your name to confirm:');
@@ -5926,7 +5928,8 @@ async function confirmArunShared(shared){
   sb.functions.invoke('report-flow-notify', {
     body: {
       step: 'arun_shared', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
-      to: rec2b?.senior_manager_email, cc: rec2b?.campus_manager_email,
+      to: shared ? rec2b?.senior_manager_email : ARUN_EMAIL,
+      cc: shared ? rec2b?.campus_manager_email : rec2b?.senior_manager_email,
       by: reviewer.trim(), shared, history: reportRecord.history,
     }
   }).catch(e => console.error('notify arun_shared failed', e));
