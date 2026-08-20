@@ -5878,21 +5878,21 @@ function renderReportMonitor(){
   const deadlineDate = getReportDeadlineDate(reportMonitorCollege, reportMonitorMonth);
   const step2CutoffDate = getStep2CutoffDate(reportMonitorCollege, reportMonitorMonth);
   let deadlineStripHtml = '';
+  let step2Text = '', step2PillClass = 'neutral';
   if(deadlineDate){
     const deadlineCountdown = fmtCountdown(deadlineDate);
     const deadlineOverdue = !deadlineCountdown;
     const step2Done = stage >= 3; // stage 3+ means Step 2 (Arun confirmation) is already done
-    let step2Text, step2PillClass;
     if(step2Done){
-      step2Text = 'Step 2: Completed on time';
+      step2Text = 'Completed on time';
       step2PillClass = 'ok';
     } else if(step2CutoffDate){
       const c = fmtCountdown(step2CutoffDate);
       if(c){
-        step2Text = `Step 2 due in ${c}`;
+        step2Text = `Due in ${c}`;
         step2PillClass = 'warn';
       } else {
-        step2Text = 'Step 2 OVERDUE — not confirmed';
+        step2Text = 'OVERDUE — not confirmed';
         step2PillClass = 'bad';
       }
     }
@@ -5907,11 +5907,9 @@ function renderReportMonitor(){
           <div class="rm-status-sub">${deadlineOverdue ? 'Deadline has passed' : `${deadlineCountdown} remaining`}</div>
         </div>
       </div>
-      <span class="rm-status-big-pill ${step2PillClass}"><span class="dot"></span>${step2Text}</span>
     </div>`;
   }
-
-  let html = `
+ let html = `
     <div class="rm-status-strip">
       <div class="rm-status-strip-main">
         <div class="rm-status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${reportStatusIcon(stage)}</svg></div>
@@ -5951,7 +5949,10 @@ ${stage>1 && rec && rec.kam_sheet_link ? submissionLinkHtml(rec.kam_sheet_link, 
             <div class="ledger-card-title" style="margin-bottom:4px;">Step 2 · Campus Manager</div>
             <div style="font-size:13.5px;">Have you received the visual report from Arun by mail?</div>
           </div>
-          <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="rm-pill ${s2.pill}"><span class="dot"></span>${s2.label}</span>
+            ${step2Text ? `<span class="rm-pill ${step2PillClass}"><span class="dot"></span>${step2Text}</span>` : ''}
+          </div>
         </div>
         ${stage<2 ? `<div class="rm-lock">Locked until the spreadsheet link is shared in Step 1.</div>` : ''}
         ${stage===2 && isManager && arunCanRetry ? `
