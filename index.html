@@ -261,20 +261,20 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
 input::placeholder { color: var(--text-faint); }
 input:disabled, select:disabled { background: var(--slate-soft); color: var(--text-faint); cursor: not-allowed; }
-#dlog-date, #dlog-name, #snap-obs-date {
+#dlog-date, #dlog-name, #snap-obs-date, #rm-month-select {
   cursor: not-allowed;
   background: var(--slate-soft);
   color: var(--text-light);
 }
-#dlog-date:hover, #dlog-name:hover, #snap-obs-date:hover {
+#dlog-date:hover, #dlog-name:hover, #snap-obs-date:hover, #rm-month-select:hover {
   border-color: var(--border);
 }
-#dlog-date:focus, #dlog-name:focus, #snap-obs-date:focus {
+#dlog-date:focus, #dlog-name:focus, #snap-obs-date:focus, #rm-month-select:focus {
   border-color: var(--border);
   box-shadow: none;
 }
 /* hide/disable the calendar picker icon so it can't be clicked open */
-#dlog-date::-webkit-calendar-picker-indicator, #snap-obs-date::-webkit-calendar-picker-indicator {
+#dlog-date::-webkit-calendar-picker-indicator, #snap-obs-date::-webkit-calendar-picker-indicator, #rm-month-select::-webkit-calendar-picker-indicator {
   opacity: 0.35;
   pointer-events: none;
 }
@@ -2288,10 +2288,10 @@ body[data-theme="dark"] .dlog-topbar {
               <label class="field-label">College</label>
               <select id="rm-college-select" onchange="onReportCollegeChange(this.value)"></select>
             </div>
-            <div class="form-group">
-              <label class="field-label">Report month</label>
-              <input id="rm-month-select" type="month" onchange="onReportMonthChange(this.value)">
-            </div>
+<div class="form-group">
+  <label class="field-label">Report month</label>
+  <input id="rm-month-select" type="month" readonly onkeydown="return false;">
+</div>
           </div>
         </div>
 <div class="dlog-form-card" id="rm-broadcast-block">
@@ -3021,7 +3021,7 @@ let rmSelectedFile       = null;
 let rmProofFile          = null;
  let rmCalYear            = new Date().getFullYear();
 let rmCollegeHistory     = []; // every report_approvals row for the selected college, any month
- // { lat, lng, accuracy } captured when the photo is taken
+let rmAutoFollowCurrentMonth = true; // { lat, lng, accuracy } captured when the photo is taken
 /* ── Daily log categories (hard call = emailed, soft call = not) (added) ── */
 const DLOG_CATEGORIES = [
   { key: 'syllabus',             label: 'Syllabus',                                        callType: 'hard' },
@@ -5461,7 +5461,23 @@ function currentMonthStr(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
 }
-function populateReportCollegeSelect(){
+setInterval(() => {
+  const screen = $('report-monitor-screen');
+  if(!screen || screen.classList.contains('hidden')) return;
+  if(!rmAutoFollowCurrentMonth) return;
+  const nowMonth = currentMonthStr();
+  if(reportMonitorMonth !== nowMonth){
+    reportMonitorMonth = nowMonth;
+    rmCalYear = parseInt(nowMonth.slice(0,4), 10);
+    const sel = $('rm-month-select');
+    if(sel) sel.value = nowMonth;
+    loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
+    renderRmBroadcastCollegeList();
+    if(reportMonitorCollege) loadReportRecord();
+    renderReportMonthCalendar();
+  }
+}, 60000);
+ function populateReportCollegeSelect(){
   const sel = $('rm-college-select');
   if(!sel) return;
 
@@ -5594,7 +5610,8 @@ async function enterReportMonitor(){
   show('report-monitor-screen');
   if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
   reportMonitorMonth = currentMonthStr();
-  await loadReportCollegeStages(reportMonitorMonth);
+  rmAutoFollowCurrentMonth = true;
+ await loadReportCollegeStages(reportMonitorMonth);
   populateReportCollegeSelect();
   const sel = $('rm-college-select');
   reportMonitorCollege = sessionRole === 'manager' ? sessionCollege : (sel.value || null);
@@ -5692,9 +5709,10 @@ function rmMonthCellStatus(rec){
   }).join('');
 }
 async function selectReportMonthFromCalendar(key){
+  rmAutoFollowCurrentMonth = (key === currentMonthStr());
   reportMonitorMonth = key;
   rmCalYear = parseInt(key.slice(0,4), 10);
-  const sel = $('rm-month-select');
+ const sel = $('rm-month-select');
   if(sel) sel.value = key;
   await loadReportCollegeStages(reportMonitorMonth);
   populateReportCollegeSelect();
