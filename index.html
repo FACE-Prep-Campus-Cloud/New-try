@@ -6079,11 +6079,13 @@ async function confirmArunShared(shared){
     body: {
       step: 'arun_shared', college: reportMonitorCollege, reportMonth: reportMonitorMonth,
       to: shared ? rec2b?.senior_manager_email : ARUN_EMAIL,
-      cc: shared ? rec2b?.campus_manager_email : rec2b?.senior_manager_email,
+      cc: shared
+        ? rec2b?.campus_manager_email
+        : [rec2b?.campus_manager_email, rec2b?.senior_manager_email].filter(Boolean),
       by: reviewer.trim(), shared, history: reportRecord.history,
     }
   }).catch(e => console.error('notify arun_shared failed', e));
-  renderReportMonitor();
+ renderReportMonitor();
   loadReportCollegeHistory();
   loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast(shared ? 'Confirmed — moving to next step' : 'Marked as not shared yet');
 }
