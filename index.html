@@ -2251,7 +2251,19 @@ body[data-theme="dark"] .dlog-topbar {
             </div>
           </div>
         </div>
-
+<div class="dlog-form-card" id="rm-broadcast-block">
+  <h3>Send spreadsheet link to colleges</h3>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label class="field-label">Spreadsheet link</label>
+    <input id="rm-broadcast-link-input" type="url" placeholder="https://docs.google.com/spreadsheets/..." />
+  </div>
+  <div class="field-label" style="margin-bottom:8px;">Select colleges to send to</div>
+  <div id="rm-broadcast-college-list" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:12px;"></div>
+  <div class="modal-actions">
+    <button class="btn btn-primary" onclick="sendKamSheetLinkMulti()">Share link with selected colleges</button>
+    <span id="rm-broadcast-saved" class="saved-msg hidden">✓ Sent</span>
+  </div>
+</div>
         <div id="rm-body"></div>
       </div>
     </div>
@@ -5434,7 +5446,102 @@ function populateReportCollegeSelect(){
     }).join('');
   if(prevValue) sel.value = prevValue;
 }
- async function enterReportMonitor(){
+ let rmBroadcastSelectedColleges = new Set();
+
+function getKamCollegeList(){
+  let names = collegeContacts.length ? collegeContacts.map(c => c.college) : COLLEGE_REGION_MAP.map(c => c.college);
+  if(sessionRole === 'kam' && sessionAllowedColleges){
+    const allowedNorm = sessionAllowedColleges.map(normalizeCollege);
+    names = names.filter(n => allowedNorm.includes(normalizeCollege(n)));
+  }
+  return [...new Set(names)].sort((a,b) => a.localeCompare(b));
+}
+
+function renderRmBroadcastCollegeList(){
+  const wrap = $('rm-broadcast-college-list');
+  if(!wrap) return;
+  const names = getKamCollegeList();
+  if(!names.length){
+    wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-faint);padding:6px 2px;">No colleges available.</div>';
+    return;
+  }
+  wrap.innerHTML = names.map(name => {
+    const rec = reportCollegeStageMap[name];
+    const stepLabel = rec ? rmStepShortLabel(rec.stage, rec.revision) : 'Not started';
+    const checked = rmBroadcastSelectedColleges.has(name) ? 'checked' : '';
+    const safeName = escHTML(name).replace(/'/g, "\\'");
+    return `<label class="dd-opt" style="justify-content:flex-start;gap:9px;">
+      <input type="checkbox" value="${escHTML(name)}" ${checked} onchange="toggleRmBroadcastCollege('${safeName}', this.checked)" style="margin-left:0;order:-1;">
+      <span style="flex:1;min-width:0;">${escHTML(name)}</span>
+      <span style="font-size:10.5px;color:var(--text-faint);white-space:nowrap;">${escHTML(stepLabel)}</span>
+    </label>`;
+  }).join('');
+}
+
+function toggleRmBroadcastCollege(name, checked){
+  if(checked) rmBroadcastSelectedColleges.add(name);
+  else rmBroadcastSelectedColleges.delete(name);
+}
+
+async function sendKamSheetLinkMulti(){
+  if(!(sessionRole === 'admin' || sessionRole === 'kam')){
+    showToast('Only the KAM or Admin can share the spreadsheet link');
+    return;
+  }
+  const input = $('rm-broadcast-link-input');
+  const link = input ? input.value.trim() : '';
+  if(!link){ showToast('Paste the spreadsheet link before sending'); return; }
+  const colleges = [...rmBroadcastSelectedColleges];
+  if(!colleges.length){ showToast('Select at least one college to send to'); return; }
+  const reviewer = window.prompt('Enter your name to confirm you are sharing this link:');
+  if(!reviewer || !reviewer.trim()){ showToast('Your name is required'); return; }
+  const reviewerName = reviewer.trim();
+
+  const btn = document.querySelector('#rm-broadcast-block .btn-primary');
+  if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  let successCount = 0;
+  for(const college of colleges){
+    try{
+      const { data: existing } = await sb.from('report_approvals')
+        .select('history,revision')
+        .eq('college', college).eq('report_month', reportMonitorMonth).maybeSingle();
+      const historyEntry = { type:'sheet_shared', at:new Date().toISOString(), by:reviewerName };
+      const history = [historyEntry, ...((existing && existing.history) || [])];
+      const payload = {
+        college, report_month: reportMonitorMonth,
+        stage: 2, revision: (existing && existing.revision) || 1,
+        kam_sheet_link: link, sheet_shared_at: new Date().toISOString(), sheet_shared_by: reviewerName,
+        history, updated_at: new Date().toISOString()
+      };
+      const { error } = await sb.from('report_approvals').upsert(payload, { onConflict: 'college,report_month' });
+      if(error) throw error;
+      const recC = collegeContacts.find(c => c.college === college);
+      sb.functions.invoke('report-flow-notify', {
+        body: {
+          step: 'sheet_shared', college, reportMonth: reportMonitorMonth,
+          to: recC?.campus_manager_email, cc: recC?.senior_manager_email,
+          by: reviewerName, link, history,
+        }
+      }).catch(e => console.error('notify sheet_shared failed for', college, e));
+      successCount++;
+    }catch(e){
+      console.error('Could not send link to', college, e);
+    }
+  }
+
+  if(btn){ btn.disabled = false; btn.textContent = 'Share link with selected colleges'; }
+  rmBroadcastSelectedColleges.clear();
+  if(input) input.value = '';
+  await loadReportCollegeStages(reportMonitorMonth);
+  renderRmBroadcastCollegeList();
+  populateReportCollegeSelect();
+  if(reportMonitorCollege) loadReportRecord();
+  showToast(successCount === colleges.length
+    ? `Link sent to ${successCount} college${successCount!==1?'s':''}`
+    : `Sent to ${successCount}/${colleges.length} colleges — check console for errors`);
+}
+async function enterReportMonitor(){
   hide('platform-select-screen');
   hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
   show('report-monitor-screen');
@@ -5442,28 +5549,35 @@ function populateReportCollegeSelect(){
   reportMonitorMonth = currentMonthStr();
   await loadReportCollegeStages(reportMonitorMonth);
   populateReportCollegeSelect();
- const sel = $('rm-college-select');
+  const sel = $('rm-college-select');
   reportMonitorCollege = sessionRole === 'manager' ? sessionCollege : (sel.value || null);
- rmCalYear = new Date().getFullYear();
+  rmCalYear = new Date().getFullYear();
   $('rm-month-select').value = reportMonitorMonth;
   $('rm-college-name').textContent = reportMonitorCollege || '—';
   $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
+  $('rm-broadcast-block').classList.toggle('hidden', sessionRole === 'manager');
+  renderRmBroadcastCollegeList();
   if(reportMonitorCollege) loadReportRecord();
   else { reportRecord = null; renderReportMonitor(); }
   loadReportCollegeHistory();
-  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);}
-function onReportCollegeChange(v){
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
+}
+ function onReportCollegeChange(v){
   reportMonitorCollege = v || null;
-  $('rm-college-name').textContent = reportMonitorCollege || '—';
-  $('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
-  if(reportMonitorCollege) loadReportRecord();
-  else { reportRecord = null; renderReportMonitor(); }
-  loadReportCollegeHistory();
-  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);}
+$('rm-college-name').textContent = reportMonitorCollege || '—';
+$('rm-breadcrumb-college').textContent = reportMonitorCollege || 'Select a college';
+$('rm-broadcast-block').classList.toggle('hidden', sessionRole === 'manager');
+renderRmBroadcastCollegeList();
+if(reportMonitorCollege) loadReportRecord();
+else { reportRecord = null; renderReportMonitor(); }
+loadReportCollegeHistory();
+loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
+}
 async function onReportMonthChange(v){
   reportMonitorMonth = v;
   await loadReportCollegeStages(reportMonitorMonth);
   populateReportCollegeSelect();
+  renderRmBroadcastCollegeList();
   if(reportMonitorCollege) loadReportRecord();
 }
  async function loadReportRecord(){
@@ -5636,21 +5750,9 @@ function renderReportMonitor(){
           </div>
           <span class="rm-pill ${s1.pill}"><span class="dot"></span>${s1.label}</span>
         </div>
-        ${stage===1 && canReview ? `
-          <div class="rm-submission-box">
-            <div class="rm-submission-row">
-              <div class="form-group">
-                <label class="field-label">Spreadsheet link</label>
-                <input id="rm-sheet-link-input" type="url" placeholder="https://docs.google.com/spreadsheets/..." />
-              </div>
-            </div>
-          </div>
-          <div class="modal-actions" style="padding-top:10px;">
-            <button class="btn btn-primary" onclick="sendKamSheetLink()">Share link</button>
-          </div>
-        ` : ''}
-        ${stage===1 && !canReview ? `<div class="rm-lock">Waiting on the KAM to share the spreadsheet link.</div>` : ''}
-        ${stage>1 && rec && rec.kam_sheet_link ? submissionLinkHtml(rec.kam_sheet_link, 'Open spreadsheet') : ''}
+${stage===1 && canReview ? `<div class="rm-lock">Use the "Send spreadsheet link to colleges" panel above to share the link — you can select multiple colleges at once.</div>` : ''}
+${stage===1 && !canReview ? `<div class="rm-lock">Waiting on the KAM to share the spreadsheet link.</div>` : ''}
+${stage>1 && rec && rec.kam_sheet_link ? submissionLinkHtml(rec.kam_sheet_link, 'Open spreadsheet') : ''}
       </div>
     </div>
 
