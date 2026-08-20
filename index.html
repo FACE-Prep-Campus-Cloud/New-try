@@ -1677,7 +1677,8 @@ body[data-theme="dark"] .dlog-topbar {
 }
 .rm-status-big-pill.warn{ background:var(--amber-soft); color:var(--amber); }
 .rm-status-big-pill.ok{ background:var(--green-soft); color:var(--green); }
-.rm-status-big-pill .dot{ width:7px; height:7px; border-radius:50%; background:currentColor; }
+.rm-status-big-pill.bad{ background:var(--red-soft); color:var(--red); }
+  .rm-status-big-pill .dot{ width:7px; height:7px; border-radius:50%; background:currentColor; }
 
 .rm-submission-box{
   margin-top:12px; border:1px dashed var(--border); border-radius:12px; padding:14px 16px; background:var(--slate-soft);
@@ -5461,21 +5462,93 @@ function currentMonthStr(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
 }
+
+/* ── Report deadlines: day-of-month each college's report is due, per your schedule chart ──
+   Fill in / correct any college where the abbreviation is ambiguous — I've matched the ones
+   I'm confident about from COLLEGE_REGION_MAP; double-check every line before relying on it. */
+const REPORT_STEP2_CUTOFF_DAYS_BEFORE = 4; // Step 2 must be confirmed at least this many days before the deadline
+const REPORT_DEADLINE_DAY = {
+  // 5th
+  'Kristu Jayanti (DEEMED TO BE UNIVERSITY)': 5,       // KJ
+  'Sree Saraswathi Thyagaraja College': 5,              // SRCAS
+  'VLB Janakiammal College of Arts and Science': 5,     // VLBCAS
+  'Kongunadu College of Arts and Science': 5,           // KCAS
+  // TODO: 'AU' and 'RGU' — no confident match in COLLEGE_REGION_MAP, please confirm college name and day
+
+  // 10th
+  'Takshashila University': 10,                         // TU
+  'SDNB Vaishnav College for Women': 10,                // SDNB
+  'AMET University': 10,                                // AMET
+  'Asian School of Business': 10,                       // ASB
+
+  // 15th
+  'St. Agnes College (Autonomous)': 15,                 // St.AC
+  'Hindusthan College of Arts & Science': 15,           // HICAS
+  'Kamaraj College': 15,                                // KC
+  "Kamaraj Women's College": 15,                        // KWC
+  // TODO: 'STC' and 'NAAS' — please confirm
+
+  // 20th
+  'Study World Group of Institutions': 20,              // SWGI
+  'JOY University': 20,                                 // JU
+  'Noorul Islam Centre for Higher Education (NICHE)': 20, // NICHE
+  'Sri Amaraavathi College of Arts & Science': 20,      // SACAS
+  'Bharathidasan College Of Arts & Science': 20,        // BCAS
+
+  // 25th
+  'Sasurie College of Arts and Science': 25,            // SCAS
+  'S-VYASA University': 25,                             // S-VYASA
+  "Vinayaga Mission's Research Foundation School of Arts and Science": 25, // VMRF
+};
+
+function getReportDeadlineDate(college, monthStr){
+  const day = REPORT_DEADLINE_DAY[college];
+  if(!day || !monthStr) return null;
+  const [y,m] = monthStr.split('-').map(Number);
+  if(!y || !m) return null;
+  return new Date(y, m-1, day, 23, 59, 59);
+}
+function getStep2CutoffDate(college, monthStr){
+  const deadline = getReportDeadlineDate(college, monthStr);
+  if(!deadline) return null;
+  const cutoff = new Date(deadline);
+  cutoff.setDate(cutoff.getDate() - REPORT_STEP2_CUTOFF_DAYS_BEFORE);
+  cutoff.setHours(23,59,59,999);
+  return cutoff;
+}
+function fmtCountdown(target){
+  const ms = target - new Date();
+  if(ms <= 0) return null; // means overdue
+  const totalMin = Math.ceil(ms/60000);
+  const days = Math.floor(totalMin/1440);
+  const hours = Math.floor((totalMin%1440)/60);
+  const mins = totalMin%60;
+  if(days>0) return `${days}d ${hours}h`;
+  if(hours>0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
 setInterval(() => {
   const screen = $('report-monitor-screen');
   if(!screen || screen.classList.contains('hidden')) return;
-  if(!rmAutoFollowCurrentMonth) return;
-  const nowMonth = currentMonthStr();
-  if(reportMonitorMonth !== nowMonth){
-    reportMonitorMonth = nowMonth;
-    rmCalYear = parseInt(nowMonth.slice(0,4), 10);
-    const sel = $('rm-month-select');
-    if(sel) sel.value = nowMonth;
-    loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
-    renderRmBroadcastCollegeList();
-    if(reportMonitorCollege) loadReportRecord();
-    renderReportMonthCalendar();
+
+  // 1. Handle month rollover (only when auto-following the current month)
+  if(rmAutoFollowCurrentMonth){
+    const nowMonth = currentMonthStr();
+    if(reportMonitorMonth !== nowMonth){
+      reportMonitorMonth = nowMonth;
+      rmCalYear = parseInt(nowMonth.slice(0,4), 10);
+      const sel = $('rm-month-select');
+      if(sel) sel.value = nowMonth;
+      loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
+      renderRmBroadcastCollegeList();
+      if(reportMonitorCollege) loadReportRecord(); // loadReportRecord() calls renderReportMonitor() itself
+      renderReportMonthCalendar();
+      return; // avoid a redundant second render below on the same tick
+    }
   }
+
+  // 2. No rollover this tick — just refresh the live deadline / Step 2 countdown text
+  if(reportMonitorCollege) renderReportMonitor();
 }, 60000);
  function populateReportCollegeSelect(){
   const sel = $('rm-college-select');
@@ -5802,6 +5875,42 @@ function renderReportMonitor(){
       ${escHTML(label || 'Open link')}
     </a>` : '';
 
+  const deadlineDate = getReportDeadlineDate(reportMonitorCollege, reportMonitorMonth);
+  const step2CutoffDate = getStep2CutoffDate(reportMonitorCollege, reportMonitorMonth);
+  let deadlineStripHtml = '';
+  if(deadlineDate){
+    const deadlineCountdown = fmtCountdown(deadlineDate);
+    const deadlineOverdue = !deadlineCountdown;
+    const step2Done = stage >= 3; // stage 3+ means Step 2 (Arun confirmation) is already done
+    let step2Text, step2PillClass;
+    if(step2Done){
+      step2Text = 'Step 2: Completed on time';
+      step2PillClass = 'ok';
+    } else if(step2CutoffDate){
+      const c = fmtCountdown(step2CutoffDate);
+      if(c){
+        step2Text = `Step 2 due in ${c}`;
+        step2PillClass = 'warn';
+      } else {
+        step2Text = 'Step 2 OVERDUE — not confirmed';
+        step2PillClass = 'bad';
+      }
+    }
+    deadlineStripHtml = `
+    <div class="rm-status-strip" style="margin-top:10px;">
+      <div class="rm-status-strip-main">
+        <div class="rm-status-icon" style="background:${deadlineOverdue ? 'var(--red)' : 'var(--brand-gradient)'};">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div>
+          <div class="rm-status-title">Report deadline: ${deadlineDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+          <div class="rm-status-sub">${deadlineOverdue ? 'Deadline has passed' : `${deadlineCountdown} remaining`}</div>
+        </div>
+      </div>
+      <span class="rm-status-big-pill ${step2PillClass}"><span class="dot"></span>${step2Text}</span>
+    </div>`;
+  }
+
   let html = `
     <div class="rm-status-strip">
       <div class="rm-status-strip-main">
@@ -5813,7 +5922,8 @@ function renderReportMonitor(){
       </div>
       <span class="rm-status-big-pill ${stagePillClass}"><span class="dot"></span>${stageLabels[stage]}</span>
     </div>
-
+    ${deadlineStripHtml}
+    
     <div class="rm-rail">
     <div class="rm-rail-line"></div>
 
