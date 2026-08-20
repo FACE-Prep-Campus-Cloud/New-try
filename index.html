@@ -5405,12 +5405,16 @@ function currentMonthStr(){
 function populateReportCollegeSelect(){
   const sel = $('rm-college-select');
   if(!sel) return;
+
+  // Campus Manager: locked to their own college, cannot pick another one
   if(sessionRole === 'manager'){
     sel.innerHTML = `<option value="${escHTML(sessionCollege)}">${escHTML(sessionCollege)}</option>`;
     sel.value = sessionCollege;
     sel.disabled = true;
     return;
   }
+
+  // KAM / Admin only: free to choose which college to send the link to
   sel.disabled = false;
   let names = collegeContacts.length ? collegeContacts.map(c => c.college) : COLLEGE_REGION_MAP.map(c => c.college);
   if(sessionRole === 'kam' && sessionAllowedColleges){
@@ -5430,7 +5434,7 @@ function populateReportCollegeSelect(){
     }).join('');
   if(prevValue) sel.value = prevValue;
 }
-async function enterReportMonitor(){
+ async function enterReportMonitor(){
   hide('platform-select-screen');
   hide('admin-screen'); hide('dailylog-screen'); hide('review-panel-screen'); hide('classroom-snap-screen');
   show('report-monitor-screen');
@@ -5875,8 +5879,15 @@ function onProofFileChange(input){
 
   showToast('Report sent to KAM for review');
 }
- async function sendKamSheetLink(){
-  if(!(sessionRole==='admin'||sessionRole==='kam') || !reportMonitorCollege) return;
+async function sendKamSheetLink(){
+  if(!(sessionRole === 'admin' || sessionRole === 'kam')){
+    showToast('Only the KAM or Admin can share the spreadsheet link');
+    return;
+  }
+  if(!reportMonitorCollege){
+    showToast('Please select a college first');
+    return;
+  }
   const input = $('rm-sheet-link-input');
   const link = input ? input.value.trim() : '';
   if(!link){ showToast('Paste the spreadsheet link before sending'); return; }
@@ -5904,9 +5915,10 @@ function onProofFileChange(input){
   }).catch(e => console.error('notify sheet_shared failed', e));
   renderReportMonitor();
   loadReportCollegeHistory();
-  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);  showToast('Spreadsheet link shared');
+  loadReportCollegeStages(reportMonitorMonth).then(populateReportCollegeSelect);
+  showToast('Spreadsheet link shared');
 }
-const ARUN_EMAIL = 'arun.senthil@faceprep.in';
+ const ARUN_EMAIL = 'arun.senthil@faceprep.in';
 
 async function confirmArunShared(shared){
   if(sessionRole !== 'manager' || !reportRecord) return;
